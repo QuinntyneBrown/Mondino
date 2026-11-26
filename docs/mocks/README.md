@@ -3,8 +3,8 @@
 Static HTML mocks of every Mondino screen in every state: the five screens (Join, Globe, Team,
 Moments, Profile & Settings), the pages that say one thing, the dialogs, the notifications, and
 the brand sheet.
-They are the design and the source of truth for the interface. `docs/specs/`, the ADRs,
-`docs/detailed-designs/` and the code follow them.
+They are the design and the ultimate source of truth. `docs/design-system/`, `docs/specs/`, the
+ADRs, `docs/detailed-designs/`, `AGENTS.md` and the code follow them.
 
 They are transcribed from the **Mondino App** prototype in Magic Patterns (the *Global Teammate
 Globe* OS; frames Join, Globe, Team, Moments and Profile & Settings, and its shared `Globe`,
@@ -124,8 +124,8 @@ projection gives.
    `docs/design-system/tokens/tokens.css` and nothing else.
 2. **Sea.** The brand names sea (navy) as the globe's colour, and L2-008 lists "sea navy" among
    the globe's colours. The cartoon globe's ocean is a bright blue. The mocks keep sea as a brand
-   colour and give the globe its own ocean. L2-008 and the Design section of `AGENTS.md` ("a warm
-   paper canvas", "sea (navy) is the globe") describe the earlier palette and globe.
+   colour and give the globe its own ocean. L2-008 and the Design section of `AGENTS.md` now
+   say the same.
 3. **"Invite teammate" and "Message".** Both buttons are drawn as the prototype draws them. What
    each leads to is not designed, so no mock shows it, and neither is built until it is.
    "Message" sits uneasily with "Mondino has no chat"; it may be better removed.
@@ -136,8 +136,7 @@ projection gives.
 6. **A team of hundreds.** How the day ribbon, the globe and the Team list draw 500 teammates is
    not designed (L2-026, L2-047), so there is no `long` state.
 7. **Time zones.** The Globe counts distinct IANA time zones, as the prototype does: twelve for
-   the cast. L2-025's example reads "11 time zones · 4 working · 3 asleep"; those numbers are an
-   example, and the mocks' are worked out from the cast at 14:05 UTC.
+   the cast, worked out at 14:05 UTC. L2-025 and L2-028 use the same numbers.
 8. **Sign-in and making a team** are not designed, so there is no screen for either. Someone in
    no team sees `no-team`.
 9. **The Team filter** is a tab list and the Moments filter a set of pressed buttons, as L2-028

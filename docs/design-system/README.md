@@ -100,7 +100,7 @@ Drift between the Magic Patterns prototype and the mocks (a postal code on anoth
 
 Found while documenting and left as it is: a selected pin's ring (pin) is 1.4:1 against the globe's ocean. Selection does not depend on it: the pin is larger, lifted, shadowed and labelled, and exposes `aria-pressed`. In dark the globe's outline matches the canvas, and the bright ocean is its edge.
 
-Still open, carried from the mocks: `AGENTS.md` and L2-008 describe an earlier palette ("a warm paper canvas", "sea (navy) is the globe"); dark is this system's own and the prototype has none; "Invite teammate" and "Message" lead nowhere yet; a team of hundreds is not designed.
+Still open, carried from the mocks: dark is this system's own and the prototype has none; "Invite teammate" and "Message" lead nowhere yet; a team of hundreds is not designed.
 
 ## Verification
 

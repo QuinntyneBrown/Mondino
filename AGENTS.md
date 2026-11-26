@@ -81,29 +81,35 @@ prototype (the frame *Logo & Wordmark*): the mark and wordmark on paper, ink and
 sizes down to 16 px, the app icon, the colours, the type and the pins. The OS's own design
 thread holds the decisions behind it.
 
-The mocks in `docs/mocks/` are the design and the source of truth: every screen in every state,
-with `docs/mocks/manifest.json` listing them. They are transcribed from the prototype before any
-screen is built, and `docs/mocks/README.md` says where they depart from it, and why.
-`docs/specs/`, the ADRs, `docs/detailed-designs/` and the code follow the mocks. When a mock
-changes, the requirement, the ADR it touches and the detailed design are brought in line with it
-in that order, before any code.
+The mocks in `docs/mocks/` are the design and the ultimate source of truth: every screen in
+every state, with `docs/mocks/manifest.json` listing them. They are transcribed from the Magic
+Patterns prototype before any screen is built; when the prototype changes, the mocks are
+transcribed again, and `docs/mocks/README.md` says where they depart from it, and why.
+Everything else follows the mocks: `docs/design-system/`, which is extracted from them and which
+they render through, `docs/specs/`, the ADRs, `docs/detailed-designs/`, these instructions and
+the code. Where any of those disagrees with a mock, the mock is right and the other is brought
+in line. When a mock changes, the design system, the requirement, the ADR it touches and the
+detailed design are brought in line with it in that order, before any code.
 
 - **Wordmark:** lowercase **mondino**, set in Gabarito, on every screen. It is never "Mondino"
   in the wordmark itself; in a sentence the product is "Mondino".
 - **Mark:** a little world: a globe with one meridian and one parallel, and a single pin
   resting on its rim. Clear space on every side equals the pin's diameter.
-- **Colour:** paper and ink carry the interface: a warm paper canvas, lighter surfaces and
+- **Colour:** paper and ink carry the interface: a cool paper canvas, white surfaces and
   hairlines, and deep navy ink for text and navigation. Pin (orange-red) marks people and sun
-  (yellow) marks moments; leaf (green) marks working hours and sea (navy) is the globe. Nothing
-  else competes.
+  (yellow) marks moments; leaf (green) marks working hours and sea is the brand's navy. The
+  globe has colours of its own. Nothing else competes. The mocks are drawn in light and in
+  dark; the prototype is light only.
 - **Type:** Gabarito for the wordmark, names and clocks, and Inter for everything that is read.
   Times and temperatures use tabular figures.
 - **The globe** is three-dimensional and beautiful: modelled in Blender, lit and shaded, with
-  the soft, rounded, toy-like look of a modern animated film, in the brand's colours. It turns
-  slowly on its own, turns to a selected pin and holds there, and is dragged to spin. Its night
-  side is shaded. A pin lifts out when it is pointed at, focused or selected, and its label
-  sits beside it, clear of other pins. The prototype draws the globe flat; it designs the
-  interface around the globe, not the globe's look.
+  the soft, rounded, toy-like look of a modern animated film, in colours of its own: a bright
+  blue ocean with a deeper rim, green land with sand and forest, white ice and cloud, and an
+  ink outline. It turns slowly on its own, turns to a selected pin and holds there, and is
+  dragged to spin. Its night side is shaded in dusk. A pin lifts out when it is pointed at,
+  focused or selected, and its label sits beside it, clear of other pins. The prototype and
+  the mocks draw the globe as a cartoon in two dimensions; that is the look the 3D globe
+  aims for.
 - **Phone:** one column. Globe puts the globe on top and the panel under it, and the header
   shows the mark without the wordmark. Team shows each teammate's name, local time and next
   moment.
@@ -117,7 +123,7 @@ Before a screen is built or changed, its states are drawn in `docs/mocks/`. The 
 sample team (Northwind, its twelve teammates, their cities, postal codes, weather and moments,
 and its "today") is the cast, not rules. In the prototype a teammate's panel and the Team table
 show a postal code, which the design's own privacy copy rules out; the mocks show the city and
-country only, and `docs/mocks/README.md` records it.
+country only, and `docs/mocks/README.md` records it, with every other place they depart.
 
 ## Where things are
 
@@ -184,8 +190,8 @@ better than one that keeps growing. A further application needs its own ADR.
   bundled and served with the app.
 - **The globe is 3D, built from assets modelled in Blender.** Which renderer draws it, and how
   the assets are exported and scaled back for a low-power device, is decided in an ADR before
-  the Globe is built. The prototype draws it with d3-geo's orthographic projection, as a
-  placeholder; the interface around it is what the prototype designs.
+  the Globe is built. The prototype draws it with d3-geo's orthographic projection and the
+  mocks as a still picture; both stand in for the 3D globe and set its colours and its look.
 - Prettier and angular-eslint own formatting and lint; CI fails on either.
 - Current Angular: standalone components, signals for state, `OnPush` everywhere, zoneless.
 - **Responsive at every width.** Every screen works from the narrowest phone to the widest
