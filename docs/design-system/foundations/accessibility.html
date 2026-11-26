@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility — Mondino design system</title>
+<meta name="description" content="Mondino meets WCAG 2.2 AA by construction. Every component page says how; this page is the whole commitment.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Foundation</p>
+      <h1>Accessibility</h1>
+      <p class="ds-lead">Mondino meets WCAG 2.2 AA by construction. Every component page says how; this page is the whole commitment.</p>
+      <div class="ds-meta"><span class="ds-pill">Status: stable</span><span class="ds-pill">Since v1.0</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#perceivable">Perceivable</a></li><li><a href="#operable">Operable</a></li><li><a href="#understandable">Understandable</a></li><li><a href="#robust">Robust</a></li><li><a href="#usage">Testing</a></li><li><a href="#tokens">Interaction tokens</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>Everyone on the team can see where a teammate is and what it is like there: by keyboard, by touch, with a screen reader, with enlarged text, with reduced motion, in light or dark. Nothing on the globe is available only as a picture.</p>
+</section>
+
+<section class="ds-section" id="perceivable"><h2><a href="#perceivable">Perceivable</a></h2>
+<ul class="ds-checklist"><li>Text holds 4.5:1 against every surface it sits on, large text and the edge of a control 3:1, in both themes. The pairs are checked by a script.</li><li>Colour is never the only carrier: a status has its words, a chosen option a tick or a fill and an attribute, an invalid field an icon and a message, today’s moment marker a ring and a larger size.</li><li>A pin and its label stay readable on the night side of the globe as on the day side.</li><li>Every icon that carries meaning has a text equivalent. The weather is always a word as well.</li><li>Times and temperatures use tabular figures, so they do not shift as they change.</li><li>At 200% text size every screen keeps its content and controls with no sideways scroll at 1280 px.</li></ul>
+</section>
+
+<section class="ds-section" id="operable"><h2><a href="#operable">Operable</a></h2>
+<ul class="ds-checklist"><li>Every control is reached by Tab in the order the screen reads, and operated by the keyboard alone.</li><li>“Skip to content” is the first focusable element on every screen.</li><li>One focus ring everywhere: 2 px, 2 px off the edge, at least 3:1.</li><li>Every touch target is at least 44 × 44 px.</li><li>The globe turns with the arrow keys; each pin is a button; Enter or Space selects it; Escape clears.</li><li>A dialog keeps focus inside it, closes on Escape, and returns focus to what opened it.</li><li>Nothing needs two fingers or a drawn path. Nothing times out.</li></ul>
+</section>
+
+<section class="ds-section" id="understandable"><h2><a href="#understandable">Understandable</a></h2>
+<ul class="ds-checklist"><li>The page’s language is set, and each screen has one <code>&lt;h1&gt;</code> and headings in order.</li><li>Every field has a visible label. An error says what to fix, sits under its field, and is tied to it.</li><li>A form submitted with errors gets a summary at the top that takes focus and links to each field.</li><li>Nothing typed is lost when something fails.</li><li>The same thing is named the same way on every screen: teammate, pin, moment, postal code, local time.</li></ul>
+</section>
+
+<section class="ds-section" id="robust"><h2><a href="#robust">Robust</a></h2>
+<ul class="ds-checklist"><li>Native elements first: a button is a <code>&lt;button&gt;</code>, a link an <code>&lt;a&gt;</code>, a table a <code>&lt;table&gt;</code>.</li><li>A state assistive technology must know is an attribute and is styled through it: <code>aria-current</code>, <code>aria-pressed</code>, <code>aria-selected</code>, <code>aria-checked</code>, <code>aria-invalid</code>, <code>aria-busy</code>, <code>disabled</code>.</li><li>The globe is one labelled group holding a list of pins; the 3D canvas is hidden from the accessibility tree.</li><li>A change of panel is announced once, politely. A lookup’s result is announced; its error is an alert. The clocks ticking each minute are not announced.</li><li>Reduced motion is honoured through the duration tokens and by the globe.</li></ul>
+</section>
+
+<section class="ds-section" id="usage"><h2><a href="#usage">Testing</a></h2>
+<ol><li>Run the contrast check: <code>check_contrast.py docs/design-system/tokens/tokens.css</code>.</li><li>Run an automated scan (axe, WCAG 2.2 AA rules) on every screen in every state. It reports nothing.</li><li>Tab through each screen: order, visible focus, no trap outside a dialog.</li><li>Read the Globe with a screen reader: the globe is one group, each pin is named in full, selecting a pin is announced once.</li><li>Set text to 200%, turn on reduced motion, switch to dark, and look again.</li></ol><p>The accessibility sweep is written and kept current, and is run when a person asks.</p>
+</section>
+
+<section class="ds-section" id="tokens"><h2><a href="#tokens">Interaction tokens</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Token</th><th scope="col">Value</th><th scope="col">Use</th></tr></thead><tbody><tr><td><code>--target-min</code></td><td><span data-token="--target-min"></span></td><td>24px</td></tr><tr><td><code>--target-comfortable</code></td><td><span data-token="--target-comfortable"></span></td><td>44px, every touch target</td></tr><tr><td><code>--focus-ring-width</code></td><td><span data-token="--focus-ring-width"></span></td><td></td></tr><tr><td><code>--focus-ring-offset</code></td><td><span data-token="--focus-ring-offset"></span></td><td></td></tr><tr><td><code>--control-height-sm</code></td><td><span data-token="--control-height-sm"></span></td><td></td></tr><tr><td><code>--control-height-md</code></td><td><span data-token="--control-height-md"></span></td><td></td></tr><tr><td><code>--control-height-lg</code></td><td><span data-token="--control-height-lg"></span></td><td>---------- Component sizes -------------------------------------------</td></tr></tbody></table></div>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>

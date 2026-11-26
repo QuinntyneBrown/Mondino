@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion — Mondino design system</title>
+<meta name="description" content="Little moves, and for a reason: the globe turns, a pin lifts, a panel fades, a new pin pulses once.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Foundation</p>
+      <h1>Motion</h1>
+      <p class="ds-lead">Little moves, and for a reason: the globe turns, a pin lifts, a panel fades, a new pin pulses once.</p>
+      <div class="ds-meta"><span class="ds-pill">Status: stable</span><span class="ds-pill">Since v1.0</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#durations">Durations and easings</a></li><li><a href="#choreography">The globe</a></li><li><a href="#usage">Usage</a></li><li><a href="#accessibility">Reduced motion</a></li><li><a href="#tokens">Tokens</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>Mondino is left open all day in a tab beside the work, so it is calm. Motion shows where something came from or that something changed, and then stops.</p>
+</section>
+
+<section class="ds-section" id="durations"><h2><a href="#durations">Durations and easings</a></h2>
+<div class="ds-motion-demo" style="--demo-duration: var(--duration-fast); --demo-ease: var(--ease-standard);"><button class="btn btn--sm" type="button" data-motion-run>Play fast</button><span class="dot"></span></div><div class="ds-motion-demo" style="--demo-duration: var(--duration-base); --demo-ease: var(--ease-standard);"><button class="btn btn--sm" type="button" data-motion-run>Play base</button><span class="dot"></span></div><div class="ds-motion-demo" style="--demo-duration: var(--duration-slow); --demo-ease: var(--ease-standard);"><button class="btn btn--sm" type="button" data-motion-run>Play slow</button><span class="dot"></span></div><div class="ds-motion-demo" style="--demo-duration: var(--duration-slow); --demo-ease: var(--ease-spring);"><button class="btn btn--sm" type="button" data-motion-run>Play spring</button><span class="dot"></span></div><div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Token</th><th scope="col">Used for</th></tr></thead><tbody><tr><td><code>--duration-fast</code> 150 ms</td><td>Hover and focus colour; a pin lifting; a switch’s thumb</td></tr><tr><td><code>--duration-base</code> 180 ms</td><td>The panel fading from one teammate to the next; a toast and the save bar arriving</td></tr><tr><td><code>--duration-slow</code> 320 ms</td><td>A dialog or a sheet</td></tr><tr><td><code>--duration-deliberate</code> 1600 ms</td><td>A new pin’s one pulse; a skeleton’s pulse; one turn of a spinner</td></tr><tr><td><code>--ease-standard</code></td><td>Everything by default: quick out, gentle in</td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="choreography"><h2><a href="#choreography">The globe</a></h2>
+<ul><li>Left alone, the globe turns slowly eastward. Dragging spins it, and it stays put for 5 seconds after.</li><li>Selecting a pin turns the globe to face it within 1 second, and it holds there until the selection is cleared.</li><li>A pin lifts within 200 ms of being pointed at or focused, and settles back when the pointer leaves.</li><li>A newly placed pin pulses once.</li><li>While its tab is hidden the globe neither turns nor draws.</li></ul>
+</section>
+
+<section class="ds-section" id="usage"><h2><a href="#usage">Usage</a></h2>
+<ul><li>Use a duration token; never write a time in a component.</li><li>Nothing flashes more than three times in a second.</li><li>Nothing animates when a page loads except a skeleton’s pulse.</li><li>A local time ticking over is a change of text, not an animation.</li></ul>
+</section>
+
+<section class="ds-section" id="accessibility"><h2><a href="#accessibility">Reduced motion</a></h2>
+<p>When the system asks for reduced motion, <code>tokens.css</code> sets every duration to nothing, so components need no rule of their own. Beyond that: the globe does not turn on its own and shows a selected pin facing the viewer at once; the panel changes with no fade; a new pin does not pulse; a spinner stands still. The app follows the setting as it changes, with no reload.</p>
+</section>
+
+<section class="ds-section" id="tokens"><h2><a href="#tokens">Tokens</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Token</th><th scope="col">Value</th><th scope="col">Use</th></tr></thead><tbody><tr><td><code>--duration-instant</code></td><td><span data-token="--duration-instant"></span></td><td></td></tr><tr><td><code>--duration-fast</code></td><td><span data-token="--duration-fast"></span></td><td>hover, colour changes, a pin lifting</td></tr><tr><td><code>--duration-base</code></td><td><span data-token="--duration-base"></span></td><td>the panel's fade</td></tr><tr><td><code>--duration-slow</code></td><td><span data-token="--duration-slow"></span></td><td>dialogs, sheets</td></tr><tr><td><code>--duration-deliberate</code></td><td><span data-token="--duration-deliberate"></span></td><td>a new pin's pulse, skeleton shimmer</td></tr><tr><td><code>--ease-standard</code></td><td><span data-token="--ease-standard"></span></td><td></td></tr><tr><td><code>--ease-enter</code></td><td><span data-token="--ease-enter"></span></td><td></td></tr><tr><td><code>--ease-exit</code></td><td><span data-token="--ease-exit"></span></td><td></td></tr><tr><td><code>--ease-spring</code></td><td><span data-token="--ease-spring"></span></td><td>---------- Semantic: z-order -----------------------------------------</td></tr></tbody></table></div>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>

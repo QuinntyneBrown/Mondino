@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spacing — Mondino design system</title>
+<meta name="description" content="One 4 px scale for every gap and every padding, and the sizes a few components own.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Foundation</p>
+      <h1>Spacing</h1>
+      <p class="ds-lead">One 4 px scale for every gap and every padding, and the sizes a few components own.</p>
+      <div class="ds-meta"><span class="ds-pill">Status: stable</span><span class="ds-pill">Since v1.0</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#scale">The scale</a></li><li><a href="#usage">Usage</a></li><li><a href="#component-sizes">Component sizes</a></li><li><a href="#tokens">Tokens</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>Space is what groups things. Related things sit close; unrelated things sit apart. Every distance comes from the scale below, so the same decision is made the same way on every screen.</p>
+</section>
+
+<section class="ds-section" id="scale"><h2><a href="#scale">The scale</a></h2>
+<div class="ds-scale"><div class="ds-scale__row"><code>--space-0</code><span>0</span><span class="ds-scale__bar" style="--size: var(--space-0);"></span></div><div class="ds-scale__row"><code>--space-0-5</code><span>0.125rem</span><span class="ds-scale__bar" style="--size: var(--space-0-5);"></span></div><div class="ds-scale__row"><code>--space-1</code><span>0.25rem</span><span class="ds-scale__bar" style="--size: var(--space-1);"></span></div><div class="ds-scale__row"><code>--space-1-5</code><span>0.375rem</span><span class="ds-scale__bar" style="--size: var(--space-1-5);"></span></div><div class="ds-scale__row"><code>--space-2</code><span>0.5rem</span><span class="ds-scale__bar" style="--size: var(--space-2);"></span></div><div class="ds-scale__row"><code>--space-3</code><span>0.75rem</span><span class="ds-scale__bar" style="--size: var(--space-3);"></span></div><div class="ds-scale__row"><code>--space-4</code><span>1rem</span><span class="ds-scale__bar" style="--size: var(--space-4);"></span></div><div class="ds-scale__row"><code>--space-5</code><span>1.25rem</span><span class="ds-scale__bar" style="--size: var(--space-5);"></span></div><div class="ds-scale__row"><code>--space-6</code><span>1.5rem</span><span class="ds-scale__bar" style="--size: var(--space-6);"></span></div><div class="ds-scale__row"><code>--space-7</code><span>1.75rem</span><span class="ds-scale__bar" style="--size: var(--space-7);"></span></div><div class="ds-scale__row"><code>--space-8</code><span>2rem</span><span class="ds-scale__bar" style="--size: var(--space-8);"></span></div><div class="ds-scale__row"><code>--space-10</code><span>2.5rem</span><span class="ds-scale__bar" style="--size: var(--space-10);"></span></div><div class="ds-scale__row"><code>--space-12</code><span>3rem</span><span class="ds-scale__bar" style="--size: var(--space-12);"></span></div><div class="ds-scale__row"><code>--space-16</code><span>4rem</span><span class="ds-scale__bar" style="--size: var(--space-16);"></span></div><div class="ds-scale__row"><code>--space-20</code><span>5rem</span><span class="ds-scale__bar" style="--size: var(--space-20);"></span></div><div class="ds-scale__row"><code>--space-24</code><span>6rem</span><span class="ds-scale__bar" style="--size: var(--space-24);"></span></div></div>
+</section>
+
+<section class="ds-section" id="usage"><h2><a href="#usage">Usage</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Where</th><th scope="col">Token</th><th scope="col">Example</th></tr></thead><tbody><tr><td>Icon to its label</td><td><code>--space-1-5</code> to <code>--space-2</code></td><td>A button’s icon, a kind and its icon</td></tr><tr><td>Inside a chip, a pill, a label</td><td><code>--space-2</code> to <code>--space-3</code></td><td>Pin label, moment pill</td></tr><tr><td>Between rows in a list</td><td><code>--space-2</code> of padding each</td><td>Panel rows</td></tr><tr><td>Inside a card or the panel</td><td><code>--space-5</code>, then <code>--space-6</code> from 576 px</td><td>Panel, invite card</td></tr><tr><td>Between a form’s fields</td><td><code>--space-5</code></td><td>Join</td></tr><tr><td>Between blocks in a panel</td><td><code>--space-6</code> to <code>--space-8</code></td><td>Teammate panel</td></tr><tr><td>Between sections of a page</td><td><code>--space-10</code> to <code>--space-12</code></td><td>Team: ribbon, then the list</td></tr><tr><td>Page edge to content</td><td><code>--layout-margin</code></td><td>16 px, 24 px from 576 px</td></tr></tbody></table></div><ul><li>Inside a component use <code>--space-6</code> or less; between components use <code>--space-6</code> or more.</li><li>Space does not scale with the width of the screen. A breakpoint changes the token.</li></ul>
+</section>
+
+<section class="ds-section" id="component-sizes"><h2><a href="#component-sizes">Component sizes</a></h2>
+<p>Sizes that belong to one component and carry meaning: how big a pin is at rest and lifted, how small a moment marker may be, how tall a row of the day ribbon is.</p><div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Token</th><th scope="col">Value</th><th scope="col">Use</th></tr></thead><tbody><tr><td><code>--pin-size</code></td><td><span data-token="--pin-size"></span></td><td>26px at rest</td></tr><tr><td><code>--pin-size-lifted</code></td><td><span data-token="--pin-size-lifted"></span></td><td>34px pointed at, focused or selected</td></tr><tr><td><code>--pin-size-compact</code></td><td><span data-token="--pin-size-compact"></span></td><td>18px on a globe under 400px</td></tr><tr><td><code>--pin-dot-size</code></td><td><span data-token="--pin-dot-size"></span></td><td>12px, a pin with no name on Join</td></tr><tr><td><code>--pin-label-height</code></td><td><span data-token="--pin-label-height"></span></td><td></td></tr><tr><td><code>--moment-marker-size</code></td><td><span data-token="--moment-marker-size"></span></td><td>16px, never smaller</td></tr><tr><td><code>--moment-marker-size-today</code></td><td><span data-token="--moment-marker-size-today"></span></td><td></td></tr><tr><td><code>--avatar-size-xs</code></td><td><span data-token="--avatar-size-xs"></span></td><td></td></tr><tr><td><code>--avatar-size-sm</code></td><td><span data-token="--avatar-size-sm"></span></td><td></td></tr><tr><td><code>--avatar-size-md</code></td><td><span data-token="--avatar-size-md"></span></td><td></td></tr><tr><td><code>--avatar-size-lg</code></td><td><span data-token="--avatar-size-lg"></span></td><td></td></tr><tr><td><code>--switch-width</code></td><td><span data-token="--switch-width"></span></td><td></td></tr><tr><td><code>--switch-height</code></td><td><span data-token="--switch-height"></span></td><td></td></tr><tr><td><code>--date-block-width</code></td><td><span data-token="--date-block-width"></span></td><td></td></tr><tr><td><code>--overlap-bar-height</code></td><td><span data-token="--overlap-bar-height"></span></td><td></td></tr><tr><td><code>--ribbon-row-height</code></td><td><span data-token="--ribbon-row-height"></span></td><td></td></tr><tr><td><code>--ribbon-top</code></td><td><span data-token="--ribbon-top"></span></td><td></td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="tokens"><h2><a href="#tokens">Tokens</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Token</th><th scope="col">Value</th><th scope="col">Use</th></tr></thead><tbody><tr><td><code>--space-0</code></td><td><span data-token="--space-0"></span></td><td></td></tr><tr><td><code>--space-0-5</code></td><td><span data-token="--space-0-5"></span></td><td></td></tr><tr><td><code>--space-1</code></td><td><span data-token="--space-1"></span></td><td></td></tr><tr><td><code>--space-1-5</code></td><td><span data-token="--space-1-5"></span></td><td></td></tr><tr><td><code>--space-2</code></td><td><span data-token="--space-2"></span></td><td></td></tr><tr><td><code>--space-3</code></td><td><span data-token="--space-3"></span></td><td></td></tr><tr><td><code>--space-4</code></td><td><span data-token="--space-4"></span></td><td></td></tr><tr><td><code>--space-5</code></td><td><span data-token="--space-5"></span></td><td></td></tr><tr><td><code>--space-6</code></td><td><span data-token="--space-6"></span></td><td></td></tr><tr><td><code>--space-7</code></td><td><span data-token="--space-7"></span></td><td></td></tr><tr><td><code>--space-8</code></td><td><span data-token="--space-8"></span></td><td></td></tr><tr><td><code>--space-10</code></td><td><span data-token="--space-10"></span></td><td></td></tr><tr><td><code>--space-12</code></td><td><span data-token="--space-12"></span></td><td></td></tr><tr><td><code>--space-16</code></td><td><span data-token="--space-16"></span></td><td></td></tr><tr><td><code>--space-20</code></td><td><span data-token="--space-20"></span></td><td></td></tr><tr><td><code>--space-24</code></td><td><span data-token="--space-24"></span></td><td>---------- Semantic: layout ------------------------------------------</td></tr></tbody></table></div>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data tables and lists — Mondino design system</title>
+<meta name="description" content="How Mondino lists teammates and moments: in an order that means something, with a row that opens the globe.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Pattern</p>
+      <h1>Data tables and lists</h1>
+      <p class="ds-lead">How Mondino lists teammates and moments: in an order that means something, with a row that opens the globe.</p>
+      <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#when">When to use</a></li><li><a href="#structure">Structure</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#sources">Sources</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>Mondino has three lists: the panel’s rows, the Team table, and the Moments list. None is sorted by the viewer and none is searched. Each has one fixed order that answers a question.</p>
+</section>
+
+<section class="ds-section" id="when"><h2><a href="#when">When to use</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">List</th><th scope="col">Component</th><th scope="col">Order</th><th scope="col">Filter</th></tr></thead><tbody><tr><td>This week around the world</td><td><a href="../components/panel-row.html">Panel rows</a></td><td>By date, today to 7 days ahead; at most eight</td><td>The kinds left on in Profile & Settings</td></tr><tr><td>In working hours now</td><td>Panel rows</td><td>By local hour</td><td>—</td></tr><tr><td>Everyone, west to east</td><td><a href="../components/team-table.html">Team table</a></td><td>By time zone offset, then longitude</td><td>All · Working now · Asleep</td></tr><tr><td>Moments</td><td><a href="../components/moment-row.html">Moment rows</a></td><td>By date: Today, This week, Later, to 90 days</td><td>Everything · Holiday · Formula 1 · Local event · Sport</td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="structure"><h2><a href="#structure">Structure</a></h2>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack ds-example__canvas--canvas"><div style="width: 100%;"><div class="section-head" style="margin-top: 0;"><p style="font: var(--text-h2);">Everyone, west to east</p><div class="segmented" role="tablist" aria-label="Filter by status"><button class="segmented__option tnum" type="button" role="tab" aria-selected="true">All <span class="segmented__count">12</span></button><button class="segmented__option tnum" type="button" role="tab" aria-selected="false" tabindex="-1">Working now <span class="segmented__count">7</span></button><button class="segmented__option tnum" type="button" role="tab" aria-selected="false" tabindex="-1">Asleep <span class="segmented__count">2</span></button></div></div><p class="text-muted" style="margin-top: var(--space-3);">A heading, a filter with counts, then the rows.</p></div></div><div class="ds-example__caption"><span>The head of a list</span></div></div>
+</section>
+
+<section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
+<ul><li><strong>Loading:</strong> skeleton rows in the shape of real ones.</li><li><strong>A filter with nothing:</strong> one line; the filter and its counts stay.</li><li><strong>Counts are live:</strong> when the clock passes an hour that changes a status, the rows and the counts change with no reload.</li><li><strong>A value is missing:</strong> a dash, with a label for a screen reader. Weather unavailable says so in its cell.</li><li><strong>Long:</strong> a team may hold 500. The rows held in the page stay under a fixed limit as the list scrolls. How the day ribbon and the globe draw hundreds is not designed yet.</li></ul>
+</section>
+
+<section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
+<p>The Team table is a table from 768 px and a stack of blocks under it; it never scrolls sideways. Moment rows move whose it is under the text on a phone. Panel rows truncate.</p>
+</section>
+
+<section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
+<ul><li>The Team table is a real table with a caption and header cells; the name is each row’s header and its one link.</li><li>The Team filter is a tab list; arrow keys move between its tabs. The Moments filter is a group of pressed buttons.</li><li>A group heading with nothing under it is not rendered.</li><li>Times, offsets and temperatures use tabular figures.</li></ul>
+</section>
+
+<section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
+<p>A row leads with who or what, then where, then when. Another teammate’s row never shows a postal code: city and country only.</p>
+</section>
+
+<section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p>Mexico City · Austin · São Paulo · Dublin · Milan · Tokyo</p></div><figcaption>Order teammates west to east, as the day moves.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p>Aiko · Chloé · Jordan · Liam · Sofia · Tomás</p></div><figcaption>Order them by name, which says nothing about their day.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p class="tnum">All 12 · Working now 7 · Asleep 2</p></div><figcaption>Show how many each filter holds.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p>All · Working now · Asleep</p></div><figcaption>Make the teammate try a filter to learn it is empty.</figcaption></figure></div>
+</section>
+
+<section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
+<p>Composed from these mocks:</p><ul><li><a href="../../mocks/pages/team/default.html">pages/team/default</a></li><li><a href="../../mocks/pages/team/working.html">pages/team/working</a></li><li><a href="../../mocks/pages/team/loading.html">pages/team/loading</a></li><li><a href="../../mocks/pages/moments/default.html">pages/moments/default</a></li><li><a href="../../mocks/pages/moments/filtered.html">pages/moments/filtered</a></li><li><a href="../../mocks/pages/globe/default.html">pages/globe/default</a></li></ul>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>

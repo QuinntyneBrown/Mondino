@@ -25,9 +25,8 @@ bar at the bottom that lists the screen's other states and switches the theme.
 docs/mocks/
   index.html            gallery of every screen and state (generated)
   manifest.json         the screens, their states and the L2 requirements each serves
-  assets/tokens.css     design tokens: the only place colours, sizes and durations live
-  assets/ui.css         the component kit every mock shares
-  assets/fonts/         Gabarito and Inter, bundled (SIL Open Font License)
+  assets/tokens.css     imports the design system's tokens (docs/design-system/tokens/tokens.css)
+  assets/ui.css         imports the design system's component CSS, then the brand sheet's own layout
   assets/mock.css, mock.js   the mock bar and notes; not product UI
   pages/<screen>/<state>.html
   dialogs/<dialog>/<state>.html
@@ -112,7 +111,7 @@ caps, puffy clouds, a glossy shine, a hard drop shadow and an ink outline, with 
 shaded in dusk from the sun's position at the cast's "now". They design the interface around the
 globe and the look it aims for; which renderer draws it is decided in an ADR.
 
-The globe's colours are tokens of their own (`--color-globe-*`): ocean, land, sand, ice, cloud
+The globe's colours are tokens of their own (`--color-globe-*`, in the design system): ocean, land, sand, ice, cloud
 and night. Pins and their labels are HTML over the picture, placed at the positions the
 projection gives.
 
@@ -121,8 +120,8 @@ projection gives.
 1. **The palette.** The Mondino App prototype uses the palette the *Palette Variants* canvas
    calls "Current": navy ink and sea on a cool off-white with a warm orange pin. Fjord, Candy
    Pop and Lagoon are on that canvas as options and none has been applied to the app. The mocks
-   use Current. Choosing another changes the primitives at the top of `assets/tokens.css` and
-   nothing else.
+   use Current. Choosing another changes the primitives at the top of
+   `docs/design-system/tokens/tokens.css` and nothing else.
 2. **Sea.** The brand names sea (navy) as the globe's colour, and L2-008 lists "sea navy" among
    the globe's colours. The cartoon globe's ocean is a bright blue. The mocks keep sea as a brand
    colour and give the globe its own ocean. L2-008 and the Design section of `AGENTS.md` ("a warm
@@ -191,4 +190,4 @@ python .claude/skills/writing-html-mocks/scripts/check_mocks.py docs/mocks --wri
 python .claude/skills/writing-html-mocks/scripts/screenshot_mocks.py docs/mocks      # every mock at 360, 768 and 1280 px, light and dark, into docs/mocks/.cache/
 ```
 
-The next step is `extracting-design-systems`, which turns these mocks into `docs/design-system/`.
+The design system extracted from these mocks is in [`docs/design-system/`](../design-system/README.md). The mocks render through its tokens and component CSS, so a token changed there changes every mock.
