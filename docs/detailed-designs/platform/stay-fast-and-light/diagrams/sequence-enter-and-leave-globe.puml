@@ -34,27 +34,28 @@ store -> controller : GET /api/teams/{teamId}/pins
 controller --> store : Pins, compressed
 page --> actor : Heading, counts and panel are usable (L2-046)
 page -> view : @defer: import("@mondino/globe"), then create GlobeView
-view -> scene : new GlobeScene(canvas), load content-hashed assets from the app's origin
+view -> scene : GlobeScene.create(canvas, options): load content-hashed assets from the app's origin
 scene -> scene : start(): requestAnimationFrame loop
 view -> view : Add pointer listeners and a ResizeObserver
 scene --> actor : 3D globe drawn and spinnable
 loop Each frame
-  scene -> detail : sample(frameMs)
+  scene -> view : Frame listener (elapsed ms)
+  view -> detail : record(elapsedMs)
   opt Frame rate under 30, sustained (L2-046)
-    detail -> scene : stepDown(): lower detail and resolution
+    detail --> view : Next lower DetailStep
+    view -> scene : setDetail(step): lower detail and resolution
   end
 end
 clock -> page : minute tick: one timer for every local time (L2-047)
 actor -> clock : Hide the tab
 clock -> clock : Clear the timer
-scene -> scene : stop(): no frame drawn while hidden
+view -> scene : stop(): no frame drawn while hidden
 actor -> clock : Show the tab again
 clock -> page : Tick at once with the current time
-scene -> scene : start()
-actor -> router : Go to /team while a refresh is pending
+view -> scene : start()
+actor -> router : Go to /team while a request of the page's own is pending
 router -> page : Destroy GlobePage
-page -> store : Subscription to the pending read ends
-store -> controller : Request cancelled (L2-047)
+page -> controller : The page's own request is cancelled (L2-047); TeamStore stays for Team
 page -> view : Destroy GlobeView (DestroyRef)
 view -> view : Remove pointer listeners, disconnect the ResizeObserver
 view -> scene : dispose()

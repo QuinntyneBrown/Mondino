@@ -65,6 +65,6 @@ else refresh failed
   client --> store : ApiError
   store -> store : Keep the pins held; refreshFailed = true; try again at the next minute tick that is due
   store --> shell : refreshFailed, refreshedAt
-  shell -> shell : Banner "Couldn't refresh just now." with "Try now", until a refresh succeeds;\nthe screen keeps what it shows (L2-048, L2-049)
+  shell -> shell : Banner "Couldn’t refresh just now." with "Try now", until a refresh succeeds;\nthe screen keeps what it shows (L2-048, L2-049)
 end
 @enduml

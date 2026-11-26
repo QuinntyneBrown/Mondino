@@ -37,7 +37,7 @@ presentation components that show a time and a status.
 - **`City`** — value object in `Mondino.Domain`. Its `TimeZoneId` holds the IANA name found when
   the teammate's postal code was looked up.
 - **`TeammateSettings`** — value object in `Mondino.Domain`. Its `ShowOutsideWorkingHours`
-  records the teammate's choice for "Show when I'm outside working hours".
+  records the teammate's choice for "Show when I’m outside working hours".
 - **`GetPinsQueryHandler`** — MediatR handler in `Mondino.Application`. It returns one `PinDto`
   per teammate of the viewer's team.
 - **`PinDto`** — carries `TimeZoneId` and `ShowsStatusOutsideWorkingHours`, and no local time

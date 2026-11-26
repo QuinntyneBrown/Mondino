@@ -54,6 +54,7 @@ session --> controller : Session cookie: HttpOnly, Secure, SameSite
 controller --> client : 201 JoinResultDto, Set-Cookie
 client --> store : JoinResult
 store --> page : Team id and teammate id
+page -> page : TeamMembership.remember(teamId, teammateId, teamName)
 page --> actor : Navigate to /globe with the new pin selected, pulsing once (L2-005)
 note over page, client
   When the request fails, JoinStore sets joinState Failed, keeps what was typed

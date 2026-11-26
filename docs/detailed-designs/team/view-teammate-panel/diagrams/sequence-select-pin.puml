@@ -58,7 +58,7 @@ alt a row is chosen
   group -> page : teammateChosen(teammateId)
   page -> router : navigate /globe?teammate={teammateId}
   page --> actor : That teammate's panel
-else the close button, "This week around the world" or Escape
+else "This week around the world" or Escape
   group -> page : closed
   page -> page : groupTeammateIds.set([])
   page --> actor : Week panel (L2-024)

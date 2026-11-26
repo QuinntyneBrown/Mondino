@@ -89,26 +89,28 @@ link, which is the first focusable element of every screen, and the router outle
 else. Each screen renders its own `main`, which is the skip link's target.
 
 **`TeamShell`** — route component of the guarded parent route, in the `mondino` application.
-It provides `TeamStore` and renders `mo-app-header`, the refresh banner (`keep-team-fresh`),
+It provides `TeamStore` and `InviteLinkCopier` and renders `mo-app-header`, the refresh banner (`keep-team-fresh`),
 the router outlet that holds Globe, Team, Moments and Profile & Settings, and the toast. The
 banner and the toast are therefore the same on all four screens and are not rendered by a
 page. `TeamShell` holds the three `NavItem`s (Globe, Team, Moments) and projects one link per
-item into the header's `nav` slot, the "Invite teammate" button into its `invite` slot, and
+item into the header's `nav` slot, and
 the link to Profile & Settings, the viewer's avatar with the accessible name "Profile &
 Settings", into its `me` slot. Each link is an anchor with `routerLink` and
 `ariaCurrentWhenActive="page"`, so the current screen carries `aria-current="page"`. The
-avatar's initials and colour come from the viewer's pin in `TeamStore`. The "Invite teammate"
-button, which the mocks draw from 768 px, copies the team's invite link and shows the toast
-(`view-week-around-the-world`, L2-025).
+avatar's initials and colour come from the viewer's pin in `TeamStore`. On the header's
+`invite` output `TeamShell` calls `InviteLinkCopier.copy()`, which copies the team's invite
+link, and shows the toast (`view-week-around-the-world`, L2-025).
 
 **`AppHeader`** (`mo-app-header`) — presentation component in `components`; its block is
 `app-header`. It renders the header with `Wordmark`, the `nav` slot inside a `nav` landmark
-named "Primary", and the `invite` and `me` slots at the header's end. It injects no router
+named "Primary", and, at the header's end (`app-header__actions`), its own "Invite teammate"
+button (`app-header__invite`), which the mocks draw from 768 px and which emits the output
+`invite`, and the `me` slot. It injects no router
 and no service. The navigation sits in the header at every width, and each target is at least
 44 × 44 px; under 360 px the header's gaps and the options' padding tighten, so the three
 options and the avatar fit at 320 px. With the input `showNavigation` the mark and wordmark
 link to the Globe; without it the header is the mocks' `app-header--bare`, which shows the
-mark and wordmark alone, not as a link. `LeftPage` and `InviteNeededPage` render it that way.
+mark and wordmark alone, not as a link, with no "Invite teammate" button. `LeftPage` and `InviteNeededPage` render it that way.
 The Join screen shows no header and carries the mark and wordmark at the top of its form.
 
 **`Wordmark`** (`mo-wordmark`) — presentation component in `components`. It renders the mark

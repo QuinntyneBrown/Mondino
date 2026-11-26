@@ -127,7 +127,7 @@ decides how they are drawn.
   cities are rendered as text. Where `pin.isViewer` is true the name is followed by "(you)"
   and the mark carries a ring, so the viewer's pin differs by more than colour. When
   `GlobeView` emits `selectGroup` the page clears the selected teammate and shows the group in
-  the panel: the heading "3 teammates close together" (with the group's count), "Choose one to
+  the panel, as `GroupPanel` (`team/view-teammate-panel`): the heading "3 teammates close together" (with the group's count), "Choose one to
   see where they are in their day.", a row for each teammate, west to east, which selects
   them, and a link back to "This week around the world". On Join the
   page projects no label template, so pins there carry no name, city, local time or weather

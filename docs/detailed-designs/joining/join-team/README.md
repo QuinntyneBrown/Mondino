@@ -33,7 +33,8 @@ screen.
 **Frontend (`mondino` application, `@mondino/api`)**
 
 - **`JoinPage`** — calls `JoinStore.join()` when the person chooses the button. On success it
-  calls `TeamMembership.remember(...)` with the team id, the teammate id and the team's name, and
+  calls `TeamMembership.remember(membership)` with a `Membership`: the `teamId` and `teammateId`
+  of the `JoinResult` and the `teamName` of the `Invite`, and never the postal code. It then
   navigates to `/globe` and passes the new teammate's id and a "new" flag in the navigation
   state, never in the URL. `GlobePage` selects that pin and pulses it once.
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one
@@ -43,7 +44,8 @@ screen.
     name and postal code are read-only and the country cannot be changed.
   - A failure sets `TeamFull`, `RateLimited` or `Failed` by the `code` of the `ApiError`. The
     signals `name`, `countryCode` and `postalCode` and the found city are left as they are.
-    `TeamFull` keeps the button disabled; `Failed` and `RateLimited` enable it again.
+    `TeamFull` keeps the button disabled; `Failed` and `RateLimited` enable it again. The code
+    `invite_not_found` sets `inviteState` to `NotFound` instead, which replaces the form.
   - A retry sends the same `joinRequestId`, so a join whose response was lost does not make a
     second pin.
 - **`JoinState`** — feature-local union of `Idle`, `Joining`, `TeamFull`, `RateLimited` and
@@ -63,8 +65,8 @@ screen.
   answers 201 for a new teammate and 200 for a repeated join request. Fields the body does not
   define, such as a teammate id, a position or a colour, are ignored.
 - **`JoinTeamCommand`** — `InviteToken`, `Name`, `CountryCode`, `PostalCode`, `JoinRequestId`.
-- **`JoinTeamCommandValidator`** — removes control characters from the name and trims it, then
-  refuses an empty name, a name over 60 characters, a country outside the supported list, a
+- **`JoinTeamCommandValidator`** — after `NameNormaliser` has removed control characters from
+  the name and trimmed it (`protect-team-data`), refuses an empty name, a name over 60 characters, a country outside the supported list, a
   postal code over 12 characters or an empty `JoinRequestId`. The refusal is 400 with the code
   `validation_failed`, and nothing is stored (L2-044).
 - **`JoinTeamCommandHandler`** — runs these steps in order.

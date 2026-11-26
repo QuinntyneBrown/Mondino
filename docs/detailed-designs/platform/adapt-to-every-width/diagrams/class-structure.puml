@@ -26,8 +26,9 @@ class App {
 
 class TeamShell {
   +navItems: NavItem[]
-  provides TeamStore
+  provides TeamStore and InviteLinkCopier
   renders the refresh banner and the toast
+  +onInvite(): void
 }
 
 class NavItem {
@@ -37,8 +38,8 @@ class NavItem {
 
 class AppHeader <<mo-app-header>> {
   +showNavigation: InputSignal<boolean>
+  +invite: OutputEmitterRef<void>
   slot nav
-  slot invite
   slot me
 }
 

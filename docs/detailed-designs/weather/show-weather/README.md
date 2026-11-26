@@ -110,7 +110,7 @@ weather is available, unavailable or not shared, so the web app can say which.
 - **`WeatherCondition`** — `'clear' | 'partly-cloudy' | 'cloudy' | 'rain' | 'showers' | 'storm'
   | 'fog' | 'wind'`.
 - **`Pin`** — its `weather` is a `Weather` or `null`, and its `weatherState` a `WeatherState`.
-- **`WeatherState`** — `'available' | 'unavailable' | 'not-shared'`.
+- **`WeatherState`** — `'Available' | 'Unavailable' | 'NotShared'`, the names `PinDto.WeatherState` carries.
 - **`TemperatureUnit`** — `'celsius' | 'fahrenheit'`, in the viewer's `Settings`.
 
 ### Frontend — `domain` library, `pins/`
@@ -151,10 +151,10 @@ weather is available, unavailable or not shared, so the web app can say which.
 
 When `pin.weather` is `null` no temperature and no condition is shown, and a pin's label and
 its accessible name leave the weather out; the local time and status are unaffected.
-`pin.weatherState` says why. When it is `unavailable`, the source could not give the weather:
+`pin.weatherState` says why. When it is `Unavailable`, the source could not give the weather:
 in the weather's place the panel says "Weather is unavailable right now." with "Tomás’s local
 time is still right." under it, and a Team row shows a mark named "Weather unavailable"
-(L2-049). When it is `not-shared`, the panel says "Ahmed doesn’t share local weather.". The
+(L2-049). When it is `NotShared`, the panel says "Ahmed doesn’t share local weather.". The
 teammate is named by `firstName(name)` from `pins/`, the first word of their name; it is data
 and is rendered as text.
 

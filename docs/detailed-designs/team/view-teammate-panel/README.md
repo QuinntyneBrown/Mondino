@@ -55,7 +55,7 @@ loading and refreshing are designed in `keep-team-fresh`.
   behind you", "10 h ahead of you", "Same time as you". For the viewer's own pin it sets
   `isViewer` and leaves `offset`, `overlap`, `theirDay` and `overlapText` null. `status` is
   what `statusFor(pin, time)` gives: null when the pin's status visibility flag hides it.
-  `weather` is null unless the pin's `weatherState` is `available`, and `weatherState` is
+  `weather` is null unless the pin's `weatherState` is `Available`, and `weatherState` is
   carried so the panel can say which of the two it is. `firstName` is `firstName(pin.name)`
   from `pins/`, the first word of the name, by which the panel's running copy names the
   teammate.
@@ -65,10 +65,11 @@ loading and refreshing are designed in `keep-team-fresh`.
   emits `closed`. It renders the `Avatar`, the name (followed by "(you)" when `isViewer`), the
   city and country, the local time and day in tabular figures, the offset, a `StatusBadge`, a
   `WeatherIcon` with the temperature and the weather in words, one moment card per moment (its
-  kind and when, its title and its detail) and the `OverlapBar`. In the weather's place it says
+  kind and when, "Holiday · In 5 days" within 7 days and the date, "Formula 1 · 12 Nov", beyond
+  them, its title and its detail) and the `OverlapBar`. In the weather's place it says
   "Weather is unavailable right now." with "Tomás’s local time is still right." when
-  `weatherState` is `unavailable`, and "Ahmed doesn’t share local weather." when it is
-  `not-shared` (designed in `weather/show-weather`). It omits the moments section when
+  `weatherState` is `Unavailable`, and "Ahmed doesn’t share local weather." when it is
+  `NotShared` (designed in `weather/show-weather`). It omits the moments section when
   `moments` is empty and the offset and overlap when they are null. The close button is named
   "Close" and the teammate's name. Its heading is focusable by script through `focusHeading()`.
   A change of `content` fades in at most 200 ms; the `prefers-reduced-motion` query removes the
@@ -89,7 +90,7 @@ loading and refreshing are designed in `keep-team-fresh`.
   count, "3 teammates close together", over "Choose one to see where they are in their day.".
   Each row is a link holding an `Avatar`, the name (followed by "(you)" for the viewer), the
   city and the local time in tabular figures. Under the rows, "This week around the world"
-  emits `closed`, as its close button does. Its heading is focusable by script through
+  emits `closed`; the group's panel has no close button, as the mock draws it. Its heading is focusable by script through
   `focusHeading()`.
 - **`GlobeView`** (`mo-globe`) — component of the `globe` library. It emits `select` with a
   teammate id, takes `selectedId`, turns to the selected pin and lifts it. It emits `selectGroup`
@@ -108,7 +109,7 @@ A group is held by `GlobePage` alone, as `groupTeammateIds`, and is not in the a
 `groupTeammateIds` and renders `GroupPanel` from `groupRows`; the globe does not turn. A polite
 `role="status"` region says "3 teammates close together." once, when the group opens. Choosing
 a row navigates to `/globe?teammate={teammateId}`, which empties `groupTeammateIds` and opens
-that teammate's panel. The close button, "This week around the world" and Escape empty
+that teammate's panel. "This week around the world" and Escape empty
 `groupTeammateIds`, and `WeekPanel` returns. A refresh that takes a teammate off the team drops
 them from the rows; a group left with no teammate closes. Focus follows the same rule as for a
 teammate's panel.

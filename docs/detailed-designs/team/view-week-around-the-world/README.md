@@ -59,7 +59,7 @@ the pins: the team's invite token.
   with a `MomentIcon`, its title, its kind, the teammate's first name and city, and when it is;
   each teammate in working hours is a row with an `Avatar`, name, city and local time. Choosing
   either row emits `teammateChosen`. "All moments" is always shown under the moments, and
-  "Nobody — it's quiet everywhere." when `working` is empty. With every kind of moment turned
+  "Nobody — it’s quiet everywhere." when `working` is empty. With every kind of moment turned
   off (L2-022) the list gives way to "Nothing to show: every kind of moment is turned off for
   your globe." and "Choose what shows", which leads to Profile & Settings.
 - **`InviteCard`** (`mo-invite-card`) — presentation component. It takes `inviteLink` and
@@ -79,7 +79,7 @@ the pins: the team's invite token.
 - **`Toast`** (`mo-toast`) — presentation component that confirms the copy, rendered by
   `TeamShell` from `InviteLinkCopier.result`. "Invite link copied", with "Send it to a teammate. They add their pin with a name and a postal code.", sits
   in a `role="status"` region and dismisses itself after 4 seconds; the timer pauses while the
-  toast is pointed at or focused. "Couldn't copy the invite link", with "Your browser didn't
+  toast is pointed at or focused. "Couldn’t copy the invite link", with "Your browser didn’t
   allow it. Select the link in the card and copy it yourself.", sits in a `role="alert"` region
   and stays until dismissed. Assistive technology announces both (L2-025).
 - **`inviteLinkFor(origin, inviteToken)`** — pure function in `pins/` that returns

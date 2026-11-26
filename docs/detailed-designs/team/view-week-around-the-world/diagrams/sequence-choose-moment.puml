@@ -35,7 +35,7 @@ fn -> fn : Keep status Working hours, order by local hour, then west to east (L2
 fn --> page : WorkingTeammate[]
 page -> panel : moments, working
 alt no teammate in working hours
-  panel --> actor : "Nobody — it's quiet everywhere."
+  panel --> actor : "Nobody — it’s quiet everywhere."
 else
   panel --> actor : "This week around the world" and "In working hours now"
 end

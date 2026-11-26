@@ -76,8 +76,9 @@ package "Mondino.Application" {
     +string Colour
   }
   interface ICurrentTeammate {
-    +Guid? TeamId
-    +Guid? TeammateId
+    +Guid TeammateId
+    +Guid TeamId
+    +bool IsAuthenticated
   }
   interface IAppDbContext
 }

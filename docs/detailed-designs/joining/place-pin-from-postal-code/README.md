@@ -49,13 +49,15 @@ source and Open-Meteo. The browser calls only the Mondino API.
   and `postalCode`, and the signals `lookupState`, `found`, `nameProblem` and
   `postalCodeMissing`.
   - `lookUp()` sets `Locating`, calls `InviteApi.lookUpPostalCode`, and maps the answer or the
-    `ApiError` code to a `LookupState`. One lookup runs at a time: a new lookup aborts the
+    `ApiError` code to a `LookupState`; the code `invite_not_found` sets `inviteState` to
+    `NotFound` instead, which replaces the form. One lookup runs at a time: a new lookup aborts the
     pending one through its `AbortController`.
   - `clearFound()` runs when the postal code or the country changes. It aborts a pending lookup,
     removes the found city and the new pin, removes any alert, and returns the state to `Idle`,
     so the button reads "Place my pin" again.
   - `nameProblem` reports a name that is empty, only spaces, or longer than 60 characters. A
-    submit with a name problem places no pin and marks the name field `aria-invalid`.
+    submit with a name problem places no pin, marks the name field `aria-invalid` and shows
+    "Enter your name, up to 60 characters, so teammates know whose pin this is."
   - `postalCodeMissing` reports an empty postal code. A submit with it makes no lookup, marks
     the postal code field `aria-invalid` and shows "Enter your postal code."
   - A submit with either problem makes `JoinPage` show a summary alert above the fields
@@ -78,9 +80,11 @@ source and Open-Meteo. The browser calls only the Mondino API.
   body. A postal code never travels in a URL and is never written to browser storage.
 - **`PostalCodeResult`** — the `city` (name, region, country code, position, time zone id) and
   the `weather`, or null.
-- **`Country`** — feature-local type: `code`, `name`, `postalCodeForm` ("five digits") and
-  `postalCodeExample` ("20121"). The list arrives on the `Invite`, so the frontend holds no
-  second copy of the formats.
+- **`Country`** — feature-local type: `code`, `name`, `postalCodeForm` ("Italian postal codes
+  have five digits") and `postalCodeExample` ("20121"). The not-found message is made of the
+  postal code, the `name`, the `postalCodeForm` and the example: "We couldn’t find “2012” in
+  Italy. Italian postal codes have five digits, like 20121." The list arrives on the `Invite`,
+  so the frontend holds no second copy of the formats.
 
 **Backend**
 

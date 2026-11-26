@@ -30,8 +30,8 @@ class TeamStore {
   +pins: Signal<Pin[]>
   +selectedTeammateId: Signal<string | null>
   +counts: Signal<TeamCounts>
-  -pending: Subscription | null
-  +refresh(): void
+  -pending: AbortController | null
+  +refresh(): Promise<void>
   +select(teammateId: string | null): void
   +ngOnDestroy(): void
 }
@@ -45,7 +45,7 @@ class GlobeView <<mo-globe>> {
   +pins: InputSignal<Pin[]>
   +selectedId: InputSignal<string | null>
   +interactive: InputSignal<boolean>
-  +select: OutputEmitterRef<string>
+  +select: OutputEmitterRef<string | null>
   -scene: GlobeScene | null
   -resizeObserver: ResizeObserver
   -onDestroy(): void
@@ -53,19 +53,23 @@ class GlobeView <<mo-globe>> {
 
 class GlobeScene {
   -frameRequest: number | null
+  {static} +create(canvas: HTMLCanvasElement, options: GlobeSceneOptions): Promise<GlobeScene>
+  +onFrame(listener: (elapsedMs: number) => void): void
+  +setDetail(step: DetailStep): void
   +start(): void
   +stop(): void
-  +setPins(pins: Pin[]): void
-  +turnTo(position: Position, animate: boolean): void
-  +resize(width: number, height: number): void
   +dispose(): void
 }
 
 class DetailLevel {
-  +level: number
-  +sample(frameMs: number): void
-  +stepDown(): void
-  +stepUp(): void
+  +current: DetailStep
+  +record(elapsedMs: number): void
+  +reset(): void
+}
+
+class DetailStep {
+  +pixelRatio: number
+  +modelDetail: number
 }
 
 class GlobeFallback <<mo-globe-fallback, components>> {
@@ -87,6 +91,7 @@ GlobePage ..> Clock : reads minute
 GlobePage ..> GlobeView : defers, dynamic import
 GlobeView *-- GlobeScene : creates and disposes
 GlobeView ..> GlobeFallback : projected by GlobePage, when WebGL is unavailable
-GlobeScene *-- DetailLevel
-GlobeScene ..> Clock : now()
+GlobeView *-- DetailLevel : owns
+GlobeView ..> Clock : injects CLOCK
+DetailLevel --> DetailStep : current
 @enduml

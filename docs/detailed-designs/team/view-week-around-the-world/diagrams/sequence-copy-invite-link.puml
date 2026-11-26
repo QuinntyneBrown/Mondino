@@ -52,7 +52,7 @@ alt the link is on the clipboard
 else the browser refuses
   clip --> copier : false
   copier --> shell : result is Refused
-  shell -> toast : "Couldn't copy the invite link", alert, until dismissed
+  shell -> toast : "Couldn’t copy the invite link", alert, until dismissed
   toast --> actor : The failure announced; the link stays shown as selectable text (L2-025)
 end
 == A second teammate joins ==

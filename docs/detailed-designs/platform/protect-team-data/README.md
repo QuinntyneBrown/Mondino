@@ -87,8 +87,9 @@ behind them.
 - **`ValidationBehaviour`** — MediatR pipeline behaviour. It runs the request's validator and
   stops the pipeline with `validation_failed`, written as 400, before anything is stored.
 - **`JoinTeamCommandValidator`** and **`UpdateProfileCommandValidator`** — a name of 1 to 60
-  characters, a country in the supported list, a postal code of at most 12 characters, then
-  the country's format through `PostalCodeFormats`.
+  characters, a country in the supported list and a postal code of at most 12 characters. The
+  country's format is checked afterwards by the handler through `PostalCodeFormats`, which
+  refuses with `postal_code_not_found` (422), not `validation_failed`.
 - **`NameNormaliser`** — service in `Mondino.Application`. It removes control characters and
   trims leading and trailing spaces before validation and storage.
 - **Narrow request bodies.** A request body binds to a record that has only the fields a
@@ -121,8 +122,10 @@ controller and any outside source.
 | `Join` | `POST /api/invites/{inviteToken}/teammates` | 5 a minute |
 
 A refused request is answered 429 with a `Retry-After` header and the code `rate_limited`.
-`JoinPage` shows "That was a lot of tries in a short time. Wait a moment, then try again." and
-keeps what was typed. `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
+For a lookup or a join request, `JoinPage` shows "That was a lot of tries in a short time. Wait
+a moment, then try again." and keeps what was typed. For an open of an invite link, nothing has
+been typed yet, and `JoinPage` shows "We couldn’t open this invite link" with "Try again"
+(L2-001). `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
 `IPostalCodeLookup`, so the lookup cannot be used without a valid invite link. Behind a proxy,
 the client address is read from the forwarded header the hosting platform sets, which is
 `<TO SUPPLY>`. The limit on `POST /api/teams/{teamId}/me/postal-code-lookups`, which needs a

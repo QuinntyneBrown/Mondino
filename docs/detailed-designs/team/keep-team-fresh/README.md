@@ -49,11 +49,12 @@ Frontend:
   `GlobeView`.
 - **`loadState`** — `Loading`, `Ready` or `Failed`, for the first load only. A refresh never
   changes it: a failed refresh keeps the pins held, sets `refreshFailed`, and the store tries
-  again at the next minute tick. `Loading` shows skeletons and announces "Loading your team…";
-  `Failed` shows "We couldn't load your team" with "Try again", which calls `load` again.
+  again at the next minute tick. `Loading` shows skeletons, on the Globe screen under the heading "Your team", and announces
+  "Loading your team…";
+  `Failed` shows "We couldn’t load your team" with "Try again", which calls `load` again.
 - **`refreshFailed`** and **`refreshedAt`** — whether the last refresh failed, and when the pins
   held were read. While `refreshFailed` is true a banner (`Alert` as a banner, block `banner`,
-  `role="status"`) sits under the header of whichever screen is open: "Couldn't refresh just
+  `role="status"`) sits under the header of whichever screen is open: "Couldn’t refresh just
   now. Clocks are still right; weather and moments are from 14:50. Mondino will try again
   shortly.", the time being `refreshedAt` on the viewer's clock, with "Try now", which calls
   `refresh()`. `TeamShell`, the route component that provides the `TeamStore`, renders it under
