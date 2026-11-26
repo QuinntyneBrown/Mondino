@@ -1,16 +1,19 @@
 # Mondino mocks
 
-Static HTML mocks of every Mondino screen in every state: the five screens (Join, Globe, Team,
-Moments, Profile & Settings), the pages that say one thing, the dialogs, the notifications, and
-the brand sheet.
+Static HTML mocks of every Mondino screen in every state: the screens before a team (Join, Sign
+In, Create Team), the four screens of a team (Globe, Team, Moments, Profile & Settings), the
+pages that say one thing, the dialogs, the notifications, and the brand sheet.
 They are the design and the ultimate source of truth. `docs/design-system/`, `docs/specs/`, the
 ADRs, `docs/detailed-designs/`, `AGENTS.md` and the code follow them.
 
 They are transcribed from the **Mondino App** prototype in Magic Patterns (the *Global Teammate
-Globe* OS; frames Join, Globe, Team, Moments and Profile & Settings, and its shared `Globe`,
-`AppShell`, `OverlapBar`, pins, team and time code), as it stood on 26 November 2026: the cool
-paper palette and the cartoon globe. The brand sheet, `pages/brand`, is the *Mondino Brand*
-prototype's frame *Logo & Wordmark*, with the globe's colours added from the app's theme.
+Globe* OS; frames Join, Sign In, Create Team, Invite Needed, Globe, Team, Moments, Profile &
+Settings, Left Team and Not Found, and its shared `Globe`, `AppShell`, `AuthLayout`,
+`NoticePage`, `InviteDialog`, `OverlapBar`, feedback, pins, team and time code), as it stood on
+26 November 2026 after its second pass: the cool paper palette, the cartoon globe, the screens
+for signing in and making a team, the invite dialog, a team of 500, and its own dark theme. The
+brand sheet, `pages/brand`, is the *Mondino Brand* prototype's frame *Logo & Wordmark*, with the
+globe's colours added from the app's theme.
 
 ## How to open them
 
@@ -38,70 +41,84 @@ docs/mocks/
 The prototype's sample team is the cast, not rules. Every mock uses it.
 
 - **Team:** Northwind. Its invite link is `mondino.app/join/northwind-7Kq2`.
-- **The viewer:** Sofia Bianchi, Milan, Italy (postal code 20121, shown only on her own Join and
-  Profile & Settings).
+- **The viewer:** Sofia Bianchi, Milan, Italy (postal code 20121, shown only on her own Join,
+  Create Team and Profile & Settings; her email, sofia@northwind.co, only on her own Sign In,
+  Create Team and "You need an invite link").
 - **Now:** Monday 27 October 2025, 14:05 UTC, which is 15:05 in Milan. Temperatures in °C and a
   24-hour clock unless a mock says otherwise.
 
 | Teammate | City, country | Time zone | Local time | Status | From Sofia | Weather | Moment |
 |---|---|---|---|---|---|---|---|
-| Tomás Herrera | Mexico City, Mexico | America/Mexico_City | 08:05 | Early morning | 7 h behind | Partly cloudy, 22° | Holiday · Día de Muertos · 1 Nov |
-| Jordan Lee | Austin, United States | America/Chicago | 09:05 | Working hours | 6 h behind | Partly cloudy, 24° | Local event · Halloween on 6th Street · 31 Oct |
-| Chloé Martin | São Paulo, Brazil | America/Sao_Paulo | 11:05 | Working hours | 4 h behind | Showers, 26° | Formula 1 · São Paulo Grand Prix · 9 Nov |
-| Liam O’Connor | Dublin, Ireland | Europe/Dublin | 14:05 | Working hours | 1 h behind | Rainy, 9° | Holiday · October Bank Holiday · today |
-| Kwame Mensah | Accra, Ghana | Africa/Accra | 14:05 | Working hours | 1 h behind | Clear, 30° | Holiday · Farmers’ Day · 5 Dec |
+| Tomás Herrera | Mexico City, Mexico | America/Mexico_City | 08:05 | Early morning | 7h behind | Partly cloudy, 22° | Holiday · Día de Muertos · 1 Nov; Sport · Clásico Nacional · 2 Nov |
+| Jordan Lee | Austin, United States | America/Chicago | 09:05 | Working hours | 6h behind | Partly cloudy, 24° | Local event · Halloween on 6th Street · 31 Oct |
+| Chloé Martin | São Paulo, Brazil | America/Sao_Paulo | 11:05 | Working hours | 4h behind | Showers, 26° | Formula 1 · São Paulo Grand Prix · 9 Nov |
+| Liam O’Connor | Dublin, Ireland | Europe/Dublin | 14:05 | Working hours | 1h behind | Rainy, 9° | Holiday · October Bank Holiday · today |
+| Kwame Mensah | Accra, Ghana | Africa/Accra | 14:05 | Working hours | 1h behind | Clear, 30° | Holiday · Farmers’ Day · 5 Dec |
+| Luca Ferri | Milan, Italy | Europe/Rome | 15:05 | Working hours | Same time | Foggy, 13° | none |
 | Sofia Bianchi (you) | Milan, Italy | Europe/Rome | 15:05 | Working hours | — | Foggy, 13° | Formula 1 · Monza tickets on sale · 12 Nov |
 | Lena Fischer | Berlin, Germany | Europe/Berlin | 15:05 | Working hours | Same time | Cloudy, 8° | Local event · St. Martin’s lantern walk · 11 Nov |
 | Mara Lindqvist | Stockholm, Sweden | Europe/Stockholm | 15:05 | Working hours | Same time | Cloudy, 6° | Holiday · Alla helgons dag · 1 Nov |
-| Ahmed Al-Sayed | Dubai, United Arab Emirates | Asia/Dubai | 18:05 | Evening | 3 h ahead | Clear, 32° | Holiday · UAE National Day · 2 Dec; Formula 1 · Abu Dhabi Grand Prix · 7 Dec |
-| Priya Raman | Bengaluru, India | Asia/Kolkata | 19:35 | Evening | 4 h 30 min ahead | Stormy, 27° | Holiday · Karnataka Rajyotsava · 1 Nov |
-| Aiko Tanaka | Tokyo, Japan | Asia/Tokyo | 23:05 | Probably asleep | 8 h ahead | Clear, 14° | Holiday · Culture Day · 3 Nov |
-| Noah Williams | Melbourne, Australia | Australia/Melbourne | 01:05 Tue | Probably asleep | 10 h ahead | Windy, 18° | Sport · Melbourne Cup Day · 4 Nov |
+| Ahmed Al-Sayed | Dubai, United Arab Emirates | Asia/Dubai | 18:05 | Evening | 3h ahead | Clear, 32° | Holiday · UAE National Day · 2 Dec; Formula 1 · Abu Dhabi Grand Prix · 7 Dec |
+| Priya Raman | Bengaluru, India | Asia/Kolkata | 19:35 | Evening | 4h 30m ahead | Stormy, 27° | Holiday · Karnataka Rajyotsava · 1 Nov |
+| Aiko Tanaka | Tokyo, Japan | Asia/Tokyo | 23:05 | Probably asleep | 8h ahead | Clear, 14° | Holiday · Culture Day · 3 Nov |
+| Noah Williams | Melbourne, Australia | Australia/Melbourne | 01:05 Tue | Probably asleep | 10h ahead | Windy, 18° | Sport · Melbourne Cup Day · 4 Nov |
 
-So the Globe reads "12 teammates" and "12 time zones · 7 working · 2 asleep", and the Team
-filters read "All 12", "Working now 7" and "Asleep 2". Seven moments fall this week: one today
-(Dublin) and six in the next seven days. "Today" is the date in the moment's own place, so
-Melbourne Cup Day is seven days off in Melbourne although it is eight days off in Milan.
+So the Globe reads "13 teammates" and "12 time zones · 8 working · 2 asleep", and the Team
+filters read "All 13", "Working now 8" and "Asleep 2". Luca joined in the prototype's second
+pass, in Milan like Sofia, so the cast always has two pins in one place: on the globe they are
+one group pin, "2". Tomás has two moments in the week, so his moment marker shows a count.
+Eight moments fall this week: one today (Dublin) and seven in the next seven days; the panel
+lists six of them. "Today" is the date in the moment's own place, so Melbourne Cup Day is seven
+days off in Melbourne although it is eight days off in Milan.
 
 A few states need something the cast cannot give at that hour, and say so in a note:
 
+- **A team of 500**, in `globe/hundreds`, `team/hundreds` and `team/hundreds-no-match`: the
+  prototype's seeded team (`bigTeam.ts`: the cast and 487 generated teammates in 40 cities),
+  reproduced name for name, at the cast's "now": 38 time zones, 324 working, 42 asleep.
 - **A smaller team** of Sofia, Mara and Liam: `globe/quiet` (23:30 in Milan, nobody in working
   hours, every kind of moment turned off) and `team/no-results` (mid-afternoon, no one asleep).
-- **A team of one**, Sofia: `globe/empty`, `team/empty` and the invite link notifications.
+- **A team of one**, Sofia: `globe/empty`, `team/empty` and `create-team/created`.
 - **Edges**, in `team/edge`: three more teammates with a very long name, a one-word name and a
   name typed as markup, on a 12-hour clock in °F.
 - **A move**, in `profile/locating`, `location-found`, `invalid`, `lookup-unavailable` and
-  `rate-limited`: Sofia types a Toronto postal code, M5V 2T6.
+  `rate-limited`: Sofia types a Toronto postal code, M5V 2T6. (The prototype moves her to
+  Berlin; the city is the cast's, not a rule.)
 - **°F and the 12-hour clock**, the prototype's own controls, in `globe/fahrenheit-12-hour` and
   `team/edge`.
-- **Sharing off**, in `globe/sharing-off`: Ahmed shares neither his weather nor when he is
-  outside working hours.
+- **Sharing off**, in `globe/sharing-off`: Ahmed shares neither his weather nor whether he is
+  working or asleep. (The prototype shows Lena.)
 
 ## Where the mocks depart from the prototype, and why
 
+The prototype's second pass took up most of what the mocks had corrected in its first: no
+postal code and no role on another teammate, no "Message" button, a moment marker with the
+kind's icon, darker pin text and control edges, all four kinds of moment on. What is left:
+
 | The prototype | The mocks | Why |
 |---|---|---|
-| A teammate's panel and the Team table show a postal code. | City and country only. | The design's own privacy copy: only the city is shown (L2-007). |
-| A role under each name ("Growth marketer"). | No role. On Team the line under a name is the teammate's status in words. | Join asks for a name, a country and a postal code and nothing else, so there is no role to show; and a status is never given by colour alone (L2-015). |
-| Offsets as "−7h", "+4h 30m". | "7 h behind", "4 h 30 min ahead", "Same time". | Read aloud and at a glance without a sign (L2-016). |
-| A sun dot on a pin with a moment this week. | A moment marker with the kind's icon, larger and ringed when the moment is today. | A marker shows an emblem for the moment, and today's is stronger by more than colour (L2-021). |
-| A selected pin's label is an ink chip with the time and weather. | A lifted pin, pointed at, focused or selected, shows name, city, local time, weather and its moment. | A lifted pin is how a teammate is read on a small globe (L2-012). |
-| A "Message" button on a teammate’s panel, and "Schedule a message for Aiko’s morning" when a teammate is asleep. | No message button, in any status. | Mondino has no chat and no scheduler, so the button would lead nowhere. It is not built. |
-| Today's moment adds "Liam is probably offline." | The moment's own detail and its teammate. | Mondino infers nothing about presence. |
+| Sign In has a state "No Mondino account uses sofia@northwind.co". | Not drawn. "Check your inbox" is shown whether or not the email is on a team. | A screen open to anyone must not tell anyone which emails Mondino knows (L2-043, L2-045). |
+| "Check your inbox" has a button "I’ve clicked the link". | No such button. | It is how the prototype moves on. In the product the link in the email opens Mondino signed in. |
+| A full team: "The team has used all 1,000 places on its plan. Ask a Northwind admin to make room". | "The team has all 500 of its places taken. Ask a teammate at Northwind to tell you when a place opens". | Mondino has no plans and no admins, and a team holds 500 (L2-005). |
+| A reset invite link: "Someone at Northwind reset it". | "Someone on the team reset it". | A link that no longer works names no team (L2-001). |
+| "ask a teammate for a fresh invite link", "you’ll need a new invite link". | "the team’s invite link". | The invite link never expires, as the invite dialog says, so leaving does not use it up. |
+| The viewer's own panel on the Globe shows their postal code. | City and country only. | A postal code appears only on the teammate's own Join, Create Team and Profile & Settings (L2-007). |
+| "8h ahead you". | "8h ahead of you". | Grammar. "7h behind you" and "same time as you" are the prototype's. |
+| Team shows a teammate's status as a coloured dot beside the time. | The dot, and the status in words under the name. | A status is never given by colour alone (L2-015). |
+| A moment marker is the same whether the moment is today or later in the week. | Today's is larger and ringed. | Today's moment is the one to notice, and it is stronger by more than colour (L2-021). |
+| A pin pointed at shows a label with the name, and the city and first moment. | The lifted label also carries the local time and the weather. | A lifted pin is how a teammate is read on a small globe (L2-012). |
+| "No one matches…" and a filter with nothing say "Try another filter." as a line of text. | The same words, in a live region. | So the change is announced (L2-039). |
+| Join and Create Team list six countries; Profile & Settings types the country. | One list of the supported countries on all three. | One field, one shape. |
+| Profile & Settings moves Sofia to "Berlin-Mitte". | A city: "Toronto, Canada." | Only the city is shown, and a pin is placed at the city (L2-006). |
+| The invite dialog's "Reset link", and the copy button on the empty Globe's card, do nothing when pressed. | "Reset link" is drawn and noted as not designed; the card's "Copy" ends in the invite toasts. | See the open questions. |
 | The globe fetches its land from a CDN and is drawn live with d3-geo. | A still SVG of the same cartoon globe, drawn into each mock. | Mocks open from disk with no network. |
-| Fonts from Google Fonts. | Gabarito and Inter bundled in `assets/fonts/`. | Fonts are self-hosted, never from a CDN. |
-| Pin (#e8532f) as text, and white initials on some teammate colours. | A darker pin for text and for the leave button, and seven teammate colours darkened. | 4.5:1 for text (L2-041). The pin itself, on the globe, keeps the brand's colour. |
-| Inputs edged with the hairline colour. | A stronger edge on inputs, selects, buttons and chips. | 3:1 for the edge of a control (L2-041). |
-| Light only. | Light and dark. Dark turns night into the canvas and paper into the ink; the globe keeps its colours. | Every mock is themed through tokens. Dark is this set's own proposal; see the open questions. |
-| Sporting days off by default. | All four kinds of moment on. | All four are on to begin with (L2-022). |
-| Tabs, filters and chips drawn about 30 px tall. | The same look, each with a 44 px touch target. | Every touch target is at least 44 × 44 px (L2-039). |
+| Fonts from Google Fonts. | Gabarito and Inter bundled in the design system. | Fonts are self-hosted, never from a CDN. |
+| White initials on every teammate colour. | Seven of the thirteen teammate colours darkened. | 4.5:1 for text (L2-041). |
+| Tabs, filters and chips drawn about 30 px tall; the phone header 390 px wide at its narrowest. | The same look, each with a 44 px touch target, and a header that fits 320 px. | Every touch target is at least 44 × 44 px, and every screen works from the narrowest phone (L2-037, L2-039). |
 
-The prototype draws only the happy path of each frame and a few states (Join: default, locating,
-found, error; Globe: default, empty; Profile & Settings: default, unsaved, saved). Every other
-state here is new: loading, errors, an invite link that cannot be used, a full team, a rate
-limit (on Join and on Profile & Settings), a lifted pin, a group pin, weather unavailable, the
-still picture where the 3D globe cannot be drawn, the dialogs and the pages that say one thing.
-Their copy is written for these mocks from the L2 requirements.
+The prototype now draws most states itself. These are still the mocks' own, written from the L2
+requirements: Join's error summary, Profile & Settings with the lookup down or rate limited,
+Team with long and odd names, the Globe in °F on a 12-hour clock, and the brand sheet's notes.
 
 ## The globe
 
@@ -111,46 +128,53 @@ caps, puffy clouds, a glossy shine, a hard drop shadow and an ink outline, with 
 shaded in dusk from the sun's position at the cast's "now". They design the interface around the
 globe and the look it aims for; which renderer draws it is decided in an ADR.
 
-The globe's colours are tokens of their own (`--color-globe-*`, in the design system): ocean, land, sand, ice, cloud
-and night. Pins and their labels are HTML over the picture, placed at the positions the
-projection gives.
+The globe's colours are tokens of their own (`--color-globe-*`, in the design system): ocean,
+land, sand, ice, cloud and night, a little deeper in dark, where the outline is light. Pins and
+their labels are HTML over the picture, placed at the positions the projection gives. Pins that
+would cover each other are one group pin with a count; where the 3D globe cannot be drawn, the
+still picture keeps its pins.
 
 ## Open questions and assumptions
 
-1. **The palette.** The Mondino App prototype uses the palette the *Palette Variants* canvas
+1. **Signing in after joining by invite link.** Sign In emails a link to a "work email", and
+   Create Team asks for one. Join asks for a name, a country and a postal code and no email, so
+   a teammate who joined by invite link has no email to sign in with. Whether Join should ask
+   for one, or such a teammate comes back another way, is not designed. Nothing is built for it
+   until it is.
+2. **A sign-in link that has expired or was already used.** "It works once, for the next 15
+   minutes." What opening it afterwards shows is not designed.
+3. **"Reset link".** The invite dialog draws it and Join says what a reset link looks like to
+   someone who opens it. What it asks before it acts, and what the dialog shows afterwards, is
+   not designed; anyone on the team can press it, since Mondino has no admins.
+4. **The palette.** The Mondino App prototype uses the palette the *Palette Variants* canvas
    calls "Current": navy ink and sea on a cool off-white with a warm orange pin. Fjord, Candy
    Pop and Lagoon are on that canvas as options and none has been applied to the app. The mocks
    use Current. Choosing another changes the primitives at the top of
    `docs/design-system/tokens/tokens.css` and nothing else.
-2. **Sea.** Settled. Sea is the brand's navy and the globe has an ocean of its own, a bright
-   blue with a deeper rim. L2-008 and the Design section of `AGENTS.md` say the same.
-3. **"Invite teammate" and "Message".** Decided. "Invite teammate", in the header, copies the
-   team's invite link to the clipboard and shows the same toast as the invite card
-   (`notifications/invite-link`: "Invite link copied", or the refused copy); it opens nothing
-   else. "Message" is removed from the mocks and is not built: Mondino has no chat.
-4. **Dark theme.** Not in the prototype. It is drawn here because the mocks are themed; whether
-   Mondino ships it is not decided.
-5. **A count on a moment marker** when a teammate has two moments in the week (L2-021) is not
-   drawn: no teammate in the cast has two in one week.
-6. **A team of hundreds.** How the day ribbon, the globe and the Team list draw 500 teammates is
-   not designed (L2-026, L2-047), so there is no `long` state.
-7. **Time zones.** The Globe counts distinct IANA time zones, as the prototype does: twelve for
-   the cast, worked out at 14:05 UTC. L2-025 and L2-028 use the same numbers.
-8. **Sign-in and making a team** are not designed, so there is no screen for either. Someone in
-   no team sees `no-team`.
-9. **The Team filter** is a tab list and the Moments filter a set of pressed buttons, as L2-028
-   and L2-030 word them.
-10. **The initials on Join** are those of the five teammates who joined most recently, with
+5. **Dark theme.** Decided: the prototype now has one, and the mocks use its values. The design
+   system adds the steps the prototype's sixteen values do not give (a raised surface, the
+   danger and warning surfaces).
+6. **"Invite teammate".** Decided, and changed: the header button opens the invite dialog
+   (`dialogs/invite`), on a phone as an icon. It no longer copies the link straight to the
+   clipboard. "Message" stays out: Mondino has no chat.
+7. **A team of hundreds.** Decided for 500: group pins on the Globe, the day ribbon as a bar
+   chart past 40 teammates, and Team with a search and a section per city. Moments for a team
+   of 500 is not drawn (L2-047).
+8. **A count on a moment marker.** Decided: two or more moments this week show their number.
+9. **Create Team with a postal code that cannot be found**, or with the lookup down, is not
+   drawn. The mocks assume Join's messages.
+10. **Time zones.** The Globe counts distinct IANA time zones, as the prototype does: twelve for
+    the cast, worked out at 14:05 UTC.
+11. **The Team filter** is a tab list and the Moments filter a set of pressed buttons, as L2-028
+    and L2-030 word them.
+12. **The initials on Join** are those of the five teammates who joined most recently, with
     their colours and nothing else: no name, no city.
-11. **The countries on Join** are the supported list to begin with: Australia, Brazil, Canada,
-    Germany, Ghana, India, Ireland, Italy, Japan, Mexico, Sweden, United Arab Emirates and the
-    United States.
-12. **Leaving.** `left-team` takes the team's name from the screen the teammate left from;
-    opened or reloaded without it, its title reads "You’ve left the team". Someone with no
-    team who opens a screen sees `no-team` in place.
-13. **Selecting a teammate** from a row, a ribbon marker or a moment opens the Globe with that
-    pin selected. In the mocks those links lead to the nearest drawn state: Tomás, Sofia, Noah
-    and Ahmed have their own, and every other teammate leads to Tomás's.
+13. **The countries** on Join, Create Team and Profile & Settings are the supported list to
+    begin with: Australia, Brazil, Canada, Germany, Ghana, India, Ireland, Italy, Japan, Mexico,
+    Sweden, United Arab Emirates and the United States.
+14. **Leaving.** `left-team` takes the team's name from the screen the teammate left from;
+    opened or reloaded without it, its title reads "You’ve left the team". Someone on no team
+    who opens a screen sees `invite-needed` in place.
 
 ## Coverage
 
