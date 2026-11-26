@@ -61,4 +61,19 @@
   </div></section>
 </main>
 <p class="mock-note" style="top: 1rem; right: 1rem;">The postal code is looked up as on Join, with the same messages when it cannot be found or the lookup is down; the pin is placed at the city. The email is where sign-in links are sent, and is never shown to a teammate.</p>
-<nav class="mock-bar"></nav>
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Create Team</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html" aria-current="page">default</a></li>
+    <li><a href="invalid.html">invalid</a></li>
+    <li><a href="submitting.html">submitting</a></li>
+    <li><a href="error.html">error</a></li>
+    <li><a href="created.html">created</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

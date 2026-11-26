@@ -262,4 +262,25 @@
   </div>
 </main>
 <p class="mock-note" style="top: 5rem; right: 1rem;">Past 40 teammates faces stop fitting on the day ribbon, so it becomes a bar chart of how many teammates are at each half hour of their day, and the list gains a search and splits into one section per city, west to east, each with its count and local time. The first two cities start open; a city shows at most 50 teammates and then says how many more there are and to search for them.</p>
-<nav class="mock-bar"></nav>
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Team</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html">default</a></li>
+    <li><a href="working.html">working</a></li>
+    <li><a href="asleep.html">asleep</a></li>
+    <li><a href="no-results.html">no-results</a></li>
+    <li><a href="loading.html">loading</a></li>
+    <li><a href="empty.html">empty</a></li>
+    <li><a href="error.html">error</a></li>
+    <li><a href="weather-unavailable.html">weather-unavailable</a></li>
+    <li><a href="edge.html">edge</a></li>
+    <li><a href="hundreds.html" aria-current="page">hundreds</a></li>
+    <li><a href="hundreds-no-match.html">hundreds-no-match</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

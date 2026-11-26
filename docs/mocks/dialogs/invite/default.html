@@ -100,4 +100,16 @@
   </div>
 </div>
 <p class="mock-note" style="top: 1rem; right: 1rem;">Opened by “Invite teammate” in the header, on any screen, and by “Invite teammates” on Team for a team of one. Focus starts on “Copy link” and stays inside the dialog; Escape or Close returns it to the button that opened it. Copying closes the dialog and shows “Invite link copied”. Under 576 px it is a sheet from the bottom. What “Reset link” asks before it acts is not designed yet.</p>
-<nav class="mock-bar"></nav>
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Invite teammates</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html" aria-current="page">default</a></li>
+    <li><a href="copy-failed.html">copy-failed</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

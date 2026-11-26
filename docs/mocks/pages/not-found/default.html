@@ -25,4 +25,15 @@
   </div>
 </main>
 <p class="mock-note" style="top: 5rem; left: 1rem;">The address is shown as text, never as markup, and without its query string. Someone on no team is taken to “You need an invite link” by the button.</p>
-<nav class="mock-bar"></nav>
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Not Found</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html" aria-current="page">default</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

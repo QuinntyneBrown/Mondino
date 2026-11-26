@@ -63,4 +63,30 @@
   <p class="visually-hidden" role="status" aria-live="polite">2 teammates close together.</p>
 </main>
 <p class="mock-note" style="top: 5rem; left: 1rem;">Pins that would cover each other are drawn as one group pin with a count. Selecting it turns the globe to it and lists who it stands for, city by city, each city with its local time. A group of teammates in several cities reads “3 cities · pick someone to see their pin”. The selected teammate’s pin always stands alone. Close, or Escape, returns the panel to the week.</p>
-<nav class="mock-bar"></nav>
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Globe</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html">default</a></li>
+    <li><a href="selected.html">selected</a></li>
+    <li><a href="selected-self.html">selected-self</a></li>
+    <li><a href="selected-asleep.html">selected-asleep</a></li>
+    <li><a href="pin-lifted.html">pin-lifted</a></li>
+    <li><a href="just-joined.html">just-joined</a></li>
+    <li><a href="group.html" aria-current="page">group</a></li>
+    <li><a href="hundreds.html">hundreds</a></li>
+    <li><a href="sharing-off.html">sharing-off</a></li>
+    <li><a href="quiet.html">quiet</a></li>
+    <li><a href="loading.html">loading</a></li>
+    <li><a href="empty.html">empty</a></li>
+    <li><a href="error.html">error</a></li>
+    <li><a href="globe-unavailable.html">globe-unavailable</a></li>
+    <li><a href="fahrenheit-12-hour.html">fahrenheit-12-hour</a></li>
+    <li><a href="weather-unavailable.html">weather-unavailable</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>
