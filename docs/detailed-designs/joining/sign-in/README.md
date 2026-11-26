@@ -66,7 +66,8 @@ source, the Email source. The browser calls only the Mondino API.
 - **`SignInStore`** — service provided at the `/sign-in` route, so its state goes when the
   person leaves the screen. It holds the writable signal `email` and the signal `state`.
   `requestLink()` checks the email's form, sets `Sending`, calls `SignInApi.requestLink` and
-  sets `Sent` on any 202. An `ApiError` of any code, and no answer, set `Failed`. It aborts a
+  sets `Sent` on any 202. An `ApiError` and no answer set `Failed`; the state for the code
+  `rate_limited` is `<TO SUPPLY>`. It aborts a
   pending request when it is destroyed. `open(signInToken)` sets `Opening` and calls
   `SignInApi.redeem`; the code `sign_in_link_unusable` sets `LinkUnusable`.
 - **`SignInState`** — feature-local union of `Idle`, `Invalid`, `Sending`, `Sent`, `Failed`,
@@ -103,7 +104,9 @@ source, the Email source. The browser calls only the Mondino API.
   form of an address with 400 and the code `validation_failed`.
 - **`RequestSignInLinkCommandHandler`** — runs the same steps for every email, so neither its
   answer nor the time it takes says whether the email is on a team.
-  1. It parses the email to an `EmailAddress`, which trims it and lower-cases it.
+  1. It parses the email to an `EmailAddress`, which trims it and lower-cases it. When more
+     than 3 sign-in links were asked for that email in the last 15 minutes, by `TimeProvider`,
+     it stops here, sends no mail and answers as for any other request (L2-045).
   2. It asks `ISignInTokens.Create()` for a token and its hash.
   3. It adds a `SignInLink` with the hash, the email and `ExpiresAt`, which is the time from
      `TimeProvider` plus `SignInLink.Lifetime` (15 minutes), and saves through `IAppDbContext`.
@@ -147,7 +150,7 @@ source, the Email source. The browser calls only the Mondino API.
 | Case | Status | `code` | The screen says |
 |------|--------|--------|-----------------|
 | Email over 254 characters or not an address | 400 | `validation_failed` | "We couldn’t send the link." and "Try again"; the browser's own check catches the form first |
-| Over the limit for asking | 429 | `rate_limited` | "We couldn’t send the link." and "Try again" |
+| Over the limit for one client | 429 | `rate_limited` | `<TO SUPPLY>`: what Sign In shows for this refusal is not drawn (L2-045) |
 | Email source did not accept the message | 503 | `sign_in_email_unavailable` | "We couldn’t send the link." and "Try again" |
 | Sign-in link unknown, expired or used | 410 | `sign_in_link_unusable` | `<TO SUPPLY>` |
 | Network failure or any other error | — | — | "We couldn’t send the link." and "Try again" |
@@ -156,8 +159,10 @@ No refusal depends on whether the email is on a team.
 
 **Open points**
 
-- The limits of the `SignInLink` and `SignInRedemption` policies, and a limit on the links sent
-  to one address, are `<TO SUPPLY>`.
+- The `SignInLink` policy allows one client 5 requests in 15 minutes, and the
+  `SignInRedemption` policy 10 openings a minute; each then answers 429 with `Retry-After`
+  (L2-045). What Sign In shows for a 429 is not drawn and is not built before its design
+  exists: `<TO SUPPLY>`.
 - The protection of these pre-session, state-changing requests against cross-site request
   forgery follows the session design: `<TO SUPPLY>`.
 - A link is emailed to any address in the right form, since an answer that depended on the

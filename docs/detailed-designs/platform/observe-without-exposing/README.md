@@ -104,9 +104,6 @@ requirement, cited by identifier.
 |-------|--------------|-------------|
 | `L2-051` | `L1-017` | The backend emits OpenTelemetry traces, metrics and logs, enough to see its health and the health of each outside source. None of it carries a name, an email, a postal code, a position, a city, a token, a query string or a body, and a route is recorded as its template. |
 
-An email is held to the same rule as a name and a postal code, and a sign-in token to the
-same rule as an invite token (L2-052).
-
 ## Diagrams
 
 ### System context

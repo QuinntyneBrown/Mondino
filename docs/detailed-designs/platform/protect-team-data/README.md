@@ -152,18 +152,19 @@ authentication, the controller and any outside source.
 | `Join` | `POST /api/invites/{inviteToken}/teammates` | 5 a minute |
 | `CitySearch` | `POST /api/invites/{inviteToken}/city-searches`, `POST /api/city-searches` | `<TO SUPPLY>` |
 | `Countries` | `GET /api/countries` | `<TO SUPPLY>` |
-| `CreateTeam` | `POST /api/teams` | `<TO SUPPLY>` |
-| `SignInLink` | `POST /api/sign-in-links` | `<TO SUPPLY>` |
-| `SignInRedemption` | `POST /api/sign-in-links/redemptions` | `<TO SUPPLY>` |
+| `CreateTeam` | `POST /api/teams` | 5 an hour |
+| `SignInLink` | `POST /api/sign-in-links` | 5 in 15 minutes |
+| `SignInRedemption` | `POST /api/sign-in-links/redemptions` | 10 a minute |
 
 A refused request is answered 429 with a `Retry-After` header and the code `rate_limited`.
 For a lookup or a join request, `JoinPage` shows "Too many tries from this device. You can try
 again in 9:42.", counts down from `Retry-After`, disables its button until the countdown ends
 and keeps what was typed. For an open of an invite link, nothing has been typed yet, and
-`JoinPage` shows "We couldn’t open this invite" with "Try again" (L2-001). Sign In and Create
-Team have no state of their own for the refusal: each shows its alert with "Try again". A
-limit on the sign-in links sent to one address, whatever client asks, is `<TO SUPPLY>`; it
-keeps the open endpoint from being used to fill a person's inbox. `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
+`JoinPage` shows "We couldn’t open this invite" with "Try again" (L2-001). What Sign In and
+Create Team show for the refusal is not drawn: `<TO SUPPLY>`. Beside the limit per client,
+`RequestSignInLinkCommandHandler` sends no further mail once more than 3 sign-in links were
+asked for one email in 15 minutes, from any number of clients, and answers as for any other
+request, so nobody's inbox can be flooded and nothing is learned about the email. `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
 `IPostalCodeLookup`, so the lookup cannot be used without a valid invite link. Behind a proxy,
 the client address is read from the forwarded header the hosting platform sets, which is
 `<TO SUPPLY>`. The limit on `POST /api/teams/{teamId}/me/postal-code-lookups`, which needs a
@@ -180,10 +181,6 @@ level-1 (L1) requirement, cited by identifier.
 | `L2-043` | `L1-014` | The backend decides what is allowed. Every request must come from a teammate of the team it concerns, except those that are open to anyone (L2-045): opening an invite link, looking up a postal code or finding a city while joining or making a team, joining, making a team, asking for a sign-in link and opening one. What the browser shows or hides is a convenience and never the rule. Mondino has no roles: the teammate who made a team is a teammate like any other. |
 | `L2-044` | `L1-014` | Every value from a browser is validated by the backend whatever the frontend checked. A teammate's name, a team's name, an email, a city, a moment's title and detail, what is typed in a search and the address of a page that is not there are rendered as text, never as HTML, wherever they appear. |
 | `L2-045` | `L1-014` | Opening an invite link, looking up a postal code or finding a city while joining, and joining are open to anyone who holds an invite link. Sign In (asking for a sign-in link and opening one) and Create Team (its postal code lookup and making the team) are open to anyone at all. Each is marked as open explicitly and is rate limited. |
-
-Sign In and Create Team add open endpoints (L2-052, L2-053). This design applies L2-043,
-L2-044 and L2-045 to them: each is marked as open, each is rate limited, and none reveals
-whether an email is known.
 
 ## Diagrams
 

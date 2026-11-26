@@ -74,8 +74,8 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
   - `create()` sets `Creating` and calls `TeamCreationApi.createTeam`. A retry sends the same
     `createRequestId`, so a request whose response was lost does not make a second team.
   - A failure maps the `code` of the `ApiError`: `postal_code_not_found` and
-    `postal_code_unavailable` set the `lookupState`, and every other code and no answer set
-    `Failed`.
+    `postal_code_unavailable` set the `lookupState`, and any other failure sets `Failed`. The
+    state for the code `rate_limited` is `<TO SUPPLY>`.
 - **`CreateTeamState`** — feature-local union of `Idle`, `Creating`, `Created` and `Failed`.
 - **`TeamCreationApi` / `TEAM_CREATION_API`, `HttpTeamCreationApi`** — contract, injection
   token and HTTP client in `@mondino/api`: `getCountries()`, `lookUpPostalCode(countryCode,
@@ -108,10 +108,10 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 
   | Action | Request | Policy |
   |--------|---------|--------|
-  | `GET /api/countries` | `GetCountriesQuery` | `Countries` |
-  | `POST /api/postal-code-lookups` | `LookUpPostalCodeQuery` with no invite token | `PostalCodeLookup` |
-  | `POST /api/city-searches` | `SearchCitiesQuery` with no invite token | `CitySearch` |
-  | `POST /api/teams` | `CreateTeamCommand` | `CreateTeam` |
+  | `GET /api/countries` | `GetCountriesQuery` | `Countries`, limit `<TO SUPPLY>` |
+  | `POST /api/postal-code-lookups` | `LookUpPostalCodeQuery` with no invite token | `PostalCodeLookup`, 10 a minute for one client, as on Join |
+  | `POST /api/city-searches` | `SearchCitiesQuery` with no invite token | `CitySearch`, limit `<TO SUPPLY>` |
+  | `POST /api/teams` | `CreateTeamCommand` | `CreateTeam`, 5 teams an hour for one client |
 
   `POST /api/teams` signs the returned teammate in through `TeammateSessionHandler` and
   answers 201 for a new team and 200 for a repeated request. Fields the body does not define
@@ -123,7 +123,9 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 - **`CreateTeamCommand`** — `TeamName`, `Name`, `Email`, `CountryCode`, `PostalCode` or
   `CityId`, and `CreateRequestId`.
 - **`CreateTeamCommandValidator`** — after `NameNormaliser` has cleaned the team's name and the
-  maker's name, refuses a team name or a name that is empty or over 60 characters, an email
+  maker's name, refuses a team name or a name that is empty or over 60 characters (the mock's
+  field stops a team name at 60 characters; L2-053 leaves the longest team name undecided), an
+  email
   over 254 characters or not in the form of an address, a country outside the supported list,
   a postal code over 12 characters, a command with neither a postal code nor a city id, and an
   empty `CreateRequestId`. The refusal is 400 with the code `validation_failed`, and nothing
@@ -159,7 +161,7 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 | Postal code in the wrong form, or unknown to the source | 422 | `postal_code_not_found` | Join's message, naming the postal code, the country and the form |
 | Postal code source timed out or circuit open | 503 | `postal_code_unavailable` | Join's "Your city" search in the postal code's place |
 | A value outside its limits | 400 | `validation_failed` | "We couldn’t create Northwind. Nothing was saved — try again." |
-| Over the limit for one client | 429 | `rate_limited` | The same alert, with "Try again" |
+| Over the limit for one client | 429 | `rate_limited` | `<TO SUPPLY>`: what Create Team shows for this refusal is not drawn (L2-045) |
 | Network failure or any other error | — | — | The same alert, with "Try again" |
 
 In each case the person stays on the Create Team screen and what they typed is kept. No refusal
@@ -167,7 +169,8 @@ says whether the email is already on a team.
 
 **Open points**
 
-- The limits of the `Countries`, `CitySearch` and `CreateTeam` policies are `<TO SUPPLY>`.
+- The limits of the `Countries` and `CitySearch` policies, and what Create Team shows for a
+  429, are `<TO SUPPLY>`.
 - What an email that is already on a team means for a second team, and which team its sign-in
   link then opens, are `<TO SUPPLY>` (`sign-in`).
 - The protection of this pre-session, state-changing request against cross-site request

@@ -56,7 +56,9 @@ else
   page --> actor : "Check your inbox", the same whatever the email (L2-052)
 end
 note over page, client
-  A request that gets no answer, a 429 and a 503 set the state Failed. The page says
+  A request that gets no answer and a 503 set the state Failed. The page says
   "We couldn’t send the link." and the button reads "Try again"; the email typed is kept.
+  What the page shows for a 429 is TO SUPPLY. Past 3 links for one email in 15 minutes
+  no mail is sent and the answer is the same (L2-045).
 end note
 @enduml

@@ -112,7 +112,8 @@ on the hosting platform and is `<TO SUPPLY>`.
   the browser from the pin's time zone and the clock, so they need no outside source. Where a
   pin's `weatherState` is `Unavailable`, `PinLabel` leaves the weather out, and `TeammatePanel`
   and the Team row say in the weather's place that it is unavailable: in the panel, "Weather
-  for Mexico City isn’t available right now. We’ll try again in a few minutes." `NotShared`
+  for Mexico City isn’t available right now. We’ll try again in a few minutes."; above the
+  Team list, "Weather is unavailable right now. Local times are still right." `NotShared`
   has its own words (`show-weather`).
 - **A first read that is pending shows the screen's loading state.** Until a screen's first
   read answers, the screen shows a placeholder in the shape of its content and announces the

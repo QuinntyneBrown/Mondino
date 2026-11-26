@@ -202,8 +202,8 @@ search leaves the backend for no one. No log, metric or span carries the postal 
 position or the text of a city search.
 
 **Open point.** The mock's countdown, "9:42", is longer than the one-minute window of the
-lookup policy (L2-045). The alert shows whatever `Retry-After` the refusal carries; whether the
-window lengthens is `<TO SUPPLY>`.
+lookup policy (L2-045). The alert counts down from whatever `Retry-After` the refusal carries;
+whether the window lengthens is `<TO SUPPLY>`.
 
 ## Requirements
 
