@@ -1,0 +1,90 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Show local time and status
+
+
+interface Clock <<api>> {
+  +minute: Signal<Date>
+  +now(): Date
+}
+
+class BrowserClock <<domain, time/>> {
+  -timer: number | null
+  +minute: Signal<Date>
+  +now(): Date
+  -arm(): void
+  -rest(): void
+  -onVisibilityChange(): void
+}
+
+class "time/ functions" as TimeFns <<domain, time/>> {
+  +localTime(now: Date, timeZoneId: string): LocalTime
+  +formatTime(time: LocalTime, format: ClockFormat): string
+  +statusAt(localHour: number): Status
+  +statusFor(pin: Pin, time: LocalTime): Status | null
+}
+
+class LocalTime <<domain, time/>> {
+  +hour: number
+  +minute: number
+  +weekday: Weekday
+  +date: string
+}
+
+enum Weekday <<domain, time/>> {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+enum Status <<api>> {
+  early-morning
+  working-hours
+  evening
+  probably-asleep
+}
+
+enum ClockFormat <<api>> {
+  24-hour
+  12-hour
+}
+
+class Pin <<api>> {
+  +teammateId: string
+  +timeZoneId: string
+  +showsStatusOutsideWorkingHours: boolean
+}
+
+class PinDto <<Mondino.Application>> {
+  +Guid TeammateId
+  +string TimeZoneId
+  +bool ShowsStatusOutsideWorkingHours
+}
+
+class StatusBadge <<components>> {
+  +status: Status
+}
+
+Clock <|.. BrowserClock : implements
+TimeFns ..> LocalTime : returns
+TimeFns ..> Status : returns
+TimeFns ..> ClockFormat : reads
+TimeFns ..> Pin : reads
+LocalTime --> Weekday : has
+StatusBadge --> Status : shows as words
+Pin ..> PinDto : mirrors
+@enduml

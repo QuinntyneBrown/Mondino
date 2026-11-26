@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — A join request traced with no teammate data
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "HttpInviteApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "ASP.NET Core instrumentation" as aspnet
+  participant "InvitesController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "JoinTeamCommandHandler" as handler
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedPostalCodeLookup" as lookup
+  database "Mondino database" as db
+  participant "MondinoTelemetry" as telemetry
+  participant "TelemetryRedaction" as redaction
+end box
+participant "Postal code source" as source
+participant "Telemetry backend" as backend
+actor -> page : Join as "Sofia Bianchi", postal code 20121
+page -> client : join(inviteToken, name, country, postalCode)
+client -> aspnet : POST /api/invites/{inviteToken}/teammates, values in the body
+aspnet -> telemetry : Start a server span
+aspnet -> controller : Request
+controller -> handler : Send JoinTeamCommand
+handler -> lookup : FindCityAsync(postalCode)
+lookup -> source : Country and postal code
+source --> lookup : City, position, time zone
+lookup -> telemetry : RecordSourceCall("postal_code", Success, duration) (L2-051)
+lookup --> handler : City
+handler -> db : Save the teammate
+db --> handler : Saved
+handler -> telemetry : Log TeammateJoined: a fixed message with no fields
+handler --> controller : Result
+controller --> aspnet : 201, session cookie set
+aspnet -> telemetry : End the span: method, status, route template
+telemetry -> redaction : Each span and log record
+redaction -> redaction : Keep http.route = api/invites/{inviteToken}/teammates; drop path, query, client address and outgoing URL
+redaction -> backend : Export over OTLP
+note over redaction, backend
+  No name, postal code, city, position
+  or invite token is exported (L2-051)
+end note
+aspnet --> client : 201
+client --> page : Joined
+page --> actor : Pin placed on the globe
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Show local time and status
+
+
+Person(teammate, "Teammate", "Reads local times and statuses")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Works out every local time and status from one clock")
+  Container(api, "Mondino API", "ASP.NET Core", "Gives each pin's IANA time zone and status visibility flag")
+  ContainerDb(db, "Mondino database", "TO SUPPLY", "Teammates, their cities and settings")
+}
+Rel(teammate, web, "Uses", "HTTPS")
+Rel(web, api, "Reads the team's pins", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

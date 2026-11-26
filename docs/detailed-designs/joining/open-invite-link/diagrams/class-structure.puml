@@ -1,0 +1,113 @@
+@startuml
+set namespaceSeparator none
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure — Open an invite link
+
+package "mondino application" {
+  class JoinPage {
+    +inviteToken: string
+  }
+  class JoinStore {
+    +invite: Signal<Invite | null>
+    +inviteState: Signal<InviteState>
+    +open(inviteToken: string): void
+  }
+  enum InviteState {
+    Loading
+    Ready
+    AlreadyJoined
+    NotFound
+    RateLimited
+    Failed
+  }
+}
+package "@mondino/api" {
+  interface InviteApi {
+    +getInvite(inviteToken: string): Promise<Invite>
+  }
+  class HttpInviteApi
+  class Invite {
+    +teamName: string
+    +teammateCount: number
+    +positions: Position[]
+    +alreadyJoined: boolean
+    +countries: Country[]
+  }
+  class ApiError {
+    +code: string
+  }
+}
+package "Mondino.Api" {
+  class InvitesController {
+    +GetInvite(inviteToken: string): Task<ActionResult<InviteDto>>
+  }
+}
+package "Mondino.Application" {
+  class GetInviteQuery {
+    +string InviteToken
+  }
+  class GetInviteQueryHandler {
+    +Handle(query: GetInviteQuery): Task<InviteDto>
+  }
+  class InviteDto {
+    +string TeamName
+    +int TeammateCount
+    +IReadOnlyList<Position> Positions
+    +bool AlreadyJoined
+    +IReadOnlyList<CountryDto> Countries
+  }
+  interface ICurrentTeammate {
+    +Guid? TeamId
+    +Guid? TeammateId
+  }
+  interface IAppDbContext
+}
+package "Mondino.Domain" {
+  class Team {
+    +Guid Id
+    +string Name
+    +string InviteToken
+    +IReadOnlyList<Teammate> Teammates
+  }
+  class Teammate {
+    +Guid Id
+    +City City
+  }
+  class City {
+    +string Name
+    +Position Position
+  }
+  class Position {
+    +double Latitude
+    +double Longitude
+  }
+}
+
+JoinPage --> JoinStore : provides and reads
+JoinStore --> InviteState : holds
+JoinStore ..> InviteApi : INVITE_API
+HttpInviteApi ..|> InviteApi
+InviteApi ..> Invite : returns
+InviteApi ..> ApiError : refuses with
+HttpInviteApi ..> InvitesController : GET /api/invites/{inviteToken}
+InvitesController ..> GetInviteQuery : sends
+GetInviteQueryHandler ..> GetInviteQuery : handles
+GetInviteQueryHandler ..> InviteDto : builds
+GetInviteQueryHandler ..> ICurrentTeammate : asks
+GetInviteQueryHandler ..> IAppDbContext : reads
+GetInviteQueryHandler --> Team : loads
+Team "1" *-- "0..500" Teammate
+Teammate --> City
+City --> Position
+InviteDto --> Position : bare positions
+@enduml

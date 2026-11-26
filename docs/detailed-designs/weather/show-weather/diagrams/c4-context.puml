@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Show weather
+
+
+Person(teammate, "Teammate", "A person on a team, looking at the weather where teammates are")
+System(mondino, "Mondino", "Shows the current temperature and conditions at each teammate's city")
+System_Ext(openmeteo, "Open-Meteo", "Current weather for a position")
+
+Rel(teammate, mondino, "Reads each pin's weather in")
+Rel(mondino, openmeteo, "Reads current weather for a city's position from", "HTTPS")
+@enduml

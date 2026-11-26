@@ -1,0 +1,38 @@
+@startuml
+title UML sequence behaviour — Cancel leaving the team
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "ProfilePage" as page
+  participant "LeaveTeamDialog" as dialog
+  participant "ProfileStore" as store
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "ProfileController" as controller
+end box
+actor -> page : Choose "Remove my pin and leave Northwind"
+page -> dialog : Open through CDK Dialog with the team's name
+dialog --> actor : Names the team; focus moves into the dialog and is trapped there
+alt Escape is pressed
+  actor -> dialog : Escape
+else "Cancel" is chosen
+  actor -> dialog : Cancel
+end
+dialog --> page : Close with cancel
+page -> page : Focus returns to the button that opened the dialog (L2-036)
+page --> actor : Profile & Settings as it was
+note over store, controller : ProfileStore.leave() is not called and no request reaches the backend. Nothing has changed.
+@enduml

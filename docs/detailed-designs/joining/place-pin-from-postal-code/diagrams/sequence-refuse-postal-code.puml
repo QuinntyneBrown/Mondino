@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Refuse a postal code in the wrong form or not found
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "JoinStore" as store
+  participant "HttpInviteApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "InvitesController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeFormats" as formats
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedPostalCodeLookup" as lookup
+end box
+participant "Postal code source" as postal
+actor -> page : Leave the postal code field
+page -> store : lookUp()
+store -> client : lookUpPostalCode(inviteToken, countryCode, postalCode)
+client -> controller : POST /api/invites/{inviteToken}/postal-code-lookups
+controller -> handler : Send LookUpPostalCodeQuery
+handler -> handler : Find the team by invite token
+handler -> formats : TryNormalise(countryCode, postalCode)
+alt the postal code does not fit the country's form ("2012" in Italy)
+  formats --> handler : false
+  note over lookup, postal : The postal code source is not called (L2-004)
+  handler --> controller : Refuse with postal_code_not_found
+else the form fits and the source does not know it
+  formats --> handler : PostalCode
+  handler -> lookup : FindCityAsync(postalCode)
+  lookup -> postal : Country and postal code only
+  postal --> lookup : No such postal code
+  lookup --> handler : NotFound (cached)
+  handler --> controller : Refuse with postal_code_not_found
+end
+controller --> client : 422 ProblemDetails, code postal_code_not_found
+client --> store : ApiError postal_code_not_found
+store --> page : lookupState NotFound, nothing placed
+page --> actor : Alert naming the postal code, the country, its form and an example (L2-004)
+actor -> page : Edit the postal code
+page -> store : clearFound()
+store --> page : lookupState Idle
+page --> actor : Alert removed (L2-004)
+@enduml

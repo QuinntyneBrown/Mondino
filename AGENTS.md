@@ -66,6 +66,9 @@ The requirements are in `docs/specs/L1.md` (what Mondino must do) and `docs/spec
 behaviour with its acceptance criteria). An acceptance test names the L2 requirements it covers
 in a header comment (`// Traces to: L2-012`).
 
+The detailed designs are in `docs/detailed-designs/`, one folder per subsystem and one per
+feature inside it; its `README.md` lists them with the L2 requirements each realises.
+
 The mission, Mondino's single L0 requirement, is not written yet. When it is, it goes in
 `docs/specs/L0.md` and this section quotes it word for word; everything then points back to it.
 Do not invent a mission in its place.

@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — Read pins while the weather source is failing
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+  participant "CachedWeatherSource" as cached
+  participant "SourceResilience" as resilience
+  participant "OpenMeteoWeatherSource" as openmeteo
+end box
+participant "Open-Meteo" as source
+actor -> page : Open the Globe screen
+page -> store : refresh()
+store -> client : getPins(teamId)
+client -> controller : GET /api/teams/{teamId}/pins
+controller -> handler : Send GetPinsQuery
+handler -> db : Load teammates with city, position, time zone
+db --> handler : Teammates
+loop Each distinct city, one call per city (L2-050)
+  handler -> cached : GetCurrentAsync(position)
+  cached -> cached : Round the position to two decimal places; look in the cache
+  alt Fresh answer cached
+    cached --> handler : Weather
+  else Nothing fresh
+    cached -> resilience : ExecuteAsync("weather", call)
+    alt Circuit closed
+      resilience -> openmeteo : GetCurrentAsync(position), 5 s timeout (L2-049)
+      openmeteo -> source : Position only (L2-050)
+      source --> openmeteo : Error, or no answer in 5 s
+      openmeteo --> resilience : Failure or timeout
+      resilience -> resilience : Count the failure; open the circuit at the threshold
+    else Circuit open
+      note over resilience, source : Open-Meteo is not called (L2-049)
+    end
+    resilience --> cached : No value
+    alt Cached answer under 3 hours old (L2-049)
+      cached --> handler : Cached Weather
+    else None, or older than 3 hours
+      cached --> handler : null
+    end
+  end
+end
+handler --> controller : PinDto list; weather null where unavailable, never zero
+controller --> client : 200 within 6 s
+client --> store : Pins
+store --> page : pins signal
+page --> actor : Each pin shows local time and status; weather, or "unavailable" in its place (L2-049)
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Make accessible
+
+Person(teammate, "Teammate", "Uses a keyboard, a touch screen, a screen reader, enlarged text or reduced motion")
+Person(visitor, "Person with an invite link", "Joins with the same means")
+System(mondino, "Mondino", "Meets WCAG 2.2 level AA on every screen")
+
+Rel(teammate, mondino, "Reads and operates every screen by keyboard, touch and assistive technology")
+Rel(visitor, mondino, "Joins and hears the postal code lookup's result")
+@enduml

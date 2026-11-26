@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — List moments
+
+Container_Boundary(web, "Mondino web app") {
+  Component(page, "MomentsPage", "Angular page, lazy route /moments", "Loads the moments, holds the chosen filter")
+  Component(client, "HttpTeamApi", "api library, bound to TEAM_API", "Calls the moments endpoint")
+  Component(group, "groupMoments", "domain moments/", "Sorts moments into today, this week and later")
+  Component(when, "whenLabel", "domain moments/", "Says Today, Tomorrow or In 3 days")
+  Component(chips, "FilterChips", "components library", "Everything and the four kinds, as pressed buttons")
+  Component(list, "MomentList", "components library", "Shows the groups and the empty messages")
+  Component(card, "MomentCard", "components library", "Shows one moment")
+}
+Container(api, "Mondino API", "ASP.NET Core", "TeamsController and GetMomentsQueryHandler")
+
+Rel(page, client, "Asks for the team's moments")
+Rel(client, api, "GET /api/teams/{teamId}/moments", "JSON/HTTPS")
+Rel(page, group, "Calls with the filtered moments")
+Rel(group, when, "Labels each moment with")
+Rel(page, chips, "Passes the chosen filter, receives a choice")
+Rel(page, list, "Passes the groups, receives a chosen moment")
+Rel(list, card, "Renders each moment with")
+@enduml

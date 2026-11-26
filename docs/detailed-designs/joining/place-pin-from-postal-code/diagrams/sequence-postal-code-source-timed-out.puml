@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — The postal code source does not answer in time
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "JoinStore" as store
+  participant "HttpInviteApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "InvitesController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeFormats" as formats
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedPostalCodeLookup" as lookup
+  participant "PostalCodeLookupClient" as lookupClient
+end box
+participant "Postal code source" as postal
+actor -> page : Leave the postal code field
+page -> store : lookUp()
+store -> client : lookUpPostalCode(inviteToken, countryCode, postalCode)
+client -> controller : POST /api/invites/{inviteToken}/postal-code-lookups
+controller -> handler : Send LookUpPostalCodeQuery
+handler -> formats : TryNormalise(countryCode, postalCode)
+formats --> handler : PostalCode
+handler -> lookup : FindCityAsync(postalCode)
+alt the circuit is closed
+  lookup -> lookupClient : FindCityAsync(postalCode)
+  lookupClient -> postal : Country and postal code only
+  postal --> lookupClient : No answer within the timeout
+  lookupClient --> lookup : Timed out
+  lookup -> lookup : Count the failure; do not cache it
+else the circuit is open
+  lookup -> lookup : Do not call the source
+end
+lookup --> handler : Unavailable
+handler --> controller : Refuse with postal_code_unavailable
+controller --> client : 503 ProblemDetails, code postal_code_unavailable
+client --> store : ApiError postal_code_unavailable
+store --> page : lookupState Unavailable, what was typed is kept
+page --> actor : "Could not be checked right now", offer to try again; not "wrong" (L2-004)
+actor -> page : Try again
+page -> store : lookUp()
+@enduml

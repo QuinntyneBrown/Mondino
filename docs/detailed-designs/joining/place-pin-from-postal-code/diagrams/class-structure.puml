@@ -1,0 +1,150 @@
+@startuml
+set namespaceSeparator none
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure — Place a pin from a postal code
+
+package "mondino application" {
+  class JoinStore {
+    +name: WritableSignal<string>
+    +countryCode: WritableSignal<string>
+    +postalCode: WritableSignal<string>
+    +lookupState: Signal<LookupState>
+    +found: Signal<PostalCodeResult | null>
+    +nameProblem: Signal<NameProblem | null>
+    +lookUp(): void
+    +clearFound(): void
+  }
+  enum LookupState {
+    Idle
+    Finding
+    Found
+    NotFound
+    Unavailable
+    RateLimited
+  }
+}
+package "@mondino/components" {
+  class PostalCodeField {
+    +value: string
+    +state: LookupState
+    +country: Country
+    +valueChange: string
+    +left: void
+    +retry: void
+  }
+}
+package "@mondino/api" {
+  interface InviteApi {
+    +lookUpPostalCode(inviteToken, countryCode, postalCode, signal): Promise<PostalCodeResult>
+  }
+  class PostalCodeResult {
+    +city: City
+    +weather: Weather | null
+  }
+  class Country {
+    +code: string
+    +name: string
+    +postalCodeForm: string
+    +postalCodeExample: string
+  }
+}
+package "Mondino.Application" {
+  class LookUpPostalCodeQuery {
+    +string InviteToken
+    +string CountryCode
+    +string PostalCode
+  }
+  class LookUpPostalCodeQueryValidator
+  class LookUpPostalCodeQueryHandler {
+    +Handle(query: LookUpPostalCodeQuery): Task<PostalCodeResultDto>
+  }
+  class PostalCodeResultDto {
+    +CityDto City
+    +WeatherDto? Weather
+  }
+  class PostalCodeFormats {
+    +IReadOnlyList<PostalCodeFormat> Supported
+    +TryNormalise(countryCode: string, value: string, out postalCode: PostalCode): bool
+  }
+  class PostalCodeFormat {
+    +string CountryCode
+    +string CountryName
+    +Regex Pattern
+    +string Form
+    +string Example
+  }
+  interface IPostalCodeLookup {
+    +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
+  }
+  class PostalCodeLookupOutcome {
+    +PostalCodeLookupStatus Status
+    +City? City
+  }
+  enum PostalCodeLookupStatus {
+    Found
+    NotFound
+    Unavailable
+  }
+  interface IWeatherSource {
+    +GetCurrentAsync(position: Position, ct): Task<Weather?>
+  }
+}
+package "Mondino.Domain" {
+  class PostalCode {
+    +string CountryCode
+    +string Value
+  }
+  class City {
+    +string Name
+    +string Region
+    +string CountryCode
+    +Position Position
+    +string TimeZoneId
+  }
+  class Weather {
+    +double TemperatureC
+    +WeatherCondition Condition
+    +DateTimeOffset ObservedAt
+  }
+}
+package "Mondino.Infrastructure" {
+  class CachedPostalCodeLookup
+  class PostalCodeLookupClient
+  class CachedWeatherSource
+  class OpenMeteoWeatherSource
+}
+
+JoinStore --> LookupState
+JoinStore ..> InviteApi : INVITE_API
+PostalCodeField ..> LookupState : shows
+PostalCodeField ..> Country : form and example
+InviteApi ..> PostalCodeResult : returns
+LookUpPostalCodeQueryValidator ..> LookUpPostalCodeQuery : validates
+LookUpPostalCodeQueryHandler ..> LookUpPostalCodeQuery : handles
+LookUpPostalCodeQueryHandler ..> PostalCodeFormats : normalises with
+LookUpPostalCodeQueryHandler ..> IPostalCodeLookup : finds the city
+LookUpPostalCodeQueryHandler ..> IWeatherSource : reads the weather
+LookUpPostalCodeQueryHandler ..> PostalCodeResultDto : builds
+PostalCodeFormats *-- PostalCodeFormat
+PostalCodeFormats ..> PostalCode : creates
+IPostalCodeLookup ..> PostalCodeLookupOutcome : returns
+PostalCodeLookupOutcome --> PostalCodeLookupStatus
+PostalCodeLookupOutcome --> City
+IWeatherSource ..> Weather : returns
+CachedPostalCodeLookup ..|> IPostalCodeLookup
+PostalCodeLookupClient ..|> IPostalCodeLookup
+CachedPostalCodeLookup --> PostalCodeLookupClient : decorates
+CachedWeatherSource ..|> IWeatherSource
+OpenMeteoWeatherSource ..|> IWeatherSource
+CachedWeatherSource --> OpenMeteoWeatherSource : decorates
+@enduml

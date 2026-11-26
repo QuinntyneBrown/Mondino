@@ -1,0 +1,47 @@
+@startuml
+title UML sequence behaviour — Filter moments by kind
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "FilterChips" as chips
+  participant "MomentsPage" as page
+  participant "groupMoments" as group
+  participant "MomentList" as list
+end box
+
+note over chips, page : The screen opens with "Everything" pressed (L2-030)
+actor -> chips : Choose "Sport"
+chips --> page : select("sport")
+page -> page : Set the filter signal
+page --> chips : selected = "sport"
+chips --> actor : "Sport" exposed with aria-pressed="true",\nits icon and its name (L2-030)
+page -> page : Keep the loaded moments whose kind is sport
+note right of page : No request is sent: the filter\nworks on the moments already loaded
+page -> group : groupMoments(filtered moments, clock.now())
+group --> page : MomentGroups
+page -> list : groups, filtered = true
+alt at least one sport moment
+  list --> actor : Sport moments only, grouped as before (L2-030)
+else no upcoming sport moment
+  list --> actor : "Nothing of this kind coming up for your team."
+end
+actor -> chips : Choose "Everything"
+chips --> page : select("everything")
+page -> group : groupMoments(all moments, clock.now())
+group --> page : MomentGroups
+page -> list : groups, filtered = false
+list --> actor : All upcoming moments
+@enduml

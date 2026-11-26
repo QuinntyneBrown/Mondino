@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — A duplicate submit makes exactly one pin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "HttpInviteApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "InvitesController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "JoinTeamCommandHandler (first)" as h1
+  participant "JoinTeamCommandHandler (second)" as h2
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+end box
+actor -> page : Double-click "Join Northwind"
+page -> client : join(..., joinRequestId)
+note right of page : The button is disabled while joining; the case below\ncovers two requests that still arrive.
+client -> controller : POST teammates (joinRequestId A)
+client -> controller : POST teammates (joinRequestId A)
+controller -> h1 : Send JoinTeamCommand
+controller -> h2 : Send JoinTeamCommand
+h1 -> db : Load the team; no teammate has joinRequestId A
+h2 -> db : Load the team
+alt the second request loads after the first commits
+  h1 -> db : Save the new teammate
+  db --> h1 : Committed
+  db --> h2 : Team with a teammate that has joinRequestId A
+  h2 -> h2 : Return that teammate, add nothing (L2-005)
+else both load before either commits
+  h1 -> db : Save the new teammate
+  db --> h1 : Committed
+  h2 -> db : Save a second teammate
+  db --> h2 : Unique index on (TeamId, JoinRequestId) rejects it
+  h2 -> db : Load the teammate with joinRequestId A
+  db --> h2 : The first request's teammate (L2-005)
+end
+h1 --> controller : JoinResultDto, teammate T
+h2 --> controller : JoinResultDto, the same teammate T
+controller --> client : 201 JoinResultDto, Set-Cookie (first)
+controller --> client : 200 JoinResultDto, Set-Cookie (second)
+client --> page : JoinResult
+page --> actor : Globe screen with one new pin
+@enduml

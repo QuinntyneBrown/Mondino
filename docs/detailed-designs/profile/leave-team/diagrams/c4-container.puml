@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Leave team
+
+Person(viewer, "Teammate", "Removes their pin and leaves the team")
+System_Boundary(mondino, "Mondino") {
+  Container(spa, "Mondino web app", "Angular", "Profile and Settings, the leave dialog, the screen confirming the teammate has left")
+  Container(api, "Mondino API", "ASP.NET Core", "Deletes the teammate and ends their session")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams, teammates and sessions")
+}
+
+Rel(viewer, spa, "Uses", "HTTPS")
+Rel(spa, api, "DELETE own teammate", "HTTPS")
+Rel(api, db, "Deletes the teammate and their sessions", "EF Core")
+@enduml

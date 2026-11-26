@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Turn the globe
+
+Person(teammate, "Teammate", "A person on a team")
+Container_Boundary(spa, "Mondino web app") {
+  Component(page, "GlobePage", "Angular page, mondino application", "Passes the selected teammate id to the globe")
+  Component(store, "TeamStore", "Signal store, domain library", "Holds the pins and the selected teammate id")
+  Component(view, "GlobeView", "Angular component mo-globe, globe library", "Joins gestures, motion and the scene; watches visibility and reduced motion")
+  Component(gestures, "GlobeGestures", "Class, globe library", "Turns pointer, touch and arrow-key input into drags, steps and taps")
+  Component(motion, "GlobeMotion", "Class, globe library", "The rules of turning: on its own, dragged, held on a pin, at rest")
+  Component(scene, "GlobeScene", "Class, globe library", "Draws the globe at the orientation it is given")
+}
+Rel(teammate, gestures, "Drags and presses arrow keys")
+Rel(page, store, "Reads the selected teammate id from")
+Rel(page, view, "Sets selectedId on")
+Rel(view, gestures, "Attaches to the canvas and releases")
+Rel(gestures, motion, "Reports drags and steps to")
+Rel(view, motion, "Holds on a pin, advances each frame")
+Rel(view, scene, "Sets the orientation, starts and stops")
+@enduml

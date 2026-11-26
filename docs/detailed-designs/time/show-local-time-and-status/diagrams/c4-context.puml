@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Show local time and status
+
+
+Person(teammate, "Teammate", "A person on a team, looking at where teammates are in their day")
+System(mondino, "Mondino", "Shows each teammate's pin with its local time and status")
+
+Rel(teammate, mondino, "Reads local times and statuses in")
+@enduml

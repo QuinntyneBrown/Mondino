@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Load the globe lazily, with a placeholder and a still picture
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "GlobePlaceholder" as placeholder
+  participant "GlobeView" as view
+  participant "GlobeScene" as scene
+  participant "GlobeFallback" as fallback
+end box
+participant "Mondino web app origin" as origin
+actor -> page : Open the Globe screen
+page -> placeholder : Show in the globe's box (L2-008 AC5)
+placeholder --> actor : Placeholder, heading, counts and panel
+page -> origin : Dynamic import of the globe library (@defer)
+origin --> page : Globe chunk
+page -> view : Create mo-globe in the same box, placeholder projected
+view -> scene : create(canvas, options)
+scene -> scene : Ask for a WebGL context
+alt WebGL context available
+  scene -> origin : Import the renderer, fetch model and textures (L2-008 AC2)
+  alt assets loaded
+    origin --> scene : Renderer chunk, model, textures
+    scene --> view : GlobeScene
+    view -> scene : resize, setSun, start
+    scene --> view : First frame drawn
+    view -> view : state = Ready, remove the placeholder
+    view --> actor : 3D globe, no layout shift (L2-008 AC1, AC5)
+  else assets fail to load
+    origin --> scene : Error or timeout
+    scene --> view : Reject with GlobeUnavailableError(AssetsFailed)
+    view -> fallback : state = Fallback, show the still picture
+    fallback --> actor : Still picture of the globe (L2-008 AC3)
+  end
+else no WebGL context
+  scene --> view : Reject with GlobeUnavailableError(NoWebGL)
+  view -> fallback : state = Fallback, show the still picture
+  fallback --> actor : Still picture of the globe (L2-008 AC3)
+end
+actor -> page : Leave the Globe screen
+page -> view : Destroy
+view -> scene : dispose() and abort pending loads
+scene --> view : Renderer, model, textures and loop released
+@enduml

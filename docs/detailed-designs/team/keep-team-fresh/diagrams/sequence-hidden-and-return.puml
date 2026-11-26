@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — A hidden tab makes no refresh, and refreshes at once on return
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "BrowserClock" as clock
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+  participant "GlobePage" as page
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+actor -> clock : Hide the tab
+clock -> clock : visibilitychange: stop the minute timer
+note over clock, store : No tick reaches TeamStore while the tab is hidden,\nso no refresh is made (L2-048)
+opt a refresh is in flight
+  store -> store : Let it finish; merge its result
+end
+actor -> clock : Show the tab again
+clock -> clock : visibilitychange: restart the timer
+clock -> store : Minute tick at once
+store -> store : refreshIfDue(clock.now())
+alt hidden for 15 minutes or more
+  store -> client : getPins(teamId, signal)
+  client -> controller : GET /api/teams/{teamId}/pins
+  controller --> client : 200 with the pins
+  client --> store : TeamPins
+  store -> store : merge; lastRefreshedAt = clock.now()
+  store --> page : pins, counts
+  page --> actor : Current pins, weather and moments, selection kept
+else hidden for less than 15 minutes
+  store -> store : Wait for the tick that completes 15 minutes
+  page --> actor : Local times, statuses and moment groups recomputed from the clock
+end
+== The teammate leaves the screens ==
+page -> store : Route destroyed
+store -> store : Abort the pending request; stop reading the clock
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+title UML sequence behaviour — a status changes at its hour
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "TeamPage" as page
+  participant "TeamTable,\nStatusBadge" as views
+  participant "BrowserClock" as clock
+  participant "localTime" as local
+  participant "statusFor,\nstatusAt" as status
+end box
+
+note over clock : A teammate's local time is 08:59\nand their status reads "Early morning"
+clock -> clock : Timer fires at the minute boundary
+clock --> page : minute signal changes
+page -> local : localTime(minute, pin.timeZoneId)
+local --> page : LocalTime 09:00
+page -> status : statusFor(pin, localTime)
+status -> status : statusAt(9) by the table of L2-015
+alt status is working-hours, or pin.showsStatusOutsideWorkingHours
+  status --> page : working-hours
+  page -> views : Bind status
+  views --> actor : "Working hours", as words (L2-015)
+else outside 09:00 to 18:00 and the flag is false
+  status --> page : null
+  page -> views : Bind no status
+  views --> actor : No status shown, not counted as asleep (L2-015)
+end
+@enduml

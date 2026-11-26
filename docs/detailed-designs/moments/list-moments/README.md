@@ -1,0 +1,131 @@
+# List moments
+
+## Overview
+
+Mondino shows a team spread around the world, and what is happening where each teammate lives.
+The Moments screen is one of Mondino's five screens. It gathers the whole team's upcoming
+moments into one list, so a teammate sees what is coming up for the people they work with.
+
+**moment** — something happening where a teammate lives, with a kind, a title, a date local to
+that place and one line of detail
+
+**kind** — one of the four categories of moment: holiday, Formula 1, local event or sport
+
+The list is ordered by when each moment happens. A moment today comes first and is the most
+prominent, headed "Today in" and its city. "This week" holds the moments 1 to 7 days ahead, and
+"Later" those 8 to 90 days ahead. Each moment gives its kind, when it happens, its title, its
+detail, and its teammate and city. Choosing a moment opens the Globe screen with that teammate's
+pin selected.
+
+A row of filters narrows the list to one kind: Everything, Holiday, Formula 1, Local event or
+Sport. The viewer's choice of which kinds mark pins on the globe (`mark-pins-with-moments`) does
+not apply here: the Moments screen lists every kind.
+
+"Today" is the date in the moment's own place. A moment dated 4 November in Melbourne is "today"
+while it is 4 November in Melbourne, whatever the date is where the viewer sits.
+
+## Description
+
+The screen is a lazy route in the `mondino` application. The backend supplies the moments
+(`find-moments`), and the browser groups and filters them.
+
+- **`MomentsPage`** — page at `/moments`, loaded with `loadComponent` behind `teammateGuard`. It
+  asks `TEAM_API` for the team's moments once on entry and holds them in a signal. It holds the
+  chosen filter in a second signal, "everything" at first. A computed signal filters the moments
+  by kind and passes them to `groupMoments` with the clock's time. The computed signal reads the
+  clock's minute tick, so a moment moves from "This week" to "Today" without a reload. The page
+  cancels a pending request when the teammate leaves, and its state goes with it.
+- **`TeamApi.getMoments(teamId)`** / **`HttpTeamApi`** — contract and HTTP client in `api` for
+  `GET /api/teams/{teamId}/moments`. A refusal arrives as an `ApiError` with a `code`.
+- **`Moment`** — `api` type: kind, title, date, detail, emblem key, the teammate's id and name,
+  the city's name and country code, and the city's time zone id. It carries no postal code and
+  no position.
+- **`groupMoments(moments, now)`** — pure function in `domain`'s `moments/`. For each moment it
+  works out the days ahead with `daysUntil`, from today in the moment's own time zone. It drops
+  a moment before today or more than 90 days ahead. It returns `MomentGroups`: `today` (0 days),
+  `thisWeek` (1 to 7 days) and `later` (8 to 90 days), each in date order.
+- **`DatedMoment`** — a moment with its days ahead and its `when` label.
+- **`whenLabel(daysAhead)`** — "Today", "Tomorrow" or "In 3 days". `MomentCard` shows it beside
+  the weekday, day and month.
+- **`FilterChips`** — presentation component. It renders the five filters as buttons, each with
+  its kind's `MomentIcon` and its name. The chosen filter carries `aria-pressed="true"` and is
+  styled through that attribute, with a mark that does not depend on colour. It emits the
+  choice.
+- **`MomentList`** — presentation component. It renders the three groups and omits the heading
+  of a group with no moments. With no moment at all it says that nothing is coming up for the
+  team. With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
+  team." It emits a chosen moment.
+- **`MomentCard`** — presentation component for one moment: kind icon, `when` label and date,
+  title, detail, teammate and city. The prominent form is used for a moment today. Title, detail
+  and names are rendered as text, never as HTML. The whole card is one control, reachable by
+  keyboard and at least 44 × 44 px.
+- **`TeamStore.select(teammateId)`** — when a moment is chosen, `MomentsPage` selects its
+  teammate in `TeamStore` and navigates to `/globe`.
+- **`TeamsController`**, **`GetMomentsQuery`**, **`GetMomentsQueryHandler`** — the backend
+  endpoint and handler, described in `find-moments`. The handler returns the moments of the next
+  90 days only for a teammate of the team.
+
+A filter choice sends no request: it narrows the moments already loaded. The filter is not kept
+between visits. The response is bounded by the 90-day window, and the page replaces its moments
+on each load. How a long list is windowed in the page for a team of up to 500 teammates is
+`<TO SUPPLY>`. The wording of the message for a team with no upcoming moment, and the screen's
+loading and failed states, follow the mocks in `docs/mocks/`, which are `<TO SUPPLY>`.
+
+## Requirements
+
+The feature realises the following level-2 (L2) requirements. Each refines the level-1 (L1)
+requirement cited by identifier.
+
+| L2 ID | Refines (L1) | Requirement |
+|-------|--------------|-------------|
+| `L2-029` | `L1-010` | The Moments screen lists the team's upcoming moments. A moment today is shown first and most prominently, "Today in" and its city; then "This week" (1 to 7 days ahead) and "Later" (8 to 90 days ahead), each in date order. Each moment gives its kind, when it happens, its title, its detail, and its teammate and city. |
+| `L2-030` | `L1-010` | The Moments screen is filtered by Everything, Holiday, Formula 1, Local event or Sport. |
+
+## Diagrams
+
+### System context
+
+A teammate reads and filters the team's upcoming moments through Mondino, which reads them from
+the calendar sources.
+
+![C4 system context for listing moments](diagrams/c4-context.png)
+
+### Containers
+
+The Mondino web app asks the Mondino API for the team's moments with one request. The API reads
+the team from the Mondino database.
+
+![C4 container view for listing moments](diagrams/c4-container.png)
+
+### Components
+
+`MomentsPage` loads the moments through `HttpTeamApi`, groups them with `groupMoments`, and
+passes the result to `MomentList`, which renders each moment with `MomentCard`. `FilterChips`
+reports the chosen kind to the page.
+
+![C4 component view for listing moments](diagrams/c4-component.png)
+
+### Class structure
+
+`MomentsPage` depends on the `TeamApi` and `Clock` contracts and on `groupMoments`, which
+returns `MomentGroups` of `DatedMoment` values. `FilterChips`, `MomentList` and `MomentCard`
+take inputs and emit outputs only.
+
+![Class diagram for listing moments](diagrams/class-structure.png)
+
+### Behaviour — open the Moments screen
+
+The page loads the team's moments with one request. `groupMoments` counts each moment's days
+ahead from today in its own place, drops what falls outside 0 to 90 days, and sorts the rest
+into today, this week and later (`L2-029`). Choosing a moment opens the Globe screen with its
+teammate's pin selected.
+
+![Sequence diagram for opening the Moments screen](diagrams/sequence-open-moments.png)
+
+### Behaviour — filter moments by kind
+
+Choosing a filter narrows the loaded moments in the browser and regroups them; no request is
+sent. The chosen filter is exposed as pressed. A kind with no upcoming moment shows "Nothing of
+this kind coming up for your team." (`L2-030`).
+
+![Sequence diagram for filtering moments by kind](diagrams/sequence-filter-by-kind.png)

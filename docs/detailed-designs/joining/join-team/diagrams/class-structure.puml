@@ -1,0 +1,124 @@
+@startuml
+set namespaceSeparator none
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure — Join the team
+
+package "mondino application" {
+  class JoinStore {
+    +joinState: Signal<JoinState>
+    -joinRequestId: string
+    +join(): Promise<JoinResult | null>
+  }
+  enum JoinState {
+    Idle
+    Joining
+    TeamFull
+    RateLimited
+    Failed
+  }
+  class JoinPage
+  class GlobePage
+}
+package "@mondino/api" {
+  interface InviteApi {
+    +join(inviteToken: string, request: JoinRequest): Promise<JoinResult>
+  }
+  class JoinRequest {
+    +name: string
+    +countryCode: string
+    +postalCode: string
+    +joinRequestId: string
+  }
+  class JoinResult {
+    +teamId: string
+    +teammateId: string
+  }
+}
+package "Mondino.Api" {
+  class InvitesController {
+    +Join(inviteToken: string, body: JoinRequest): Task<ActionResult<JoinResultDto>>
+  }
+}
+package "Mondino.Application" {
+  class JoinTeamCommand {
+    +string InviteToken
+    +string Name
+    +string CountryCode
+    +string PostalCode
+    +Guid JoinRequestId
+  }
+  class JoinTeamCommandValidator
+  class JoinTeamCommandHandler {
+    +Handle(command: JoinTeamCommand): Task<JoinResultDto>
+  }
+  class JoinResultDto {
+    +Guid TeamId
+    +Guid TeammateId
+  }
+  class PostalCodeFormats
+  interface IPostalCodeLookup
+  class PinColourPicker {
+    +Pick(team: Team): string
+  }
+  interface IAppDbContext
+}
+package "Mondino.Domain" {
+  class Team {
+    +Guid Id
+    +string Name
+    +string InviteToken
+    +{static} int MaxTeammates = 500
+    +IReadOnlyList<Teammate> Teammates
+    +AddTeammate(name, postalCode, city, colour, joinRequestId, joinedAt): Teammate
+  }
+  class Teammate {
+    +Guid Id
+    +Guid TeamId
+    +string Name
+    +string CountryCode
+    +PostalCode PostalCode
+    +City City
+    +string Colour
+    +TeammateSettings Settings
+    +DateTimeOffset JoinedAt
+    +Guid JoinRequestId
+  }
+  class TeamFullException
+  class City
+  class PostalCode
+}
+package "Mondino.Infrastructure" {
+  class TeammateSessionHandler
+}
+
+JoinPage --> JoinStore
+JoinPage ..> GlobePage : navigates to /globe
+JoinStore --> JoinState
+JoinStore ..> InviteApi : INVITE_API
+InviteApi ..> JoinRequest
+InviteApi ..> JoinResult
+InvitesController ..> JoinTeamCommand : sends
+InvitesController ..> TeammateSessionHandler : signs in through
+JoinTeamCommandValidator ..> JoinTeamCommand : validates
+JoinTeamCommandHandler ..> JoinTeamCommand : handles
+JoinTeamCommandHandler ..> JoinResultDto : returns
+JoinTeamCommandHandler ..> PostalCodeFormats
+JoinTeamCommandHandler ..> IPostalCodeLookup
+JoinTeamCommandHandler ..> PinColourPicker
+JoinTeamCommandHandler ..> IAppDbContext
+JoinTeamCommandHandler --> Team : loads / mutates
+Team "1" *-- "0..500" Teammate
+Team ..> TeamFullException : throws at the limit
+Teammate --> City
+Teammate --> PostalCode
+@enduml

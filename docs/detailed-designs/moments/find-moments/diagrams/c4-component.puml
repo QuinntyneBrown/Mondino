@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Find moments
+
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "TeamsController", "ASP.NET Core controller", "Exposes GET /api/teams/{teamId}/moments")
+  Component(handler, "GetMomentsQueryHandler", "MediatR handler", "Reads the team's cities and names each moment's teammate")
+  Component(finder, "MomentFinder", "Application service", "Decides which moments belong to a city")
+  Component(emblems, "EmblemCatalogue", "Application service", "Gives an emblem key where Mondino holds the right")
+  Component(cache, "CachedMomentCalendars", "Infrastructure decorator", "Caches answers by place, with a timeout and a circuit breaker")
+  Component(clients, "Calendar clients", "HolidayCalendarClient, RaceCalendarClient, EventCalendarClient", "Call the outside sources")
+  ComponentDb(db, "Mondino database", "EF Core; engine TO SUPPLY", "Teams, teammates and their cities")
+}
+System_Ext(sources, "Calendar sources", "Holiday calendar source, Race calendar source, Event source")
+
+Rel(ctrl, handler, "Sends GetMomentsQuery")
+Rel(handler, db, "Reads the team", "IAppDbContext")
+Rel(handler, finder, "Asks for the moments of each city")
+Rel(finder, cache, "Reads IHolidayCalendar, IRaceCalendar, IEventCalendar")
+Rel(finder, emblems, "Asks for an emblem key")
+Rel(cache, clients, "Calls on a cache miss")
+Rel(clients, sources, "Ask with a place", "HTTPS")
+@enduml

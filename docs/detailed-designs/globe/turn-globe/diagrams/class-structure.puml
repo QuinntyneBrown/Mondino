@@ -1,0 +1,91 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Turn the globe
+
+enum MotionMode {
+  TurningOnItsOwn
+  Dragged
+  Waiting
+  TurningToPin
+  Holding
+}
+
+enum ArrowDirection {
+  North
+  East
+  South
+  West
+}
+
+class GlobeOrientation {
+  +longitude: number
+  +tilt: number
+}
+
+class GlobeMotion {
+  {static} +IdleDelayMs: number = 5000
+  {static} +TurnToPinMaxMs: number = 1000
+  +mode: MotionMode
+  +orientation: GlobeOrientation
+  +advance(elapsedMs: number): GlobeOrientation
+  +dragStart(): void
+  +canTurn(deltaLongitude: number, deltaTilt: number): boolean
+  +dragBy(deltaLongitude: number, deltaTilt: number): void
+  +dragEnd(): void
+  +step(direction: ArrowDirection): void
+  +hold(position: Position): void
+  +release(): void
+  +setReducedMotion(reduced: boolean): void
+  +isMoving(): boolean
+}
+
+class GlobeGestures {
+  +attach(target: HTMLElement, signal: AbortSignal): void
+  -onPointerDown(event: PointerEvent): void
+  -onPointerMove(event: PointerEvent): void
+  -onPointerUp(event: PointerEvent): void
+  -onTouchMove(event: TouchEvent): void
+  -onKeyDown(event: KeyboardEvent): void
+}
+
+class GlobeView {
+  +selectedId: InputSignal<string | null>
+  +interactive: InputSignal<boolean>
+  -onFrame(elapsedMs: number): void
+  -onSelectedChange(): void
+  -onVisibilityChange(): void
+  -onReducedMotionChange(query: MediaQueryList): void
+}
+
+class GlobeScene {
+  +setOrientation(orientation: GlobeOrientation): void
+  +onFrame(listener: (elapsedMs: number) => void): void
+  +start(): void
+  +stop(): void
+  +draw(): void
+}
+
+class Position {
+  +latitude: number
+  +longitude: number
+}
+
+GlobeView *-- GlobeMotion : owns
+GlobeView *-- GlobeGestures : owns
+GlobeView --> GlobeScene : orients / starts / stops
+GlobeGestures --> GlobeMotion : drags and steps
+GlobeMotion --> MotionMode : has
+GlobeMotion --> GlobeOrientation : has
+GlobeMotion ..> ArrowDirection : steps by
+GlobeMotion ..> Position : holds on
+GlobeScene ..> GlobeOrientation : drawn at
+@enduml

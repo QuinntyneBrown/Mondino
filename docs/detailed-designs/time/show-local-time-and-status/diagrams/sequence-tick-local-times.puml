@@ -1,0 +1,70 @@
+@startuml
+title UML sequence behaviour — the shared clock ticks every local time
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "PinLabel,\nTeammatePanel" as views
+  participant "BrowserClock" as clock
+  participant "localTime,\nformatTime" as fns
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+end box
+
+actor -> page : Open the Globe screen
+page -> store : Read pins
+store -> client : getPins(teamId)
+client -> controller : GET /api/teams/{teamId}/pins
+controller -> handler : Send GetPinsQuery
+handler -> db : Load the team's teammates and cities
+db --> handler : Teammates
+handler --> controller : PinDto per teammate: TimeZoneId, no local time (L2-014)
+controller --> client : 200 pins
+client --> store : Pin[]
+store --> page : pins signal
+page -> clock : Read minute through CLOCK
+clock -> clock : Arm one timer for the next minute boundary
+
+loop each minute while the tab is visible
+  clock -> clock : Timer fires at hh:mm:00, set minute, arm again
+  clock --> page : minute signal changes
+  loop each pin, in one computed pass
+    page -> fns : localTime(minute, pin.timeZoneId)
+    fns --> page : LocalTime: hour, minute, weekday
+    page -> fns : formatTime(localTime, viewer's ClockFormat)
+    fns --> page : "08:05" or "8:05 am" (L2-014)
+  end
+  page -> views : Bind every local time in one change
+  views --> actor : Every local time changes together
+end
+
+opt the tab is hidden
+  clock -> clock : Clear the timer and rest
+  ... the tab is shown again ...
+  clock -> clock : Set minute to now and arm again
+  clock --> page : minute signal changes
+end
+@enduml

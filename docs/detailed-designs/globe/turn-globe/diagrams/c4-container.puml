@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Turn the globe
+
+Person(teammate, "Teammate", "A person on a team")
+System_Boundary(mondino, "Mondino") {
+  Container(spa, "Mondino web app", "Angular", "Turns the globe in the browser; no turn reaches the API")
+  Container(api, "Mondino API", "ASP.NET Core", "Gives each pin's position, which a selection turns the globe to")
+}
+Rel(teammate, spa, "Drags, presses arrow keys and selects pins", "Pointer, touch, keyboard")
+Rel(spa, api, "Reads the team's pins", "JSON/HTTPS")
+@enduml

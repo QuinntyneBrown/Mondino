@@ -1,0 +1,107 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Survive source failure
+
+interface IWeatherSource {
+  +GetCurrentAsync(position: Position, ct): Task<Weather?>
+}
+
+interface IPostalCodeLookup {
+  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupResult>
+}
+
+interface IHolidayCalendar {
+  +HolidaysIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+}
+
+class OpenMeteoWeatherSource {
+  +GetCurrentAsync(position: Position, ct): Task<Weather?>
+}
+
+class CachedWeatherSource {
+  -inner: IWeatherSource
+  -cache: IMemoryCache
+  -time: TimeProvider
+  +{static} TimeSpan MaxAge = 3 hours
+  +GetCurrentAsync(position: Position, ct): Task<Weather?>
+  -Round(position: Position): Position
+}
+
+class PostalCodeLookupClient {
+  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupResult>
+}
+
+class CachedPostalCodeLookup {
+  -inner: IPostalCodeLookup
+  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupResult>
+}
+
+class CachedMomentCalendars {
+  -holidays: IHolidayCalendar
+  -races: IRaceCalendar
+  -events: IEventCalendar
+  +HolidaysIn(...): Task<IReadOnlyList<CalendarEntry>>
+}
+
+class SourceResilience {
+  +{static} TimeSpan Timeout = 5 s
+  +TimeSpan BreakDuration
+  +int FailuresBeforeBreak
+  +ExecuteAsync<T>(source: string, call, ct): Task<SourceAnswer<T>>
+}
+
+enum SourceOutcome {
+  Success
+  Failure
+  Timeout
+  CircuitOpen
+}
+
+class "SourceAnswer<T>" as SourceAnswer {
+  +SourceOutcome Outcome
+  +T? Value
+}
+
+class GetPinsQueryHandler {
+  +Handle(query: GetPinsQuery, ct): Task<IReadOnlyList<PinDto>>
+}
+
+class PinDto {
+  +string CityName
+  +Position Position
+  +string TimeZoneId
+  +WeatherDto? Weather
+}
+
+class Weather {
+  +double TemperatureC
+  +WeatherCondition Condition
+  +DateTimeOffset ObservedAt
+}
+
+IWeatherSource <|.. OpenMeteoWeatherSource
+IWeatherSource <|.. CachedWeatherSource
+CachedWeatherSource o-- IWeatherSource : decorates
+IPostalCodeLookup <|.. PostalCodeLookupClient
+IPostalCodeLookup <|.. CachedPostalCodeLookup
+CachedPostalCodeLookup o-- IPostalCodeLookup : decorates
+IHolidayCalendar <|.. CachedMomentCalendars
+CachedWeatherSource ..> SourceResilience : runs calls through
+CachedPostalCodeLookup ..> SourceResilience
+CachedMomentCalendars ..> SourceResilience
+SourceResilience ..> SourceAnswer : returns
+SourceAnswer --> SourceOutcome
+GetPinsQueryHandler ..> IWeatherSource : once per city
+GetPinsQueryHandler ..> PinDto : builds
+IWeatherSource ..> Weather
+@enduml

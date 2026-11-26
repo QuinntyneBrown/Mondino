@@ -1,0 +1,47 @@
+@startuml
+title UML sequence behaviour — Filter the team by status
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "FilterChips" as chips
+  participant "TeamPage" as page
+  participant "filterByStatus" as fn
+  participant "TeamTable" as table
+  participant "Clock" as clock
+end box
+actor -> chips : Move with the arrow keys and choose "Working now"
+chips -> chips : Roving focus in one radio group; aria-checked on the chosen chip (L2-028)
+chips -> page : selectedChange("working")
+page -> page : filter.set(Working)
+page -> fn : filterByStatus(rows, Working)
+fn --> page : Rows whose status is Working hours, still west to east
+alt at least one row
+  page -> table : rows, emptyMessage = null
+  table --> actor : The teammates in working hours
+else no row for Working now
+  page -> table : rows = [], "Nobody is in working hours right now."
+  table --> actor : The empty message
+else no row for Asleep
+  page -> table : rows = [], "Everyone is awake right now."
+  table --> actor : The empty message
+end
+== The clock passes an hour that changes a status ==
+clock -> page : Minute tick
+page -> page : Recompute rows, counts and visibleRows (L2-028)
+page -> chips : New counts
+page -> table : New rows
+table --> actor : The list and the counts change with no reload
+@enduml

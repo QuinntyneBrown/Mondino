@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Join the team
+
+Person(person, "Person with an invite link", "Chooses Join")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Join screen, then the Globe screen with the new pin selected")
+  Container(api, "Mondino API", "ASP.NET Core", "Adds the teammate once and issues the session cookie")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams, teammates and their pins")
+}
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+
+Rel(person, web, "Chooses Join", "HTTPS")
+Rel(web, api, "POST /api/invites/{inviteToken}/teammates", "JSON/HTTPS, postal code in the body")
+Rel(api, db, "Reads the team, writes the teammate", "EF Core")
+Rel(api, postal, "Country and postal code only, on a cache miss", "HTTPS, timeout, cached")
+@enduml

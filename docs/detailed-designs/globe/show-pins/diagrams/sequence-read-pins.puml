@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Read the team's pins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+  participant "MomentFinder" as moments
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedWeatherSource" as weather
+  database "Mondino database" as db
+end box
+participant "Open-Meteo" as openmeteo
+actor -> page : Open the Globe screen
+page -> store : Load the team's pins
+store -> client : getPins(teamId)
+client -> controller : GET /api/teams/{teamId}/pins
+controller -> handler : Send GetPinsQuery
+handler -> db : Load the team where the current teammate belongs to it
+alt not a teammate of this team
+  db --> handler : No team
+  handler --> controller : Not found
+  controller --> client : 404 ProblemDetails (L2-043)
+else teammate of the team
+  db --> handler : Teammates with city, colour and settings
+  loop each distinct city
+    handler -> weather : Weather at the city's position
+    alt cached or Open-Meteo answers in time
+      weather -> openmeteo : Position only, when the cache has expired
+      openmeteo --> weather : Temperature and conditions
+      weather --> handler : Weather
+    else Open-Meteo fails or times out
+      weather --> handler : null, the pin keeps its local time (L2-049)
+    end
+    handler -> moments : Moments at the city
+    moments --> handler : Moments
+  end
+  handler -> handler : Build PinDto: name, colour, city, country, position,\ntime zone id, IsViewer; weather null when not shared (L2-011 AC4);\nno postal code (L2-007)
+  handler --> controller : PinDto list
+  controller --> client : 200, compressed JSON
+  client --> store : Pin[]
+  store --> page : pins signal
+  page --> actor : Pins on the globe with initials, colour and label (L2-011 AC1)
+end
+@enduml

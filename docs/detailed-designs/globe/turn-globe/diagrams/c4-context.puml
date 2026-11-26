@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Turn the globe
+
+Person(teammate, "Teammate", "A person on a team")
+System(mondino, "Mondino", "Shows a team on a 3D globe that turns on its own, is dragged to spin and turns to a selected pin")
+
+Rel(teammate, mondino, "Spins the globe and selects pins using")
+@enduml

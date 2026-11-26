@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — Select a pin and open the teammate's panel
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobeView" as globe
+  participant "GlobePage" as page
+  participant "Router" as router
+  participant "TeamStore" as store
+  participant "teammatePanelView" as view
+  participant "TeammatePanel" as panel
+end box
+actor -> globe : Select a pin by pointer, touch or keyboard
+globe -> page : select(teammateId)
+page -> page : Note whether the selection came from the keyboard
+page -> router : navigate /globe?teammate={teammateId} (L2-023 opaque id only)
+router --> page : teammate input changes
+page -> store : select(teammateId)
+alt the id is a pin of this team
+  store --> page : selectedPin, viewerPin
+  page -> view : teammatePanelView(pin, viewerPin, clock.now(), settings)
+  view -> view : localTime, statusAt, offsetBetween, overlapBetween
+  view --> page : TeammatePanelContent (no offset or overlap for the viewer's own pin)
+  page -> panel : content, fade of at most 200 ms (none under reduced motion)
+  page -> globe : selectedId; the globe turns to the pin and holds
+  opt opened from the keyboard
+    page -> panel : focusHeading()
+  end
+  panel --> actor : Name, city and country, local time and day, offset, status, weather, moments, overlap
+else the id is unknown
+  store --> page : false
+  page -> router : navigate /globe, replacing the address
+  page --> actor : Week panel (L2-024)
+end
+@enduml

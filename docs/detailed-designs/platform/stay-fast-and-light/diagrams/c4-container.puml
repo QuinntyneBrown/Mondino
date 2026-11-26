@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Stay fast and light
+
+Person(teammate, "Teammate", "Leaves the tab open all day")
+
+System_Boundary(mondino, "Mondino") {
+  Container(spa, "Mondino web app", "Angular", "Small initial bundle; lazy screens; the globe library and its assets loaded on first draw")
+  Container(api, "Mondino API", "ASP.NET Core", "Answers a team of 500 within 300 ms at the 95th percentile, compressed")
+  ContainerDb(db, "Mondino database", "EF Core, engine TO SUPPLY", "Teams, teammates and pins")
+}
+
+Rel(teammate, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads pins and moments", "JSON/HTTPS, compressed")
+Rel(api, db, "Reads in one query per request", "EF Core")
+@enduml

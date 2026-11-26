@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Open a screen's address as a teammate
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "Router" as router
+  participant "teammateGuard" as guard
+  participant "TeamMembership" as membership
+  participant "App and AppShell" as shell
+  participant "TeamPage" as page
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "TeammateSessionHandler" as session
+  database "Mondino database" as db
+end box
+actor -> router : Open or reload /team (L2-038)
+router -> guard : canActivate for the guarded parent route
+guard -> membership : current()
+membership --> guard : Membership for this device
+guard --> router : true
+router -> page : loadComponent, then create TeamPage
+router -> shell : Activated route is /team
+shell --> actor : Navigation with aria-current="page" on Team
+page -> store : Read pins
+store -> client : getPins(teamId)
+client -> controller : GET /api/teams/{teamId}/pins with session cookie
+controller -> session : Authenticate the session cookie
+session --> controller : Teammate of the team
+controller -> handler : Send GetPinsQuery
+handler -> db : Load the team's pins
+db --> handler : Pins
+handler --> controller : PinDto list
+controller --> client : 200 with pins
+client --> store : Pin list
+store --> page : pins signal
+page --> actor : Team screen in the layout for the current width (L2-037)
+@enduml

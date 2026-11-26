@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — View a teammate's panel
+
+Person(teammate, "Teammate", "The viewer")
+Container_Boundary(web, "Mondino web app") {
+  Component(page, "GlobePage", "Angular page, mondino application", "Binds the address, the store, the globe and the panel")
+  Component(globe, "GlobeView", "Angular component, globe library", "Draws the pins; emits select; lifts the selected pin")
+  Component(store, "TeamStore", "Signal store, domain pins/", "Holds the pins and the selected teammate id")
+  Component(view, "teammatePanelView", "Pure function, domain pins/", "Builds the panel's content from a pin, the viewer's pin and the clock")
+  Component(time, "time/ rules", "Pure functions, domain time/", "localTime, statusAt, offsetBetween, overlapBetween")
+  Component(clock, "BrowserClock", "Clock, domain time/", "The one shared clock and its minute tick")
+  Component(panel, "TeammatePanel", "Angular component, components library", "Presents one teammate; emits closed")
+  Component(overlap, "OverlapBar", "Angular component, components library", "Draws the overlap on the viewer's clock")
+}
+Rel(teammate, globe, "Selects a pin on")
+Rel(globe, page, "Emits select with a teammate id")
+Rel(page, store, "Sets and clears the selection in")
+Rel(page, view, "Reads the panel's content from")
+Rel(view, store, "Reads the selected pin and the viewer's pin from")
+Rel(view, time, "Works out local time, status, offset and overlap with")
+Rel(view, clock, "Reads the minute tick of")
+Rel(page, panel, "Passes TeammatePanelContent to")
+Rel(panel, overlap, "Renders")
+@enduml

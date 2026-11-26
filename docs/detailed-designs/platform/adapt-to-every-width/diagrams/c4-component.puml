@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Adapt to every width
+
+Person(teammate, "Teammate", "Opens a screen's address")
+Container_Boundary(spa, "Mondino web app") {
+  Component(routes, "app.routes.ts", "Angular router configuration", "One lazy route per screen under a guarded parent route")
+  Component(guard, "teammateGuard", "CanActivateFn", "Lets a teammate through and sends anyone else to InviteNeededPage")
+  Component(membership, "TeamMembership", "Service in domain storage/", "Team id, teammate id and team name held on the device")
+  Component(app, "App", "Root component", "Supplies the navigation links and the router outlet")
+  Component(shell, "AppShell", "Presentation component, mo-app-shell", "Header, mark and wordmark, navigation, skip link and content area")
+  Component(pages, "GlobePage, TeamPage, MomentsPage, ProfilePage", "Lazy route components", "One screen each, laid out by its own stylesheet")
+  Component(needed, "InviteNeededPage", "Lazy route component", "Says an invite link is needed and shows no team data")
+  Component(expired, "sessionExpiredInterceptor", "HttpInterceptorFn", "Forgets the membership when the API answers 401")
+}
+Rel(teammate, routes, "Opens an address")
+Rel(routes, guard, "Runs before a teammate screen")
+Rel(guard, membership, "Reads")
+Rel(guard, needed, "Redirects a non-teammate to")
+Rel(routes, pages, "Loads with loadComponent")
+Rel(app, shell, "Renders with navigation links")
+Rel(app, membership, "Shows navigation when a membership is held")
+Rel(expired, membership, "Clears on 401")
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Mark pins with moments
+
+Person(teammate, "Teammate", "A person on a team, looking at the globe")
+System(mondino, "Mondino", "Shows a team on a 3D globe with local time, weather and moments")
+System_Ext(sources, "Calendar sources", "Holiday calendar source, Race calendar source and Event source; providers TO SUPPLY")
+
+Rel(teammate, mondino, "Sees moment markers on pins using")
+Rel(mondino, sources, "Reads the moments of each city from", "HTTPS")
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Show pins
+
+Container_Boundary(spa, "Mondino web app") {
+  Component(page, "GlobePage", "Angular page, mondino application", "Supplies what a pin and its label show; binds PIN_SPREADER")
+  Component(store, "TeamStore", "Signal store, domain library", "Holds the pins and the selected teammate id")
+  Component(spread, "spreadPins", "Function, domain library", "Fans and groups pins that are close together")
+  Component(view, "GlobeView", "Angular component mo-globe, globe library", "Asks for placements at the globe's size")
+  Component(layer, "PinLayer", "Angular component, globe library", "Places pins over the globe, lifts them, places labels")
+  Component(list, "PinList", "Angular component, globe library", "Text list of pins; takes keyboard focus")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "TeamsController", "ASP.NET Core controller", "GET /api/teams/{teamId}/pins")
+  Component(handler, "GetPinsQueryHandler", "MediatR handler", "Checks the team, builds a PinDto for each teammate")
+  Component(weather, "CachedWeatherSource", "IWeatherSource", "Cached weather with a timeout")
+  ComponentDb(db, "Mondino database", "EF Core", "Teammates and cities")
+}
+Rel(page, store, "Reads pins and selection from")
+Rel(store, ctrl, "Reads pins through TEAM_API", "JSON/HTTPS")
+Rel(page, view, "Gives pins, selectedId and templates to")
+Rel(view, spread, "Calls through PIN_SPREADER")
+Rel(view, layer, "Gives placements to")
+Rel(view, list, "Gives pins to")
+Rel(list, layer, "Focus lifts the pin in")
+Rel(ctrl, handler, "Sends GetPinsQuery")
+Rel(handler, db, "Reads", "IAppDbContext")
+Rel(handler, weather, "Asks for weather at each city")
+@enduml

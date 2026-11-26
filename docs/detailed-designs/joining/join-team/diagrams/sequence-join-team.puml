@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Join the team
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "JoinStore" as store
+  participant "HttpInviteApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "InvitesController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "JoinTeamCommandHandler" as handler
+  participant "Team" as team
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedPostalCodeLookup" as lookup
+  database "Mondino database" as db
+  participant "TeammateSessionHandler" as session
+end box
+actor -> page : Choose "Join Northwind"
+page -> store : join()
+store --> page : joinState Joining, button disabled
+store -> client : join(inviteToken, name, countryCode, postalCode, joinRequestId)
+client -> controller : POST /api/invites/{inviteToken}/teammates
+controller -> controller : Apply the join rate limit policy
+controller -> handler : Send JoinTeamCommand (validated in the pipeline)
+handler -> db : Load the team by invite token, with its teammates
+db --> handler : Team
+handler -> lookup : FindCityAsync(normalised postal code)
+lookup --> handler : Found, City (from the cache after the lookup)
+handler -> team : AddTeammate(name, postalCode, city, colour, joinRequestId, now)
+team --> handler : Teammate with a pin at the city (L2-005)
+handler -> db : Save changes in one unit of work
+db --> handler : Committed
+handler --> controller : JoinResultDto
+controller -> session : Sign in the teammate
+session --> controller : Session cookie: HttpOnly, Secure, SameSite
+controller --> client : 201 JoinResultDto, Set-Cookie
+client --> store : JoinResult
+store --> page : Team id and teammate id
+page --> actor : Navigate to /globe with the new pin selected, pulsing once (L2-005)
+note over page, client
+  When the request fails, JoinStore sets joinState Failed, keeps what was typed
+  and keeps joinRequestId, and JoinPage offers to try again (L2-005).
+end note
+@enduml

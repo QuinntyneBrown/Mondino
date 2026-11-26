@@ -1,0 +1,108 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — View the team through the day
+
+class TeamPage <<mondino>> {
+  +filter: WritableSignal<StatusFilter>
+  +rows: Signal<TeamRow[]>
+  +visibleRows: Signal<TeamRow[]>
+  +markers: Signal<RibbonMarker[]>
+  +chips: Signal<FilterChip[]>
+  +emptyMessage: Signal<string | null>
+  +onFilter(filter: StatusFilter): void
+  +onTeammateChosen(teammateId: string): void
+}
+
+class TeamStore <<domain pins/>> {
+  +pins: Signal<Pin[]>
+  +viewerPin: Signal<Pin | null>
+  +counts: Signal<TeamCounts>
+}
+
+class "pins/ functions" as fn <<function, domain pins/>> {
+  +orderWestToEast(pins: Pin[], now: Date): Pin[]
+  +teamRows(pins: Pin[], viewer: Pin, now: Date, settings: Settings): TeamRow[]
+  +filterByStatus(rows: TeamRow[], filter: StatusFilter): TeamRow[]
+  +ribbonMarkers(pins: Pin[], now: Date, settings: Settings): RibbonMarker[]
+}
+
+class "zoneOffsetMinutes" as off <<function, domain time/>> {
+  +zoneOffsetMinutes(now: Date, timeZoneId: string): number
+}
+
+enum StatusFilter {
+  All
+  Working
+  Asleep
+}
+
+class TeamRow <<domain pins/>> {
+  +teammateId: string
+  +name: string
+  +initials: string
+  +colour: string
+  +isViewer: boolean
+  +city: string
+  +country: string
+  +localTime: string
+  +offset: string | null
+  +status: Status
+  +weather: Weather | null
+  +nextMoment: Moment | null
+}
+
+class RibbonMarker <<domain pins/>> {
+  +teammateId: string
+  +name: string
+  +initials: string
+  +colour: string
+  +localTime: string
+  +dayFraction: number
+  +lane: number
+}
+
+class FilterChip <<components>> {
+  +value: string
+  +label: string
+  +count: number
+}
+
+class DayRibbon <<components, mo-day-ribbon>> {
+  +markers: InputSignal<RibbonMarker[]>
+  +teammateChosen: OutputEmitterRef<string>
+}
+
+class FilterChips <<components, mo-filter-chips>> {
+  +chips: InputSignal<FilterChip[]>
+  +selected: InputSignal<string>
+  +selectedChange: OutputEmitterRef<string>
+}
+
+class TeamTable <<components, mo-team-table>> {
+  +rows: InputSignal<TeamRow[]>
+  +emptyMessage: InputSignal<string | null>
+  +teammateChosen: OutputEmitterRef<string>
+}
+
+TeamPage --> TeamStore : reads
+TeamPage ..> fn : calls
+TeamPage --> StatusFilter : holds
+TeamPage --> DayRibbon : renders
+TeamPage --> FilterChips : renders
+TeamPage --> TeamTable : renders
+fn ..> off : orders by
+fn ..> TeamRow : builds
+fn ..> RibbonMarker : builds
+DayRibbon ..> RibbonMarker : presents
+FilterChips ..> FilterChip : presents
+TeamTable ..> TeamRow : presents a window of
+@enduml

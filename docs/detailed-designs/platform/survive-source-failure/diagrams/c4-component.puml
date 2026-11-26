@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Survive source failure
+
+Container_Boundary(api, "Mondino API") {
+  Component(pins, "GetPinsQueryHandler", "MediatR handler", "Builds pins; asks for weather once per city")
+  Component(moments, "GetMomentsQueryHandler", "MediatR handler", "Gathers moments of each kind independently")
+  Component(cweather, "CachedWeatherSource", "Decorator of IWeatherSource", "Cache, 5 s timeout, circuit breaker; null when unavailable")
+  Component(cpostal, "CachedPostalCodeLookup", "Decorator of IPostalCodeLookup", "Cache, 5 s timeout, circuit breaker")
+  Component(ccal, "CachedMomentCalendars", "Decorator of the three calendars", "Last cached moments of a failing kind")
+  Component(resilience, "SourceResilience", "Resilience pipeline per source", "Timeout and circuit breaker settings")
+  Component(clients, "OpenMeteoWeatherSource and the four source clients", "Typed HTTP clients", "Send a place and nothing else")
+}
+ContainerDb(db, "Mondino database", "EF Core", "City, position, time zone")
+System_Ext(sources, "Outside sources", "Open-Meteo and the providers TO SUPPLY")
+Rel(pins, db, "Loads teammates", "IAppDbContext")
+Rel(pins, cweather, "Weather per distinct city", "IWeatherSource")
+Rel(moments, ccal, "Moments per kind", "IHolidayCalendar, IRaceCalendar, IEventCalendar")
+Rel(cweather, resilience, "Runs calls through")
+Rel(cpostal, resilience, "Runs calls through")
+Rel(ccal, resilience, "Runs calls through")
+Rel(resilience, clients, "Calls within the timeout")
+Rel(clients, sources, "HTTPS")
+@enduml

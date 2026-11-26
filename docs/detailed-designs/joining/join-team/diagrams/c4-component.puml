@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Join the team
+
+Container(web, "Mondino web app", "Angular", "JoinPage, JoinStore, HttpInviteApi, then GlobePage")
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "InvitesController", "ASP.NET Core controller", "Open to an invite link's holder, rate limited")
+  Component(session, "TeammateSessionHandler", "Cookie session authentication", "Issues the HttpOnly, Secure, SameSite cookie")
+  Component(validator, "JoinTeamCommandValidator", "Validator", "Name, country and postal code limits")
+  Component(handler, "JoinTeamCommandHandler", "MediatR handler", "Adds the teammate exactly once")
+  Component(lookup, "CachedPostalCodeLookup", "IPostalCodeLookup decorator", "Finds the city of the postal code")
+  Component(colour, "PinColourPicker", "Application service", "Picks the pin's colour")
+  Component(team, "Team", "Domain entity", "AddTeammate, limit of 500 teammates")
+  ComponentDb(db, "Mondino database", "EF Core, IAppDbContext", "Teams and teammates")
+}
+Rel(web, ctrl, "POST teammates", "JSON/HTTPS")
+Rel(ctrl, validator, "JoinTeamCommand passes through", "MediatR pipeline")
+Rel(validator, handler, "Valid command")
+Rel(handler, lookup, "FindCityAsync(postalCode)")
+Rel(handler, colour, "Pick(team)")
+Rel(handler, team, "AddTeammate")
+Rel(handler, db, "Loads the team, saves in one unit of work", "EF Core")
+Rel(ctrl, session, "Signs the new teammate in")
+@enduml

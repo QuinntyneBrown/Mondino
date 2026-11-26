@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Show offset and overlap
+
+
+Container(api, "Mondino API", "ASP.NET Core", "GET /api/teams/{teamId}/pins: time zone id per pin")
+
+Container_Boundary(web, "Mondino web app") {
+  Component(page, "GlobePage, TeamPage", "Angular pages, mondino", "Derive offset and overlap for the selected teammate or each row")
+  Component(store, "TeamStore", "domain, pins/", "Holds the pins, the selected teammate id and the viewer's pin")
+  Component(clock, "BrowserClock", "domain, time/", "The one shared Clock")
+  Component(offset, "offsetBetween, formatOffset", "domain, time/", "Difference between two zones at an instant, as words")
+  Component(overlap, "overlapBetween, formatOverlap", "domain, time/", "Shared part of two working days on the viewer's clock")
+  Component(panel, "TeammatePanel, TeamTable", "components", "Show the offset as text")
+  Component(bar, "OverlapBar", "components", "Draws the overlap and gives it as text")
+}
+Rel(store, api, "Reads pins through TEAM_API", "JSON/HTTPS")
+Rel(page, store, "Reads selected pin and viewer's pin")
+Rel(page, clock, "Reads minute through CLOCK")
+Rel(page, offset, "Calls")
+Rel(page, overlap, "Calls")
+Rel(overlap, offset, "Reads the offset from")
+Rel(page, panel, "Binds inputs")
+Rel(panel, bar, "Contains")
+@enduml

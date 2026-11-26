@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Joining a team that is full
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "JoinStore" as store
+  participant "HttpInviteApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "InvitesController" as controller
+  participant "ProblemDetailsWriter" as problems
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "JoinTeamCommandHandler" as handler
+  participant "Team" as team
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+end box
+actor -> page : Choose "Join Northwind"
+page -> store : join()
+store -> client : join(inviteToken, name, countryCode, postalCode, joinRequestId)
+client -> controller : POST /api/invites/{inviteToken}/teammates
+controller -> handler : Send JoinTeamCommand
+handler -> db : Load the team by invite token, with its teammates
+db --> handler : Team with 500 teammates
+handler -> team : AddTeammate(...)
+team --> handler : TeamFullException: MaxTeammates reached (L2-005)
+handler --> controller : Refuse with team_full, nothing saved
+controller -> problems : Write the refusal
+problems --> client : 409 ProblemDetails, code team_full
+client --> store : ApiError team_full
+store --> page : joinState TeamFull, what was typed is kept
+page --> actor : Say the team is full (L2-005)
+@enduml

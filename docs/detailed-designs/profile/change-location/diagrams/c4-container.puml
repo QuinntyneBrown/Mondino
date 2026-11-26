@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Change location
+
+Person(teammate, "Teammate", "Changes their own location")
+System_Boundary(mondino, "Mondino") {
+  Container(spa, "Mondino web app", "Angular", "Profile and Settings: own pin, country and postal code")
+  Container(api, "Mondino API", "ASP.NET Core", "Own profile, postal code lookup, moving the pin")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teammates with their postal code and city")
+}
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+System_Ext(meteo, "Open-Meteo", "Weather")
+
+Rel(teammate, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads profile, looks up, saves", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, postal, "Country and postal code only", "HTTPS")
+Rel(api, meteo, "City position only", "HTTPS")
+@enduml

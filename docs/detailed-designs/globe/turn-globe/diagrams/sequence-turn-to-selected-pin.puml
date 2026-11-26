@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — Turn to a selected pin and hold
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "GlobeView" as view
+  participant "GlobeMotion" as motion
+  participant "GlobeScene" as scene
+end box
+actor -> view : Select a pin
+view --> page : select(teammateId)
+page -> store : Set the selected teammate id
+store --> page : selectedId changed
+page -> view : selectedId input
+view -> motion : hold(pin.position)
+alt reduced motion requested (L2-009 AC5)
+  motion -> motion : Set the orientation to face the pin, mode = Holding
+  view -> scene : setOrientation(orientation), draw()
+  scene --> actor : Pin faces the viewer, no animated turn
+else motion allowed
+  motion -> motion : mode = TurningToPin along the shorter way round
+  loop each frame, for no more than 1 s (L2-009 AC3)
+    scene -> view : Frame listener (elapsed ms)
+    view -> motion : advance(elapsedMs)
+    motion --> view : Eased orientation towards the pin
+    view -> scene : setOrientation(orientation)
+  end
+  motion -> motion : mode = Holding
+  scene --> actor : Pin faces the viewer and stays there
+end
+actor -> view : Clear the selection
+view --> page : select(null)
+page -> store : Clear the selected teammate id
+page -> view : selectedId input = null
+view -> motion : release()
+motion -> motion : mode = Waiting, then TurningOnItsOwn after 5 s
+@enduml

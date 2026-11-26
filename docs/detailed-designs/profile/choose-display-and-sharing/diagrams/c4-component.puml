@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Choose display and sharing
+
+Container_Boundary(spa, "Mondino web app") {
+  Component(page, "ProfilePage", "Angular page, lazy route", "Segmented, Switch and SaveBar bound to the draft")
+  Component(store, "ProfileStore", "Route-scoped signal store", "Draft, unsaved changes, save state")
+  Component(guard, "unsavedChangesGuard", "CanDeactivateFn", "Asks before leaving with unsaved changes")
+  Component(settings, "SettingsStore", "Root signal store", "The viewer's settings for every screen")
+  Component(client, "HttpProfileApi", "ProfileApi over HTTP", "Sends the settings")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(profile, "ProfileController", "ASP.NET Core controller", "PUT /api/teams/{teamId}/me")
+  Component(update, "UpdateProfileCommandHandler", "MediatR handler", "Stores the current teammate's settings")
+  Component(teams, "TeamsController", "ASP.NET Core controller", "GET /api/teams/{teamId}/pins")
+  Component(pins, "GetPinsQueryHandler", "MediatR handler", "Applies each teammate's sharing switches")
+  ComponentDb(db, "Mondino database", "EF Core", "TeammateSettings")
+}
+
+Rel(page, store, "Reads signals, sends changes")
+Rel(guard, store, "Reads hasUnsavedChanges")
+Rel(store, client, "Calls through PROFILE_API")
+Rel(store, settings, "Publishes saved settings")
+Rel(client, profile, "PUT", "JSON/HTTPS")
+Rel(profile, update, "Sends UpdateProfileCommand")
+Rel(update, db, "Saves", "IAppDbContext")
+Rel(teams, pins, "Sends GetPinsQuery")
+Rel(pins, db, "Reads settings", "IAppDbContext")
+@enduml

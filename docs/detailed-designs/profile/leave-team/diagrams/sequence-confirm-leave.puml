@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — Confirm leaving the team
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "ProfilePage" as page
+  participant "LeaveTeamDialog" as dialog
+  participant "ProfileStore" as store
+  participant "HttpProfileApi" as client
+  participant "LeftPage" as left
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "ProfileController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "LeaveTeamCommandHandler" as handler
+  participant "Team" as team
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "TeammateSessions" as sessions
+  database "Mondino database" as db
+end box
+actor -> page : Choose "Remove my pin and leave Northwind"
+page -> dialog : Open through CDK Dialog with the team's name
+dialog --> actor : Names the team, says the pin will be removed; cancel or leave. Nothing is removed yet (L2-036)
+actor -> dialog : Confirm leaving
+dialog --> page : Close with leave
+page -> store : leave()
+store -> store : leaving = true; the button is disabled
+store -> client : leaveTeam(teamId)
+client -> controller : DELETE /api/teams/{teamId}/me
+controller -> controller : Authenticate the session; check the anti-forgery token
+controller -> handler : Send LeaveTeamCommand (no teammate id)
+handler -> db : Load the Team with the teammate ICurrentTeammate names
+db --> handler : Team
+alt left
+  handler -> team : RemoveTeammate(teammateId)
+  team --> handler : Teammate removed with name, postal code, city and settings
+  handler -> sessions : EndAllAsync(teammateId)
+  sessions --> handler : Sessions deleted; cookie expired on the response
+  handler -> db : Save changes in one unit of work (L2-036)
+  db --> handler : Commit result
+  handler --> controller : Done
+  controller --> client : 204 No Content, session cookie expired
+  client --> store : Done
+  store -> store : Discard the draft; clear SettingsStore and SettingsCache
+  store -> left : Navigate to /left, replacing /profile
+  left --> actor : Confirms the pin is removed and the team is left
+else the request fails
+  controller --> client : ProblemDetails, or no answer
+  client --> store : ApiError
+  store -> store : leaving = false; nothing is cleared
+  page --> actor : The team could not be left; offer to try again. The pin stays
+end
+note over page, db : At their next read of GET /api/teams/{teamId}/pins, every other teammate receives no pin for the teammate who left.\nThe old session is refused with 401 from now on.
+@enduml

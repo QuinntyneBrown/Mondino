@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Select a pin by keyboard, with the change announced
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "AppShell" as shell
+  participant "PinList" as list
+  participant "GlobeView" as view
+  participant "PinLayer" as layer
+  participant "MotionPreference" as motion
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "TeammatePanel" as panel
+  participant "LiveAnnouncer" as announcer
+end box
+actor -> shell : Tab: "Skip to content" is the first stop (L2-039)
+shell --> actor : Focus moves to the main content
+actor -> list : Tab into the list of pins
+list -> view : focused(teammateId)
+view -> layer : lift(teammateId), showFocusRing(teammateId)
+layer --> actor : Pin lifts with a visible focus ring
+actor -> list : Arrow key
+list -> list : FocusKeyManager moves to the next PinListItem
+list -> view : focused(nextTeammateId)
+view -> layer : lift and ring move to the next pin
+actor -> list : Enter or Space
+list -> view : select(teammateId)
+view -> page : select(teammateId)
+page -> store : select(teammateId)
+store --> page : selected teammate id signal
+page -> view : selectedId input
+view -> motion : reduced()
+alt Reduced motion not requested
+  view -> view : Turn the globe to the pin and hold
+else Reduced motion requested (L2-042)
+  view -> view : Show the pin facing the viewer with no animated turn
+end
+page -> panel : Selected teammate's city, local time, offset, status, weather
+panel --> actor : Panel shows the teammate
+page -> announcer : announce(name, city and local time, "polite") once (L2-040)
+announcer --> actor : Screen reader speaks the change
+note over list, announcer
+  A minute tick updates the descriptions in place.
+  Nothing is sent to LiveAnnouncer for it (L2-040).
+end note
+@enduml

@@ -1,0 +1,104 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Draw the globe
+
+enum GlobeState {
+  Loading
+  Ready
+  Fallback
+}
+
+enum GlobeUnavailableReason {
+  NoWebGL
+  AssetsFailed
+  ContextLost
+}
+
+class GlobeView {
+  +pins: InputSignal<Pin[]>
+  +selectedId: InputSignal<string | null>
+  +interactive: InputSignal<boolean>
+  +select: OutputEmitterRef<string | null>
+  +state: Signal<GlobeState>
+  -scene: GlobeScene | null
+  -startScene(): Promise<void>
+  -onResize(entry: ResizeObserverEntry): void
+  -onMinute(): void
+  -release(): void
+}
+
+class GlobeScene {
+  {static} +create(canvas: HTMLCanvasElement, options: GlobeSceneOptions): Promise<GlobeScene>
+  +resize(width: number, height: number, pixelRatio: number): void
+  +setSun(subsolar: Position): void
+  +setDetail(step: DetailStep): void
+  +setOrientation(orientation: GlobeOrientation): void
+  +project(position: Position): ProjectedPoint
+  +onFrame(listener: (elapsedMs: number) => void): void
+  +start(): void
+  +stop(): void
+  +dispose(): void
+}
+
+class GlobeSceneOptions {
+  +assetBaseUrl: string
+  +detail: DetailStep
+  +signal: AbortSignal
+}
+
+class GlobeUnavailableError {
+  +reason: GlobeUnavailableReason
+}
+
+class SunPosition {
+  {static} +subsolarPoint(now: Date): Position
+  {static} +isNight(position: Position, now: Date): boolean
+}
+
+class DetailLevel {
+  +current: DetailStep
+  +record(elapsedMs: number): void
+  +reset(): void
+}
+
+class DetailStep {
+  +pixelRatio: number
+  +modelDetail: number
+}
+
+class GlobeFallback {
+  +label: InputSignal<string>
+}
+
+interface Clock {
+  +now(): Date
+  +minute: Signal<number>
+}
+
+class Position {
+  +latitude: number
+  +longitude: number
+}
+
+GlobeView *-- GlobeScene : creates / disposes
+GlobeView *-- DetailLevel : owns
+GlobeView --> GlobeState : has
+GlobeView ..> SunPosition : asks each minute
+GlobeView ..> Clock : injects CLOCK
+GlobeView ..> GlobeFallback : shows in Fallback
+GlobeScene ..> GlobeSceneOptions : created from
+GlobeScene ..> GlobeUnavailableError : rejects with
+GlobeUnavailableError --> GlobeUnavailableReason : has
+DetailLevel --> DetailStep : current
+GlobeSceneOptions --> DetailStep : starts at
+SunPosition ..> Position : returns
+@enduml

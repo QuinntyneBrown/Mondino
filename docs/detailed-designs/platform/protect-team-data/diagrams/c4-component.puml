@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Protect team data
+
+Container(spa, "Mondino web app", "Angular", "Sends requests")
+Container_Boundary(api, "Mondino API") {
+  Component(headers, "SecurityHeadersMiddleware", "ASP.NET Core middleware", "CSP, nosniff, no-referrer and HSTS on each response")
+  Component(limits, "RateLimitPolicies", "ASP.NET Core rate limiter", "Limits per client on the three open endpoints")
+  Component(session, "TeammateSessionHandler", "Authentication handler", "Turns the session cookie into the current teammate, or 401")
+  Component(controllers, "InvitesController, TeamsController, ProfileController", "Controllers", "Check nothing and send one MediatR request")
+  Component(scope, "TeamScopeBehaviour", "MediatR pipeline behaviour", "Refuses a request for a team the current teammate is not in")
+  Component(validation, "ValidationBehaviour", "MediatR pipeline behaviour", "Runs the request's validator before its handler")
+  Component(handlers, "Request handlers", "MediatR handlers", "Read and change only what the current teammate may")
+  Component(problems, "ProblemDetailsWriter", "Error writer", "ProblemDetails with a code, never a stack trace")
+}
+ContainerDb(db, "Mondino database", "EF Core", "Teams and teammates")
+Rel(spa, headers, "HTTPS request")
+Rel(headers, limits, "Passes to")
+Rel(limits, session, "Passes to when within the limit")
+Rel(session, controllers, "Sets ICurrentTeammate for")
+Rel(controllers, scope, "Send one request through")
+Rel(scope, validation, "Passes a request in scope to")
+Rel(validation, handlers, "Passes a valid request to")
+Rel(handlers, db, "Read and write", "IAppDbContext")
+Rel(scope, problems, "404 team_not_found")
+Rel(limits, problems, "429 rate_limited")
+@enduml

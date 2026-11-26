@@ -1,0 +1,107 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Protect team data
+
+interface ICurrentTeammate {
+  +Guid TeammateId
+  +Guid TeamId
+  +bool IsAuthenticated
+}
+
+class CurrentTeammate {
+  +Guid TeammateId
+  +Guid TeamId
+  +bool IsAuthenticated
+}
+
+class TeammateSessionHandler {
+  +HandleAuthenticateAsync(): Task<AuthenticateResult>
+  +SignInAsync(teammate: Teammate): Task
+  +SignOutAsync(): Task
+}
+
+interface ITeamScopedRequest {
+  +Guid TeamId
+}
+
+class TeamScopeBehaviour<TRequest, TResponse> {
+  +Handle(request, next, ct): Task<TResponse>
+}
+
+class ValidationBehaviour<TRequest, TResponse> {
+  +Handle(request, next, ct): Task<TResponse>
+}
+
+class JoinTeamCommandValidator {
+  Name: 1 to 60 characters
+  CountryCode: in the supported list
+  PostalCode: at most 12 characters
+}
+
+class NameNormaliser {
+  +Normalise(name: string): string
+}
+
+class RateLimitPolicies {
+  +{static} string OpenInvite = 30 per minute
+  +{static} string PostalCodeLookup = 10 per minute
+  +{static} string Join = 5 per minute
+  +{static} Add(options: RateLimiterOptions): void
+}
+
+class SecurityHeadersMiddleware {
+  +InvokeAsync(context: HttpContext): Task
+}
+
+class ProblemDetailsWriter {
+  +WriteAsync(context, status: int, code: string): Task
+}
+
+class PinDto {
+  +Guid TeammateId
+  +string Name
+  +string CityName
+  +string CountryCode
+  +Position Position
+  +string TimeZoneId
+  no postal code
+}
+
+class ProfileDto {
+  +string PostalCode
+  +string CountryCode
+  +City City
+  +TeammateSettings Settings
+}
+
+class GetPinsQuery {
+  +Guid TeamId
+}
+
+class GetProfileQuery {
+  +Guid TeamId
+}
+
+ICurrentTeammate <|.. CurrentTeammate
+TeammateSessionHandler ..> CurrentTeammate : populates
+TeamScopeBehaviour ..> ICurrentTeammate : compares TeamId
+TeamScopeBehaviour ..> ITeamScopedRequest : applies to
+ITeamScopedRequest <|.. GetPinsQuery
+ITeamScopedRequest <|.. GetProfileQuery
+TeamScopeBehaviour ..> ProblemDetailsWriter : team_not_found
+ValidationBehaviour ..> JoinTeamCommandValidator : runs
+ValidationBehaviour ..> ProblemDetailsWriter : validation_failed
+JoinTeamCommandValidator ..> NameNormaliser : after
+GetPinsQuery ..> PinDto : answers with
+GetProfileQuery ..> ProfileDto : answers the owner with
+@enduml

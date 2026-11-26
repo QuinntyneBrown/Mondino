@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Draw the globe
+
+Person(teammate, "Teammate", "A person on a team")
+Container_Boundary(spa, "Mondino web app") {
+  Component(page, "GlobePage", "Angular page, mondino application", "Defers the globe and shows the placeholder in its place")
+  Component(placeholder, "GlobePlaceholder", "Angular component, components library", "Holds the globe's box until the 3D globe is ready")
+  Component(view, "GlobeView", "Angular component mo-globe, globe library", "Owns the canvas, the scene and everything the scene acquires")
+  Component(scene, "GlobeScene", "Class, globe library", "Hides the renderer, loads the Blender-built model and runs the render loop")
+  Component(sun, "SunPosition", "Class, globe library", "Works out where the sun is overhead from the clock")
+  Component(detail, "DetailLevel", "Class, globe library", "Steps detail and resolution down on a low-power device")
+  Component(fallback, "GlobeFallback", "Angular component, globe library", "Still picture of the globe when WebGL is unavailable")
+  Component(clock, "BrowserClock", "CLOCK token, domain library", "The one shared clock, with a minute tick")
+}
+Rel(teammate, page, "Opens the Globe screen")
+Rel(page, placeholder, "Shows until the globe is ready")
+Rel(page, view, "Loads with a dynamic import and gives pins to")
+Rel(view, scene, "Creates, sizes and disposes")
+Rel(view, fallback, "Shows when the scene is unavailable")
+Rel(view, sun, "Asks for the sun's position each minute")
+Rel(sun, clock, "Reads the time from")
+Rel(view, detail, "Reports frame times to")
+Rel(detail, scene, "Sets the detail step on")
+@enduml

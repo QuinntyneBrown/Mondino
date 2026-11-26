@@ -1,0 +1,92 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Stay fast and light
+
+interface Clock {
+  +now(): Date
+  +minute: Signal<number>
+}
+
+class BrowserClock {
+  -timer: number | null
+  -onVisibilityChange(): void
+  -schedule(): void
+  +now(): Date
+  +minute: Signal<number>
+  +ngOnDestroy(): void
+}
+
+class TeamStore {
+  +pins: Signal<Pin[]>
+  +selectedTeammateId: Signal<string | null>
+  +counts: Signal<TeamCounts>
+  -pending: Subscription | null
+  +refresh(): void
+  +select(teammateId: string | null): void
+  +ngOnDestroy(): void
+}
+
+class GlobePage {
+  +pins: Signal<Pin[]>
+  +onSelect(teammateId: string): void
+}
+
+class GlobeView <<mo-globe>> {
+  +pins: InputSignal<Pin[]>
+  +selectedId: InputSignal<string | null>
+  +interactive: InputSignal<boolean>
+  +select: OutputEmitterRef<string>
+  -scene: GlobeScene | null
+  -resizeObserver: ResizeObserver
+  -onDestroy(): void
+}
+
+class GlobeScene {
+  -frameRequest: number | null
+  +start(): void
+  +stop(): void
+  +setPins(pins: Pin[]): void
+  +turnTo(position: Position, animate: boolean): void
+  +resize(width: number, height: number): void
+  +dispose(): void
+}
+
+class DetailLevel {
+  +level: number
+  +sample(frameMs: number): void
+  +stepDown(): void
+  +stepUp(): void
+}
+
+class GlobeFallback {
+}
+
+class TeamTable <<mo-team-table>> {
+  +rows: InputSignal<TeamRow[]>
+  rows rendered through cdkVirtualFor
+}
+
+class MomentList <<mo-moment-list>> {
+  +moments: InputSignal<Moment[]>
+  rows rendered through cdkVirtualFor
+}
+
+Clock <|.. BrowserClock
+GlobePage ..> TeamStore : reads pins
+GlobePage ..> Clock : reads minute
+GlobePage ..> GlobeView : defers, dynamic import
+GlobeView *-- GlobeScene : creates and disposes
+GlobeView ..> GlobeFallback : when WebGL is unavailable
+GlobeScene *-- DetailLevel
+GlobeScene ..> Clock : now()
+@enduml

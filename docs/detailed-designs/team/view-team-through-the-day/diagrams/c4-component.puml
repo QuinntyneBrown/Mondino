@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — View the team through the day
+
+Person(teammate, "Teammate", "The viewer")
+Container_Boundary(web, "Mondino web app") {
+  Component(page, "TeamPage", "Angular page, mondino application", "Orders, filters and presents the team; navigates to the Globe screen")
+  Component(store, "TeamStore", "Signal store, domain pins/", "Holds the pins and the counts")
+  Component(rows, "teamRows and ribbonMarkers", "Pure functions, domain pins/", "West-to-east rows, status filter and ribbon positions")
+  Component(time, "time/ rules", "Pure functions, domain time/", "localTime, statusAt, offsetBetween, zoneOffsetMinutes")
+  Component(clock, "BrowserClock", "Clock, domain time/", "The one shared clock and its minute tick")
+  Component(ribbon, "DayRibbon", "Angular component, components library", "Places each teammate on the 24 hours of a day")
+  Component(chips, "FilterChips", "Angular component, components library", "All, Working now, Asleep, with counts")
+  Component(table, "TeamTable", "Angular component, components library", "Windowed rows; a table from 768 px, a list below")
+}
+Rel(teammate, ribbon, "Chooses a marker on")
+Rel(teammate, chips, "Chooses a filter in")
+Rel(teammate, table, "Chooses a row in")
+Rel(page, store, "Reads pins and counts from")
+Rel(page, rows, "Reads rows and markers from")
+Rel(rows, time, "Works out local time, status and offset with")
+Rel(rows, clock, "Reads the minute tick of")
+Rel(page, ribbon, "Passes RibbonMarker values to")
+Rel(page, chips, "Passes the filters and counts to")
+Rel(page, table, "Passes TeamRow values to")
+@enduml

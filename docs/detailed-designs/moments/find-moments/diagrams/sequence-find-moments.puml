@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — Find the moments of a team's cities
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Frontend — Mondino web app" #E0F2FE
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetMomentsQueryHandler" as handler
+  participant "MomentFinder" as finder
+  participant "EmblemCatalogue" as emblems
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedMomentCalendars" as cache
+  database "Mondino database" as db
+end box
+participant "Holiday calendar source" as holidays
+participant "Race calendar source" as races
+participant "Event source" as events
+
+client -> controller : GET /api/teams/{teamId}/moments
+controller -> handler : Send GetMomentsQuery
+handler -> db : Load the team of the current teammate
+db --> handler : Teammates and their cities
+loop each distinct city
+  handler -> finder : FindFor(city)
+  finder -> finder : Today in the city's time zone (TimeProvider),\nwindow of today to 90 days ahead
+  finder -> cache : HolidaysIn(country, window)
+  alt answer cached
+    cache --> finder : Cached entries
+  else cache miss
+    cache -> holidays : Holidays of the country
+    holidays --> cache : Entries
+    cache --> finder : Entries
+  end
+  finder -> cache : RaceWeekendsIn(country, window)
+  cache -> races : Race weekends of the country
+  races --> cache : Entries
+  cache --> finder : Entries
+  finder -> cache : EventsNear(city position, 100 km, window)
+  cache -> events : Events and fixtures near the position
+  alt source answers in time
+    events --> cache : Entries
+    cache --> finder : Entries
+  else timeout, failure or open circuit
+    cache --> finder : No entries
+  end
+  finder -> finder : Keep entries that belong to the city (L2-020 table)
+  finder -> emblems : KeyFor(subject)
+  emblems --> finder : Emblem key or none
+  finder -> finder : Create each Moment, title cut to 80\nand detail to 160 characters (L2-020)
+  finder --> handler : Moments of the city
+end
+handler -> handler : One MomentDto per teammate a moment\nbelongs to, naming the teammate (L2-020)
+handler --> controller : MomentDto list in date order
+controller --> client : 200 with the moments, or ProblemDetails
+@enduml

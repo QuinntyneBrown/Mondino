@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — A request for another team is refused
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate of team A" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "SecurityHeadersMiddleware" as headers
+  participant "TeamsController" as controller
+  participant "ProblemDetailsWriter" as problems
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "TeamScopeBehaviour" as scope
+  participant "GetPinsQueryHandler" as handler
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "TeammateSessionHandler" as session
+  database "Mondino database" as db
+end box
+actor -> client : Request team B's pins by its id
+client -> headers : GET /api/teams/{teamB}/pins with session cookie
+headers -> session : Authenticate the session cookie
+session -> db : Find the teammate the session names
+alt Teammate no longer exists (left the team) or no cookie
+  db --> session : None
+  session --> headers : No valid session
+  headers -> problems : 401 (L2-043)
+  problems --> client : 401 ProblemDetails, no team data
+else Teammate of team A
+  db --> session : Teammate and team A
+  session --> headers : ICurrentTeammate set to team A
+  headers -> controller : Request
+  controller -> scope : Send GetPinsQuery(teamB)
+  scope -> scope : Compare query TeamId with ICurrentTeammate.TeamId
+  scope -> problems : Team not in scope (L2-043)
+  note over handler : GetPinsQueryHandler is not run
+  problems --> client : 404 ProblemDetails, code team_not_found
+end
+headers --> client : Response carries CSP, nosniff, no-referrer, HSTS (L2-044)
+client --> actor : ApiError with code; the screen shows its own message
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+title UML sequence behaviour — Close the teammate's panel
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "TeammatePanel" as panel
+  participant "GlobePage" as page
+  participant "Router" as router
+  participant "TeamStore" as store
+  participant "GlobeView" as globe
+  participant "WeekPanel" as week
+end box
+alt close button
+  actor -> panel : Use the close button
+  panel -> page : closed
+else Escape
+  actor -> page : Press Escape
+  page -> page : onEscape()
+end
+page -> router : navigate /globe, removing the teammate parameter
+router --> page : teammate input is undefined
+page -> store : clearSelection() (L2-023)
+store --> page : selectedPin is null
+page -> globe : selectedId null; the pin settles back
+page -> week : Render in place of TeammatePanel (L2-024)
+opt the panel was opened from the keyboard
+  page -> globe : focusPin(teammateId)
+end
+week --> actor : "This week around the world"
+@enduml
