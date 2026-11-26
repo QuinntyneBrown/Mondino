@@ -171,7 +171,7 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-052` | `L1-018` | A teammate who is already on a team signs in on a new browser or device with a link sent to their email. The link works once, for 15 minutes. The screen says the same whether or not the email is on a team; opening the link starts the teammate's session and shows the Globe, or says that an invite link is needed when the email is on no team. |
+| `L2-052` | `L1-018` | Sign In (`/sign-in`) is for a teammate who is already on a team and has come back on a new browser or device. There is no password: the teammate gives their work email, and Mondino emails a link that signs them straight in. The link works once, for 15 minutes. A newcomer opens their team's invite link instead, or starts a team. |
 
 ## Diagrams
 

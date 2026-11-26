@@ -34,8 +34,8 @@ alt no unsaved changes
 else unsaved changes (L2-035)
   store --> guard : true
   guard -> dialog : Open through CDK Dialog
-  dialog --> actor : "Leave without saving?", naming the settings changed
-  alt "Leave without saving"
+  dialog --> actor : "Leave without saving?", role alertdialog, focus on "Keep editing"
+  alt "Discard and leave"
     actor -> dialog : Confirm
     dialog --> guard : leave
     guard --> router : true

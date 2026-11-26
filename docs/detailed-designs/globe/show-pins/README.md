@@ -249,7 +249,7 @@ requirement, cited by identifier.
 |-------|--------------|-------------|
 | `L2-011` | `L1-004` | A pin shows the teammate's initials in the teammate's own colour, and a label beside it with their local time, the weather and the temperature. The viewer's own pin is marked as theirs. |
 | `L2-012` | `L1-004` | On a small globe pins are small. A pin that the pointer is over, that has keyboard focus, or that is selected rises from the globe's surface, grows, comes in front of its neighbours and shows its label, so the teammate can be read clearly. When the pointer leaves it settles back. |
-| `L2-013` | `L1-004` | Teammates in the same city, or in cities close together at the current size of the globe, are never drawn on top of one another so that one is hidden: pins that would cover each other are drawn as one group pin with a count. |
+| `L2-013` | `L1-004` | Teammates in the same city, or in cities close together at the current size and turn of the globe, are never drawn on top of one another so that one is hidden. Pins that would cover each other are drawn as one group pin that shows how many teammates it stands for. This holds at every size of globe and for a team of any size, from two teammates in one city to a team of 500. Pins are never spread out around a city to keep them apart. |
 
 ## Diagrams
 

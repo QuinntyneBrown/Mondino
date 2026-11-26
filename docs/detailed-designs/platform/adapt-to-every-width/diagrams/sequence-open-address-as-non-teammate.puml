@@ -36,7 +36,7 @@ alt No membership on this device
   membership --> guard : null
   guard --> router : false
   router -> needed : Match the same address, loadComponent, then create InviteNeededPage
-  needed --> actor : An invite link is needed; no team data and no API request (L2-038)
+  needed --> actor : "You need an invite link", "Start a team" and "Use a different email";\nno team data and no API request (L2-038)
 else Membership held, session no longer valid
   membership --> guard : Membership for this device
   guard --> router : true

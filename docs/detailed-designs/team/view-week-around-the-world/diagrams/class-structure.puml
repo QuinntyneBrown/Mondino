@@ -13,11 +13,14 @@ title Class structure — View the week around the world
 
 class GlobePage <<mondino>> {
   +week: Signal<WeekMoment[]>
-  +working: Signal<WorkingTeammate[]>
+  +working: Signal<WorkingNow>
+  +momentsOff: Signal<boolean>
   +teamOfOne: Signal<boolean>
   +inviteLink: Signal<string | null>
   +onTeammateChosen(teammateId: string): void
   +onAllMoments(): void
+  +onMoreWorking(): void
+  +onChooseMoments(): void
   +onCopy(): void
 }
 
@@ -38,7 +41,7 @@ class TeamCounts <<domain pins/>> {
 
 class "moments/ and pins/ functions" as fn <<function, domain>> {
   +weekMoments(pins: Pin[], now: Date, limit: number): WeekMoments
-  +workingNow(pins: Pin[], now: Date): WorkingTeammate[]
+  +workingNow(pins: Pin[], now: Date, limit: number): WorkingNow
   +teamCounts(pins: Pin[], now: Date): TeamCounts
   +inviteLinkFor(origin: string, inviteToken: string): string
 }
@@ -58,6 +61,12 @@ class WeekMoment <<domain moments/>> {
   +emblemKey: string | null
 }
 
+class WorkingNow <<domain pins/>> {
+  +count: number
+  +teammates: WorkingTeammate[]
+  +more: number
+}
+
 class WorkingTeammate <<domain pins/>> {
   +teammateId: string
   +name: string
@@ -69,14 +78,18 @@ class WorkingTeammate <<domain pins/>> {
 
 class WeekPanel <<components, mo-week-panel>> {
   +moments: InputSignal<WeekMoment[]>
-  +working: InputSignal<WorkingTeammate[]>
+  +working: InputSignal<WorkingNow>
+  +momentsOff: InputSignal<boolean>
   +teammateChosen: OutputEmitterRef<string>
   +allMoments: OutputEmitterRef<void>
+  +moreWorking: OutputEmitterRef<void>
+  +chooseMoments: OutputEmitterRef<void>
 }
 
 class InviteCard <<components, mo-invite-card>> {
   +inviteLink: InputSignal<string>
   +copy: OutputEmitterRef<void>
+  +selectLink(): void
 }
 
 enum CopyResult {
@@ -85,7 +98,7 @@ enum CopyResult {
 }
 
 class Toast <<components, mo-toast>> {
-  +title: InputSignal<string>
+  +title: InputSignal<string | null>
   +text: InputSignal<string>
   +tone: InputSignal<'success' | 'danger'>
   +dismissed: OutputEmitterRef<void>
@@ -115,16 +128,17 @@ GlobePage --> WeekPanel : renders
 GlobePage --> InviteCard : renders for a team of one
 GlobePage ..> InviteLinkCopier : copies on Copy
 TeamShell --> AppHeader : renders
-TeamShell ..> InviteLinkCopier : copies on invite
+TeamShell ..> InviteLinkCopier : reads the result
 TeamShell --> Toast : renders from the result
 InviteLinkCopier ..> TeamStore : reads inviteToken
 InviteLinkCopier ..> Clipboard : injects
 InviteLinkCopier --> CopyResult
 TeamStore *-- TeamCounts
 fn ..> WeekMoments : builds
-fn ..> WorkingTeammate : builds
+fn ..> WorkingNow : builds
+WorkingNow "1" *-- "0..6" WorkingTeammate
 fn ..> TeamCounts : builds
-WeekMoments "1" *-- "0..8" WeekMoment
+WeekMoments "1" *-- "0..6" WeekMoment
 WeekPanel ..> WeekMoment : presents
-WeekPanel ..> WorkingTeammate : presents
+WeekPanel ..> WorkingNow : presents
 @enduml

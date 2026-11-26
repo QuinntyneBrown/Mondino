@@ -181,7 +181,7 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-053` | `L1-018` | A person makes a team with a team name, their name, a work email, a country and a postal code. Making it creates the team, its invite link and the maker's pin at the city of the postal code, starts their session, and shows the invite link to send to the team. The maker is a teammate like any other. |
+| `L2-053` | `L1-018` | Create Team (`/new`), "Start a team.", lets anyone make a team: they name it, place their own pin, and get the invite link for everyone else. The person who makes a team is its first teammate and a teammate like any other; Mondino has no roles. The work email given here is where sign-in links are sent (L2-052) and is never shown to a teammate. |
 
 ## Diagrams
 

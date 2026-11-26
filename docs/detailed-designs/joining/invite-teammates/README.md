@@ -144,8 +144,8 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-054` | `L1-018` | "Invite teammate" in the header of every teammate screen, and "Invite teammates" on Team for a team of one, open a dialog that shows the team's invite link and copies it. A copy that succeeds closes the dialog and is confirmed by a toast; a copy that is refused leaves the link selected and says so. The invite link never expires. |
-| `L2-055` | `L1-018` | Any teammate can reset the team's invite link. The old link stops working, and a new one is shown. |
+| `L2-054` | `L1-018` | Any teammate can invite others: "Invite teammate" in the header of every screen after joining opens a dialog with the team's invite link to copy. The invite link does not expire. A person who opens it places their own pin (L2-001 to L2-005). |
+| `L2-055` | `L1-018` | Any teammate can reset the team's invite link from the invite dialog ("Reset link"). The old link stops working and a new one takes its place. Nothing else changes: the teammates already on the team keep their pins and stay signed in. |
 
 ## Diagrams
 

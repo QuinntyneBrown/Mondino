@@ -165,7 +165,7 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-023` | `L1-008` | Selecting a pin opens that teammate in the panel: name, city and country, local time and day, offset from the viewer, status, weather, upcoming moments and the overlap with the viewer. |
+| `L2-023` | `L1-008` | Selecting a pin opens that teammate in the panel: name, city and country, local time and day, offset from the viewer, status, weather, upcoming moments and the overlap with the viewer. Selecting a group pin lists the teammates it stands for. |
 
 L2-023's criterion for a group pin's panel is realised by `GroupPanel`, and its criterion for a
 teammate who shares neither their weather nor their status by the private note.

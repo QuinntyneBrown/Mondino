@@ -33,13 +33,13 @@ box "Backend — Mondino Infrastructure" #FFF4E5
   participant "TeammateSessions" as sessions
   database "Mondino database" as db
 end box
-actor -> page : Choose "Remove my pin and leave Northwind"
+actor -> page : Choose "Leave Northwind"
 page -> dialog : Open through CDK Dialog with the team's name
-dialog --> actor : "Leave Northwind?", says the pin will be removed; "Cancel" or "Remove my pin and leave". Nothing is removed yet (L2-036)
-actor -> dialog : Use "Remove my pin and leave"
+dialog --> actor : "Leave Northwind?", says the pin comes off the globe for all 12 teammates; "Stay" or "Leave Northwind". Nothing is removed yet (L2-036)
+actor -> dialog : Use "Leave Northwind"
 dialog -> store : leave()
 store -> store : leaving = true
-dialog --> actor : Stays open; both buttons disabled, "Removing your pin…"
+dialog --> actor : Stays open; both buttons disabled, "Leaving…"
 store -> client : leaveTeam(teamId)
 client -> controller : DELETE /api/teams/{teamId}/me
 controller -> controller : Authenticate the session; check the anti-forgery token
@@ -58,12 +58,12 @@ alt left
   client --> store : Done
   store -> store : Discard the draft; clear SettingsStore and SettingsCache; TeamMembership.forget()
   store -> left : Navigate to /left with the team's name in the navigation state, replacing /profile; the dialog closes
-  left --> actor : "You’ve left Northwind" ("You’ve left the team" when reloaded): the pin is gone and what was deleted
+  left --> actor : "You’ve left Northwind" ("You’ve left the team" when reloaded): "Start a new team" and "Sign in to another team"
 else the request fails
   controller --> client : ProblemDetails, or no answer
   client --> store : ApiError
   store -> store : leaving = false; leaveFailed = true; nothing is cleared
-  dialog --> actor : Alert in the dialog: the pin could not be removed, nothing has changed; "Try again". The pin stays
+  dialog --> actor : Alert in the dialog: "We couldn’t take your pin off. You’re still on Northwind — try again."; "Try again". The pin stays
 end
 note over page, db : At their next read of GET /api/teams/{teamId}/pins, every other teammate receives no pin for the teammate who left.\nThe old session is refused with 401 from now on.
 @enduml

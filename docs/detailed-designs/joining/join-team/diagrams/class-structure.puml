@@ -22,7 +22,6 @@ package "mondino application" {
   enum JoinState {
     Idle
     Joining
-    TeamFull
     RateLimited
     Failed
   }
@@ -41,7 +40,8 @@ package "@mondino/api" {
   class JoinRequest {
     +name: string
     +countryCode: string
-    +postalCode: string
+    +postalCode: string | null
+    +cityId: string | null
     +joinRequestId: string
   }
   class JoinResult {
@@ -59,7 +59,8 @@ package "Mondino.Application" {
     +string InviteToken
     +string Name
     +string CountryCode
-    +string PostalCode
+    +string? PostalCode
+    +string? CityId
     +Guid JoinRequestId
   }
   class JoinTeamCommandValidator
@@ -91,7 +92,7 @@ package "Mondino.Domain" {
     +Guid TeamId
     +string Name
     +string CountryCode
-    +PostalCode PostalCode
+    +PostalCode? PostalCode
     +City City
     +string Colour
     +TeammateSettings Settings

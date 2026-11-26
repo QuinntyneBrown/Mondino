@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — Open a city section
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "CitySection" as city
+  participant "TeamPage" as page
+  participant "citySections" as sections
+  participant "TeamTable" as table
+  participant "Router" as router
+end box
+note over page : First shown: the first two cities are open,\nthe rest are closed and hold no rows (L2-056)
+actor -> city : Use the button of a closed city ("San Francisco", 27, "07:05")
+city -> page : toggle(city key)
+page -> page : toggled.update: this city is open
+page -> sections : citySections(visibleRows, toggled, clock.now(), settings)
+sections -> sections : The opened city gets its first 50 rows;\nmore = count less 50, when above zero
+sections --> page : CitySectionContent[]
+page -> city : content, open = true
+city -> city : aria-expanded="true", aria-controls the table
+city -> table : rows, caption naming the city ("Teammates in Honolulu" for Honolulu)
+table --> actor : That city's teammates, with the columns of L2-026
+opt the city has more than 50 teammates
+  city --> actor : A line under the table: how many more, and to search for them
+end
+actor -> city : Use the button again
+city -> page : toggle(city key)
+page -> page : toggled.update: this city is closed
+page -> city : content, open = false
+city --> actor : The heading alone; its rows leave the page (L2-047)
+actor -> table : Choose a row in an open city
+table -> page : teammateChosen(teammateId)
+page -> router : navigate /globe?teammate={teammateId}
+router --> actor : Globe screen with that pin selected (L2-023)
+@enduml

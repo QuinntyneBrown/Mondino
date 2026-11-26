@@ -130,7 +130,7 @@ requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-009` | `L1-003` | Left alone, the globe turns slowly on its own. It is dragged to spin, by pointer or touch, and turned with the arrow keys. When a pin or a group pin is selected the globe turns to bring it to the front and holds there. |
+| `L2-009` | `L1-003` | Left alone, the globe turns slowly on its own. It is dragged to spin, by pointer or touch, and turned with the arrow keys. When a pin is selected the globe turns to bring it to the front and holds there. |
 
 ## Diagrams
 

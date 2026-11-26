@@ -138,8 +138,8 @@ level-1 (L1) requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-016` | `L1-005` | A teammate's offset is the difference between their local time and the viewer's, in hours and, where the zones differ by part of an hour, minutes. |
-| `L2-017` | `L1-005` | The overlap between the viewer and a teammate is the part of both their working days (09:00 to 18:00 local) that coincides, given on the viewer's own clock, with a bar that draws both working days, the part they share and the time now across the viewer's day. No overlap is shown for a teammate who does not share their status. |
+| `L2-016` | `L1-005` | A teammate's offset is the difference between their local time and the viewer's, in hours and, where the zones differ by part of an hour, minutes. It is written with "h" and "m" straight after the numbers ("7h", "4h 30m"), followed by "behind" or "ahead". |
+| `L2-017` | `L1-005` | The overlap between the viewer and a teammate is the part of both their working days (09:00 to 18:00 local) that coincides, given on the viewer's own clock, with a bar that draws both working days, the part they share and the time now across the viewer's day. |
 
 ## Diagrams
 

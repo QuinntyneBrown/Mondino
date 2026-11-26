@@ -88,7 +88,7 @@ package "Backend" {
     +ClockFormat ClockFormat
     +MomentKind[] MomentKinds
     +bool ShareWeather
-    +bool ShowOutsideWorkingHours
+    +bool ShareStatus
     +{static} DefaultsFor(countryCode: string): TeammateSettings
   }
   enum TemperatureUnit {
@@ -103,7 +103,7 @@ package "Backend" {
     +Guid TeammateId
     +WeatherDto? Weather
     +WeatherState WeatherState
-    +bool ShowsStatusOutsideWorkingHours
+    +bool SharesStatus
   }
   enum WeatherState {
     Available

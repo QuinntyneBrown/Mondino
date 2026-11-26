@@ -13,17 +13,20 @@ team's name, for example "Join Northwind". This feature covers what that button 
 **join request id** — random identifier the browser makes once for a Join screen and sends with every join request from it
 
 Joining adds the teammate to the team, issues their session, and opens the Globe screen with
-their own pin selected. The new pin pulses once, and does not pulse under reduced motion.
+their own pin selected. The new pin pulses once, and does not pulse under reduced motion, and a
+toast reads "You’re on the map. Northwind can now see your pin in Milan."
 
-Three things can go wrong, and each has a defined outcome. A request that fails leaves the
-person on the Join screen with what they typed intact and an offer to try again. Two requests
-from a double-click make exactly one pin. A team that has reached 500 teammates refuses the
-join with the code `team_full`, and the screen says the team is full.
+Four things can go wrong, and each has a defined outcome. A request that fails leaves the
+person on the Join screen with what they typed intact and the button "Try joining again". Two
+requests from a double-click make exactly one pin. A client over the limit is told how long to
+wait. A team that has reached 500 teammates refuses the join with the code `team_full`, and a
+notice that the team is full takes the form's place.
 
 The backend does not trust the city the browser saw. It resolves the postal code again and
 places the pin at the city it finds. The features `open-invite-link` and
-`place-pin-from-postal-code` cover the steps before this one. How a teammate signs in again on
-another device is not designed: `<TO SUPPLY>`.
+`place-pin-from-postal-code` cover the steps before this one. `sign-in` covers how a teammate
+signs in again on another device. Join asks for no email, so how a teammate who joined by
+invite link signs in again is not designed: `<TO SUPPLY>`.
 
 ## Description
 
@@ -36,23 +39,31 @@ screen.
   calls `TeamMembership.remember(membership)` with a `Membership`: the `teamId` and `teammateId`
   of the `JoinResult` and the `teamName` of the `Invite`, and never the postal code. It then
   navigates to `/globe` and passes the new teammate's id and a "new" flag in the navigation
-  state, never in the URL. `GlobePage` selects that pin and pulses it once.
+  state, never in the URL. `GlobePage` selects that pin, pulses it once, and shows the toast
+  "You’re on the map. Northwind can now see your pin in Milan.", which dismisses itself after
+  4 s. Under the fields, `Failed` shows the alert "We couldn’t add you to Northwind. Your
+  details are still here — try joining again." and the button reads "Try joining again".
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one
   `joinRequestId`, made with `crypto.randomUUID()` when the store is created.
   - `join()` sets `Joining` and calls `InviteApi.join`. While `Joining`, the button reads
     "Joining" and the team's name with an ellipsis ("Joining Northwind…") and is disabled, the
     name and postal code are read-only and the country cannot be changed.
-  - A failure sets `TeamFull`, `RateLimited` or `Failed` by the `code` of the `ApiError`. The
-    signals `name`, `countryCode` and `postalCode` and the found city are left as they are.
-    `TeamFull` keeps the button disabled; `Failed` and `RateLimited` enable it again. The code
-    `invite_not_found` sets `inviteState` to `NotFound` instead, which replaces the form.
+  - A failure sets `RateLimited` or `Failed` by the `code` of the `ApiError`. The signals
+    `name`, `countryCode` and `postalCode` and the found city are left as they are. `Failed`
+    enables the button again. `RateLimited` shows "Too many tries from this device. You can
+    try again in 9:42." and keeps the button disabled until the countdown from the refusal's
+    `Retry-After` ends (`place-pin-from-postal-code`).
+  - The code `team_full` sets `inviteState` to `Full`, and the code `invite_not_found` sets it
+    to `NotFound`. Each replaces the form with its notice and takes the pins off the globe
+    (`open-invite-link`): "Northwind is full", or "This invite link no longer works".
   - A retry sends the same `joinRequestId`, so a join whose response was lost does not make a
     second pin.
-- **`JoinState`** — feature-local union of `Idle`, `Joining`, `TeamFull`, `RateLimited` and
-  `Failed`.
+- **`JoinState`** — feature-local union of `Idle`, `Joining`, `RateLimited` and `Failed`.
 - **`InviteApi.join(inviteToken, request)`** — sends
   `POST /api/invites/{inviteToken}/teammates` with a `JoinRequest` body: `name`, `countryCode`,
-  `postalCode` and `joinRequestId`. It returns a `JoinResult`: `teamId` and `teammateId`.
+  `postalCode` or `cityId`, and `joinRequestId`. It returns a `JoinResult`: `teamId` and
+  `teammateId`. The `cityId` is sent in the postal code's place when the pin was placed
+  through the city search, while the postal code lookup was down.
 - The postal code is held in memory by `JoinStore` only. It is never written to browser storage
   and goes when the person leaves the Join screen.
 
@@ -64,10 +75,12 @@ screen.
   `JoinTeamCommand`, signs the returned teammate in through `TeammateSessionHandler`, and
   answers 201 for a new teammate and 200 for a repeated join request. Fields the body does not
   define, such as a teammate id, a position or a colour, are ignored.
-- **`JoinTeamCommand`** — `InviteToken`, `Name`, `CountryCode`, `PostalCode`, `JoinRequestId`.
+- **`JoinTeamCommand`** — `InviteToken`, `Name`, `CountryCode`, `PostalCode` or `CityId`,
+  `JoinRequestId`.
 - **`JoinTeamCommandValidator`** — after `NameNormaliser` has removed control characters from
   the name and trimmed it (`protect-team-data`), refuses an empty name, a name over 60 characters, a country outside the supported list, a
-  postal code over 12 characters or an empty `JoinRequestId`. The refusal is 400 with the code
+  postal code over 12 characters, a command with neither a postal code nor a city id, or an
+  empty `JoinRequestId`. The refusal is 400 with the code
   `validation_failed`, and nothing is stored (L2-044).
 - **`JoinTeamCommandHandler`** — runs these steps in order.
   1. It loads the `Team` by invite token with its teammates, and refuses with
@@ -77,7 +90,9 @@ screen.
   3. It normalises the postal code with `PostalCodeFormats` and resolves the city through
      `IPostalCodeLookup`. The outcome is normally in the cache of `CachedPostalCodeLookup` from
      the lookup on the Join screen. `NotFound` and `Unavailable` are refused with
-     `postal_code_not_found` and `postal_code_unavailable`.
+     `postal_code_not_found` and `postal_code_unavailable`. A command with a `CityId` resolves
+     the city through `ICityDirectory.Find` instead, calls no outside source, and stores no
+     postal code for the teammate; an unknown city id is refused with `validation_failed`.
   4. It picks the pin's colour with `PinColourPicker` and calls `Team.AddTeammate` with the
      time from `TimeProvider`.
   5. It saves through `IAppDbContext` in one unit of work.
@@ -88,6 +103,8 @@ screen.
   team. When the team already has `MaxTeammates` (500) teammates, it throws `TeamFullException`.
 - **`Teammate.JoinRequestId`** — addition this feature makes to the shared `Teammate` entity. It
   is never returned in any DTO.
+- **`Teammate.PostalCode`** — optional. A teammate placed through the city search has none
+  until they give one on Profile & Settings (`change-location`).
 - **`TeamFullException`** — feature-local domain exception. `ProblemDetailsWriter` maps it to
   409 with the code `team_full`.
 - **`JoinResultDto`** — `TeamId` and `TeammateId`. The Globe screen reads the pin itself through
@@ -99,14 +116,14 @@ screen.
 
 | Case | Status | `code` | The screen says |
 |------|--------|--------|-----------------|
-| Team has 500 teammates | 409 | `team_full` | The team is full and holds up to 500 teammates; the button is disabled |
-| Over 5 join requests a minute | 429 | `rate_limited` | Wait a moment and try again |
-| Invalid name, country or postal code | 400 | `validation_failed` | A generic message, try again |
-| Unknown invite token | 404 | `invite_not_found` | The invite link cannot be used |
-| Network failure or any other error | — | — | Joining did not work; try again |
+| Team has 500 teammates | 409 | `team_full` | "Northwind is full" and "The team has all 500 of its places taken. Ask a teammate at Northwind to tell you when a place opens, then open this link again.", in the form's place |
+| Over 5 join requests a minute | 429 | `rate_limited` | "Too many tries from this device. You can try again in 9:42."; the button is disabled until the countdown ends |
+| Invalid name, country or postal code | 400 | `validation_failed` | "We couldn’t add you to Northwind. Your details are still here — try joining again." |
+| Unknown or reset invite token | 404 | `invite_not_found` | "This invite link no longer works", in the form's place |
+| Network failure or any other error | — | — | "We couldn’t add you to Northwind. Your details are still here — try joining again." and "Try joining again" |
 
-In each case the person stays on the Join screen. What they typed is kept, except for an unknown
-invite token, which replaces the form with the message.
+In each case the person stays on the Join screen. What they typed is kept, except for a full
+team and an unknown invite token, which replace the form with a notice.
 
 **Open points**
 
@@ -123,7 +140,7 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-005` | `L1-001` | Once the city is found, joining adds the teammate to the team with a pin at that city, and takes them to the Globe screen with their own pin selected. |
+| `L2-005` | `L1-001` | Once the city is found, joining adds the teammate to the team with a pin at that city, and takes them to the Globe screen with their own pin selected. A team holds up to 500 teammates. |
 
 ## Diagrams
 
@@ -181,7 +198,7 @@ one pin (`L2-005`).
 ### Behaviour — joining a team that is full
 
 `Team.AddTeammate` refuses when the team has 500 teammates. Nothing is saved, the Mondino API
-answers 409 with the code `team_full`, and the screen says the team is full and disables the
-button (`L2-005`).
+answers 409 with the code `team_full`, and the notice "Northwind is full" takes the form's
+place (`L2-005`).
 
 ![Sequence diagram for joining a team that is full](diagrams/sequence-team-full.png)

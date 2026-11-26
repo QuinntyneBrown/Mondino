@@ -98,8 +98,8 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-029` | `L1-010` | The Moments screen lists the team's upcoming moments. A moment today is shown first and most prominently, "Today in" and its city; then "This week" (1 to 7 days ahead) and "Later" (8 to 90 days ahead), each in date order and, on one date, west to east by their teammate. Each moment gives its kind, when it happens, its title, its detail, and its teammate's first name and city. |
-| `L2-030` | `L1-010` | The Moments screen is filtered by Everything, Holiday, Formula 1, Local event or Sport. |
+| `L2-029` | `L1-010` | The Moments screen, "Holidays, races and local happenings where your teammates live.", lists the team's upcoming moments. A moment today is shown first and most prominently, "Today in" and its city; then "This week" (1 to 7 days ahead) and "Later" (8 to 90 days ahead), each in date order and, on one date, west to east by their teammate. Each moment gives its kind, when it happens, its title, its detail, and its teammate's first name and city. |
+| `L2-030` | `L1-010` | The Moments screen is filtered by "Everything", "Holiday", "Formula 1", "Local event" or "Sport". |
 
 ## Diagrams
 

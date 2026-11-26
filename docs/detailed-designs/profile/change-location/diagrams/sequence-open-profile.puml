@@ -50,7 +50,7 @@ else own team
   controller --> client : 200 ProfileDto
 end
 client --> store : Profile, or ApiError when the read fails
-note over page : When the read fails: "We couldn’t load your pin", "Try again" and "Back to the globe".
+note over page : When the read fails: "Your settings didn’t load", "Try again" and "Back to the globe".
 store --> page : saved and draft signals
 page -> globe : Import @mondino/globe dynamically; one pin, interactive = false
 globe --> page : Small globe that does not turn and cannot be dragged (L2-031)

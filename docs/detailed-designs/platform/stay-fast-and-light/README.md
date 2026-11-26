@@ -28,10 +28,19 @@ renderer is chosen.
 **Load only what is needed now (L2-046).**
 
 - **Lazy routes.** Each screen is loaded with `loadComponent` (`adapt-to-every-width`), so a
-  screen's code arrives when its address is opened.
+  screen's code arrives when its address is opened. Sign In (`/sign-in`), Create Team (`/new`)
+  and the pages that say one thing are routes of their own, so a teammate who opens the Globe
+  downloads none of them. Each of those routes binds its own API token (`SIGN_IN_API`,
+  `TEAM_CREATION_API`) and provides its own store, which keeps the clients out of the initial
+  bundle and lets the state go with the route.
+- **The invite dialog is loaded on demand.** `InviteDialogOpener` imports `InviteDialog`
+  dynamically when "Invite teammate" is first chosen (`invite-teammates`). The dialog, with
+  `CopyField`, is in a chunk of its own: it is in no screen's chunk and not in the initial
+  bundle, although the button that opens it is in the header of every teammate screen.
+  `LeaveTeamDialog` and `DiscardChangesDialog` arrive with the `/profile` route.
 - **The `globe` library is imported dynamically.** No file in the initial bundle imports
-  `@mondino/globe` statically. `GlobePage`, `JoinPage` and `ProfilePage` place `mo-globe`
-  inside a `@defer` block, which imports the library, its renderer and its map data when a
+  `@mondino/globe` statically. `GlobePage`, `JoinPage`, `SignInPage`, `CreateTeamPage` and
+  `ProfilePage` place `mo-globe` inside a `@defer` block, which imports the library, its renderer and its map data when a
   globe is first drawn. The block's placeholder reserves the globe's box, so the layout does
   not shift when the globe arrives.
 - **The screen is usable before the globe.** `GlobePage` renders its heading, counts and panel
@@ -51,7 +60,11 @@ renderer is chosen.
   model's detail and the drawing resolution; this repeats until the frame rate recovers. The
   steps and the interval are `<TO SUPPLY>` with the renderer's ADR.
 - **`GlobeFallback`** — component in `components`: the still picture shown when WebGL is
-  unavailable or the `globe` library fails to load. It allocates no renderer.
+  unavailable or the `globe` library fails to load. It allocates no renderer and runs no
+  animation frame. It keeps the team's pins, in place and working, drawn as HTML over the
+  picture (`draw-globe`, `show-pins`); it does not turn and is not dragged, so it holds no
+  pointer listener for dragging. `NoticePage` draws its small globe the same way, as a
+  picture.
 - **Interactions stay under 200 ms.** State is held in signals, every component is `OnPush`
   and the app is zoneless, so a selection or a filter re-renders only what reads the changed
   signal.
@@ -76,7 +89,12 @@ renderer is chosen.
   HTTP request. A page that starts its own request ties it to `takeUntilDestroyed`, so leaving
   a screen cancels the request.
 - **Scoped state.** A screen's own state (a filter, a draft of the settings) lives in the page
-  component or a service it provides, and goes when the teammate leaves the screen.
+  component or a service it provides, and goes when the teammate leaves the screen. An email
+  typed on Sign In or Create Team, a postal code and a city search go the same way.
+- **Timers that count down.** The toast's 4 s dismissal (`InviteLinkCopier`), the rate limit
+  countdown and the pause before a city search (`JoinStore`) are each one timer, cleared when
+  it ends and when its owner is destroyed. A pending city search is aborted when a newer one
+  starts and when the route is left.
 
 **One clock, and it rests (L2-047).**
 

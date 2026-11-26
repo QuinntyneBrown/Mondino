@@ -128,7 +128,7 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-001` | `L1-001` | An invite link opens the Join screen for its team. The screen shows the team's name, how many teammates are already on the globe, the initials of up to five of them, and the globe with their pins, before the person has given anything. |
+| `L2-001` | `L1-001` | An invite link opens the Join screen for its team. The screen shows the team's name, how many teammates are already on the globe, the initials of up to five of them, and the globe with their pins, before the person has given anything. Under the form, "Already on Mondino? Sign in" leads to Sign In (L2-052). |
 
 ## Diagrams
 

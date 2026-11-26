@@ -36,6 +36,7 @@
       <li><a href="../components/select.html">Select</a></li>
       <li><a href="../components/form-field.html">Form field</a></li>
       <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/copy-field.html">Copy field</a></li>
       <li><a href="../components/switch.html">Switch</a></li>
       <li><a href="../components/chip.html">Chip</a></li>
       <li><a href="../components/avatar.html">Avatar</a></li>
@@ -51,6 +52,8 @@
       <li><a href="../components/empty-state.html">Empty state</a></li>
       <li><a href="../components/skip-link.html">Skip link</a></li>
       <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/auth.html">Auth</a></li>
+      <li><a href="../components/notice-page.html">Notice page</a></li>
       <li><a href="../components/logo.html">Logo</a></li>
       <li><a href="../components/globe.html">Globe</a></li>
       <li><a href="../components/pin.html">Pin</a></li>
@@ -63,6 +66,7 @@
       <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
       <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
       <li><a href="../components/team-table.html">Team table</a></li>
+      <li><a href="../components/city-section.html">City section</a></li>
     </ul></details>
     <details open><summary>Patterns</summary><ul>
       <li><a href="../patterns/forms.html">Forms</a></li>
@@ -84,7 +88,7 @@
       <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#anatomy">Anatomy</a></li><li><a href="#variants">Variants</a></li><li><a href="#sizes">Sizes</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#theming">Theming</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#tokens">Tokens</a></li><li><a href="#code">Code</a></li><li><a href="#sources">Sources</a></li></ul>
     </header>
 <section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
-<p>Status comes only from the teammate’s local hour, never from what they do. It is shown as a badge in the panel, as words under a name in the Team table, and as a dot beside a local time. A teammate who has turned off “Show when I’m outside working hours” has no status outside 09:00 to 18:00.</p>
+<p>Status comes only from the teammate’s local hour, never from what they do. It is shown as a badge in the panel, as words under a name in the Team table, and as a dot beside a local time. A teammate who has turned off “Share whether I’m working or asleep” has no status at any hour: no badge, no words, no dot, no working-hours overlap. They are counted neither as working nor as asleep, and are not listed under “In working hours now”, Working now or Asleep.</p>
 </section>
 
 <section class="ds-section" id="anatomy"><h2><a href="#anatomy">Anatomy</a></h2>
@@ -111,7 +115,7 @@
 <h3>Role and pattern</h3><p>Plain text. The dot is decorative and hidden from assistive technology.</p>
 <h3>Keyboard</h3><p>It is not focusable and takes no keys; it is read in place by a screen reader.</p>
 <h3>Focus</h3><p>Not focusable.</p>
-<h3>Labelling</h3><p>The status is always given as its words. When the hour turns, the words change without a reload and without an announcement.</p>
+<h3>Labelling</h3><p>The status is always given as its words. When the hour turns, the words change without a reload and without an announcement. Where a teammate does not share it, nothing stands in its place; the panel’s private note says why.</p>
 <h3>Contrast</h3><div class="ds-pair"><span>Working hours <code>--color-fg-working</code> on <code>--color-working-subtle</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-working|--color-working-subtle" data-min="4.5"></span></div>
 <div class="ds-pair"><span>Early morning, Evening <code>--color-fg-default</code> on <code>--color-moment-subtle</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-default|--color-moment-subtle" data-min="4.5"></span></div>
 <div class="ds-pair"><span>Probably asleep <code>--color-fg-on-asleep</code> on <code>--color-asleep-bg</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-on-asleep|--color-asleep-bg" data-min="4.5"></span></div>
@@ -139,7 +143,7 @@
 
 <section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
 <p>Extracted from these mocks:</p>
-<ul><li><a href="../../mocks/pages/globe/selected.html">pages/globe/selected</a> (Early morning)</li><li><a href="../../mocks/pages/globe/selected-asleep.html">pages/globe/selected-asleep</a></li><li><a href="../../mocks/pages/team/default.html">pages/team/default</a> (words and dot)</li><li><a href="../../mocks/pages/globe/sharing-off.html">pages/globe/sharing-off</a> (no status)</li></ul>
+<ul><li><a href="../../mocks/pages/globe/selected.html">pages/globe/selected</a> (Early morning)</li><li><a href="../../mocks/pages/globe/selected-asleep.html">pages/globe/selected-asleep</a></li><li><a href="../../mocks/pages/team/default.html">pages/team/default</a> (words and dot)</li><li><a href="../../mocks/pages/globe/sharing-off.html">pages/globe/sharing-off</a> (no status, at any hour)</li><li><a href="../../mocks/pages/profile/sharing-off.html">pages/profile/sharing-off</a> (the switch that turns it off)</li></ul>
 <p>Drift fixed during extraction: the prototype’s Team table showed status as a coloured dot only; the words were added under each name.</p>
 </section>
     <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>

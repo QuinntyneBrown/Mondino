@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dialogs and overlays — Mondino design system</title>
-<meta name="description" content="Mondino interrupts twice only. Everything else happens in place.">
+<meta name="description" content="Mondino interrupts three times only. Everything else happens in place.">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../assets/components.css">
 <link rel="stylesheet" href="../assets/ds.css">
@@ -36,6 +36,7 @@
       <li><a href="../components/select.html">Select</a></li>
       <li><a href="../components/form-field.html">Form field</a></li>
       <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/copy-field.html">Copy field</a></li>
       <li><a href="../components/switch.html">Switch</a></li>
       <li><a href="../components/chip.html">Chip</a></li>
       <li><a href="../components/avatar.html">Avatar</a></li>
@@ -51,6 +52,8 @@
       <li><a href="../components/empty-state.html">Empty state</a></li>
       <li><a href="../components/skip-link.html">Skip link</a></li>
       <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/auth.html">Auth</a></li>
+      <li><a href="../components/notice-page.html">Notice page</a></li>
       <li><a href="../components/logo.html">Logo</a></li>
       <li><a href="../components/globe.html">Globe</a></li>
       <li><a href="../components/pin.html">Pin</a></li>
@@ -63,6 +66,7 @@
       <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
       <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
       <li><a href="../components/team-table.html">Team table</a></li>
+      <li><a href="../components/city-section.html">City section</a></li>
     </ul></details>
     <details open><summary>Patterns</summary><ul>
       <li><a href="../patterns/forms.html">Forms</a></li>
@@ -79,24 +83,36 @@
     <header class="ds-header">
       <p class="ds-kicker">Pattern</p>
       <h1>Dialogs and overlays</h1>
-      <p class="ds-lead">Mondino interrupts twice only. Everything else happens in place.</p>
+      <p class="ds-lead">Mondino interrupts three times only. Everything else happens in place.</p>
       <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span></div>
       <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#when">When to use</a></li><li><a href="#structure">Structure</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#sources">Sources</a></li></ul>
     </header>
 <section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
-<p>A dialog stops everything, so it is kept for the two moments when stopping is kind: before a pin is removed and a team left, and before unsaved settings are dropped.</p>
+<p>A dialog stops everything, so it is kept for the three moments when stopping is right: when a teammate asks to invite someone and needs the team’s invite link in front of them, before a team is left, and before unsaved settings are lost. The first is opened on purpose and closes freely; the other two are questions that must be answered.</p>
 </section>
 
 <section class="ds-section" id="when"><h2><a href="#when">When to use</a></h2>
-<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Need</th><th scope="col">Use</th><th scope="col">Not</th></tr></thead><tbody><tr><td>Confirm removing your pin</td><td>A <a href="../components/dialog.html">dialog</a> with a danger button</td><td>A second click on the same link</td></tr><tr><td>Leaving with unsaved changes</td><td>A dialog; the safe choice is primary</td><td>Silently dropping them</td></tr><tr><td>Show a teammate</td><td>The panel, in place beside or under the globe</td><td>A dialog or a popover over the globe</td></tr><tr><td>Confirm a copy</td><td>A <a href="../components/toast.html">toast</a></td><td>A dialog</td></tr><tr><td>Say a setting is unsaved</td><td>The <a href="../components/save-bar.html">save bar</a></td><td>A dialog</td></tr><tr><td>Edit something</td><td>A screen (Profile & Settings)</td><td>An inline form or a hand-rolled modal</td></tr></tbody></table></div>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Need</th><th scope="col">Use</th><th scope="col">Not</th></tr></thead><tbody><tr><td>Share the team’s invite link</td><td>The invite <a href="../components/dialog.html">dialog</a>, from “Invite teammate” in the header on any screen, and from “Invite teammates” on Team for a team of one</td><td>Copying straight to the clipboard with nothing to see; a screen of its own</td></tr><tr><td>Confirm leaving the team</td><td>An alert dialog with a danger button</td><td>A second click on the same link</td></tr><tr><td>Leaving with unsaved changes</td><td>An alert dialog; the safe choice is primary</td><td>Silently dropping them</td></tr><tr><td>Show a teammate, or a group pin’s teammates</td><td>The panel, in place beside or under the globe</td><td>A dialog or a popover over the globe</td></tr><tr><td>Confirm a copy</td><td>A <a href="../components/toast.html">toast</a></td><td>A dialog</td></tr><tr><td>Say a setting is unsaved</td><td>The <a href="../components/save-bar.html">save bar</a></td><td>A dialog</td></tr><tr><td>Edit something</td><td>A screen (Profile &amp; Settings)</td><td>An inline form or a hand-rolled modal</td></tr></tbody></table></div>
 </section>
 
 <section class="ds-section" id="structure"><h2><a href="#structure">Structure</a></h2>
-<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--canvas"><div class="dialog__panel" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title">Leave without saving?</p></div><div class="dialog__body"><p>Your changes to temperature and clock haven’t been saved. If you leave now, they’re dropped.</p></div><div class="dialog__footer"><button class="btn" type="button">Leave without saving</button><button class="btn btn--primary" type="button">Keep editing</button></div></div></div><div class="ds-example__caption"><span>A question, what is lost, the safe choice and the other one</span></div></div>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--canvas"><div class="dialog__panel" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);">
+    <div class="dialog__header"><p class="dialog__title" id="dlg-title-9000">Invite teammates to Northwind</p><a class="btn btn--icon dialog__close" href="../../mocks/pages/globe/default.html" aria-label="Close"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a></div>
+    <div class="dialog__body">
+      <p id="dlg-desc-9000">Share this link with anyone on the team. They place their own pin with a postal code — only their city is ever shown.</p>
+      <label class="dialog__label" for="invite-link-9000">Invite link</label>
+      <div class="copy-field"><input class="copy-field__value" id="invite-link-9000" type="text" readonly value="mondino.app/join/northwind-7Kq2"><button class="btn btn--primary btn--sm" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>Copy link</button></div>
+      <div class="dialog__meta"><span class="tnum">13 on the team · link never expires</span><button class="btn btn--link" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Reset link</button></div>
+    </div>
+  </div></div><div class="ds-example__caption"><span>Asked for: a title, a close button, what the link does, the link in a copy field, and a foot</span></div></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--canvas"><div class="dialog__panel" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);">
+    <div class="dialog__header"><p class="dialog__title" id="dlg-title-9001">Leave without saving?</p></div>
+    <div class="dialog__body"><p id="dlg-desc-9001">You changed your settings but haven’t saved them. If you leave now, those changes are lost and your pin stays as it was.</p></div>
+    <div class="dialog__footer"><a class="btn" href="../../mocks/pages/globe/default.html">Discard and leave</a><a class="btn btn--primary" href="../../mocks/notifications/settings-bar/info.html">Keep editing</a></div>
+  </div></div><div class="ds-example__caption"><span>A question: what is lost, the other choice and the safe one</span></div></div>
 </section>
 
 <section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
-<ul><li><strong>Open:</strong> focus on the safe action; the page behind is inert and dimmed.</li><li><strong>Busy:</strong> the confirming button is busy; Cancel is disabled; nothing can be sent twice.</li><li><strong>Failed:</strong> an alert at the top of the dialog; nothing has changed; “Try again”.</li><li><strong>Done:</strong> leaving goes to a page that confirms it. Only one dialog is ever open.</li></ul>
+<ul><li><strong>Open:</strong> the page behind is inert and dimmed. Focus is on the safe action of a question (“Stay”, “Keep editing”), or on “Copy link” in the invite dialog.</li><li><strong>Busy:</strong> the confirming button is busy (“Leaving…”); “Stay” is disabled; nothing can be sent twice.</li><li><strong>Failed:</strong> an alert at the top of the dialog; nothing has changed; “Try again”.</li><li><strong>Copied:</strong> the invite dialog closes and a toast says “Invite link copied. Paste it wherever your team talks.”</li><li><strong>Copying was refused:</strong> the invite dialog stays open with the link selected and focused, and a toast that stays says which keys to press.</li><li><strong>Done:</strong> leaving goes to a page that confirms it. Only one dialog is ever open.</li></ul>
 </section>
 
 <section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
@@ -104,20 +120,20 @@
 </section>
 
 <section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
-<ul><li><code>role="dialog"</code>, <code>aria-modal="true"</code>, named by its title and described by its body.</li><li>Focus is kept inside; Escape and Cancel close it and return focus to what opened it; nothing has changed.</li><li>Built on CDK Dialog. Never hand-roll a modal.</li><li>Layers come from tokens: backdrop, dialog, toast.</li></ul>
+<ul><li>The invite dialog is <code>role="dialog"</code>; the two questions are <code>role="alertdialog"</code>. All are <code>aria-modal="true"</code>, named by their title and described by their body.</li><li>Focus is kept inside. Escape closes it and returns focus to what opened it; so do “Close”, “Stay” and “Keep editing”. Nothing has changed.</li><li>Built on CDK Dialog. Never hand-roll a modal.</li><li>Layers come from tokens: backdrop, dialog, toast. A toast sits over an open dialog.</li></ul>
 </section>
 
 <section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
-<p>The title is the question and names the thing. The body says exactly what is lost and what can be undone. The buttons repeat the verbs. Never “Are you sure?”.</p>
+<p>A question’s title names the thing: “Leave Northwind?”, “Leave without saving?”. The body says exactly what is lost and what is not. The buttons repeat the verbs: “Stay” / “Leave Northwind”, “Discard and leave” / “Keep editing”. Never “Are you sure?”. The invite dialog says what it is for and for which team, “Invite teammates to Northwind”, and repeats that only a teammate’s city is ever shown.</p>
 </section>
 
 <section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
 <div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p class="dialog__title">Leave Northwind?</p></div><figcaption>Ask about the thing by name.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p class="dialog__title">Are you sure?</p></div><figcaption>Ask a question that could be about anything.</figcaption></figure></div>
-<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><div class="toast" style="max-width: var(--layout-overlay-max);"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div class="toast__body"><p class="toast__title">Invite link copied</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><figcaption>Confirm success without interrupting.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="dialog__panel" style="max-width: 16rem; border-radius: var(--dialog-radius); padding: var(--space-5);"><p class="dialog__title">Copied!</p><div class="dialog__footer"><button class="btn btn--primary" type="button">OK</button></div></div></div><figcaption>Stop the teammate to tell them it worked.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><div style="max-width: var(--layout-overlay-max);" class="toast toast--success"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div class="toast__body"><p>Invite link copied. Paste it wherever your team talks.</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><figcaption>Confirm success without interrupting.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="dialog__panel" style="max-width: 16rem; border-radius: var(--dialog-radius); padding: var(--space-5);"><p class="dialog__title">Copied!</p><div class="dialog__footer"><button class="btn btn--primary" type="button">OK</button></div></div></div><figcaption>Stop the teammate to tell them it worked.</figcaption></figure></div>
 </section>
 
 <section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
-<p>Composed from these mocks:</p><ul><li><a href="../../mocks/dialogs/leave-team/default.html">dialogs/leave-team/default</a></li><li><a href="../../mocks/dialogs/leave-team/busy.html">dialogs/leave-team/busy</a></li><li><a href="../../mocks/dialogs/leave-team/failed.html">dialogs/leave-team/failed</a></li><li><a href="../../mocks/dialogs/unsaved-changes/default.html">dialogs/unsaved-changes/default</a></li><li><a href="../../mocks/pages/left-team/default.html">pages/left-team/default</a></li></ul>
+<p>Composed from these mocks:</p><ul><li><a href="../../mocks/dialogs/invite/default.html">dialogs/invite/default</a></li><li><a href="../../mocks/dialogs/invite/copy-failed.html">dialogs/invite/copy-failed</a></li><li><a href="../../mocks/dialogs/leave-team/default.html">dialogs/leave-team/default</a></li><li><a href="../../mocks/dialogs/leave-team/busy.html">dialogs/leave-team/busy</a></li><li><a href="../../mocks/dialogs/leave-team/failed.html">dialogs/leave-team/failed</a></li><li><a href="../../mocks/dialogs/unsaved-changes/default.html">dialogs/unsaved-changes/default</a></li><li><a href="../../mocks/notifications/invite-link/success.html">notifications/invite-link/success</a></li><li><a href="../../mocks/pages/left-team/default.html">pages/left-team/default</a></li></ul><p>Not designed yet: what “Reset link” asks before it acts. It is not built before its design exists.</p>
 </section>
     <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
   </main>

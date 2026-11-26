@@ -31,7 +31,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
   database "Mondino database" as db
 end box
 participant "Open-Meteo" as meteo
-note over actor, db : A teammate has saved "Share my local weather" off and "Show when I’m outside working hours" off.
+note over actor, db : A teammate has saved "Share my local weather" off and "Share whether I’m working or asleep" off.
 actor -> page : Open the Globe, or the 15 minute refresh arrives
 page -> store : refresh()
 store -> client : getPins(teamId)
@@ -44,7 +44,7 @@ loop each teammate
   alt the viewer's own pin
     handler -> weather : Weather at City.Position
     weather --> handler : Weather or none
-    handler -> handler : PinDto with weather, or null and WeatherState Unavailable; status visibility flag true
+    handler -> handler : PinDto with weather, or null and WeatherState Unavailable; SharesStatus true
   else another teammate, ShareWeather is false
     handler -> handler : PinDto with null Weather, WeatherState NotShared; the source is not asked (L2-034)
   else another teammate, ShareWeather is true
@@ -54,12 +54,12 @@ loop each teammate
     weather --> handler : Weather or none
     handler -> handler : PinDto with weather and WeatherState Available, or null and Unavailable
   end
-  handler -> handler : Another teammate with ShowOutsideWorkingHours false: status visibility flag false (L2-034)
+  handler -> handler : Another teammate with ShareStatus false: SharesStatus false, no status at any hour (L2-034)
 end
 handler --> controller : TeamPinsDto
 controller --> client : 200 TeamPinsDto; no settings and no postal code of any other teammate
 client --> store : Pin list
 store --> page : pins signal
 page -> page : statusFor(pin, local time)
-page --> actor : That pin shows its local time, no weather, and no status at 23:30 its time
+page --> actor : That pin shows its local time, no weather, and no status, at any hour
 @enduml

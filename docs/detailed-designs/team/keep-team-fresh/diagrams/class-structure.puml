@@ -22,6 +22,7 @@ class TeamStore <<domain pins/>> {
   +arrivedTeammateIds: Signal<string[]>
   +loadState: Signal<LoadState>
   +refreshFailed: Signal<boolean>
+  +refreshing: Signal<boolean>
   +refreshedAt: Signal<Date | null>
   -pending: AbortController | null
   +load(teamId: string): Promise<void>

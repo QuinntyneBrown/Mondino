@@ -41,7 +41,7 @@ actor -> bar : Use "Save changes"
 bar -> page : save
 page -> store : save()
 store --> bar : state = saving
-bar --> actor : "Saving your changes…"; the button reads "Saving…" and is disabled
+bar --> actor : "Saving…"; the button reads "Saving" and is disabled
 store -> client : updateProfile(teamId, draft)
 client -> controller : PUT /api/teams/{teamId}/me
 controller -> controller : Authenticate the session; check the anti-forgery token

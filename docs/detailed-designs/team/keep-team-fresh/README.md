@@ -19,7 +19,8 @@ and the `TeamStore` reads them again every 15 minutes while the tab is visible. 
 makes no request. A tab shown again after 15 minutes or more refreshes at once.
 
 A teammate who joined while the screen was open appears at the next refresh: their pin is added
-to the globe, pulses once, and the counts change.
+to the globe, pulses once, and the counts change. No toast is shown for them; the toast "You’re
+on the map." is for the person who has just joined (`view-week-around-the-world`).
 
 ## Description
 
@@ -50,15 +51,21 @@ Frontend:
 - **`loadState`** — `Loading`, `Ready` or `Failed`, for the first load only. A refresh never
   changes it: a failed refresh keeps the pins held, sets `refreshFailed`, and the store tries
   again at the next minute tick. `Loading` shows skeletons, on the Globe screen under the heading "Your team", and announces
-  "Loading your team…";
-  `Failed` shows "We couldn’t load your team" with "Try again", which calls `load` again.
-- **`refreshFailed`** and **`refreshedAt`** — whether the last refresh failed, and when the pins
-  held were read. While `refreshFailed` is true a banner (`Alert` as a banner, block `banner`,
-  `role="status"`) sits under the header of whichever screen is open: "Couldn’t refresh just
-  now. Clocks are still right; weather and moments are from 14:50. Mondino will try again
-  shortly.", the time being `refreshedAt` on the viewer's clock, with "Try now", which calls
-  `refresh()`. `TeamShell`, the route component that provides the `TeamStore`, renders it under
-  `AppHeader`, where it also renders the toast. The screen keeps everything it showed. The next
+  "Loading your team…".
+  `Failed` shows the open screen's own message with "Try again", which calls `load` again: on
+  the Globe screen "The globe didn’t load" and "We couldn’t reach Mondino to fetch your team.
+  Check your connection — nothing you set has been lost."; on the Team screen "The team didn’t
+  load" and "We couldn’t reach Mondino. Check your connection and try again.", with "Back to
+  the globe".
+- **`refreshFailed`**, **`refreshing`** and **`refreshedAt`** — whether the last refresh
+  failed, whether one is pending, and when the pins held were read. While `refreshFailed` is true a banner (`Alert` as a banner, block `banner`,
+  `role="status"`) sits under the header of whichever screen is open: "Couldn’t refresh.
+  Clocks are live; weather and moments are from 14:50.", the time being `refreshedAt` on the
+  viewer's clock in tabular figures, with the button "Try again", which calls `refresh()` at
+  once. On the Team screen, which shows no list of moments, the banner names the weather alone
+  ("weather is from 14:50"). While that request is pending (`refreshing`) the button reads
+  "Trying…" and is not used again. `TeamShell`, the route component that provides the
+  `TeamStore`, renders it under `AppHeader`, where it also renders the toast. The screen keeps everything it showed. The next
   refresh that succeeds clears `refreshFailed` and the banner goes, with no message (L2-048,
   L2-049).
 - **`TeamApi`** (`TEAM_API`) and **`HttpTeamApi`** — contract and HTTP client in the `api`
@@ -97,7 +104,7 @@ Backend:
 
 The interval is one constant, `TeamStore.RefreshIntervalMinutes`. Unit tests advance a fake
 clock bound to `CLOCK`; none sleeps. How the web app learns its team id when a teammate returns
-on another device is `<TO SUPPLY>`, since signing in again is not designed.
+on another device is designed in `joining/sign-in` (L2-052), outside this feature.
 
 ## Requirements
 
@@ -149,7 +156,7 @@ In the web app, `BrowserClock` ticks `TeamStore`, which calls `HttpTeamApi`. In 
 A minute tick finds 15 minutes passed, and the store reads the pins again. The handler returns
 every teammate's pin with weather or null. The store merges them, keeps the selection, and
 reports the new teammate's id, whose pin the globe adds and pulses once. A failed refresh keeps
-the pins held and shows the banner until a refresh succeeds.
+the pins held and shows the banner, with "Try again", until a refresh succeeds.
 
 ![Sequence diagram for a quiet refresh that brings in a new teammate](diagrams/sequence-quiet-refresh.png)
 

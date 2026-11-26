@@ -56,7 +56,7 @@ The rule lives in `domain`'s `moments/`. The `globe` library draws the result an
 - **`Emblem`** — `api` type: whether the picture is a held emblem or a kind's icon, its key and
   the kind.
 - **`MarkedMoment`** — `api` type: a `moment` and its `when` label from `whenLabel` ("Today",
-  "Tomorrow", "In 3 days").
+  "In 5 days").
 - **`MomentMarker`** — `api` type: the `moments` of the window as `MarkedMoment`s, nearest
   first; the `emblem` of the nearest; the `count` of the moments; and a `today` flag, true
   when the nearest moment is today. The type sits in `api` so `globe` can read it without
@@ -108,8 +108,8 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-021` | `L1-007` | A pin whose teammate has a moment today or in the next 7 days carries a moment marker beside it, in the sun colour. For one moment the marker shows an emblem for it so it can be told at a glance: a race car for Formula 1, a team's emblem for a sport fixture, and so on. For two or more moments it shows their count. An emblem that belongs to someone else (a team's or a series' own logo) is used only where Mondino holds the right to use it; otherwise the marker shows Mondino's own icon for the kind and the title names the team or race. |
-| `L2-022` | `L1-007` | The viewer chooses which kinds of moment mark pins on the globe. All four kinds are on to begin with. The choice changes what the viewer sees and nothing for anyone else. |
+| `L2-021` | `L1-007` | A pin whose teammate has a moment today or in the next 7 days carries a moment marker beside it, in the sun colour. With one moment this week the marker shows an emblem for it, so it can be told at a glance: a race car for Formula 1, a team's emblem for a sport fixture, and so on. With two or more it shows how many there are. An emblem that belongs to someone else (a team's or a series' own logo) is used only where Mondino holds the right to use it; otherwise the marker shows Mondino's own icon for the kind and the title names the team or race. |
+| `L2-022` | `L1-007` | The viewer chooses which kinds of moment mark pins on the globe, with four switches in Profile & Settings under "Moments on the globe": "Public holidays", "Formula 1 race weekends", "Local events and festivals" and "Big sporting days". All four kinds are on to begin with. The choice changes what the viewer sees and nothing for anyone else. |
 
 ## Diagrams
 

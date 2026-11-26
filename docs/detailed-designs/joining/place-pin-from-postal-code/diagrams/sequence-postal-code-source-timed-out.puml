@@ -27,10 +27,12 @@ end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "LookUpPostalCodeQueryHandler" as handler
   participant "PostalCodeFormats" as formats
+  participant "SearchCitiesQueryHandler" as search
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
   participant "CachedPostalCodeLookup" as lookup
   participant "PostalCodeLookupClient" as lookupClient
+  participant "BundledCityDirectory" as directory
 end box
 participant "Postal code source" as postal
 actor -> page : Leave the postal code field
@@ -55,7 +57,20 @@ handler --> controller : Refuse with postal_code_unavailable
 controller --> client : 503 ProblemDetails, code postal_code_unavailable
 client --> store : ApiError postal_code_unavailable
 store --> page : lookupState Unavailable, what was typed is kept
-page --> actor : "Could not be checked right now", offer to try again; not "wrong" (L2-004)
-actor -> page : Try again
-page -> store : lookUp()
+page --> actor : Postal code field switched off; "Your city" with "Postal code lookup is down\nright now, so pick your city instead. Your pin goes to its centre." (L2-049)
+actor -> page : Type "Mil" in "Your city"
+page -> store : searchCities(), when typing stops
+store -> client : searchCities(inviteToken, countryCode, text)
+client -> controller : POST /api/invites/{inviteToken}/city-searches, text in the body
+controller -> search : Send SearchCitiesQuery
+search -> directory : Search(countryCode, text, max)
+directory --> search : Cities from Mondino's own data, no outside source
+search --> controller : CityResultDto list
+controller --> client : 200
+client --> store : CityResult list
+store --> page : cityResults
+actor -> page : Choose Milan, then "Place my pin in Milan"
+page -> store : placeAtCity()
+store --> page : lookupState Found, the city's own position (L2-006)
+page --> actor : The pin at the city; the button reads "Join Northwind"
 @enduml

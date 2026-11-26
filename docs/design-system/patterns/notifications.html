@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Notifications — Mondino design system</title>
-<meta name="description" content="Mondino sends nothing: no e-mail, no push, no badge. It only tells you what just happened on the screen you are looking at.">
+<meta name="description" content="Mondino sends one thing, the sign-in link a teammate asks for. Everything else it tells you on the screen you are looking at.">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../assets/components.css">
 <link rel="stylesheet" href="../assets/ds.css">
@@ -36,6 +36,7 @@
       <li><a href="../components/select.html">Select</a></li>
       <li><a href="../components/form-field.html">Form field</a></li>
       <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/copy-field.html">Copy field</a></li>
       <li><a href="../components/switch.html">Switch</a></li>
       <li><a href="../components/chip.html">Chip</a></li>
       <li><a href="../components/avatar.html">Avatar</a></li>
@@ -51,6 +52,8 @@
       <li><a href="../components/empty-state.html">Empty state</a></li>
       <li><a href="../components/skip-link.html">Skip link</a></li>
       <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/auth.html">Auth</a></li>
+      <li><a href="../components/notice-page.html">Notice page</a></li>
       <li><a href="../components/logo.html">Logo</a></li>
       <li><a href="../components/globe.html">Globe</a></li>
       <li><a href="../components/pin.html">Pin</a></li>
@@ -63,6 +66,7 @@
       <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
       <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
       <li><a href="../components/team-table.html">Team table</a></li>
+      <li><a href="../components/city-section.html">City section</a></li>
     </ul></details>
     <details open><summary>Patterns</summary><ul>
       <li><a href="../patterns/forms.html">Forms</a></li>
@@ -79,20 +83,20 @@
     <header class="ds-header">
       <p class="ds-kicker">Pattern</p>
       <h1>Notifications</h1>
-      <p class="ds-lead">Mondino sends nothing: no e-mail, no push, no badge. It only tells you what just happened on the screen you are looking at.</p>
+      <p class="ds-lead">Mondino sends one thing, the sign-in link a teammate asks for. Everything else it tells you on the screen you are looking at.</p>
       <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span></div>
       <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#when">When to use</a></li><li><a href="#structure">Structure</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#sources">Sources</a></li></ul>
     </header>
 <section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
-<p>There is no notification centre and no feed. A teammate opens Mondino when they want to know what it is like where someone is. The only notices are answers to their own actions, and one about the screen’s freshness.</p>
+<p>There is no notification centre, no feed, no push and no badge. A teammate opens Mondino when they want to know what it is like where someone is. The only notices are answers to their own actions, and one about the screen’s freshness. The one email Mondino sends is the sign-in link a teammate asks for on Sign In; it works once, for 15 minutes.</p>
 </section>
 
 <section class="ds-section" id="when"><h2><a href="#when">When to use</a></h2>
-<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Notice</th><th scope="col">Component</th><th scope="col">Stays</th></tr></thead><tbody><tr><td>Invite link copied</td><td><a href="../components/toast.html">Toast</a>, success</td><td>4 seconds; waits while pointed at or focused</td></tr><tr><td>Could not copy</td><td>Toast, failure</td><td>Until dismissed</td></tr><tr><td>Unsaved changes</td><td><a href="../components/save-bar.html">Save bar</a></td><td>Until saved or undone</td></tr><tr><td>Saved</td><td>Save bar</td><td>4 seconds</td></tr><tr><td>Could not save</td><td>Save bar, as an alert</td><td>Until it succeeds or the changes are undone</td></tr><tr><td>Could not refresh</td><td>Banner</td><td>Until a refresh succeeds; then it goes without a word</td></tr><tr><td>A new teammate joined</td><td>Their pin appears and pulses once; the counts change</td><td>No message</td></tr></tbody></table></div>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Notice</th><th scope="col">Component</th><th scope="col">Stays</th></tr></thead><tbody><tr><td>Invite link copied</td><td><a href="../components/toast.html">Toast</a>, success</td><td>4 seconds; waits while pointed at or focused</td></tr><tr><td>Could not copy</td><td>Toast, failure: a raised surface with a pin edge</td><td>Until dismissed</td></tr><tr><td>You have just joined</td><td>Toast, success, as your new pin pulses</td><td>4 seconds</td></tr><tr><td>Unsaved changes</td><td><a href="../components/save-bar.html">Save bar</a></td><td>Until saved or undone</td></tr><tr><td>Saved</td><td>Save bar</td><td>4 seconds</td></tr><tr><td>Could not save</td><td>Save bar, as an alert</td><td>Until it succeeds or the changes are undone</td></tr><tr><td>Could not refresh</td><td>Banner</td><td>Until a refresh succeeds; then it goes without a word</td></tr><tr><td>A sign-in link was sent</td><td>A notice in the form’s place, on Sign In</td><td>Until the teammate leaves the screen</td></tr><tr><td>A new teammate joined</td><td>Their pin appears and pulses once; the counts change</td><td>No message</td></tr></tbody></table></div>
 </section>
 
 <section class="ds-section" id="structure"><h2><a href="#structure">Structure</a></h2>
-<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack" style="padding: 0;"><div class="banner" role="status" style="width: 100%;"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057"/><path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78"/><path d="m2 2 20 20"/></svg><p class="banner__text">Couldn’t refresh just now. Clocks are still right; weather and moments are from <span class="tnum">14:50</span>. Mondino will try again shortly.</p><button class="btn btn--sm" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>Try now</button></div></div><div class="ds-example__caption"><span>The banner: what is still right, what is stale and since when, what happens next</span></div></div>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack" style="padding: 0;"><div class="banner" style="width: 100%;" role="status"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057"/><path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78"/><path d="m2 2 20 20"/></svg><p class="banner__text">Couldn’t refresh. Clocks are live; weather and moments are from <span class="tnum">14:50</span>.</p><button class="btn btn--sm" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>Try again</button></div></div><div class="ds-example__caption"><span>The banner: what failed, what is still live, what is stale and since when, and the way to try again</span></div></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack ds-example__canvas--canvas"><div style="max-width: var(--layout-overlay-max);" class="toast toast--success"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div class="toast__body"><p>Invite link copied. Paste it wherever your team talks.</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="max-width: var(--layout-overlay-max);" class="toast toast--success"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div class="toast__body"><p><strong>You’re on the map.</strong> Northwind can now see your pin in Milan.</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="max-width: var(--layout-overlay-max);" class="toast toast--danger"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><div class="toast__body"><p><strong>Couldn’t copy the link.</strong> It’s selected — press Ctrl+C or ⌘C to copy it yourself.</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><div class="ds-example__caption"><span>Toasts: two successes, and a failure</span></div></div>
 </section>
 
 <section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
@@ -104,20 +108,20 @@
 </section>
 
 <section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
-<ul><li>The toast region is in the page before any toast, so a screen reader hears it arrive.</li><li>Success is polite; a failure is an alert.</li><li>Nothing dismisses itself while it is pointed at or focused, and a failure never does.</li><li>The clocks ticking each minute are never announced.</li></ul>
+<ul><li>The toast region is in the page before any toast, so a screen reader hears it arrive.</li><li>Success is polite (<code>role="status"</code>); a failure is an alert, and differs by its surface, edge, icon and words, not by colour alone.</li><li>Nothing dismisses itself while it is pointed at or focused, and a failure never does.</li><li>The clocks ticking each minute are never announced.</li></ul>
 </section>
 
 <section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
-<p>What happened in a few words, then the next step. For the banner: what is still right (the clocks), what is stale (weather and moments, and since when), and that Mondino will try again.</p>
+<p>What happened in a few words, then the next step: “Invite link copied. Paste it wherever your team talks.”; “<strong>Couldn’t copy the link.</strong> It’s selected — press Ctrl+C or ⌘C to copy it yourself.”; “<strong>You’re on the map.</strong> Northwind can now see your pin in Milan.” For the banner: what is still live (the clocks) and what is stale (weather and moments, and since when): “Couldn’t refresh. Clocks are live; weather and moments are from 14:50.” Its button is “Try again”, and “Trying…” meanwhile.</p>
 </section>
 
 <section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
 <div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p>A new pin appears and pulses once.</p></div><figcaption>Let the globe itself show a new teammate.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="toast" style="max-width: 18rem;"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><div class="toast__body"><p class="toast__title">Hana joined Northwind</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><figcaption>Build an activity feed out of toasts.</figcaption></figure></div>
-<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p>Mondino will try again shortly.</p></div><figcaption>Recover quietly.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="toast" style="max-width: 18rem;"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div class="toast__body"><p class="toast__title">Back online</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><figcaption>Announce that things are normal again.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p>Couldn’t refresh. Clocks are live; weather and moments are from 14:50.</p></div><figcaption>Recover quietly.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="toast" style="max-width: 18rem;"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div class="toast__body"><p class="toast__title">Back online</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><figcaption>Announce that things are normal again.</figcaption></figure></div>
 </section>
 
 <section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
-<p>Composed from these mocks:</p><ul><li><a href="../../mocks/notifications/invite-link/success.html">notifications/invite-link/success</a></li><li><a href="../../mocks/notifications/invite-link/danger.html">notifications/invite-link/danger</a></li><li><a href="../../mocks/notifications/settings-bar/info.html">notifications/settings-bar/info</a></li><li><a href="../../mocks/notifications/settings-bar/success.html">notifications/settings-bar/success</a></li><li><a href="../../mocks/notifications/settings-bar/danger.html">notifications/settings-bar/danger</a></li><li><a href="../../mocks/notifications/refresh-banner/warning.html">notifications/refresh-banner/warning</a></li><li><a href="../../mocks/pages/globe/just-joined.html">pages/globe/just-joined</a></li></ul>
+<p>Composed from these mocks:</p><ul><li><a href="../../mocks/notifications/invite-link/success.html">notifications/invite-link/success</a></li><li><a href="../../mocks/notifications/invite-link/danger.html">notifications/invite-link/danger</a></li><li><a href="../../mocks/dialogs/invite/copy-failed.html">dialogs/invite/copy-failed</a></li><li><a href="../../mocks/notifications/settings-bar/info.html">notifications/settings-bar/info</a></li><li><a href="../../mocks/notifications/settings-bar/saving.html">notifications/settings-bar/saving</a></li><li><a href="../../mocks/notifications/settings-bar/success.html">notifications/settings-bar/success</a></li><li><a href="../../mocks/notifications/settings-bar/danger.html">notifications/settings-bar/danger</a></li><li><a href="../../mocks/notifications/refresh-banner/warning.html">notifications/refresh-banner/warning</a></li><li><a href="../../mocks/pages/globe/just-joined.html">pages/globe/just-joined</a></li><li><a href="../../mocks/pages/sign-in/sent.html">pages/sign-in/sent</a></li></ul>
 </section>
     <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
   </main>
