@@ -34,8 +34,8 @@ interface Moment {
 }
 
 interface TeamApi {
-  +pins(teamId: string): Promise<Pin[]>
-  +getMoments(teamId: string): Promise<Moment[]>
+  +getPins(teamId: string, signal: AbortSignal): Promise<TeamPins>
+  +getMoments(teamId: string, signal: AbortSignal): Promise<Moment[]>
 }
 
 class HttpTeamApi
@@ -73,9 +73,9 @@ class MomentsPage {
 }
 
 class FilterChips {
-  +options: FilterOption[]
+  +chips: FilterChip[]
   +selected: string
-  +select: Output<string>
+  +selectedChange: Output<string>
 }
 
 class MomentList {
@@ -84,7 +84,7 @@ class MomentList {
   +select: Output<Moment>
 }
 
-class MomentCard {
+class MomentRow {
   +item: DatedMoment
   +prominent: boolean
   +select: Output<Moment>
@@ -101,7 +101,7 @@ MomentsPage ..> moments : calls groupMoments
 MomentsPage --> FilterChips
 MomentsPage --> MomentList
 MomentsPage --> TeamStore : selects a teammate
-MomentList "1" --> "*" MomentCard
+MomentList "1" --> "*" MomentRow
 moments ..> MomentGroups : returns
 MomentGroups "1" --> "*" DatedMoment
 DatedMoment --> Moment

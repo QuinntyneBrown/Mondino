@@ -70,7 +70,7 @@ controller --> client : 200 PostalCodeResultDto, or ProblemDetails with a code
 client --> store : PostalCodeResult or ApiError
 alt found
   store -> store : lookup = found; canSave = true
-  field --> actor : City and region; saving is offered
+  field --> actor : City and region, "your pin moves here when you save"; the small globe shows the pin there as new; saving is offered
 else postal_code_not_found
   store -> store : lookup = notFound; canSave = false
   field --> actor : Alert of L2-004; saving is not offered; the pin stays (L2-032)

@@ -24,7 +24,7 @@ end box
 
 note over chips, page : The screen opens with "Everything" pressed (L2-030)
 actor -> chips : Choose "Sport"
-chips --> page : select("sport")
+chips --> page : selectedChange("sport")
 page -> page : Set the filter signal
 page --> chips : selected = "sport"
 chips --> actor : "Sport" exposed with aria-pressed="true",\nits icon and its name (L2-030)
@@ -39,7 +39,7 @@ else no upcoming sport moment
   list --> actor : "Nothing of this kind coming up for your team."
 end
 actor -> chips : Choose "Everything"
-chips --> page : select("everything")
+chips --> page : selectedChange("everything")
 page -> group : groupMoments(all moments, clock.now())
 group --> page : MomentGroups
 page -> list : groups, filtered = false

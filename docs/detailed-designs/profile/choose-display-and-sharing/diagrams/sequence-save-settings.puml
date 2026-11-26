@@ -41,6 +41,7 @@ actor -> bar : Use "Save changes"
 bar -> page : save
 page -> store : save()
 store --> bar : state = saving
+bar --> actor : "Saving your changes…"; the button reads "Saving…" and is disabled
 store -> client : updateProfile(teamId, draft)
 client -> controller : PUT /api/teams/{teamId}/me
 controller -> controller : Authenticate the session; check the anti-forgery token
@@ -66,7 +67,7 @@ else save fails
   client --> store : ApiError
   store -> store : The draft is kept; hasUnsavedChanges stays true
   store --> bar : state = failed
-  bar --> actor : The changes could not be saved; "Try again" (L2-035)
+  bar --> actor : "Couldn't save. Your changes are still here." and "Try again" (L2-035)
   actor -> bar : Use "Try again"
   bar -> page : retry
   page -> store : save()

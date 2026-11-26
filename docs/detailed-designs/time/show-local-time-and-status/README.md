@@ -70,12 +70,15 @@ presentation components that show a time and a status.
   timer. It removes the listener and clears the timer through `DestroyRef`.
 - **`localTime(now, timeZoneId): LocalTime`** — pure function. It reads the hour, minute,
   weekday and calendar date of `now` in the given time zone through `Intl.DateTimeFormat` with
-  `timeZone` set and a 23-hour cycle. The browser's time zone data supplies the zone's rule,
+  `timeZone` set and the `h23` hour cycle. The browser's time zone data supplies the zone's rule,
   including daylight-saving changes. Formatters are kept in a map keyed by time zone id, which
   is bounded by the number of IANA time zones.
 - **`LocalTime`** — `hour` (0 to 23), `minute` (0 to 59), `weekday` (`Weekday`) and `date` (the
   local calendar date as `YYYY-MM-DD`). The `weekday` is the teammate's own day, so a panel
   shows Tuesday for Melbourne while the viewer in Milan is on Monday evening.
+- **`formatDay(time): string`** — pure function. It gives the weekday in full, the day of the
+  month and the short month of the teammate's own date ("Monday 27 Oct", "Tuesday 28 Oct"), the
+  day line of a panel.
 - **`formatTime(time, format): string`** — pure function. On the 24-hour clock it gives two-digit
   hours and minutes ("08:05"). On the 12-hour clock it gives the hour without a leading zero and
   a lowercase "am" or "pm" ("8:05 am").
@@ -98,9 +101,10 @@ instant comes from `CLOCK`. Unit tests bind a fake `Clock` and advance it; none 
   `minute` therefore changes every local time on the screen in one pass. A page's `computed` is
   released with the page.
 - **`PinLabel`**, **`TeammatePanel`**, **`TeamTable`** and **`DayRibbon`** — presentation
-  components in `components`. Each takes the time text, and where it shows one the weekday, as
+  components in `components`. Each takes the time text, and where it shows one the day text, as
   inputs. Times are set in Gabarito with tabular figures. None injects `CLOCK`.
-- **`StatusBadge`** — presentation component. It takes a `Status` and shows it as its words;
+- **`StatusBadge`** — presentation component, the `status` block of the mocks. It takes a
+  `Status` and shows it as its words;
   colour accompanies the words and never replaces them. It renders nothing for `null`.
 
 The words for each status and for each weekday follow the mocks in `docs/mocks/`.

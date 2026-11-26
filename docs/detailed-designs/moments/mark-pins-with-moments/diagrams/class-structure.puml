@@ -99,5 +99,5 @@ GlobeView --> PinLayer
 GlobeView --> PinList
 PinLayer ..> MomentMarker : draws
 PinList ..> MomentMarker : gives as text
-PinList ..> MomentIcon : uses
+PinLayer ..> MomentIcon : draws a kind's icon with
 @enduml

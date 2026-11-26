@@ -30,6 +30,7 @@ class BrowserClock <<domain, time/>> {
 class "time/ functions" as TimeFns <<domain, time/>> {
   +localTime(now: Date, timeZoneId: string): LocalTime
   +formatTime(time: LocalTime, format: ClockFormat): string
+  +formatDay(time: LocalTime): string
   +statusAt(localHour: number): Status
   +statusFor(pin: Pin, time: LocalTime): Status | null
 }

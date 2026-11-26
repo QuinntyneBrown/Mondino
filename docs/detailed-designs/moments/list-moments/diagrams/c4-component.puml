@@ -10,7 +10,7 @@ Container_Boundary(web, "Mondino web app") {
   Component(when, "whenLabel", "domain moments/", "Says Today, Tomorrow or In 3 days")
   Component(chips, "FilterChips", "components library", "Everything and the four kinds, as pressed buttons")
   Component(list, "MomentList", "components library", "Shows the groups and the empty messages")
-  Component(card, "MomentCard", "components library", "Shows one moment")
+  Component(card, "MomentRow", "components library", "Shows one moment")
 }
 Container(api, "Mondino API", "ASP.NET Core", "TeamsController and GetMomentsQueryHandler")
 

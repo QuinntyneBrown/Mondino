@@ -35,7 +35,7 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   by kind and passes them to `groupMoments` with the clock's time. The computed signal reads the
   clock's minute tick, so a moment moves from "This week" to "Today" without a reload. The page
   cancels a pending request when the teammate leaves, and its state goes with it.
-- **`TeamApi.getMoments(teamId)`** / **`HttpTeamApi`** — contract and HTTP client in `api` for
+- **`TeamApi.getMoments(teamId, signal)`** / **`HttpTeamApi`** — contract and HTTP client in `api` for
   `GET /api/teams/{teamId}/moments`. A refusal arrives as an `ApiError` with a `code`.
 - **`Moment`** — `api` type: kind, title, date, detail, emblem key, the teammate's id and name,
   the city's name and country code, and the city's time zone id. It carries no postal code and
@@ -45,19 +45,22 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   a moment before today or more than 90 days ahead. It returns `MomentGroups`: `today` (0 days),
   `thisWeek` (1 to 7 days) and `later` (8 to 90 days), each in date order.
 - **`DatedMoment`** — a moment with its days ahead and its `when` label.
-- **`whenLabel(daysAhead)`** — "Today", "Tomorrow" or "In 3 days". `MomentCard` shows it beside
-  the weekday, day and month.
-- **`FilterChips`** — presentation component. It renders the five filters as buttons, each with
-  its kind's `MomentIcon` and its name. The chosen filter carries `aria-pressed="true"` and is
+- **`whenLabel(daysAhead)`** — "Today", "Tomorrow" or "In 3 days". `MomentRow` shows it after
+  the kind ("Local event · In 4 days"), beside the weekday, day and month.
+- **`FilterChips`** — presentation component. It renders the five filters as buttons in a group
+  labelled "Filter by kind": "Everything" by its name, and each kind with its `MomentIcon` and
+  its name. The chosen filter carries `aria-pressed="true"` and is
   styled through that attribute, with a mark that does not depend on colour. It emits the
   choice.
 - **`MomentList`** — presentation component. It renders the three groups and omits the heading
-  of a group with no moments. With no moment at all it says that nothing is coming up for the
-  team. With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
+  of a group with no moments. With no moment at all the page shows no filter and says "Nothing is coming up
+  for your team", with a link back to the globe. With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
   team." It emits a chosen moment.
-- **`MomentCard`** — presentation component for one moment: kind icon, `when` label and date,
-  title, detail, teammate and city. The prominent form is used for a moment today. Title, detail
-  and names are rendered as text, never as HTML. The whole card is one control, reachable by
+- **`MomentRow`** — presentation component for one moment (`moment-row`): the date, kind icon
+  and `when` label, title, detail, and the teammate's first name and city. The prominent form
+  (`today-moment`) is used for a moment today: "Today in" and its city, the kind, title, detail
+  and teammate, and "On the globe". Title, detail
+  and names are rendered as text, never as HTML. The whole row is one control, reachable by
   keyboard and at least 44 × 44 px.
 - **`TeamStore.select(teammateId)`** — when a moment is chosen, `MomentsPage` selects its
   teammate in `TeamStore` and navigates to `/globe`.
@@ -68,8 +71,11 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
 A filter choice sends no request: it narrows the moments already loaded. The filter is not kept
 between visits. The response is bounded by the 90-day window, and the page replaces its moments
 on each load. How a long list is windowed in the page for a team of up to 500 teammates is
-`<TO SUPPLY>`. The wording of the message for a team with no upcoming moment, and the screen's
-loading and failed states, follow the mocks in `docs/mocks/`, which are `<TO SUPPLY>`.
+`<TO SUPPLY>`.
+
+While the request is pending the page is marked busy and announces "Loading moments…". When it
+fails the page says "We couldn’t load moments", with "Try again", which asks again, and "Back
+to the globe".
 
 ## Requirements
 
@@ -100,7 +106,7 @@ the team from the Mondino database.
 ### Components
 
 `MomentsPage` loads the moments through `HttpTeamApi`, groups them with `groupMoments`, and
-passes the result to `MomentList`, which renders each moment with `MomentCard`. `FilterChips`
+passes the result to `MomentList`, which renders each moment with `MomentRow`. `FilterChips`
 reports the chosen kind to the page.
 
 ![C4 component view for listing moments](diagrams/c4-component.png)
@@ -108,7 +114,7 @@ reports the chosen kind to the page.
 ### Class structure
 
 `MomentsPage` depends on the `TeamApi` and `Clock` contracts and on `groupMoments`, which
-returns `MomentGroups` of `DatedMoment` values. `FilterChips`, `MomentList` and `MomentCard`
+returns `MomentGroups` of `DatedMoment` values. `FilterChips`, `MomentList` and `MomentRow`
 take inputs and emit outputs only.
 
 ![Class diagram for listing moments](diagrams/class-structure.png)

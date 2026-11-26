@@ -9,11 +9,12 @@ local hour: "Working hours", "Early morning", "Evening" or "Probably asleep".
 Profile & Settings, titled "Your pin", is the screen where a teammate decides how Mondino looks
 to them and what teammates see of them. This feature covers four things on that screen:
 
-- **Display.** The viewer chooses °C or °F and a 24-hour or 12-hour clock. The choice belongs to
-  the teammate, is stored by the backend, and applies on every screen.
-- **Sharing.** Two switches, both on to begin with: "Share my local weather" and "Show when I'm
-  outside working hours". The backend applies both, so what a teammate switched off never
-  reaches another teammate's browser as something to hide.
+- **Display.** Under "Display", the viewer chooses °C or °F ("Temperature") and a 24-hour or
+  12-hour clock ("Clock"). The choice belongs to the teammate, is stored by the backend, and
+  applies on every screen.
+- **Sharing.** Under "Privacy", two switches, both on to begin with: "Share my local weather"
+  and "Show when I'm outside working hours". The backend applies both, so what a teammate
+  switched off never reaches another teammate's browser as something to hide.
 - **Saving.** Nothing on the screen is applied until it is saved. A bar says when there are
   unsaved changes, confirms a save, and reports a save that failed.
 - **Leaving with unsaved changes.** A viewer who tries to leave the screen with unsaved changes
@@ -43,7 +44,10 @@ exist yet; each part below is introduced by this design.
 
 - **`ProfilePage`** — lazy route `/profile`. It binds the draft's settings to two `Segmented`
   controls and two `Switch` controls, and binds the save state to `SaveBar`. A change is an
-  output from a presentation component that the page passes to `ProfileStore`.
+  output from a presentation component that the page passes to `ProfileStore`. Each switch
+  carries a line under its label that says what its state means for teammates. While either
+  switch is off in the saved profile, the card of the viewer's own pin adds the note "You still
+  see your own weather and status. Teammates don't." (L2-034).
 - **`ProfileStore`** — store provided at the `/profile` route. It holds the saved `Profile` and
   the draft as signals. `hasUnsavedChanges` is computed by comparing the draft with the saved
   profile field by field, so a setting changed back to what was saved removes the bar (L2-035).
@@ -56,8 +60,9 @@ exist yet; each part below is introduced by this design.
 - **`unsavedChangesGuard`** — `CanDeactivateFn` on the `/profile` route. When
   `hasUnsavedChanges` is true it opens `DiscardChangesDialog` and lets the navigation continue
   only on "Leave without saving" (L2-035).
-- **`DiscardChangesDialog`** — CDK Dialog that asks whether to leave without saving and offers
-  to stay or to leave. Escape and "Stay" close it and return focus to where it was.
+- **`DiscardChangesDialog`** — CDK Dialog titled "Leave without saving?". It names the settings
+  that have unsaved changes, says they are dropped on leaving, and offers "Leave without saving"
+  and "Keep editing". Escape and "Keep editing" close it and return focus to where it was.
 - **Closing the tab** — while `hasUnsavedChanges` is true, `ProfilePage` holds a `beforeunload`
   listener so the browser asks before a reload or a closed tab. The listener is removed when the
   changes are saved and when the page is destroyed.
@@ -65,13 +70,15 @@ exist yet; each part below is introduced by this design.
 ### Frontend — libraries
 
 - **`Segmented`** (`@mondino/components`) — a set of options of which one is chosen, used for
-  "°C / °F" and "24-hour / 12-hour". The chosen option is exposed through `aria-pressed` and
-  carries a mark besides its colour (L2-033).
+  "°C / °F" and "24-hour / 12-hour". Here it is a `radiogroup` named "Temperature" or "Clock";
+  each option is a `radio`, and the chosen one is exposed through `aria-checked` and carries a
+  mark besides its colour (L2-033).
 - **`Switch`** (`@mondino/components`) — a button with `role="switch"` and `aria-checked`,
   operated by Space and Enter, at least 44 × 44 px (L2-034).
 - **`SaveBar`** (`@mondino/components`) — takes a `state` input and emits `save` and `retry`.
-  It renders nothing when the state is `hidden`. Its text sits in a live region so "Saved — your
-  pin is up to date" is announced. Its states are in the table below.
+  It renders nothing when the state is `hidden`. Its text sits in a live region (`role="status"`)
+  so "Saved — your pin is up to date" is announced; in `failed` it is an alert (`role="alert"`).
+  Its states are in the table below.
 - **`Settings`**, **`TemperatureUnit`**, **`ClockFormat`** (`@mondino/api`) — the types the
   draft holds. `ProfileApi.updateProfile(teamId, update)` sends the whole `Settings` with the
   country and postal code.
@@ -93,9 +100,9 @@ exist yet; each part below is introduced by this design.
 |-----------------|------|------|--------|
 | `hidden` | The draft equals the saved profile and no confirmation is showing | none | none |
 | `unsaved` | `hasUnsavedChanges` is true | "You have unsaved changes" | "Save changes" |
-| `saving` | A save is pending | "You have unsaved changes" | "Save changes", disabled |
+| `saving` | A save is pending | "Saving your changes…" | "Saving…", disabled and marked busy |
 | `saved` | For 4 seconds after a save succeeds | "Saved — your pin is up to date" | none |
-| `failed` | A save failed and the changes are still unsaved | That the changes could not be saved | "Try again" |
+| `failed` | A save failed and the changes are still unsaved; it stays until a save succeeds or the changes are undone | "Couldn't save. Your changes are still here." | "Try again" |
 
 ### Backend — `Mondino.Api`
 

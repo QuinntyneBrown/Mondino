@@ -35,11 +35,11 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 actor -> page : Choose "Remove my pin and leave Northwind"
 page -> dialog : Open through CDK Dialog with the team's name
-dialog --> actor : Names the team, says the pin will be removed; cancel or leave. Nothing is removed yet (L2-036)
-actor -> dialog : Confirm leaving
-dialog --> page : Close with leave
-page -> store : leave()
-store -> store : leaving = true; the button is disabled
+dialog --> actor : "Leave Northwind?", says the pin will be removed; "Cancel" or "Remove my pin and leave". Nothing is removed yet (L2-036)
+actor -> dialog : Use "Remove my pin and leave"
+dialog -> store : leave()
+store -> store : leaving = true
+dialog --> actor : Stays open; both buttons disabled, "Removing your pin…"
 store -> client : leaveTeam(teamId)
 client -> controller : DELETE /api/teams/{teamId}/me
 controller -> controller : Authenticate the session; check the anti-forgery token
@@ -57,13 +57,13 @@ alt left
   controller --> client : 204 No Content, session cookie expired
   client --> store : Done
   store -> store : Discard the draft; clear SettingsStore and SettingsCache
-  store -> left : Navigate to /left, replacing /profile
-  left --> actor : Confirms the pin is removed and the team is left
+  store -> left : Navigate to /left with the team's name, replacing /profile; the dialog closes
+  left --> actor : "You've left Northwind": the pin is gone and what was deleted
 else the request fails
   controller --> client : ProblemDetails, or no answer
   client --> store : ApiError
-  store -> store : leaving = false; nothing is cleared
-  page --> actor : The team could not be left; offer to try again. The pin stays
+  store -> store : leaving = false; leaveFailed = true; nothing is cleared
+  dialog --> actor : Alert in the dialog: the pin could not be removed, nothing has changed; "Try again". The pin stays
 end
 note over page, db : At their next read of GET /api/teams/{teamId}/pins, every other teammate receives no pin for the teammate who left.\nThe old session is refused with 401 from now on.
 @enduml

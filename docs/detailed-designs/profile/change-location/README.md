@@ -37,6 +37,9 @@ not exist yet; each part below is introduced by this design.
 - **`ProfilePage`** — lazy route `/profile`, guarded by `teammateGuard`. It reads the profile
   through `PROFILE_API`, lays out "Your pin" beside the settings from tablet width up and in one
   column on a phone, and passes values to presentation components. It holds no rule of its own.
+  While the profile is being read it shows a placeholder for the globe and for each section, and
+  announces "Loading your pin and settings…". When the read fails it shows "We couldn't load
+  your pin" in place of the screen, with "Try again" and "Back to the globe".
 - **`ProfileStore`** — store provided at the `/profile` route, so its state goes when the viewer
   leaves the screen. It holds the saved `Profile`, the draft, the state of the postal code lookup
   and the state of the save as signals. `changeCountry(countryCode)` and
@@ -48,8 +51,10 @@ not exist yet; each part below is introduced by this design.
   `notFound`, `unavailable`.
 - **The small globe** — `ProfilePage` imports `GlobeView` from `@mondino/globe` dynamically and
   renders `mo-globe` with one pin, the viewer's own, and `interactive` set to `false`. A globe
-  that is not interactive does not turn on its own and cannot be dragged (L2-031). `GlobeScene`
-  is disposed when the page is destroyed.
+  that is not interactive does not turn on its own and cannot be dragged (L2-031). While the
+  draft holds a found city that is not saved, the globe shows the pin there, marked as new
+  ("New · Toronto"); the city and local time beside it stay the saved ones until the save.
+  `GlobeScene` is disposed when the page is destroyed.
 
 ### Frontend — libraries
 
@@ -65,8 +70,9 @@ not exist yet; each part below is introduced by this design.
   `postal_code_unavailable` and `rate_limited`; the page shows its own message for each.
 - **`PostalCodeField`** (`@mondino/components`) — the country and postal code inputs that Join
   also uses. It shows "Finding 20121…" while the lookup runs, the found city and region when it
-  answers, and the alert of L2-004 when it does not. It emits the change and the blur; it injects
-  nothing.
+  answers, and the alert of L2-004 when it does not. On this screen the found message reads
+  "Toronto, Ontario — your pin moves here when you save.", with the weather there, and the alert
+  ends "Your pin stays in Milan." It emits the change and the blur; it injects nothing.
 - **`localTime` and `formatTime`** (`@mondino/domain`, `time/`) — work out the viewer's local
   time from the pin's time zone id and the injected `CLOCK`, in the clock format the viewer chose.
 
