@@ -68,7 +68,10 @@ exist yet; each part below is introduced by this design.
   `HttpProfileApi` sends `DELETE /api/teams/{teamId}/me` with the anti-forgery token and no
   body.
 - **`SettingsStore`** and **`SettingsCache`** (`@mondino/domain`, `storage/`) — `clear()`
-  removes the display settings kept in the browser. Nothing else about the teammate is kept
+  removes the display settings kept in the browser. `sessionExpiredInterceptor` calls the same
+  `clear()`, and `TeamMembership.forget()`, when the API answers 401
+  (`platform/adapt-to-every-width`), so a session that has ended leaves the browser as leaving
+  does. Nothing else about the teammate is kept
   there: the profile, with its postal code, is held in memory by `ProfileStore` and goes with
   the route.
 - **`TeamStore`** (`@mondino/domain`, `pins/`) — in another teammate's browser, the next read
@@ -128,7 +131,7 @@ not designed.
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
 | `teamId` is not the teammate's own team | 404 | `team_not_found` | The alert in `LeaveTeamDialog` |
-| No session, or the teammate has already left | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows the no-team page in place |
+| No session, or the teammate has already left | 401 | none | `sessionExpiredInterceptor` clears `SettingsStore` and `SettingsCache` and forgets the membership, as leaving does, and the address shows the no-team page in place |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | The alert in `LeaveTeamDialog`, which stays open, with "Try again"; the pin stays |
 
 ## Requirements

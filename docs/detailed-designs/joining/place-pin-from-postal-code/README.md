@@ -43,8 +43,8 @@ source and Open-Meteo. The browser calls only the Mondino API.
 
 **Frontend (`mondino` application, `@mondino/api`, `@mondino/components`, `@mondino/globe`)**
 
-- **`JoinPage`** — renders the form beside the globe on a tablet and wider, and in one column on
-  a phone. It lists `Invite.countries` in the Country field in alphabetical order. It passes the
+- **`JoinPage`** — renders the form beside the globe from 992 px wide, and in one column, the
+  form above the globe, under it (L2-037). It lists `Invite.countries` in the Country field in alphabetical order. It passes the
   found city to `GlobeView` as the selected pin labelled "You". `GlobeView` has no input that
   takes a position, so `JoinPage` adds the found city to `pins` as one more pin with the id
   `you`, beside the bare pins (`bare-0`, `bare-1`, … `open-invite-link`), names it in
@@ -94,7 +94,11 @@ source and Open-Meteo. The browser calls only the Mondino API.
   `aria-describedby`, with a button that emits `retry` when the message has a `retryLabel`.
   `invalid` sets `aria-invalid` on the input; it is true for an empty postal code on submit and
   for `NotFound` only, since nothing is wrong with what was typed when the lookup is
-  unavailable or rate limited. The message is rendered as text.
+  unavailable or rate limited. The message is rendered as text. Its markup is the mocks': the
+  block `lookup` in the live region (`lookup--found` for `Found`, and `lookup--error` with
+  `role="alert"` for `NotFound`), an `alert alert--warning` for `Unavailable`, with its
+  button, and for `RateLimited`, and a `field__error` under the input for an empty postal
+  code on submit.
 - **`LookupMessage`** — type in `@mondino/api`: what the field shows for a lookup state, the
   `text` and, where the message offers one, the `retryLabel` ("Try again").
 - **`joinLookupMessage(lookupState, postalCode, country)`** — pure helper beside `JoinPage`

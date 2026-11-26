@@ -56,10 +56,12 @@ package "Frontend" {
   class SettingsStore {
     +settings: Signal<Settings>
     +replace(settings: Settings): void
+    +clear(): void
   }
   class SettingsCache {
     +read(): Settings?
     +write(settings: Settings): void
+    +clear(): void
   }
   class Settings {
     +temperatureUnit: TemperatureUnit
@@ -123,7 +125,7 @@ ProfileStore --> SaveState : has
 SaveBar --> SaveBarState : shows
 ProfileStore --> Settings : draft and saved
 ProfileStore ..> SettingsStore : publishes on save
-SettingsStore ..> SettingsCache : starts from / writes
+SettingsStore ..> SettingsCache : starts from / writes / clears
 unsavedChangesGuard ..> ProfileStore : hasUnsavedChanges
 unsavedChangesGuard ..> DiscardChangesDialog : opens
 ProfileStore ..> UpdateProfileCommandHandler : PUT through ProfileApi

@@ -75,7 +75,7 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   `TeamMembership.remember` and `SettingsStore.replace` before it goes to `/globe`, so a
   browser that holds a session and no remembered membership has both again.
 - `PinDto.ShowsStatusOutsideWorkingHours` (`Pin.showsStatusOutsideWorkingHours`) is false when a
-  teammate has switched off "Show when I'm outside working hours". Anything that shows, counts
+  teammate has switched off "Show when I’m outside working hours". Anything that shows, counts
   or filters by status calls `statusFor(pin, time)`, never `statusAt` directly. While such a
   teammate's status is hidden they are listed under All only: not under Asleep, not in its
   count and not in "asleep" on the Globe.
@@ -165,7 +165,10 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   `settings` of the `JoinResult`, the defaults for their country), when an invite link
   answers `AlreadyJoined` (the `Settings` of the `InviteDto`) and when a profile is read or
   saved
-  (`profile/choose-display-and-sharing`); leaving the team clears both. After a save,
+  (`profile/choose-display-and-sharing`). `clear()` empties it and `SettingsCache`; leaving
+  the team calls it, and so does `sessionExpiredInterceptor` on a 401, beside
+  `TeamMembership.forget()`, so a session that has ended leaves nothing of the team in the
+  browser. After a save,
   `ProfileStore` also calls `TeamStore.refresh()`, so the viewer's own pin follows on every
   screen.
 - The browser knows its team from `TeamMembership`, whose `Membership` (a type in

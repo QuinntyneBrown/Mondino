@@ -69,7 +69,9 @@ exist yet; each part below is introduced by this design.
 - **`SaveState`** — feature-local union: `idle`, `saving`, `saved`, `failed`.
 - **`unsavedChangesGuard`** — `CanDeactivateFn` on the `/profile` route. When
   `hasUnsavedChanges` is true it opens `DiscardChangesDialog` and lets the navigation continue
-  only on "Leave without saving" (L2-035).
+  only on "Leave without saving" (L2-035). It asks nothing when `TeamMembership.current()` is
+  empty: the teammate has left or the session has ended, and the navigation to the no-team
+  page goes through.
 - **`DiscardChangesDialog`** — CDK Dialog titled "Leave without saving?". It names the settings
   that have unsaved changes and says they are dropped on leaving: "Your changes to temperature
   and clock haven’t been saved. If you leave now, they’re dropped." Each changed setting is
@@ -105,7 +107,8 @@ exist yet; each part below is introduced by this design.
   with the `settings` of the `JoinResult` (the defaults the backend gave for their country,
   so a teammate who joins from the United States sees °F and the 12-hour clock on the first
   screen, L2-019, L2-033), and when a profile is read or saved. Each `replace` writes
-  `SettingsCache`.
+  `SettingsCache`. `clear()` empties both; leaving the team calls it (`leave-team`), and so
+  does `sessionExpiredInterceptor` when the API answers 401 (`platform/adapt-to-every-width`).
 - **`SettingsCache`** (`@mondino/domain`, `storage/`) — keeps the display settings in browser
   storage so the first screen of a later visit is drawn in the chosen unit and clock before the
   profile arrives. It never holds a postal code. The backend's copy is the one that holds
@@ -179,7 +182,7 @@ exist yet; each part below is introduced by this design.
 | A setting outside its allowed values | 400 | `validation_failed` | `SaveBar` in `failed` |
 | The new postal code cannot be found or checked on saving | 422 or 503 | `postal_code_not_found` or `postal_code_unavailable` | `SaveBar` in `failed`; the draft stays |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | `SaveBar` in `failed`; the draft stays |
-| The session has ended | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows the no-team page in place; how a teammate signs in again is not designed |
+| The session has ended | 401 | none | `sessionExpiredInterceptor` clears `SettingsStore` and `SettingsCache` and forgets the membership, as leaving does, and the address shows the no-team page in place; how a teammate signs in again is not designed |
 
 ## Requirements
 

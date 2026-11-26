@@ -69,6 +69,10 @@ class sessionExpiredInterceptor <<HttpInterceptorFn>> {
   +(request, next): Observable<HttpEvent>
 }
 
+class SettingsStore <<domain, storage/>> {
+  +clear(): void
+}
+
 class InviteNeededPage {
 }
 
@@ -89,6 +93,7 @@ AppHeader ..> Breakpoint : styled by
 teammateGuard ..> TeamMembership : reads
 teammateGuard ..> InviteNeededPage : shown when it refuses
 sessionExpiredInterceptor ..> TeamMembership : forgets
+sessionExpiredInterceptor ..> SettingsStore : clears, with SettingsCache
 TeamMembership --> Membership : holds
 note right of TeamMembership : JoinPage calls remember after a join and\nwhen an invite link answers AlreadyJoined
 @enduml

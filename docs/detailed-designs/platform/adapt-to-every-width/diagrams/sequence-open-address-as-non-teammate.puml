@@ -46,6 +46,7 @@ else Membership held, session no longer valid
   session --> controller : No valid session
   controller --> client : 401 ProblemDetails, no team data (L2-043)
   client --> expired : 401 response
+  expired -> expired : SettingsStore.clear(), which clears SettingsCache
   expired -> membership : forget()
   expired -> router : Navigate to the current address again
   router -> needed : teammateGuard refuses; create InviteNeededPage

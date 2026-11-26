@@ -71,14 +71,16 @@ invite link answers `AlreadyJoined`, with the `Membership` the `InviteDto` then 
 (`open-invite-link`), so a browser that holds a session and no membership gets it back by
 opening the team's invite link; `TeamShell` calls
 `remember(membership)` again with the initials and colour of the viewer's pin whenever the
-pins are read; and leaving the team calls `forget()`. It holds no postal code, no city, no
+pins are read; and leaving the team and `sessionExpiredInterceptor` call `forget()`. It holds no postal code, no city, no
 position and no session: the session is an `HttpOnly`
 cookie that scripts cannot read (L2-043). How a teammate signs in again on another device is
 `<TO SUPPLY>`.
 
 **`sessionExpiredInterceptor`** — `HttpInterceptorFn` bound in `app.config.ts`. When the
-`Mondino API` answers 401, it calls `TeamMembership.forget()` and navigates to the current
-address again, which now shows `InviteNeededPage`. A membership that outlives its session
+`Mondino API` answers 401, it calls `SettingsStore.clear()`, which also clears `SettingsCache`,
+and `TeamMembership.forget()`, as leaving the team does (`profile/leave-team`), and navigates
+to the current address again, which now shows `InviteNeededPage`. A session that has ended
+leaves nothing of the team in the browser, and a membership that outlives its session
 therefore leads to the same screen as no membership.
 
 **`InviteNeededPage`** — lazy route component. It says "You need an invite link" and that a
@@ -181,7 +183,8 @@ session only.
 `app.routes.ts` runs `teammateGuard` to match a teammate screen and loads the screen's chunk.
 `TeamShell` provides `TeamStore` and renders `AppHeader` with the navigation links, the
 viewer's avatar from `TeamMembership`, the refresh banner and the toast around the four
-screens. `teammateGuard` and `sessionExpiredInterceptor` read or clear `TeamMembership`.
+screens. `teammateGuard` reads `TeamMembership`; `sessionExpiredInterceptor` clears it, and
+`SettingsStore` with it.
 
 ![C4 component view for adapting to every width](diagrams/c4-component.png)
 
@@ -189,7 +192,8 @@ screens. `teammateGuard` and `sessionExpiredInterceptor` read or clear `TeamMemb
 
 `TeamShell` composes three `NavItem`s and renders `AppHeader`, which shows `Wordmark` and is
 styled by the breakpoints. `teammateGuard`, `sessionExpiredInterceptor` and `TeamShell` depend on
-`TeamMembership`, which holds one `Membership` with the viewer's initials and colour.
+`TeamMembership`, which holds one `Membership` with the viewer's initials and colour;
+`sessionExpiredInterceptor` also clears `SettingsStore`.
 
 ![Class diagram for adapting to every width](diagrams/class-structure.png)
 
@@ -207,7 +211,7 @@ reads the pins once, with the session cookie, and the screen shows them in the l
 
 With no membership on the device, `teammateGuard` refuses the match, the same address shows
 `InviteNeededPage` and no request reaches the `Mondino API` (L2-038). With a membership whose session is no longer valid,
-the API answers 401 with no team data (L2-043), and `sessionExpiredInterceptor` forgets the
-membership and shows the same screen.
+the API answers 401 with no team data (L2-043), and `sessionExpiredInterceptor` clears the
+settings, forgets the membership and shows the same screen.
 
 ![Sequence diagram for opening a screen's address as a non-teammate](diagrams/sequence-open-address-as-non-teammate.png)

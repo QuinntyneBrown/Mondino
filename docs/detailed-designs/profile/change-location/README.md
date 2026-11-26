@@ -35,8 +35,8 @@ not exist yet; each part below is introduced by this design.
 ### Frontend — `mondino` application
 
 - **`ProfilePage`** — lazy route `/profile`, guarded by `teammateGuard`. It reads the profile
-  through `PROFILE_API`, lays out "Your pin" beside the settings from tablet width up and in one
-  column on a phone, and passes values to presentation components. It holds no rule of its own.
+  through `PROFILE_API`, lays out "Your pin" beside the settings from 992 px wide and above them, in
+  one column, under it (L2-037), and passes values to presentation components. It holds no rule of its own.
   The "Location" section reads "Moved? Update your postal code and your pin follows." and holds
   the Country field, which lists `Profile.countries` in alphabetical order, and the postal code
   field. The page passes `PostalCodeField` the chosen `Country`, the `lookupState`, the
