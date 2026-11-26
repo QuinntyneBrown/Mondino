@@ -120,7 +120,9 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 - The pins on the globe are the accessible list. `PinLayer` renders them as the mocks'
   `ul.globe__pins > li.globe__pin > button.pin`; each button is named by `describePin` and
   carries `aria-pressed`, and the visible label is `aria-hidden`. There is no separate hidden
-  list. `GlobeFallback` (the still picture) and `GlobePlaceholder` are in `components`, so
+  list. A globe whose `interactive` is false is one picture instead: `role="img"` with the
+  name from `label`, and pins that are not buttons and are hidden from the accessibility
+  tree (`platform/make-accessible`). `GlobeFallback` (the still picture) and `GlobePlaceholder` are in `components`, so
   they show when the `globe` library's chunk fails to load; the still picture has no pins.
 - `TeamShell`, in the app, is the component of the route that holds Globe, Team, Moments and
   Profile & Settings. It provides `TeamStore` and renders `AppHeader` (`mo-app-header`, block
@@ -152,12 +154,15 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 - `SettingsStore`, in `domain`'s `storage/`, holds the viewer's `Settings` (the temperature
   unit, the clock format, the kinds of moment shown on the globe and the two sharing
   switches) as a signal. It is provided in `root`, because every screen reads it, starts from
-  `SettingsCache` and is replaced when a profile is read or saved
-  (`profile/choose-display-and-sharing`); leaving the team clears both.
+  `SettingsCache` and is replaced when a teammate joins (the `settings` of the `JoinResult`,
+  the defaults for their country) and when a profile is read or saved
+  (`profile/choose-display-and-sharing`); leaving the team clears both. After a save,
+  `ProfileStore` also calls `TeamStore.refresh()`, so the viewer's own pin follows on every
+  screen.
 - The browser knows its team from `TeamMembership`, whose `Membership` holds the team's id and
   name, the teammate's id and the viewer's `initials` and `colour` (the colour from the
-  `JoinResult`, which returns the one the backend assigned), and never a postal code or a
-  city. Without a membership, the four addresses show `InviteNeededPage` in
+  `JoinResult`, which returns the one the backend assigned, beside the new teammate's
+  `settings`), and never a postal code or a city. Without a membership, the four addresses show `InviteNeededPage` in
   place, and any other address shows `NotFoundPage`. `LeftPage` takes the team's name from the
   navigation state; opened or reloaded without it, it reads "You’ve left the team".
 
