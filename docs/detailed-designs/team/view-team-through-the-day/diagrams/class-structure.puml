@@ -57,7 +57,9 @@ class TeamRow <<domain pins/>> {
   +offset: string | null
   +status: Status | null
   +weather: Weather | null
+  +weatherState: WeatherState
   +nextMoment: Moment | null
+  +nextMomentWhen: string | null
 }
 
 class RibbonMarker <<domain pins/>> {

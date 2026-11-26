@@ -30,10 +30,10 @@ store --> page : Pin[], TeamCounts
 page --> actor : "Where everyone is in their day", "12 teammates · 12 time zones · live" (L2-026)
 page -> fn : teamRows(pins, viewerPin, clock.now(), settings)
 fn -> fn : orderWestToEast: current UTC offset, then longitude (L2-026)
-fn -> fn : localTime, statusFor, offsetBetween, next moment per pin
+fn -> fn : localTime, statusFor, offsetBetween, next moment and its when per pin
 fn --> page : TeamRow[] (city and country only)
 page -> fn : ribbonMarkers(pins, clock.now(), settings)
-fn -> fn : dayFraction from the local hour and minute; a lane per marker at the same hour (L2-027)
+fn -> fn : dayFraction from the local hour and minute; a lane per marker that would overlap another (L2-027)
 fn --> page : RibbonMarker[]
 page -> ribbon : markers
 page -> chips : "All 12", "Working now 7", "Asleep 2"; All selected (L2-028)

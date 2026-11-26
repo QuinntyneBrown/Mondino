@@ -46,22 +46,28 @@ loading and refreshing are designed in `keep-team-fresh`.
   from the viewer, status, weather and next moment. The status is what `statusFor(pin, time)`
   gives, so it is null, and the row shows none, for a teammate who hides their status outside
   working hours. The viewer's own row has `isViewer` set and a null offset. `nextMoment` is the pin's earliest moment dated today or later in its city, or
-  null. A `TeamRow` holds no postal code; the `Pin` type has none to give.
+  null, and `nextMomentWhen` says when it is: `whenLabel`'s words up to 7 days ahead ("Today",
+  "In 5 days"), and from 8 days ahead its day and month ("9 Nov"). The row carries the pin's
+  `weatherState` beside its weather, so weather that is unavailable is told from weather that
+  is not shared (`show-weather`). A `TeamRow` holds no postal code; the `Pin` type has none to give.
 - **`filterByStatus(rows, filter)`** — pure function in `pins/`. `All` keeps every row,
   `Working` keeps status Working hours and `Asleep` keeps status Probably asleep. A row whose
   status is null is kept by `All` only. The order is unchanged (L2-028).
 - **`ribbonMarkers(pins, now, settings)`** — pure function in `pins/`. It returns one
   `RibbonMarker` per pin. `dayFraction` is the local hour and minute as a fraction of 24 hours,
-  so a local time of 08:05 sits just after the 08:00 mark. Markers at the same local hour take
+  so a local time of 08:05 sits just after the 08:00 mark. Markers close enough to overlap,
+  those at the same local time and those less than an hour after the marker before them, take
   successive `lane` values, so each stays visible and can be chosen (L2-027).
-- **`DayRibbon`** (`mo-day-ribbon`) — presentation component. It draws the 24 hours with a
+- **`DayRibbon`** (`mo-day-ribbon`) — presentation component, a section named by its visually
+  hidden heading "The day, hour by hour". It draws the 24 hours with a
   mark every three hours, labelled "00:00", "03:00", "06:00" and so on, or on the 12-hour clock
   by the hour alone ("12 am", "3 am", "6 am"), the span 09:00 to 18:00 labelled "Working hours"
   and the span 23:00 to 07:00 labelled "Night", each with a text label and not by colour alone; from 768 px the
   spans between them are labelled "Morning" and "Evening". Each marker is a link holding an
   `Avatar`,
   placed by percentage so the ribbon fits any width without scrolling the page. A marker's
-  accessible name is the teammate's name and local time. It emits `teammateChosen`.
+  accessible name is the teammate's name and local time ("Noah Williams, 01:05"), and its
+  tooltip the name and city ("Noah Williams · Melbourne"). It emits `teammateChosen`.
 - **`Segmented`** (`mo-segmented`) — presentation component. It takes `options`, each with an
   optional `count`, `value` and a `mode` (`tabs` or `radio`), and emits `valueChange`. Here its
   mode is `tabs`: one `tablist` named "Filter by status": the arrow keys
@@ -70,9 +76,12 @@ loading and refreshing are designed in `keep-team-fresh`.
   from `TeamStore.counts`: "All 12", "Working now 7", "Asleep 2".
 - **`TeamTable`** (`mo-team-table`) — presentation component. It takes `rows` and
   `emptyMessage`, and emits `teammateChosen`. From 768 px it has the columns Person, Location,
-  Local time, vs you, Weather and Coming up; below that each row gives the name, the local time
-  and the next moment. The viewer's row shows the name followed by "(you)" and a dash for the
-  offset. A row with no next moment shows a dash under Coming up. Each row holds one link over
+  Local time, vs you, Weather and Coming up; below that each row gives the name, the status,
+  the local time with the city and offset, and the next moment. The viewer's row shows the name
+  followed by "(you)" and a dash for the offset, named "You" for assistive technology. Coming
+  up gives the next moment's kind icon, its title and when it is ("October Bank Holiday ·
+  Today", "Día de Muertos · In 5 days", "São Paulo Grand Prix · 9 Nov"). A row with no next
+  moment shows a dash under Coming up, named "Nothing coming up". Each row holds one link over
   the teammate's name that covers the row, so a row is chosen by pointer, touch or keyboard.
   The list is headed "Everyone, west to east", and the table's caption names what it holds:
   "Everyone, west to east", "Teammates in working hours, west to east" or "Teammates probably

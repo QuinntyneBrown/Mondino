@@ -29,7 +29,8 @@ while it is 4 November in Melbourne, whatever the date is where the viewer sits.
 The screen is a lazy route in the `mondino` application. The backend supplies the moments
 (`find-moments`), and the browser groups and filters them.
 
-- **`MomentsPage`** — page at `/moments`, loaded with `loadComponent` behind `teammateGuard`. It
+- **`MomentsPage`** — page at `/moments`, loaded with `loadComponent` behind `teammateGuard`,
+  headed "Moments" and "Holidays, races and local happenings where your teammates live." It
   asks `TEAM_API` for the team's moments once on entry and holds them in a signal. It holds the
   chosen filter in a second signal, "everything" at first. A computed signal filters the moments
   by kind and passes them to `groupMoments` with `TeamStore`'s pins and the clock's time. The
@@ -64,7 +65,7 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
 - **`MomentRow`** — presentation component for one moment (`moment-row`): the date, kind icon
   and `when` label, title, detail, and the teammate's `Avatar` with their first name and city
   ("Jordan · Austin"). The prominent form (`today-moment`) is used for a moment today: "Today
-  in" and its city, the kind, title, detail and the teammate's first name, and "On the globe". Title, detail
+  in" and its city, the kind ("Today in Dublin · Holiday"), the moment's emblem, title, detail and the teammate's first name, and "On the globe". Title, detail
   and names are rendered as text, never as HTML. The whole row is one control, reachable by
   keyboard and at least 44 × 44 px.
 - **`TeamStore`** — the page reads `pins` from it for the order and the avatars. When a moment
