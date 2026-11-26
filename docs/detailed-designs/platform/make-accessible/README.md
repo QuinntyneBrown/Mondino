@@ -47,6 +47,11 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 - **`GlobeView`** (`mo-globe`) — the host element has `role="group"` and an accessible name
   from its input `label`. The canvas inside it carries `aria-hidden="true"`. `PinLayer`'s
   list of pins is drawn over the canvas and stands in its place in the accessibility tree.
+  That holds for the interactive globe, on the Globe screen. A globe whose `interactive` is
+  false (Join, and the small globe on Profile & Settings) is one picture, as the mocks draw
+  it: the host has `role="img"` and the name from `label` ("A small globe with your pin at
+  Milan"), and its pins and labels are not buttons, take no focus and are hidden from the
+  accessibility tree; the screen beside it says in text what the picture shows.
 - **`PinLayer`** — component in `globe` (`show-pins`). The pins it draws are the list: the
   mocks' `ul.globe__pins` with one `li.globe__pin` per pin, each holding a `button.pin`. A
   button's accessible name is the pin's description, and the visible label beside it is
@@ -71,8 +76,12 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   `role="status"` and `aria-live="polite"`, as the mocks draw it, and sets its text when the
   selected teammate id changes, whether the selection came from a tap, a click or the
   keyboard. The message is the selected teammate's name and city and the word "selected", as
-  in "Tomás Herrera, Mexico City, selected."; for a group pin it is the count, "3 teammates
-  close together." (`view-teammate-panel`). `TeammatePanel` is not itself a live region.
+  in "Tomás Herrera, Mexico City, selected."; for the viewer's own pin it adds "you" after the
+  name, "Sofia Bianchi, you, Milan, selected." (mock `globe/selected-self`); for a group pin it
+  is the count, "3 teammates close together." (`view-teammate-panel`). When the Globe opens
+  after joining, with the viewer's new pin selected, the message starts with "You’re on the
+  globe.": "You’re on the globe. Sofia Bianchi, you, Milan, selected." (mock
+  `globe/just-joined`, `joining/join-team`). `TeammatePanel` is not itself a live region.
 - **A minute tick is silent.** The descriptions and the panel update in place when the clock
   ticks. Neither is inside a live region, and `GlobePage` writes to its status element only on a change of selection.
 - **The postal code lookup is announced.** `PostalCodeField` renders the `LookupMessage` it

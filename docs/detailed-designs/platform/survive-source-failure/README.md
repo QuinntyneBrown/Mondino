@@ -112,7 +112,7 @@ on the hosting platform and is `<TO SUPPLY>`.
   The error state is for a first read only: once a screen has data, a failed refresh keeps it
   and shows the banner below.
 - **The backend itself unreachable.** When a refresh fails, `TeamStore` keeps its last pins,
-  sets its `refreshFailed` signal and tries again at the next refresh. `TeamShell` shows, above whichever screen is
+  sets its `refreshFailed` signal and tries again at the clock's next minute tick (`keep-team-fresh`). `TeamShell` shows, above whichever screen is
   open, a banner that it could not be refreshed, which time the weather and moments are
   from, and that Mondino will try again, with "Try now"; the clocks keep ticking, and the
   banner goes as soon as a refresh succeeds.

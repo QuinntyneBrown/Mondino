@@ -47,7 +47,7 @@ else Reduced motion requested (L2-042)
 end
 page -> panel : Selected teammate's city, local time, offset, status, weather
 panel --> actor : Panel shows the teammate
-page -> announcer : Set its text to "<name>, <city>, selected." once (L2-040)
+page -> announcer : Set its text to "<name>, <city>, selected." once ("<name>, you, <city>, selected." for the viewer's own pin) (L2-040)
 announcer --> actor : Screen reader speaks the change
 note over layer, announcer
   A minute tick updates the descriptions in place.
