@@ -43,7 +43,7 @@ any other origin.
 **In the `components` library**
 
 - **`GlobePlaceholder`** (`mo-globe-placeholder`) — presentation component with no inputs that
-  draws a flat disc in the sea colour inside a square box. The box takes its size from the
+  draws a plain disc in the quiet fill (`--color-bg-subtle`), with a hairline edge and a slow pulse, inside a square box. The box takes its size from the
   layout (`aspect-ratio: 1`), not from its content, so replacing the placeholder with the 3D
   globe moves nothing (L2-008). It is part of the page's own chunk, because it is shown before
   the globe library has arrived.
@@ -120,7 +120,7 @@ requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-008` | `L1-003` | The globe is a lit, shaded 3D model: land raised from the sea, soft shadows, rounded forms and saturated colour, in the look of a modern animated film, using the brand's colours (sea navy, paper, pin, sun, leaf). Its model and textures are made in Blender, exported to a web format and bundled with the app. |
+| `L2-008` | `L1-003` | The globe is a lit, shaded 3D model: land raised from the sea, soft shadows, rounded forms and saturated colour, in the look of a modern animated film. It has colours of its own, as the mocks draw it: a bright blue ocean with a deeper rim, green land with sand and forest, white ice and cloud, a dusk-shaded night side and an ink outline. The brand's pin and sun mark the people and moments on it. Its model and textures are made in Blender, exported to a web format and bundled with the app. |
 | `L2-010` | `L1-003` | The half of the globe where it is night right now is shaded, from the sun's real position at the current time, and the shading moves as time passes. |
 
 ## Diagrams

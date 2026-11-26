@@ -61,8 +61,8 @@ loading and refreshing are designed in `keep-team-fresh`.
 - **`FilterChips`** (`mo-filter-chips`) — presentation component. It takes `chips` and
   `selected`, and emits `selectedChange`. It is one `radiogroup`: the arrow keys move between
   chips, one chip is in the tab order, and the chosen chip carries `aria-checked` (L2-028).
-  `TeamPage` builds the three chips from `TeamStore.counts`: "All 12", "Working now 4",
-  "Asleep 3".
+  `TeamPage` builds the filter's three tabs from `TeamStore.counts`: "All 12", "Working now 7",
+  "Asleep 2".
 - **`TeamTable`** (`mo-team-table`) — presentation component. It takes `rows` and
   `emptyMessage`, and emits `teammateChosen`. From 768 px it has the columns Person, Location,
   Local time, vs you, Weather and Coming up; below that each row gives the name, the local time
@@ -95,7 +95,7 @@ requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-026` | `L1-009` | The Team screen, "Where everyone is in their day", lists every teammate from west to east: ordered by their time zone's current offset from UTC, then by longitude. Each row gives the teammate's name, city and country, local time, offset from the viewer, weather and next moment. |
+| `L2-026` | `L1-009` | The Team screen, "Where everyone is in their day", lists every teammate from west to east: ordered by their time zone's current offset from UTC, then by longitude. Each row gives the teammate's name with their status in words under it, city and country, local time, offset from the viewer, weather and next moment. |
 | `L2-027` | `L1-009` | Above the list, a day ribbon lays out the 24 hours of a day and places each teammate at the hour they are living through, with working hours and the night marked. |
 | `L2-028` | `L1-009` | The list is filtered by All, Working now or Asleep. Each filter shows how many teammates it holds. |
 

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dialog — Mondino design system</title>
+<meta name="description" content="A question that must be answered before anything else: leaving the team, or leaving unsaved changes.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Component · Overlays</p>
+      <h1>Dialog</h1>
+      <p class="ds-lead">A question that must be answered before anything else: leaving the team, or leaving unsaved changes.</p>
+      <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span><span class="ds-pill">Since v1.0</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#anatomy">Anatomy</a></li><li><a href="#variants">Variants</a></li><li><a href="#sizes">Sizes</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#theming">Theming</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#tokens">Tokens</a></li><li><a href="#code">Code</a></li><li><a href="#sources">Sources</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>A dialog interrupts. Mondino uses it twice only: to confirm removing a pin and leaving a team, and to ask before unsaved settings are dropped. Everything else happens in place. See <a href="../patterns/dialogs-and-overlays.html">dialogs and overlays</a>.</p>
+</section>
+
+<section class="ds-section" id="anatomy"><h2><a href="#anatomy">Anatomy</a></h2>
+<p>Its parts, in reading order:</p><div class="ds-anatomy"><figure class="ds-anatomy__figure"><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-202" aria-describedby="dlg-desc-202" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-202">Leave Northwind?</p></div><div class="dialog__body"><p id="dlg-desc-202">Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.</p></div><div class="dialog__footer"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">Remove my pin and leave</button></div></div></figure><ol class="ds-anatomy__list"><li><div><b>Title</b><small>The question, naming the team</small></div></li><li><div><b>Body</b><small>Exactly what happens, and what can be undone</small></div></li><li><div><b>Safe action</b><small>Cancel; takes focus first</small></div></li><li><div><b>Confirming action</b><small>Says what it does; danger when it removes</small></div></li></ol></div>
+</section>
+
+<section class="ds-section" id="variants"><h2><a href="#variants">Variants</a></h2>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--canvas"><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-23" aria-describedby="dlg-desc-23" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-23">Leave Northwind?</p></div><div class="dialog__body"><p id="dlg-desc-23">Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.</p></div><div class="dialog__footer"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">Remove my pin and leave</button></div></div></div><div class="ds-example__caption"><span>Destructive: a danger button, focus on Cancel</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;div class=&quot;dialog__panel&quot; role=&quot;dialog&quot; aria-modal=&quot;true&quot; aria-labelledby=&quot;dlg-title&quot; aria-describedby=&quot;dlg-desc&quot; style=&quot;max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);&quot;&gt;&lt;div class=&quot;dialog__header&quot;&gt;&lt;p class=&quot;dialog__title&quot; id=&quot;dlg-title&quot;&gt;Leave Northwind?&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;dialog__body&quot;&gt;&lt;p id=&quot;dlg-desc&quot;&gt;Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;dialog__footer&quot;&gt;&lt;button class=&quot;btn&quot; type=&quot;button&quot;&gt;Cancel&lt;/button&gt;&lt;button class=&quot;btn btn--danger&quot; type=&quot;button&quot;&gt;Remove my pin and leave&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--canvas"><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-24" aria-describedby="dlg-desc-24" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-24">Leave without saving?</p></div><div class="dialog__body"><p id="dlg-desc-24">Your changes to temperature and clock haven’t been saved. If you leave now, they’re dropped.</p></div><div class="dialog__footer"><button class="btn" type="button">Leave without saving</button><button class="btn btn--primary" type="button">Keep editing</button></div></div></div><div class="ds-example__caption"><span>Confirm: the safe choice is primary</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;div class=&quot;dialog__panel&quot; role=&quot;dialog&quot; aria-modal=&quot;true&quot; aria-labelledby=&quot;dlg-title&quot; aria-describedby=&quot;dlg-desc&quot; style=&quot;max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);&quot;&gt;&lt;div class=&quot;dialog__header&quot;&gt;&lt;p class=&quot;dialog__title&quot; id=&quot;dlg-title&quot;&gt;Leave without saving?&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;dialog__body&quot;&gt;&lt;p id=&quot;dlg-desc&quot;&gt;Your changes to temperature and clock haven’t been saved. If you leave now, they’re dropped.&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;dialog__footer&quot;&gt;&lt;button class=&quot;btn&quot; type=&quot;button&quot;&gt;Leave without saving&lt;/button&gt;&lt;button class=&quot;btn btn--primary&quot; type=&quot;button&quot;&gt;Keep editing&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details></div>
+</section>
+
+<section class="ds-section" id="sizes" data-na="It has one size."><h2><a href="#sizes">Sizes</a></h2><p class="ds-na">It has one size.</p></section>
+
+<section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
+<div class="ds-matrix"><table><thead><tr><th scope="col">Variant</th><th scope="col">Default</th><th scope="col">Busy</th><th scope="col">Failed</th></tr></thead><tbody><tr><th scope="row">Leave the team</th><td><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-203" aria-describedby="dlg-desc-203" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-203">Leave Northwind?</p></div><div class="dialog__body"><p id="dlg-desc-203">Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.</p></div><div class="dialog__footer"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">Remove my pin and leave</button></div></div></td><td><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-204" aria-describedby="dlg-desc-204" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-204">Leave Northwind?</p></div><div class="dialog__body"><p id="dlg-desc-204">Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.</p></div><div class="dialog__footer"><button class="btn" type="button" disabled>Cancel</button><button class="btn btn--danger" type="button" aria-busy="true" disabled><svg class="icon icon--sm icon--spin" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Removing your pin…</button></div></div></td><td><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-205" aria-describedby="dlg-desc-205" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-205">Leave Northwind?</p></div><div class="dialog__body"><div class="alert alert--danger" role="alert"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><div class="alert__body"><p>We couldn’t remove your pin just now. Nothing has changed — you’re still in Northwind.</p></div></div><p id="dlg-desc-205">Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.</p></div><div class="dialog__footer"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">Try again</button></div></div></td></tr></tbody></table></div>
+<div class="ds-themes"><div data-theme="light"><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-206" aria-describedby="dlg-desc-206" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-206">Leave Northwind?</p></div><div class="dialog__body"><p id="dlg-desc-206">Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.</p></div><div class="dialog__footer"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">Remove my pin and leave</button></div></div></div><div data-theme="dark"><div class="dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dlg-title-207" aria-describedby="dlg-desc-207" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-6);"><div class="dialog__header"><p class="dialog__title" id="dlg-title-207">Leave Northwind?</p></div><div class="dialog__body"><p id="dlg-desc-207">Your pin will be removed from the globe for everyone in Northwind, and Mondino will delete your name, postal code, city and settings for this team. You can join again with the team’s invite link.</p></div><div class="dialog__footer"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">Remove my pin and leave</button></div></div></div></div>
+</section>
+
+<section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
+<p>Under 576 px the dialog is a sheet that rises from the bottom edge, the full width, with its buttons stacked and the confirming action on top. From 576 px it is centred, at most <code>--layout-overlay-max</code> wide, with its buttons in a row at the right.</p>
+</section>
+
+<section class="ds-section" id="theming"><h2><a href="#theming">Theming</a></h2>
+<p>It reads semantic tokens only, so light and dark both come from <code>tokens.css</code>. To re-theme it, override the tokens listed under Tokens at <code>:root</code> or in a <code>[data-theme]</code> block; never write a colour in the component.</p>
+</section>
+
+<section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
+<h3>Role and pattern</h3><p>WAI-ARIA Dialog (modal): <code>role="dialog"</code>, <code>aria-modal="true"</code>, named by its title and described by its body. The page behind is <code>inert</code>. Build it on CDK Dialog; never hand-roll a modal.</p>
+<h3>Keyboard</h3><div class="ds-table-wrap"><table class="ds-table ds-keys"><thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead><tbody><tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd></td><td>Moves between the dialog’s controls and stays inside it</td></tr><tr><td><kbd>Esc</kbd></td><td>Closes it; nothing has changed</td></tr><tr><td><kbd>Enter</kbd></td><td>Activates the focused button</td></tr></tbody></table></div>
+<h3>Focus</h3><p>Opens with focus on the safe action. On closing, focus returns to the button that opened it.</p>
+<h3>Labelling</h3><p>The title is the question; the body is its description. A failure is an alert at the top of the body.</p>
+<h3>Contrast</h3><div class="ds-pair"><span>Body <code>--color-fg-muted</code> on <code>--color-bg-surface-raised</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-muted|--color-bg-surface-raised" data-min="4.5"></span></div>
+<div class="ds-pair"><span>Title <code>--color-fg-default</code> on <code>--color-bg-surface-raised</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-default|--color-bg-surface-raised" data-min="4.5"></span></div>
+<div class="ds-pair"><span>Danger button <code>--color-fg-on-danger</code> on <code>--color-danger-solid</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-on-danger|--color-danger-solid" data-min="4.5"></span></div>
+<h3>Motion</h3><p>It appears in <code>--duration-slow</code>: scaling from the centre, or rising as a sheet. No motion under reduced motion.</p>
+<h3>Touch</h3><p>The target is at least 44 × 44 px (<code>--target-comfortable</code>).</p>
+</section>
+
+<section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
+<p>The title is a question that names the thing: “Leave Northwind?”. The body says exactly what is lost and what is not. Buttons repeat the verb: “Remove my pin and leave”, “Keep editing”. Never “Are you sure?”, “Yes” or “No”.</p>
+</section>
+
+<section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><div class="dialog__footer" style="margin-top: 0;"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">Remove my pin and leave</button></div></div><figcaption>Name what the confirming button does.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="dialog__footer" style="margin-top: 0;"><button class="btn" type="button">Cancel</button><button class="btn btn--danger" type="button">OK</button></div></div><figcaption>Confirm a deletion with “OK”.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><div class="save-bar" role="status" style="position: static; translate: none; width: 100%;"><span class="save-bar__text"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Saved — your pin is up to date</span></div></div><figcaption>Confirm a save in place, in the save bar.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="dialog__panel" style="max-width: var(--layout-overlay-max); border-radius: var(--dialog-radius); padding: var(--space-5);"><p class="dialog__title">Saved</p><div class="dialog__footer"><button class="btn btn--primary" type="button">OK</button></div></div></div><figcaption>Interrupt with a dialog to say something worked.</figcaption></figure></div>
+</section>
+
+<section class="ds-section" id="tokens"><h2><a href="#tokens">Tokens</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Part</th><th scope="col">Token</th><th scope="col">Light</th><th scope="col">Dark</th></tr></thead><tbody><tr><td>Surface</td><td><code>--dialog-bg</code></td><td><span class="ds-swatch-cell" data-theme="light"><i data-token="--dialog-bg" data-swatch></i><span data-token="--dialog-bg"></span></span></td><td><span class="ds-swatch-cell" data-theme="dark"><i data-token="--dialog-bg" data-swatch></i><span data-token="--dialog-bg"></span></span></td></tr><tr><td>Radius</td><td><code>--dialog-radius</code></td><td><span data-theme="light"><span data-token="--dialog-radius"></span></span></td><td><span data-theme="dark"><span data-token="--dialog-radius"></span></span></td></tr><tr><td>Backdrop</td><td><code>--color-bg-backdrop</code></td><td><span class="ds-swatch-cell" data-theme="light"><i data-token="--color-bg-backdrop" data-swatch></i><span data-token="--color-bg-backdrop"></span></span></td><td><span class="ds-swatch-cell" data-theme="dark"><i data-token="--color-bg-backdrop" data-swatch></i><span data-token="--color-bg-backdrop"></span></span></td></tr><tr><td>Shadow</td><td><code>--shadow-4</code></td><td><span data-theme="light"><span data-token="--shadow-4"></span></span></td><td><span data-theme="dark"><span data-token="--shadow-4"></span></span></td></tr><tr><td>Maximum width</td><td><code>--layout-overlay-max</code></td><td><span data-theme="light"><span data-token="--layout-overlay-max"></span></span></td><td><span data-theme="dark"><span data-token="--layout-overlay-max"></span></span></td></tr><tr><td>Layer</td><td><code>--z-modal</code></td><td><span data-theme="light"><span data-token="--z-modal"></span></span></td><td><span data-theme="dark"><span data-token="--z-modal"></span></span></td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="code"><h2><a href="#code">Code</a></h2>
+<pre><code>&lt;div class=&quot;backdrop&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;dialog&quot; role=&quot;dialog&quot; aria-modal=&quot;true&quot; aria-labelledby=&quot;dlg-title&quot; aria-describedby=&quot;dlg-desc&quot;&gt;
+  &lt;div class=&quot;dialog__panel&quot;&gt;
+    &lt;div class=&quot;dialog__header&quot;&gt;&lt;h2 class=&quot;dialog__title&quot; id=&quot;dlg-title&quot;&gt;Leave Northwind?&lt;/h2&gt;&lt;/div&gt;
+    &lt;div class=&quot;dialog__body&quot;&gt;&lt;p id=&quot;dlg-desc&quot;&gt;Your pin will be removed from the globe for everyone in Northwind…&lt;/p&gt;&lt;/div&gt;
+    &lt;div class=&quot;dialog__footer&quot;&gt;&lt;button class=&quot;btn&quot; type=&quot;button&quot; autofocus&gt;Cancel&lt;/button&gt;&lt;button class=&quot;btn btn--danger&quot; type=&quot;button&quot;&gt;Remove my pin and leave&lt;/button&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Class / attribute</th><th scope="col">Effect</th></tr></thead><tbody><tr><td><code>.backdrop</code></td><td>The scrim over the inert page.</td></tr><tr><td><code>.dialog</code></td><td>Positions the panel: bottom sheet under 576 px, centred from 576 px.</td></tr><tr><td><code>.dialog__panel</code></td><td>The surface.</td></tr><tr><td><code>.dialog__title / __body / __footer</code></td><td>The question, what happens, the buttons.</td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
+<p>Extracted from these mocks:</p>
+<ul><li><a href="../../mocks/dialogs/leave-team/default.html">dialogs/leave-team/default</a></li><li><a href="../../mocks/dialogs/leave-team/busy.html">dialogs/leave-team/busy</a></li><li><a href="../../mocks/dialogs/leave-team/failed.html">dialogs/leave-team/failed</a></li><li><a href="../../mocks/dialogs/unsaved-changes/default.html">dialogs/unsaved-changes/default</a></li></ul>
+<p>Drift fixed during extraction: none; every mock used the kit’s classes.</p>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>

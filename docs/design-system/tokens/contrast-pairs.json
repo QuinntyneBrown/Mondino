@@ -1,0 +1,347 @@
+{
+  "$comment": "Foreground/background token pairs the components rely on, checked by check_contrast.py in both themes. 4.5:1 is WCAG 2.2 AA for text (1.4.3); 3:1 is AA for large text, the edge of a control and a focus ring (1.4.11).",
+  "pairs": [
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "text on the page"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "secondary text on the page"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "text on cards, the panel, inputs"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "secondary text on cards, the panel, inputs"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-surface-raised",
+      "min": 4.5,
+      "note": "text on dialogs"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-surface-raised",
+      "min": 4.5,
+      "note": "secondary text on dialogs"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-subtle",
+      "min": 4.5,
+      "note": "text on quiet fills, skeleton, plain emblem"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-subtle",
+      "min": 4.5,
+      "note": "secondary text on quiet fills, skeleton, plain emblem"
+    },
+    {
+      "fg": "--color-fg-link",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "links on the page"
+    },
+    {
+      "fg": "--color-fg-link",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "\"All moments\" in the panel"
+    },
+    {
+      "fg": "--color-fg-link-hover",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "hovered link"
+    },
+    {
+      "fg": "--color-fg-on-accent",
+      "bg": "--color-accent",
+      "min": 4.5,
+      "note": "primary button, chosen tab, pressed chip"
+    },
+    {
+      "fg": "--color-fg-on-accent",
+      "bg": "--color-accent-hover",
+      "min": 4.5,
+      "note": "primary button, hover"
+    },
+    {
+      "fg": "--color-fg-on-accent",
+      "bg": "--color-accent-active",
+      "min": 4.5,
+      "note": "primary button, active"
+    },
+    {
+      "fg": "--color-fg-inverse",
+      "bg": "--color-bg-inverse",
+      "min": 4.5,
+      "note": "toast and save bar text"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "button on inverse"
+    },
+    {
+      "fg": "--color-border-strong",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "edge of an input, a chip, the switch track when off"
+    },
+    {
+      "fg": "--color-border-strong",
+      "bg": "--color-bg-canvas",
+      "min": 3,
+      "note": "edge of a secondary button on the page"
+    },
+    {
+      "fg": "--color-focus-ring",
+      "bg": "--color-bg-canvas",
+      "min": 3,
+      "note": "focus ring on the page"
+    },
+    {
+      "fg": "--color-focus-ring",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "focus ring on a surface"
+    },
+    {
+      "fg": "--color-fg-people",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "pin as text on the page"
+    },
+    {
+      "fg": "--color-fg-people",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "pin as text on a surface"
+    },
+    {
+      "fg": "--color-people",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "selected pin ring, overlap bar fill"
+    },
+    {
+      "fg": "--color-fg-on-moment",
+      "bg": "--color-moment",
+      "min": 4.5,
+      "note": "today's moment, a moment marker's emblem"
+    },
+    {
+      "fg": "--color-fg-moment-muted",
+      "bg": "--color-moment",
+      "min": 4.5,
+      "note": "detail on today's moment"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-moment-subtle",
+      "min": 4.5,
+      "note": "moment card and pill text; early morning and evening status"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-moment-subtle",
+      "min": 4.5,
+      "note": "moment card kind and detail"
+    },
+    {
+      "fg": "--color-fg-working",
+      "bg": "--color-working-subtle",
+      "min": 4.5,
+      "note": "\"Working hours\" status"
+    },
+    {
+      "fg": "--color-working",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "switch track when on, working dot"
+    },
+    {
+      "fg": "--color-fg-on-asleep",
+      "bg": "--color-asleep-bg",
+      "min": 4.5,
+      "note": "\"Probably asleep\" status"
+    },
+    {
+      "fg": "--color-pin-label-fg",
+      "bg": "--color-pin-label-bg",
+      "min": 4.5,
+      "note": "pin label"
+    },
+    {
+      "fg": "--palette-paper",
+      "bg": "--palette-ink",
+      "min": 4.5,
+      "note": "lifted pin label, in both themes"
+    },
+    {
+      "fg": "--palette-sun",
+      "bg": "--palette-ink",
+      "min": 4.5,
+      "note": "moment line in a lifted pin label; emblem on today's moment"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-1",
+      "min": 4.5,
+      "note": "initials on teammate colour 1"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-2",
+      "min": 4.5,
+      "note": "initials on teammate colour 2"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-3",
+      "min": 4.5,
+      "note": "initials on teammate colour 3"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-4",
+      "min": 4.5,
+      "note": "initials on teammate colour 4"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-5",
+      "min": 4.5,
+      "note": "initials on teammate colour 5"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-6",
+      "min": 4.5,
+      "note": "initials on teammate colour 6"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-7",
+      "min": 4.5,
+      "note": "initials on teammate colour 7"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-8",
+      "min": 4.5,
+      "note": "initials on teammate colour 8"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-9",
+      "min": 4.5,
+      "note": "initials on teammate colour 9"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-10",
+      "min": 4.5,
+      "note": "initials on teammate colour 10"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-11",
+      "min": 4.5,
+      "note": "initials on teammate colour 11"
+    },
+    {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-12",
+      "min": 4.5,
+      "note": "initials on teammate colour 12"
+    },
+    {
+      "fg": "--color-info-fg",
+      "bg": "--color-info-bg",
+      "min": 4.5,
+      "note": "info alert text"
+    },
+    {
+      "fg": "--color-success-fg",
+      "bg": "--color-success-bg",
+      "min": 4.5,
+      "note": "success alert text"
+    },
+    {
+      "fg": "--color-danger-fg",
+      "bg": "--color-danger-bg",
+      "min": 4.5,
+      "note": "danger alert text"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-warning-bg",
+      "min": 4.5,
+      "note": "warning alert and banner text"
+    },
+    {
+      "fg": "--color-warning-icon",
+      "bg": "--color-warning-bg",
+      "min": 3,
+      "note": "warning icon"
+    },
+    {
+      "fg": "--color-danger-icon",
+      "bg": "--color-danger-bg",
+      "min": 3,
+      "note": "danger icon"
+    },
+    {
+      "fg": "--color-danger-fg",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "field error and lookup error on the page"
+    },
+    {
+      "fg": "--color-danger-fg",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "field error on a surface"
+    },
+    {
+      "fg": "--color-danger-border",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "edge of an invalid input"
+    },
+    {
+      "fg": "--color-fg-on-danger",
+      "bg": "--color-danger-solid",
+      "min": 4.5,
+      "note": "\"Remove my pin and leave\""
+    },
+    {
+      "fg": "--color-fg-on-danger",
+      "bg": "--color-danger-solid-hover",
+      "min": 4.5,
+      "note": "danger button, hover"
+    },
+    {
+      "fg": "--color-fg-inverse-accent",
+      "bg": "--color-bg-inverse",
+      "min": 3,
+      "note": "icon in a toast and the save bar"
+    }
+  ]
+}

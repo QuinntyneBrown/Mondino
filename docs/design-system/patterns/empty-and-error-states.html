@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empty and error states — Mondino design system</title>
+<meta name="description" content="What Mondino says when there is nothing to show, when it could not load, and when a screen is not for this person.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Pattern</p>
+      <h1>Empty and error states</h1>
+      <p class="ds-lead">What Mondino says when there is nothing to show, when it could not load, and when a screen is not for this person.</p>
+      <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#when">When to use</a></li><li><a href="#structure">Structure</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#sources">Sources</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>An empty screen still tells the truth and offers a way forward. Mondino distinguishes four cases and words each differently.</p>
+</section>
+
+<section class="ds-section" id="when"><h2><a href="#when">When to use</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Case</th><th scope="col">What it says</th><th scope="col">Where</th></tr></thead><tbody><tr><td>A team of one</td><td>“Just you, for now”, with the invite link to copy</td><td>Globe, Team</td></tr><tr><td>A filter found nothing</td><td>One line in the list’s own words; the filter stays in view</td><td>Team, Moments</td></tr><tr><td>Nothing exists yet</td><td>What will appear and when</td><td>Moments with nothing coming up</td></tr><tr><td>Could not load</td><td>“We couldn’t load…”, that nothing is lost, “Try again”</td><td>Every screen</td></tr><tr><td>Not for you</td><td>What you need: an invite link</td><td>Any address, for someone in no team</td></tr><tr><td>Gone</td><td>What happened and how to come back</td><td>After leaving; a link that cannot be used; an address that leads nowhere</td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="structure"><h2><a href="#structure">Structure</a></h2>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><div class="empty empty--error" style="padding-block: var(--space-6);"><span class="empty__icon"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057"/><path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78"/><path d="m2 2 20 20"/></svg></span><p class="empty__title">We couldn’t load your team</p><p class="empty__text">Mondino didn’t answer just now. Nothing is lost — your pin and your team are as you left them.</p><div class="empty__actions"><button class="btn btn--primary" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>Try again</button><a class="btn" href="../../mocks/pages/globe/default.html">Back to the globe</a></div></div></div><div class="ds-example__caption"><span>Icon, title, one sentence, one main action and at most one other</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;div class=&quot;empty empty--error&quot; style=&quot;padding-block: var(--space-6);&quot;&gt;&lt;span class=&quot;empty__icon&quot;&gt;&lt;svg class=&quot;icon&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;/span&gt;&lt;p class=&quot;empty__title&quot;&gt;We couldn’t load your team&lt;/p&gt;&lt;p class=&quot;empty__text&quot;&gt;Mondino didn’t answer just now. Nothing is lost — your pin and your team are as you left them.&lt;/p&gt;&lt;div class=&quot;empty__actions&quot;&gt;&lt;button class=&quot;btn btn--primary&quot; type=&quot;button&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;Try again&lt;/button&gt;&lt;a class=&quot;btn&quot; href=&quot;../../mocks/pages/globe/default.html&quot;&gt;Back to the globe&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details></div>
+</section>
+
+<section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
+<p>The header stays in every case where the person is a teammate, so the other screens are one step away. A page for someone in no team has the bare header and shows no team’s name, count or pins.</p>
+</section>
+
+<section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
+<p>Centred under the header, at most <code>--layout-container-message</code> wide, at every width. Buttons wrap.</p>
+</section>
+
+<section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
+<ul><li>When the message is the whole page, its title is the <code>&lt;h1&gt;</code>.</li><li>A filter’s empty line is a polite status, so choosing the filter is answered aloud.</li><li>An error page’s “Try again” is a button; “Back to the globe” is a link.</li></ul>
+</section>
+
+<section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
+<p>Never a status code, never “Something went wrong” alone, never blame. An invite link that cannot be used says it may have been withdrawn, and whom to ask. A lookup that failed says the postal code may be fine.</p>
+</section>
+
+<section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><div class="empty" style="padding-block: var(--space-6);"><span class="empty__icon"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg></span><p class="empty__title">You need an invite link</p><p class="empty__text">Mondino shows a team to its own teammates. Ask a teammate for their team’s invite link.</p></div></div><figcaption>Say what is needed, without showing any team’s data.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="empty" style="padding-block: var(--space-6);"><span class="empty__icon"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><p class="empty__title">Access denied</p><p class="empty__text">You are not a member of Northwind (12 teammates).</p></div></div><figcaption>Reveal a team’s name or size to someone outside it.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p class="list-note" style="padding: var(--space-4) 0; width: 100%;">Nothing of this kind coming up for your team.</p></div><figcaption>Answer a filter in a line.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="empty" style="padding-block: var(--space-6);"><span class="empty__icon"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></svg></span><p class="empty__title">No moments</p><p class="empty__text">There are no moments.</p></div></div><figcaption>Replace the list with a full empty state when only a filter is empty.</figcaption></figure></div>
+</section>
+
+<section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
+<p>Composed from these mocks:</p><ul><li><a href="../../mocks/pages/globe/empty.html">pages/globe/empty</a></li><li><a href="../../mocks/pages/globe/error.html">pages/globe/error</a></li><li><a href="../../mocks/pages/team/no-results.html">pages/team/no-results</a></li><li><a href="../../mocks/pages/moments/empty.html">pages/moments/empty</a></li><li><a href="../../mocks/pages/moments/no-results.html">pages/moments/no-results</a></li><li><a href="../../mocks/pages/no-team/default.html">pages/no-team/default</a></li><li><a href="../../mocks/pages/left-team/default.html">pages/left-team/default</a></li><li><a href="../../mocks/pages/not-found/default.html">pages/not-found/default</a></li><li><a href="../../mocks/pages/join/invite-unusable.html">pages/join/invite-unusable</a></li><li><a href="../../mocks/pages/join/error.html">pages/join/error</a></li></ul>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>

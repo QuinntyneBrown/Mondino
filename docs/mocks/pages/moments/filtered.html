@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moments · filtered — Mondino mocks</title>
+<meta name="mock:kind" content="page">
+<meta name="mock:screen" content="moments">
+<meta name="mock:state" content="filtered">
+<meta name="mock:requirements" content="L2-007 L2-020 L2-029 L2-030 L2-037">
+<meta name="description" content="Moments filtered to Formula 1: only races, grouped as before; a group with nothing in it has no heading.">
+<link rel="stylesheet" href="../../assets/tokens.css">
+<link rel="stylesheet" href="../../assets/ui.css">
+<link rel="stylesheet" href="../../assets/mock.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="app-header">
+  <a class="brand" href="../../pages/globe/default.html" aria-label="Mondino home"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark">mondino</span></a>
+  <nav class="segmented" aria-label="Primary">
+    <a class="segmented__option" href="../../pages/globe/default.html">Globe</a>
+    <a class="segmented__option" href="../../pages/team/default.html">Team</a>
+    <a class="segmented__option" href="../../pages/moments/default.html" aria-current="page">Moments</a>
+  </nav>
+  <div class="app-header__actions">
+    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <a class="app-header__me" href="../../pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
+  </div>
+</header>
+<main id="main" class="page page--reading">
+  <h1>Moments</h1>
+  <p class="page__lead">Holidays, races and local happenings where your teammates live.</p>
+  <div class="chips" role="group" aria-label="Filter by kind">
+    <button class="chip" type="button" aria-pressed="false">Everything</button><button class="chip" type="button" aria-pressed="false"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg>Holiday</button><button class="chip" type="button" aria-pressed="true"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg>Formula 1</button><button class="chip" type="button" aria-pressed="false"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>Local event</button><button class="chip" type="button" aria-pressed="false"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg>Sport</button>
+  </div>
+  <section class="moment-group" aria-labelledby="group-later">
+    <h2 class="moment-group__title" id="group-later">Later</h2>
+    <ul>
+      <li><a class="moment-row" href="../../pages/globe/selected.html">
+        <span class="date-block"><span class="date-block__weekday">Sun</span><span class="date-block__day tnum">9</span><span class="date-block__month">Nov</span></span>
+        <span><span class="moment-row__kind"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg>Formula 1 · In 13 days</span><span class="moment-row__title" style="display: block;">São Paulo Grand Prix</span><span class="moment-row__detail" style="display: block;">Race day at Interlagos, 14:00 local</span></span>
+        <span class="moment-row__who"><span class="avatar avatar--xs hue-10" aria-hidden="true">CM</span>Chloé · São Paulo</span>
+      </a></li>
+      <li><a class="moment-row" href="../../pages/globe/selected-self.html">
+        <span class="date-block"><span class="date-block__weekday">Wed</span><span class="date-block__day tnum">12</span><span class="date-block__month">Nov</span></span>
+        <span><span class="moment-row__kind"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg>Formula 1 · In 16 days</span><span class="moment-row__title" style="display: block;">Monza tickets on sale</span><span class="moment-row__detail" style="display: block;">Italian GP 2026 general sale opens at 10:00</span></span>
+        <span class="moment-row__who"><span class="avatar avatar--xs hue-1" aria-hidden="true">SB</span>Sofia · Milan</span>
+      </a></li>
+      <li><a class="moment-row" href="../../pages/globe/sharing-off.html">
+        <span class="date-block"><span class="date-block__weekday">Sun</span><span class="date-block__day tnum">7</span><span class="date-block__month">Dec</span></span>
+        <span><span class="moment-row__kind"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg>Formula 1 · In 41 days</span><span class="moment-row__title" style="display: block;">Abu Dhabi Grand Prix</span><span class="moment-row__detail" style="display: block;">Season finale at Yas Marina, 17:00 local</span></span>
+        <span class="moment-row__who"><span class="avatar avatar--xs hue-6" aria-hidden="true">AA</span>Ahmed · Dubai</span>
+      </a></li>
+    </ul>
+  </section>
+</main>
+
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Moments</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html">default</a></li>
+    <li><a href="filtered.html" aria-current="page">filtered</a></li>
+    <li><a href="no-results.html">no-results</a></li>
+    <li><a href="loading.html">loading</a></li>
+    <li><a href="empty.html">empty</a></li>
+    <li><a href="error.html">error</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

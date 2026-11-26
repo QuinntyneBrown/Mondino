@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day ribbon — Mondino design system</title>
+<meta name="description" content="The 24 hours of a day, with each teammate placed at the hour they are living through right now.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Component · Mondino</p>
+      <h1>Day ribbon</h1>
+      <p class="ds-lead">The 24 hours of a day, with each teammate placed at the hour they are living through right now.</p>
+      <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span><span class="ds-pill">Since v1.0</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#anatomy">Anatomy</a></li><li><a href="#variants">Variants</a></li><li><a href="#sizes">Sizes</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#theming">Theming</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#tokens">Tokens</a></li><li><a href="#code">Code</a></li><li><a href="#sources">Sources</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>The ribbon heads the Team screen. It answers “where is everyone in their day?” at a glance: night, morning, working hours and evening are bands, and each teammate is an <a href="avatar.html">avatar</a> at their local hour. Teammates at the same hour stack in rows so each can be chosen.</p>
+</section>
+
+<section class="ds-section" id="anatomy"><h2><a href="#anatomy">Anatomy</a></h2>
+<p>Its parts, in reading order:</p><div class="ds-anatomy" style="grid-template-columns: minmax(0, 1fr);"><figure class="ds-anatomy__figure" style="padding: var(--space-6) var(--space-4);"><div class="day-ribbon" style="margin-top: 0; width: 100%;"><div class="day-ribbon__track" style="--rows: 5"><span class="day-ribbon__band day-ribbon__band--night" style="--from: 0.00%; --span: 29.17%"><span>Night</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 29.17%; --span: 8.33%"><span>Morning</span></span><span class="day-ribbon__band day-ribbon__band--working" style="--from: 37.50%; --span: 37.50%"><span>Working hours</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 75.00%; --span: 20.83%"><span>Evening</span></span><span class="day-ribbon__band day-ribbon__band--night" style="--from: 95.83%; --span: 4.17%"></span><ul><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected-asleep.html" style="--at: 4.51%; --row: 0" title="Noah Williams · Melbourne" aria-label="Noah Williams, 01:05"><span class="avatar hue-9" aria-hidden="true">NW</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 33.68%; --row: 0" title="Tomás Herrera · Mexico City" aria-label="Tomás Herrera, 08:05"><span class="avatar hue-11" aria-hidden="true">TH</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 37.85%; --row: 1" title="Jordan Lee · Austin" aria-label="Jordan Lee, 09:05"><span class="avatar hue-12" aria-hidden="true">JL</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 46.18%; --row: 0" title="Chloé Martin · São Paulo" aria-label="Chloé Martin, 11:05"><span class="avatar hue-10" aria-hidden="true">CM</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 58.68%; --row: 0" title="Liam O’Connor · Dublin" aria-label="Liam O’Connor, 14:05"><span class="avatar hue-3" aria-hidden="true">LO</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 58.68%; --row: 1" title="Kwame Mensah · Accra" aria-label="Kwame Mensah, 14:05"><span class="avatar hue-5" aria-hidden="true">KM</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected-self.html" style="--at: 62.85%; --row: 2" title="Sofia Bianchi · Milan" aria-label="Sofia Bianchi, 15:05"><span class="avatar hue-1" aria-hidden="true">SB</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 62.85%; --row: 3" title="Lena Fischer · Berlin" aria-label="Lena Fischer, 15:05"><span class="avatar hue-4" aria-hidden="true">LF</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 62.85%; --row: 4" title="Mara Lindqvist · Stockholm" aria-label="Mara Lindqvist, 15:05"><span class="avatar hue-2" aria-hidden="true">ML</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/sharing-off.html" style="--at: 75.35%; --row: 0" title="Ahmed Al-Sayed · Dubai" aria-label="Ahmed Al-Sayed, 18:05"><span class="avatar hue-6" aria-hidden="true">AA</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 81.60%; --row: 1" title="Priya Raman · Bengaluru" aria-label="Priya Raman, 19:35"><span class="avatar hue-7" aria-hidden="true">PR</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 96.18%; --row: 0" title="Aiko Tanaka · Tokyo" aria-label="Aiko Tanaka, 23:05"><span class="avatar hue-8" aria-hidden="true">AT</span></a></li></ul></div><ul class="day-ribbon__scale tnum" aria-hidden="true"><li>00:00</li><li>03:00</li><li>06:00</li><li>09:00</li><li>12:00</li><li>15:00</li><li>18:00</li><li>21:00</li><li>00:00</li></ul></div></figure><ol class="ds-anatomy__list"><li><div><b>Night band</b><small>23:00 to 07:00, labelled</small></div></li><li><div><b>Working-hours band</b><small>09:00 to 18:00, on leaf, labelled</small></div></li><li><div><b>Marker</b><small>A teammate at their local hour</small></div></li><li><div><b>Scale</b><small>Every three hours; every six on a phone</small></div></li></ol></div>
+</section>
+
+<section class="ds-section" id="variants"><h2><a href="#variants">Variants</a></h2>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack ds-example__canvas--canvas"><div class="day-ribbon" style="margin-top: 0; width: 100%;"><div class="day-ribbon__track" style="--rows: 3"><span class="day-ribbon__band day-ribbon__band--night" style="--from: 0.00%; --span: 29.17%"><span>Night</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 29.17%; --span: 8.33%"><span>Morning</span></span><span class="day-ribbon__band day-ribbon__band--working" style="--from: 37.50%; --span: 37.50%"><span>Working hours</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 75.00%; --span: 20.83%"><span>Evening</span></span><span class="day-ribbon__band day-ribbon__band--night" style="--from: 95.83%; --span: 4.17%"></span><ul><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 58.68%; --row: 0" title="Liam O’Connor · Dublin" aria-label="Liam O’Connor, 14:05"><span class="avatar hue-3" aria-hidden="true">LO</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected-self.html" style="--at: 62.85%; --row: 1" title="Sofia Bianchi · Milan" aria-label="Sofia Bianchi, 15:05"><span class="avatar hue-1" aria-hidden="true">SB</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 62.85%; --row: 2" title="Mara Lindqvist · Stockholm" aria-label="Mara Lindqvist, 15:05"><span class="avatar hue-2" aria-hidden="true">ML</span></a></li></ul></div><ul class="day-ribbon__scale tnum" aria-hidden="true"><li>00:00</li><li>03:00</li><li>06:00</li><li>09:00</li><li>12:00</li><li>15:00</li><li>18:00</li><li>21:00</li><li>00:00</li></ul></div></div><div class="ds-example__caption"><span>A small team: one row is enough</span></div></div>
+</section>
+
+<section class="ds-section" id="sizes" data-na="It has one size."><h2><a href="#sizes">Sizes</a></h2><p class="ds-na">It has one size.</p></section>
+
+<section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
+<div class="ds-matrix"><table><thead><tr><th scope="col">Variant</th><th scope="col">Marker</th><th scope="col">Marker, hover</th><th scope="col">Marker, focus</th></tr></thead><tbody><tr><th scope="row">Marker</th><td><span class="avatar hue-11" aria-hidden="true">TH</span></td><td><span style="scale: 1.1; display: inline-flex;"><span class="avatar hue-11" aria-hidden="true">TH</span></span></td><td><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="position: static; translate: none;" data-state="focus" aria-label="Tomás Herrera, 08:05"><span class="avatar hue-11" aria-hidden="true">TH</span></a></td></tr></tbody></table></div>
+<div class="ds-themes"><div data-theme="light"><div class="day-ribbon" style="margin-top: 0; width: 100%;"><div class="day-ribbon__track" style="--rows: 1"><span class="day-ribbon__band day-ribbon__band--night" style="--from: 0.00%; --span: 29.17%"><span>Night</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 29.17%; --span: 8.33%"><span>Morning</span></span><span class="day-ribbon__band day-ribbon__band--working" style="--from: 37.50%; --span: 37.50%"><span>Working hours</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 75.00%; --span: 20.83%"><span>Evening</span></span><span class="day-ribbon__band day-ribbon__band--night" style="--from: 95.83%; --span: 4.17%"></span><ul><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 33.68%; --row: 0" title="Tomás Herrera · Mexico City" aria-label="Tomás Herrera, 08:05"><span class="avatar hue-11" aria-hidden="true">TH</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 46.18%; --row: 0" title="Chloé Martin · São Paulo" aria-label="Chloé Martin, 11:05"><span class="avatar hue-10" aria-hidden="true">CM</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected-self.html" style="--at: 62.85%; --row: 0" title="Sofia Bianchi · Milan" aria-label="Sofia Bianchi, 15:05"><span class="avatar hue-1" aria-hidden="true">SB</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/sharing-off.html" style="--at: 75.35%; --row: 0" title="Ahmed Al-Sayed · Dubai" aria-label="Ahmed Al-Sayed, 18:05"><span class="avatar hue-6" aria-hidden="true">AA</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 96.18%; --row: 0" title="Aiko Tanaka · Tokyo" aria-label="Aiko Tanaka, 23:05"><span class="avatar hue-8" aria-hidden="true">AT</span></a></li></ul></div><ul class="day-ribbon__scale tnum" aria-hidden="true"><li>00:00</li><li>03:00</li><li>06:00</li><li>09:00</li><li>12:00</li><li>15:00</li><li>18:00</li><li>21:00</li><li>00:00</li></ul></div></div><div data-theme="dark"><div class="day-ribbon" style="margin-top: 0; width: 100%;"><div class="day-ribbon__track" style="--rows: 1"><span class="day-ribbon__band day-ribbon__band--night" style="--from: 0.00%; --span: 29.17%"><span>Night</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 29.17%; --span: 8.33%"><span>Morning</span></span><span class="day-ribbon__band day-ribbon__band--working" style="--from: 37.50%; --span: 37.50%"><span>Working hours</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 75.00%; --span: 20.83%"><span>Evening</span></span><span class="day-ribbon__band day-ribbon__band--night" style="--from: 95.83%; --span: 4.17%"></span><ul><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 33.68%; --row: 0" title="Tomás Herrera · Mexico City" aria-label="Tomás Herrera, 08:05"><span class="avatar hue-11" aria-hidden="true">TH</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 46.18%; --row: 0" title="Chloé Martin · São Paulo" aria-label="Chloé Martin, 11:05"><span class="avatar hue-10" aria-hidden="true">CM</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected-self.html" style="--at: 62.85%; --row: 0" title="Sofia Bianchi · Milan" aria-label="Sofia Bianchi, 15:05"><span class="avatar hue-1" aria-hidden="true">SB</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/sharing-off.html" style="--at: 75.35%; --row: 0" title="Ahmed Al-Sayed · Dubai" aria-label="Ahmed Al-Sayed, 18:05"><span class="avatar hue-6" aria-hidden="true">AA</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 96.18%; --row: 0" title="Aiko Tanaka · Tokyo" aria-label="Aiko Tanaka, 23:05"><span class="avatar hue-8" aria-hidden="true">AT</span></a></li></ul></div><ul class="day-ribbon__scale tnum" aria-hidden="true"><li>00:00</li><li>03:00</li><li>06:00</li><li>09:00</li><li>12:00</li><li>15:00</li><li>18:00</li><li>21:00</li><li>00:00</li></ul></div></div></div>
+</section>
+
+<section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
+<p>The ribbon always fits the width; it never scrolls sideways. Under 768 px markers are 26 px and the “Morning” and “Evening” labels are dropped, keeping “Night” and “Working hours”. Under 576 px the scale shows every six hours. Markers within about two and a half hours of each other stack in rows, and the track grows to hold them.</p>
+</section>
+
+<section class="ds-section" id="theming"><h2><a href="#theming">Theming</a></h2>
+<p>It reads semantic tokens only, so light and dark both come from <code>tokens.css</code>. To re-theme it, override the tokens listed under Tokens at <code>:root</code> or in a <code>[data-theme]</code> block; never write a colour in the component.</p>
+</section>
+
+<section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
+<h3>Role and pattern</h3><p>A section with a hidden heading, holding a list of links. Each marker is a link named with the teammate and their local time.</p>
+<h3>Keyboard</h3><div class="ds-table-wrap"><table class="ds-table ds-keys"><thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead><tbody><tr><td><kbd>Tab</kbd></td><td>Moves marker to marker, in order of local hour</td></tr><tr><td><kbd>Enter</kbd></td><td>Opens the Globe with that teammate’s pin selected</td></tr></tbody></table></div>
+<h3>Focus</h3><p>The shared ring around the marker.</p>
+<h3>Labelling</h3><p>Bands are named in text, not by colour alone. A teammate who hides their status outside working hours is still placed by their hour.</p>
+<h3>Contrast</h3><div class="ds-pair"><span>Band label on leaf <code>--color-fg-muted</code> on <code>--color-working-subtle</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-muted|--color-working-subtle" data-min="4.5"></span></div>
+<div class="ds-pair"><span>Band label on soft sun <code>--color-fg-muted</code> on <code>--color-moment-subtle</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-muted|--color-moment-subtle" data-min="4.5"></span></div>
+<h3>Motion</h3><p>A marker grows slightly when pointed at. Markers move as the clock ticks, without animation.</p>
+<h3>Touch</h3><p>Markers are 26 px drawn on a phone; rows are 40 px apart so neighbours do not overlap.</p>
+</section>
+
+<section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
+<p>Band labels: “Night”, “Morning”, “Working hours”, “Evening”. The scale follows the viewer’s clock: “09:00” or “9 am”.</p>
+</section>
+
+<section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><div class="day-ribbon" style="margin-top: 0; width: 100%;"><div class="day-ribbon__track" style="--rows: 3"><span class="day-ribbon__band day-ribbon__band--night" style="--from: 0.00%; --span: 29.17%"><span>Night</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 29.17%; --span: 8.33%"><span>Morning</span></span><span class="day-ribbon__band day-ribbon__band--working" style="--from: 37.50%; --span: 37.50%"><span>Working hours</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 75.00%; --span: 20.83%"><span>Evening</span></span><span class="day-ribbon__band day-ribbon__band--night" style="--from: 95.83%; --span: 4.17%"></span><ul><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected-self.html" style="--at: 62.85%; --row: 0" title="Sofia Bianchi · Milan" aria-label="Sofia Bianchi, 15:05"><span class="avatar hue-1" aria-hidden="true">SB</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 62.85%; --row: 1" title="Lena Fischer · Berlin" aria-label="Lena Fischer, 15:05"><span class="avatar hue-4" aria-hidden="true">LF</span></a></li><li><a class="day-ribbon__marker" href="../../mocks/pages/globe/selected.html" style="--at: 62.85%; --row: 2" title="Mara Lindqvist · Stockholm" aria-label="Mara Lindqvist, 15:05"><span class="avatar hue-2" aria-hidden="true">ML</span></a></li></ul></div><ul class="day-ribbon__scale tnum" aria-hidden="true"><li>00:00</li><li>03:00</li><li>06:00</li><li>09:00</li><li>12:00</li><li>15:00</li><li>18:00</li><li>21:00</li><li>00:00</li></ul></div></div><figcaption>Stack teammates at the same hour so each is visible.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><span class="avatar-group"><span class="avatar hue-1" aria-hidden="true">SB</span><span class="avatar hue-4" aria-hidden="true">LF</span><span class="avatar hue-2" aria-hidden="true">ML</span></span></div><figcaption>Pile them on one spot.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><span class="day-ribbon__band day-ribbon__band--working" style="position: static; display: block; width: 100%; padding: var(--space-2);"><span>Working hours</span></span></div><figcaption>Label the working-hours band.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><span class="day-ribbon__band day-ribbon__band--working" style="position: static; display: block; width: 100%; height: var(--space-8);"></span></div><figcaption>Leave green to mean working hours by itself.</figcaption></figure></div>
+</section>
+
+<section class="ds-section" id="tokens"><h2><a href="#tokens">Tokens</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Part</th><th scope="col">Token</th><th scope="col">Light</th><th scope="col">Dark</th></tr></thead><tbody><tr><td>Night band</td><td><code>--color-night-band</code></td><td><span class="ds-swatch-cell" data-theme="light"><i data-token="--color-night-band" data-swatch></i><span data-token="--color-night-band"></span></span></td><td><span class="ds-swatch-cell" data-theme="dark"><i data-token="--color-night-band" data-swatch></i><span data-token="--color-night-band"></span></span></td></tr><tr><td>Working band</td><td><code>--color-working-subtle</code></td><td><span class="ds-swatch-cell" data-theme="light"><i data-token="--color-working-subtle" data-swatch></i><span data-token="--color-working-subtle"></span></span></td><td><span class="ds-swatch-cell" data-theme="dark"><i data-token="--color-working-subtle" data-swatch></i><span data-token="--color-working-subtle"></span></span></td></tr><tr><td>Morning and evening band</td><td><code>--color-moment-subtle</code></td><td><span class="ds-swatch-cell" data-theme="light"><i data-token="--color-moment-subtle" data-swatch></i><span data-token="--color-moment-subtle"></span></span></td><td><span class="ds-swatch-cell" data-theme="dark"><i data-token="--color-moment-subtle" data-swatch></i><span data-token="--color-moment-subtle"></span></span></td></tr><tr><td>Row height</td><td><code>--ribbon-row-height</code></td><td><span data-theme="light"><span data-token="--ribbon-row-height"></span></span></td><td><span data-theme="dark"><span data-token="--ribbon-row-height"></span></span></td></tr><tr><td>First row offset</td><td><code>--ribbon-top</code></td><td><span data-theme="light"><span data-token="--ribbon-top"></span></span></td><td><span data-theme="dark"><span data-token="--ribbon-top"></span></span></td></tr><tr><td>Radius</td><td><code>--radius-xl</code></td><td><span data-theme="light"><span data-token="--radius-xl"></span></span></td><td><span data-theme="dark"><span data-token="--radius-xl"></span></span></td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="code"><h2><a href="#code">Code</a></h2>
+<pre><code>&lt;section class=&quot;day-ribbon&quot; aria-labelledby=&quot;ribbon-title&quot;&gt;
+  &lt;h2 class=&quot;visually-hidden&quot; id=&quot;ribbon-title&quot;&gt;The day, hour by hour&lt;/h2&gt;
+  &lt;div class=&quot;day-ribbon__track&quot; style=&quot;--rows: 5&quot;&gt;
+    &lt;span class=&quot;day-ribbon__band day-ribbon__band--working&quot; style=&quot;--from: 37.5%; --span: 37.5%&quot;&gt;&lt;span&gt;Working hours&lt;/span&gt;&lt;/span&gt;
+    &lt;ul&gt;&lt;li&gt;&lt;a class=&quot;day-ribbon__marker&quot; href=&quot;/globe?pin=…&quot; style=&quot;--at: 33.68%; --row: 0&quot; aria-label=&quot;Tomás Herrera, 08:05&quot;&gt;&lt;span class=&quot;avatar hue-11&quot; aria-hidden=&quot;true&quot;&gt;TH&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Class / attribute</th><th scope="col">Effect</th></tr></thead><tbody><tr><td><code>.day-ribbon__track</code></td><td>The 24-hour track; --rows sets its height.</td></tr><tr><td><code>.day-ribbon__band--night / --edge / --working</code></td><td>Bands, placed by --from and --span.</td></tr><tr><td><code>.day-ribbon__marker</code></td><td>A teammate; --at is the hour as a percentage, --row the row.</td></tr><tr><td><code>.day-ribbon__scale</code></td><td>The hour marks.</td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
+<p>Extracted from these mocks:</p>
+<ul><li><a href="../../mocks/pages/team/default.html">pages/team/default</a></li><li><a href="../../mocks/pages/team/edge.html">pages/team/edge</a> (12-hour scale, fifteen teammates)</li><li><a href="../../mocks/pages/team/empty.html">pages/team/empty</a> (one marker)</li></ul>
+<p>Drift fixed during extraction: the prototype’s ribbon had a 720 px minimum width and scrolled sideways on a phone. It now fits any width.</p>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>

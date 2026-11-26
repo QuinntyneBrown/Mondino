@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notifications — Mondino design system</title>
+<meta name="description" content="Mondino sends nothing: no e-mail, no push, no badge. It only tells you what just happened on the screen you are looking at.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<link rel="stylesheet" href="../assets/ds.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ds-shell" id="top">
+  <nav class="ds-nav" aria-label="Design system">
+    <div class="ds-nav__brand"><a href="../index.html">Mondino DS</a><button class="ds-theme-toggle" type="button" aria-pressed="false">☾ Dark</button></div>
+    <details open><summary>Foundations</summary><ul>
+      <li><a href="../foundations/color.html">Colour</a></li>
+      <li><a href="../foundations/typography.html">Typography</a></li>
+      <li><a href="../foundations/spacing.html">Spacing</a></li>
+      <li><a href="../foundations/layout.html">Layout</a></li>
+      <li><a href="../foundations/elevation.html">Elevation</a></li>
+      <li><a href="../foundations/shape.html">Shape</a></li>
+      <li><a href="../foundations/motion.html">Motion</a></li>
+      <li><a href="../foundations/iconography.html">Iconography</a></li>
+      <li><a href="../foundations/theming.html">Theming</a></li>
+      <li><a href="../foundations/responsive.html">Responsive</a></li>
+      <li><a href="../foundations/accessibility.html">Accessibility</a></li>
+      <li><a href="../foundations/content.html">Content</a></li>
+    </ul></details>
+    <details open><summary>Components</summary><ul>
+      <li><a href="../components/button.html">Button</a></li>
+      <li><a href="../components/link.html">Link</a></li>
+      <li><a href="../components/segmented-control.html">Segmented control</a></li>
+      <li><a href="../components/text-field.html">Text field</a></li>
+      <li><a href="../components/select.html">Select</a></li>
+      <li><a href="../components/form-field.html">Form field</a></li>
+      <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/switch.html">Switch</a></li>
+      <li><a href="../components/chip.html">Chip</a></li>
+      <li><a href="../components/avatar.html">Avatar</a></li>
+      <li><a href="../components/status.html">Status</a></li>
+      <li><a href="../components/emblem.html">Emblem</a></li>
+      <li><a href="../components/card.html">Card</a></li>
+      <li><a href="../components/dialog.html">Dialog</a></li>
+      <li><a href="../components/toast.html">Toast</a></li>
+      <li><a href="../components/alert.html">Alert</a></li>
+      <li><a href="../components/save-bar.html">Save bar</a></li>
+      <li><a href="../components/skeleton.html">Skeleton</a></li>
+      <li><a href="../components/spinner.html">Spinner</a></li>
+      <li><a href="../components/empty-state.html">Empty state</a></li>
+      <li><a href="../components/skip-link.html">Skip link</a></li>
+      <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/logo.html">Logo</a></li>
+      <li><a href="../components/globe.html">Globe</a></li>
+      <li><a href="../components/pin.html">Pin</a></li>
+      <li><a href="../components/pin-label.html">Pin label</a></li>
+      <li><a href="../components/moment-marker.html">Moment marker</a></li>
+      <li><a href="../components/panel-row.html">Panel row</a></li>
+      <li><a href="../components/person-panel.html">Teammate panel</a></li>
+      <li><a href="../components/moment-card.html">Moment card</a></li>
+      <li><a href="../components/moment-row.html">Moment row</a></li>
+      <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
+      <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
+      <li><a href="../components/team-table.html">Team table</a></li>
+    </ul></details>
+    <details open><summary>Patterns</summary><ul>
+      <li><a href="../patterns/forms.html">Forms</a></li>
+      <li><a href="../patterns/feedback-and-loading.html">Feedback and loading</a></li>
+      <li><a href="../patterns/empty-and-error-states.html">Empty and error states</a></li>
+      <li><a href="../patterns/navigation-and-page-structure.html">Navigation and page structure</a></li>
+      <li><a href="../patterns/dialogs-and-overlays.html">Dialogs and overlays</a></li>
+      <li><a href="../patterns/data-tables-and-lists.html">Data tables and lists</a></li>
+      <li><a href="../patterns/notifications.html">Notifications</a></li>
+      <li><a href="../patterns/content-and-tone.html">Content and tone</a></li>
+    </ul></details>
+  </nav>
+  <main id="main" class="ds-main">
+    <header class="ds-header">
+      <p class="ds-kicker">Pattern</p>
+      <h1>Notifications</h1>
+      <p class="ds-lead">Mondino sends nothing: no e-mail, no push, no badge. It only tells you what just happened on the screen you are looking at.</p>
+      <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span></div>
+      <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#when">When to use</a></li><li><a href="#structure">Structure</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#sources">Sources</a></li></ul>
+    </header>
+<section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
+<p>There is no notification centre and no feed. A teammate opens Mondino when they want to know what it is like where someone is. The only notices are answers to their own actions, and one about the screen’s freshness.</p>
+</section>
+
+<section class="ds-section" id="when"><h2><a href="#when">When to use</a></h2>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Notice</th><th scope="col">Component</th><th scope="col">Stays</th></tr></thead><tbody><tr><td>Invite link copied</td><td><a href="../components/toast.html">Toast</a>, success</td><td>4 seconds; waits while pointed at or focused</td></tr><tr><td>Could not copy</td><td>Toast, failure</td><td>Until dismissed</td></tr><tr><td>Unsaved changes</td><td><a href="../components/save-bar.html">Save bar</a></td><td>Until saved or undone</td></tr><tr><td>Saved</td><td>Save bar</td><td>4 seconds</td></tr><tr><td>Could not save</td><td>Save bar, as an alert</td><td>Until it succeeds or the changes are undone</td></tr><tr><td>Could not refresh</td><td>Banner</td><td>Until a refresh succeeds; then it goes without a word</td></tr><tr><td>A new teammate joined</td><td>Their pin appears and pulses once; the counts change</td><td>No message</td></tr></tbody></table></div>
+</section>
+
+<section class="ds-section" id="structure"><h2><a href="#structure">Structure</a></h2>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack" style="padding: 0;"><div class="banner" role="status" style="width: 100%;"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057"/><path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78"/><path d="m2 2 20 20"/></svg><p class="banner__text">Couldn’t refresh just now. Clocks are still right; weather and moments are from <span class="tnum">14:50</span>. Mondino will try again shortly.</p><button class="btn btn--sm" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>Try now</button></div></div><div class="ds-example__caption"><span>The banner: what is still right, what is stale and since when, what happens next</span></div></div>
+</section>
+
+<section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
+<p>One notice of a kind at a time. A new toast replaces the last. A banner and the save bar can be present together, as they sit at opposite ends of the screen.</p>
+</section>
+
+<section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
+<p>A toast and the save bar: bottom centre, 16 px from the sides on a phone. A banner: the full width under the header, its button wrapping under its text.</p>
+</section>
+
+<section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
+<ul><li>The toast region is in the page before any toast, so a screen reader hears it arrive.</li><li>Success is polite; a failure is an alert.</li><li>Nothing dismisses itself while it is pointed at or focused, and a failure never does.</li><li>The clocks ticking each minute are never announced.</li></ul>
+</section>
+
+<section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
+<p>What happened in a few words, then the next step. For the banner: what is still right (the clocks), what is stale (weather and moments, and since when), and that Mondino will try again.</p>
+</section>
+
+<section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p>A new pin appears and pulses once.</p></div><figcaption>Let the globe itself show a new teammate.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="toast" style="max-width: 18rem;"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><div class="toast__body"><p class="toast__title">Hana joined Northwind</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><figcaption>Build an activity feed out of toasts.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p>Mondino will try again shortly.</p></div><figcaption>Recover quietly.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="toast" style="max-width: 18rem;"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div class="toast__body"><p class="toast__title">Back online</p></div><button class="toast__close" type="button" aria-label="Dismiss"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div><figcaption>Announce that things are normal again.</figcaption></figure></div>
+</section>
+
+<section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
+<p>Composed from these mocks:</p><ul><li><a href="../../mocks/notifications/invite-link/success.html">notifications/invite-link/success</a></li><li><a href="../../mocks/notifications/invite-link/danger.html">notifications/invite-link/danger</a></li><li><a href="../../mocks/notifications/settings-bar/info.html">notifications/settings-bar/info</a></li><li><a href="../../mocks/notifications/settings-bar/success.html">notifications/settings-bar/success</a></li><li><a href="../../mocks/notifications/settings-bar/danger.html">notifications/settings-bar/danger</a></li><li><a href="../../mocks/notifications/refresh-banner/warning.html">notifications/refresh-banner/warning</a></li><li><a href="../../mocks/pages/globe/just-joined.html">pages/globe/just-joined</a></li></ul>
+</section>
+    <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
+  </main>
+</div>
+<script src="../assets/ds.js"></script>
+</body>
+</html>
