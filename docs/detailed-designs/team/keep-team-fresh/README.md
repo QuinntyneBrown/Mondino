@@ -66,7 +66,7 @@ Frontend:
   is destroyed.
 - **`TeamPins`** — type in `api`: `teamId`, `teamName`, `inviteToken`, `viewerTeammateId` and
   `pins`. It mirrors `TeamPinsDto`.
-- **Moments across midnight** — `groupMoments(moments, now)` in `moments/` is called from
+- **Moments across midnight** — `groupMoments(moments, pins, now)` in `moments/` is called from
   computed signals that read the clock's minute tick, with today taken in the teammate's city.
   When the clock passes a teammate's midnight, their moments move between Today, This week and
   Later with no request (L2-048).

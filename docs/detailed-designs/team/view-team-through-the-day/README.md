@@ -56,8 +56,8 @@ loading and refreshing are designed in `keep-team-fresh`.
   successive `lane` values, so each stays visible and can be chosen (L2-027).
 - **`DayRibbon`** (`mo-day-ribbon`) — presentation component. It draws the 24 hours with a
   mark every three hours, labelled "00:00", "03:00", "06:00" and so on, or on the 12-hour clock
-  by the hour alone ("12 am", "3 am", "6 am"), the span 09:00 to 18:00 labelled "Working hours" and the span 23:00
-  to 07:00 labelled "Night", each with a text label and not by colour alone; from 768 px the
+  by the hour alone ("12 am", "3 am", "6 am"), the span 09:00 to 18:00 labelled "Working hours"
+  and the span 23:00 to 07:00 labelled "Night", each with a text label and not by colour alone; from 768 px the
   spans between them are labelled "Morning" and "Evening". Each marker is a link holding an
   `Avatar`,
   placed by percentage so the ribbon fits any width without scrolling the page. A marker's

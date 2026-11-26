@@ -58,7 +58,7 @@ interface IHolidayCalendar {
   +HolidaysIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
 }
 interface IRaceCalendar {
-  +RaceWeekendsIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+  +RaceCalendarIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
 }
 interface IEventCalendar {
   +EventsNear(position: Position, radiusKm: double, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>

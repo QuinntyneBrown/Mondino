@@ -40,9 +40,8 @@ the pins: the team's invite token.
   of teammates, the number of distinct time zones (distinct `timeZoneId` values), the number
   whose status is Working hours and the number whose status is Probably asleep. The status is
   what `statusFor(pin, time)` gives, so a teammate who hides their status outside working hours
-  is not counted as asleep (L2-015). `counts` is a
-  computed signal over `pins` and the clock's minute tick, so a count changes when the clock
-  passes an hour that changes a status (L2-025).
+  is not counted as asleep (L2-015). `counts` is a computed signal over `pins` and the clock's
+  minute tick, so a count changes when the clock passes an hour that changes a status (L2-025).
 - **`weekMoments(pins, now, limit)`** — pure function in `moments/`. It takes each pin's
   moments, keeps those dated from today to 7 days ahead, where today is the date in that pin's
   city, orders them by date and then west to east, and returns the first `limit` as
@@ -78,8 +77,7 @@ the pins: the team's invite token.
   the invite card and "Invite teammate" in the header both call it, so both end in the same
   toast.
 - **`Toast`** (`mo-toast`) — presentation component that confirms the copy, rendered by
-  `TeamShell` from `InviteLinkCopier.result`. "Invite link
-  copied", with "Send it to a teammate. They add their pin with a name and a postal code.", sits
+  `TeamShell` from `InviteLinkCopier.result`. "Invite link copied", with "Send it to a teammate. They add their pin with a name and a postal code.", sits
   in a `role="status"` region and dismisses itself after 4 seconds; the timer pauses while the
   toast is pointed at or focused. "Couldn't copy the invite link", with "Your browser didn't
   allow it. Select the link in the card and copy it yourself.", sits in a `role="alert"` region

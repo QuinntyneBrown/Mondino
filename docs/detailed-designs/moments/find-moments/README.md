@@ -13,8 +13,9 @@ that place and one line of detail
 
 This feature is the backend rule that decides which moments belong to a teammate. A moment
 belongs to a teammate when it happens where they live, and each kind has its own test of that. A
-public holiday belongs to everyone in its country or region. A Formula 1 race weekend belongs to
-everyone in the country that holds it. A local event or a sport fixture belongs to everyone
+public holiday belongs to everyone in its country or region. A Formula 1 race weekend, or a
+dated happening in that race's own calendar such as its tickets going on sale, belongs to
+everyone in the country that holds the race. A local event or a sport fixture belongs to everyone
 whose city is within 100 km of it.
 
 The moments come from three outside sources: the holiday calendar source, the race calendar
@@ -34,16 +35,18 @@ each source is `<TO SUPPLY>`.
   confirms through `ICurrentTeammate` that the caller is a teammate of that team, and collects
   the team's distinct cities. It calls `MomentFinder` once per city, not once per teammate. It
   then emits one `MomentDto` for each teammate a moment belongs to, so two teammates in one city
-  each get their own entry. The result is in date order.
+  each get their own entry. The result is in date order; the browser orders the moments of one
+  date west to east by their teammate (`list-moments`).
 - **`MomentFinder`** — application service holding the rule. `FindFor(city)` reads today's date
   in the city's time zone from `TimeProvider` and `City.TimeZoneId`, and asks each calendar for
   the window from that date to 90 days ahead. It keeps the entries that pass `BelongsTo`,
   asks `EmblemCatalogue` for an emblem key, and creates the moments. `GetPinsQueryHandler` uses
   the same service to fill the moments of a `PinDto`.
 - **`IHolidayCalendar`**, **`IRaceCalendar`**, **`IEventCalendar`** — interfaces in
-  `Mondino.Application` over the three sources. `HolidaysIn` and `RaceWeekendsIn` take a country
-  code. `EventsNear` takes the city's `Position` and a radius, and returns local events and
-  sport fixtures. No method takes a teammate's name, a team or a postal code.
+  `Mondino.Application` over the three sources. `HolidaysIn` and `RaceCalendarIn` take a country
+  code. `RaceCalendarIn` returns the race weekends held in that country and the dated
+  happenings in those races' own calendars, such as "Monza tickets on sale". `EventsNear` takes
+  the city's `Position` and a radius, and returns local events and sport fixtures. No method takes a teammate's name, a team or a postal code.
 - **`CalendarEntry`** — record a calendar returns: `Kind`, `Title`, `Date`, `Detail`,
   `CountryCode`, optional `Region`, optional `Position`, and an optional `Subject` naming the
   team or series the entry is about.
@@ -52,20 +55,21 @@ each source is `<TO SUPPLY>`.
 - **`Position.DistanceKmTo`** — great-circle distance between two positions, in kilometres.
 - **`EmblemCatalogue`** — application service. `KeyFor(subject)` returns an emblem key where
   Mondino holds the right to use the subject's emblem, and nothing otherwise.
-- **`MomentDto`** — the moment with its teammate's id and name, the city's name and country
-  code, and the city's time zone id. The time zone id lets the browser compare the moment's date
-  with today in the moment's own place.
+- **`MomentDto`** — the moment with its teammate's id (`TeammateId`) and name, the city's name
+  and country code, and the city's time zone id. The time zone id lets the browser compare the
+  moment's date with today in the moment's own place. It carries no initials and no colour: the
+  browser takes a teammate's avatar from their pin in `TeamStore`, by `TeammateId`.
 - **`CachedMomentCalendars`** — infrastructure decorator over `HolidayCalendarClient`,
   `RaceCalendarClient` and `EventCalendarClient`. It caches each answer under its place and
-  window, applies a timeout, and holds a circuit breaker per source. The cache lifetime and the
-  timeout are `<TO SUPPLY>`.
+  window, applies a 5 second timeout (L2-049), and holds a circuit breaker per source. The
+  cache lifetime is `<TO SUPPLY>`.
 
 `BelongsTo` applies one rule per kind:
 
 | Kind | Source | An entry belongs to a city when |
 |---|---|---|
 | `Holiday` | `IHolidayCalendar` | The entry's country is the city's country, and the entry has no region or its region is the city's region |
-| `Formula1` | `IRaceCalendar` | The entry's country is the city's country |
+| `Formula1` | `IRaceCalendar` | The entry's country, the country that holds the race the entry is about, is the city's country |
 | `LocalEvent` | `IEventCalendar` | The entry's position is within 100 km of the city's position |
 | `Sport` | `IEventCalendar` | The entry's position is within 100 km of the city's position |
 

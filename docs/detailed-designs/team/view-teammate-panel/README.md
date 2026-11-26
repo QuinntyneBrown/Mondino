@@ -68,10 +68,11 @@ loading and refreshing are designed in `keep-team-fresh`.
   kind and when, its title and its detail) and the `OverlapBar`. In the weather's place it says
   "Weather is unavailable right now." with "Tomás’s local time is still right." when
   `weatherState` is `unavailable`, and "Ahmed doesn’t share local weather." when it is
-  `not-shared` (designed in `weather/show-weather`). It
-  omits the moments section when `moments` is empty and the offset and overlap when they are
-  null. The close button is named "Close" and the teammate's name. Its heading is focusable by script through `focusHeading()`. A change of `content` fades
-  in at most 200 ms; the `prefers-reduced-motion` query removes the fade.
+  `not-shared` (designed in `weather/show-weather`). It omits the moments section when
+  `moments` is empty and the offset and overlap when they are null. The close button is named
+  "Close" and the teammate's name. Its heading is focusable by script through `focusHeading()`.
+  A change of `content` fades in at most 200 ms; the `prefers-reduced-motion` query removes the
+  fade.
 - **`OverlapBar`** (`mo-overlap-bar`) — presentation component, the `overlap` block of the
   mocks, designed in `time/show-offset-and-overlap`. `TeammatePanel` gives it the inputs that
   design defines, all from `content`: `overlap` (an `Overlap` or null), `theirDay` (the
