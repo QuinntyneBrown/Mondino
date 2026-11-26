@@ -60,8 +60,12 @@ source and Open-Meteo. The browser calls only the Mondino API.
   and `postalCode`, and the signals `lookupState`, `found`, `nameProblem` and
   `postalCodeMissing`.
   - `lookUp()` sets `Locating`, calls `InviteApi.lookUpPostalCode`, and maps the answer or the
-    `ApiError` code to a `LookupState`; the code `invite_not_found` sets `inviteState` to
-    `NotFound` instead, which replaces the form. One lookup runs at a time: a new lookup aborts the
+    `ApiError` code to a `LookupState`: `postal_code_not_found` to `NotFound`, `rate_limited`
+    to `RateLimited`, and `postal_code_unavailable`, any other code and no answer to
+    `Unavailable`; the code `invite_not_found` sets `inviteState` to
+    `NotFound` instead, which replaces the form. `JoinPage` calls it when the field emits
+    `blurred`, unless the postal code is empty or a lookup for the same country and postal
+    code has already answered `Found` or `NotFound`. One lookup runs at a time: a new lookup aborts the
     pending one through its `AbortController`.
   - `clearFound()` runs when the postal code or the country changes. It aborts a pending lookup,
     removes the found city and the new pin, removes any alert, and returns the state to `Idle`,
@@ -73,7 +77,9 @@ source and Open-Meteo. The browser calls only the Mondino API.
     `JoinPage` sets the field's `invalid` and gives it the message "Enter your postal code."
   - A submit with either problem makes `JoinPage` show a summary alert above the fields
     ("Two things are missing") that links to each field and takes focus.
-  - A submit with no problem and no found city runs `lookUp()` first.
+  - A submit with no problem and no found city runs `lookUp()` and does not join: the button
+    read "Place my pin". The person joins with a second submit, once the city is found
+    and the button reads "Join" and the team's name (`join-team`).
 - **`LookupState`** — union in `@mondino/api` of `Idle`, `Locating`, `Found` (with its
   `PostalCodeResult`), `NotFound`, `Unavailable` and `RateLimited`. Profile & Settings uses the
   same type.
@@ -94,7 +100,11 @@ source and Open-Meteo. The browser calls only the Mondino API.
   - `Idle`: "Only your city is shown. Your postal code stays private." (L2-002), which gives
     way to "Enter your postal code." when the form is submitted with the postal code empty.
   - `Locating`: "Finding 20121…".
-  - `Found`: "Milan, Lombardy — pinned at city level. 13° and foggy right now."
+  - `Found`: "Milan, Lombardy — pinned at city level. 13° and foggy right now.", made of the
+    found city's name and region, the temperature as degrees alone in the unit a new teammate
+    of the chosen country starts with (°F for the United States, °C elsewhere, L2-019) and the
+    condition's word (L2-018) in lower case. When the result's `weather` is null the message
+    ends after "pinned at city level."
   - `NotFound`: "We couldn’t find “2012” in Italy. Italian postal codes have five digits, like
     20121.", made of the postal code, the country's `name` and its `postalCodeHint`, which
     is a whole sentence and is appended as it stands (for Canada, "Canadian postal codes look
@@ -175,7 +185,7 @@ source and Open-Meteo. The browser calls only the Mondino API.
 | Wrong form, or unknown to the source | 422 | `postal_code_not_found` | The postal code could not be found in the country, then the country's `postalCodeHint` |
 | Source timed out or circuit open | 503 | `postal_code_unavailable` | The postal code could not be checked right now and nothing is wrong with what was typed; "Try again" |
 | Over 10 lookups a minute | 429 | `rate_limited` | That was a lot of tries in a short time; wait a moment, then try again |
-| Unsupported country or over 12 characters | 400 | `validation_failed` | A generic message |
+| Unsupported country or over 12 characters | 400 | `validation_failed` | The `Unavailable` message; the form cannot send either (the Country field lists the supported countries, and the input's `maxlength` is 12, as the name's is 60) |
 | Unknown invite token | 404 | `invite_not_found` | The invite link cannot be used |
 
 In each case but the last, what the person typed is kept; an unknown invite token replaces the

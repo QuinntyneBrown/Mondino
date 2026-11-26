@@ -38,14 +38,30 @@ screen.
   `initialsOf(name)` from `domain`'s `pins/` gives for the name typed, and never the postal
   code or the city. The header avatar is drawn from the membership, so it shows before the
   pins are read. It then
-  navigates to `/globe` and passes the new teammate's id and a "new" flag in the navigation
-  state, never in the URL. `GlobePage` selects that pin and pulses it once.
+  navigates to `/globe?teammate={teammateId}`, the address that selects a pin
+  (`team/view-teammate-panel`), so the new pin is selected as any pin is, and passes
+  `{ justJoined: true }` in the navigation state, never in the URL. `GlobePage` reads the flag
+  from the navigation that opened it (`Router.getCurrentNavigation()`), so a reload or a
+  return to the screen does not repeat it. With the flag set, once the pins are read,
+  `GlobePage` adds `TeamStore.viewerTeammateId` to the ids it passes `GlobeView` as
+  `arrivedIds`, beside `TeamStore.arrivedTeammateIds` (whose first load records none,
+  `team/keep-team-fresh`), until `arrivedShown`, so the pin pulses once (`pin--new`), and it
+  puts "You’re on the globe." before the selection's announcement ("You’re on the globe. Sofia
+  Bianchi, you, Milan, selected.", mock `globe/just-joined`).
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one
   `joinRequestId`, made with `crypto.randomUUID()` when the store is created.
   - `join()` sets `Joining` and calls `InviteApi.join`. While `Joining`, the button reads
     "Joining" and the team's name with an ellipsis ("Joining Northwind…") and is disabled, the
     name and postal code are read-only and the country cannot be changed.
-  - A failure sets `TeamFull`, `RateLimited` or `Failed` by the `code` of the `ApiError`. The
+  - A failure sets `TeamFull`, `RateLimited` or `Failed` by the `code` of the `ApiError`:
+    `team_full`, `rate_limited`, and `Failed` for every other code (`validation_failed` and
+    the postal code refusals of the handler's step 3 among them) and for no answer.
+    `JoinPage` shows each in an alert (`role="alert"`) above the button, as the mocks
+    `join/join-failed` and `join/team-full` draw it: for `Failed`, "We couldn’t add you to
+    Northwind just now. Everything you typed is still here — try again."; for `RateLimited`,
+    the words of L2-045; for `TeamFull`, "Northwind is full. A team holds up to 500 teammates,
+    so there’s no room for a new pin right now. The teammate who invited you can tell you when
+    a place opens." The
     signals `name`, `countryCode` and `postalCode` and the found city are left as they are.
     `TeamFull` keeps the button disabled; `Failed` and `RateLimited` enable it again. The code
     `invite_not_found` sets `inviteState` to `NotFound` instead, which replaces the form.
@@ -105,7 +121,7 @@ screen.
 |------|--------|--------|-----------------|
 | Team has 500 teammates | 409 | `team_full` | The team is full and holds up to 500 teammates; the button is disabled |
 | Over 5 join requests a minute | 429 | `rate_limited` | Wait a moment and try again |
-| Invalid name, country or postal code | 400 | `validation_failed` | A generic message, try again |
+| Invalid name, country or postal code | 400 | `validation_failed` | Joining did not work; try again (`Failed`) |
 | Unknown invite token | 404 | `invite_not_found` | The invite link cannot be used |
 | Network failure or any other error | — | — | Joining did not work; try again |
 

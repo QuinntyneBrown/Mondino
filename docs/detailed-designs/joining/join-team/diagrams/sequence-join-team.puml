@@ -55,7 +55,7 @@ controller --> client : 201 JoinResultDto, Set-Cookie
 client --> store : JoinResult
 store --> page : Team id, teammate id and colour
 page -> page : TeamMembership.remember(Membership: teamId, teammateId, teamName, initials, colour)
-page --> actor : Navigate to /globe with the new pin selected, pulsing once (L2-005)
+page --> actor : Navigate to /globe?teammate={teammateId} with justJoined in the navigation state:\nthe new pin selected, pulsing once (L2-005)
 note over page, client
   When the request fails, JoinStore sets joinState Failed, keeps what was typed
   and keeps joinRequestId, and JoinPage offers to try again (L2-005).
