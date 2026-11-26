@@ -82,6 +82,7 @@ Components from the skill's core set that Mondino does not have, and so are not 
 - `tokens/contrast-pairs.json` lists every foreground and background pairing a component relies on; all are checked in both themes.
 - `assets/components.css` is the component CSS, with component tokens (`--btn-*`, `--field-*`, `--pin-*`, `--dialog-*`, `--toast-*`) that alias semantic ones.
 - `assets/fonts/` holds Gabarito and Inter (SIL Open Font License).
+- `assets/logo/` holds the logo as standalone SVG files, drawn from the *Mondino Brand* prototype's mark: `mark.svg` and `mark-on-ink.svg`, `lockup.svg` and `lockup-on-ink.svg` (mark and wordmark), `wordmark.svg`, and `app-icon.svg` and `app-icon-pin.svg`. The wordmark is Gabarito bold as outlines, so the files need no font.
 
 ## Drift found in the mocks
 
