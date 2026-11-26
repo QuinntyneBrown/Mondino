@@ -56,9 +56,9 @@ alt left
   handler --> controller : Done
   controller --> client : 204 No Content, session cookie expired
   client --> store : Done
-  store -> store : Discard the draft; clear SettingsStore and SettingsCache
-  store -> left : Navigate to /left with the team's name, replacing /profile; the dialog closes
-  left --> actor : "You've left Northwind": the pin is gone and what was deleted
+  store -> store : Discard the draft; clear SettingsStore and SettingsCache; TeamMembership.forget()
+  store -> left : Navigate to /left with the team's name in the navigation state, replacing /profile; the dialog closes
+  left --> actor : "You’ve left Northwind" ("You’ve left the team" when reloaded): the pin is gone and what was deleted
 else the request fails
   controller --> client : ProblemDetails, or no answer
   client --> store : ApiError

@@ -27,7 +27,6 @@ package "mondino application" {
     Ready
     AlreadyJoined
     NotFound
-    RateLimited
     Failed
   }
 }
@@ -72,6 +71,10 @@ package "Mondino.Application" {
     +bool AlreadyJoined
     +IReadOnlyList<CountryDto> Countries
   }
+  class InviteAvatarDto {
+    +string Initials
+    +string Colour
+  }
   interface ICurrentTeammate {
     +Guid? TeamId
     +Guid? TeammateId
@@ -87,7 +90,10 @@ package "Mondino.Domain" {
   }
   class Teammate {
     +Guid Id
+    +string Name
+    +string Colour
     +City City
+    +DateTimeOffset JoinedAt
   }
   class City {
     +string Name
@@ -117,4 +123,5 @@ Team "1" *-- "0..500" Teammate
 Teammate --> City
 City --> Position
 InviteDto --> Position : bare positions
+InviteDto --> InviteAvatarDto : the five who joined most recently
 @enduml

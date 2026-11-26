@@ -55,18 +55,22 @@ loop each distinct city, in parallel
     mapper --> source : One of the eight conditions (L2-018)
     source --> cached : Weather
     cached -> cached : Store with the time read from TimeProvider
-    cached --> handler : Weather
+    cached --> handler : Weather, or null when the source fails or times out (L2-049)
   end
 end
 
 loop each teammate
   alt ShareWeather is on, or the teammate is the viewer
-    handler -> handler : PinDto.Weather from the city's Weather
+    alt the city has a Weather
+      handler -> handler : PinDto.Weather from the city's Weather; WeatherState Available
+    else the source gave none
+      handler -> handler : PinDto.Weather is null; WeatherState Unavailable
+    end
   else ShareWeather is off
-    handler -> handler : PinDto.Weather is null
+    handler -> handler : PinDto.Weather is null; WeatherState NotShared
   end
 end
-handler --> controller : PinDto per teammate
+handler --> controller : TeamPinsDto with a PinDto per teammate
 controller --> client : 200 pins
-client --> store : Pin[] with weather or null
+client --> store : Pin[] with weather or null, and its weatherState
 @enduml

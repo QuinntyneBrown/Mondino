@@ -37,7 +37,9 @@ any other origin.
 
 - **`GlobePage`** — page at `/globe`, a lazy route. Its template places the globe inside an
   `@defer` block, so the globe library is a separate chunk that is fetched after the heading,
-  the counts and the panel are on screen. The `@placeholder` block holds a `GlobePlaceholder`.
+  the counts and the panel are on screen. The `@placeholder` block holds a `GlobePlaceholder`, and
+  the `@error` block, shown when the globe library's chunk itself fails to load, holds a
+  `GlobeFallback`.
   `JoinPage` and `ProfilePage` load the globe the same way.
 
 **In the `components` library**
@@ -49,16 +51,24 @@ any other origin.
   layout (`aspect-ratio: 1`), not from its content, so replacing the placeholder with the 3D
   globe moves nothing (L2-008). It is part of the page's own chunk, because it is shown before
   the globe library has arrived.
+- **`GlobeFallback`** (`mo-globe-fallback`) — presentation component that shows the still
+  picture, an image bundled with the app, in the same square box, with `role="img"` and the
+  name "A still picture of the globe". It needs neither WebGL, the renderer nor the `globe`
+  library, so it shows when that library's chunk fails to load as well as when the scene
+  cannot be drawn. No pin is drawn on it, it is not focusable and it has no list of pins.
 
 **In the `globe` library**
 
 - **`GlobeView`** (`mo-globe`) — the library's one public component. Inputs: `pins`,
   `selectedId`, `interactive`. Output: `select`. (`show-pins`, `make-accessible` and
-  `keep-team-fresh` add `selectGroup`, `label`, `arrivedIds` and `arrivedShown`.) It owns a `<canvas>` and a `state` signal of
-  type `GlobeState` (`Loading`, `Ready`, `Fallback`). In `Loading` it renders the content
-  projected into it, which `GlobePage` fills with a second `GlobePlaceholder`, so the same
-  picture stays in the same box from the first paint to the first 3D frame. The canvas carries
-  `aria-hidden="true"`; the text equivalent is `PinList` (L2-040).
+  `keep-team-fresh` add `selectGroup`, `descriptions`, `label`, `arrivedIds` and `arrivedShown`.) It owns a `<canvas>` and a `state` signal of
+  type `GlobeState` (`Loading`, `Ready`, `Fallback`). In `Loading` it renders the loading
+  content projected into it, which `GlobePage` fills with a second `GlobePlaceholder`, so the
+  same picture stays in the same box from the first paint to the first 3D frame. In `Fallback`
+  it renders the fallback content projected into it, which the page fills with
+  `GlobeFallback`; the `globe` library depends on `api` only and imports neither component.
+  The canvas carries `aria-hidden="true"`; the text equivalent is `PinLayer`'s list of pins
+  (L2-040).
 - **`GlobeScene`** — class that hides the renderer. Nothing outside it imports the renderer or
   reads the asset format. `GlobeScene.create(canvas, options)` asks for a WebGL context,
   imports the renderer with a dynamic `import()`, fetches the model and textures from
@@ -80,9 +90,6 @@ any other origin.
 - **`DetailStep`** — `pixelRatio` (the resolution the canvas is drawn at) and `modelDetail`
   (which level of the model's detail is shown). A step shall not change the lighting, the
   colours or the pins (L2-008).
-- **`GlobeFallback`** — component that shows the still picture, an image bundled with the app,
-  in the same square box, with `role="img"` and the name "A still picture of the globe". It
-  needs neither WebGL nor the renderer. No pin is drawn on it and it is not focusable.
 
 **From the `api` and `domain` libraries**
 
@@ -95,9 +102,10 @@ any other origin.
 `GlobeView` starts the scene after its first render. On success it sizes the scene from a
 `ResizeObserver` on its host, sets the sun, starts the loop, and moves to `Ready` when the
 first frame has been drawn. On a `GlobeUnavailableError` it moves to `Fallback` and renders
-`GlobeFallback`; the teammates stay reachable through the panel and the Team screen, which do
+the projected `GlobeFallback` with no pins and no list of pins; the teammates stay reachable through the panel and the Team screen, which do
 not depend on the scene. A WebGL context lost while the globe is running is handled the same
-way. `GlobePage` reads `GlobeView`'s `state`, and in `Fallback` it shows a notice
+way. `GlobePage` reads `GlobeView`'s `state`, and in `Fallback`, or when the `@error` block is
+shown, it shows a notice
 (`globe-screen__notice`) in place of the legend: "This device can’t draw the 3D globe, so this
 is a still picture. Everyone is still here: in the panel, and on Team.", where "Team" links to
 the Team screen.
@@ -151,7 +159,8 @@ them.
 
 `GlobePage` shows `GlobePlaceholder` and loads `GlobeView` with a dynamic import. `GlobeView`
 creates the `GlobeScene`, feeds it the sun's position from `SunPosition` and the clock, reports
-frame times to `DetailLevel`, and shows `GlobeFallback` when the scene is unavailable.
+frame times to `DetailLevel`, and shows the `GlobeFallback` the page projects when the scene
+is unavailable. `GlobePage` shows `GlobeFallback` itself when the globe library fails to load.
 
 ![C4 component view for drawing the globe](diagrams/c4-component.png)
 
@@ -167,7 +176,8 @@ returns a `Position`, and `GlobeView` reads the time through the `Clock` contrac
 
 The placeholder is on screen before the globe library is requested. The scene then loads the
 renderer and the assets from the app's own origin. Without a WebGL context, or when the assets
-fail to load, `GlobeView` shows the still picture instead. Leaving the screen disposes of the
+fail to load, `GlobeView` shows the still picture instead; when the globe library's chunk
+fails to load, `GlobePage` does. Leaving the screen disposes of the
 scene.
 
 ![Sequence diagram for loading the globe with a placeholder and a still picture](diagrams/sequence-load-globe.png)

@@ -43,25 +43,28 @@ loading and refreshing are designed in `keep-team-fresh`.
   UTC at an instant, in minutes.
 - **`teamRows(pins, viewer, now, settings)`** — pure function in `pins/`. It returns one
   `TeamRow` per pin in west-to-east order: name, city and country, formatted local time, offset
-  from the viewer, status, weather and next moment. The viewer's own row has `isViewer` set and
-  a null offset. `nextMoment` is the pin's earliest moment dated today or later in its city, or
+  from the viewer, status, weather and next moment. The status is what `statusFor(pin, time)`
+  gives, so it is null, and the row shows none, for a teammate who hides their status outside
+  working hours. The viewer's own row has `isViewer` set and a null offset. `nextMoment` is the pin's earliest moment dated today or later in its city, or
   null. A `TeamRow` holds no postal code; the `Pin` type has none to give.
 - **`filterByStatus(rows, filter)`** — pure function in `pins/`. `All` keeps every row,
-  `Working` keeps status Working hours and `Asleep` keeps status Probably asleep. The order is
-  unchanged (L2-028).
+  `Working` keeps status Working hours and `Asleep` keeps status Probably asleep. A row whose
+  status is null is kept by `All` only. The order is unchanged (L2-028).
 - **`ribbonMarkers(pins, now, settings)`** — pure function in `pins/`. It returns one
   `RibbonMarker` per pin. `dayFraction` is the local hour and minute as a fraction of 24 hours,
   so a local time of 08:05 sits just after the 08:00 mark. Markers at the same local hour take
   successive `lane` values, so each stays visible and can be chosen (L2-027).
 - **`DayRibbon`** (`mo-day-ribbon`) — presentation component. It draws the 24 hours with a
-  mark every three hours, the span 09:00 to 18:00 labelled "Working hours" and the span 23:00
+  mark every three hours, labelled "00:00", "03:00", "06:00" and so on, or on the 12-hour clock
+  by the hour alone ("12 am", "3 am", "6 am"), the span 09:00 to 18:00 labelled "Working hours" and the span 23:00
   to 07:00 labelled "Night", each with a text label and not by colour alone; from 768 px the
   spans between them are labelled "Morning" and "Evening". Each marker is a link holding an
   `Avatar`,
   placed by percentage so the ribbon fits any width without scrolling the page. A marker's
   accessible name is the teammate's name and local time. It emits `teammateChosen`.
-- **`Segmented`** (`mo-segmented`) — presentation component. It takes `options` and `value`,
-  and emits `valueChange`. Here it is one `tablist` named "Filter by status": the arrow keys
+- **`Segmented`** (`mo-segmented`) — presentation component. It takes `options`, each with an
+  optional `count`, `value` and a `mode` (`tabs` or `radio`), and emits `valueChange`. Here its
+  mode is `tabs`: one `tablist` named "Filter by status": the arrow keys
   move between its tabs, one tab is in the tab order, the chosen tab carries `aria-selected`,
   and the list under it is its `tabpanel` (L2-028). `TeamPage` builds the filter's three tabs
   from `TeamStore.counts`: "All 12", "Working now 7", "Asleep 2".
@@ -88,8 +91,9 @@ with "Get the invite link", which leads to the Globe screen. The empty messages 
 in working hours right now." for Working now and "Everyone is awake right now." for Asleep.
 
 A teammate whose settings hide their status outside working hours still has a row and a ribbon
-marker, since both follow from the local time. How the Asleep filter and its count treat such a
-teammate is `<TO SUPPLY>`; L2-028 does not say.
+marker, since both follow from the local time. Outside working hours their row shows no status
+and they are listed under All only: not under Asleep, and not in its count, since `teamCounts`
+and `filterByStatus` both read `statusFor` (L2-015, L2-028).
 
 The viewer's time zone is the time zone of the viewer's own pin. The viewer's display settings
 (°C or °F, 24-hour or 12-hour clock) come from `SettingsCache`. A teammate's name, a city and a

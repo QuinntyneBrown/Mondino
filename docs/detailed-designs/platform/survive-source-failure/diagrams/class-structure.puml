@@ -82,6 +82,13 @@ class PinDto {
   +Position Position
   +string TimeZoneId
   +WeatherDto? Weather
+  +WeatherState WeatherState
+}
+
+enum WeatherState {
+  Available
+  Unavailable
+  NotShared
 }
 
 class Weather {
@@ -104,5 +111,6 @@ SourceResilience ..> SourceAnswer : returns
 SourceAnswer --> SourceOutcome
 GetPinsQueryHandler ..> IWeatherSource : once per city
 GetPinsQueryHandler ..> PinDto : builds
+PinDto --> WeatherState
 IWeatherSource ..> Weather
 @enduml

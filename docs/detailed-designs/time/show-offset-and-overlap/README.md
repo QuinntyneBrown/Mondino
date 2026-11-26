@@ -53,11 +53,12 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
 - **`Offset`** — `minutes` (the size of the difference, never negative) and `direction`
   (`'ahead' | 'behind' | 'same'`). A teammate in Mexico City seen from Milan in winter has 420
   minutes and `behind`; a teammate in Bengaluru has 270 minutes and `ahead`.
-- **`formatOffset(offset): string`** (`time/`) — pure function. It gives whole hours, adds
-  minutes only when the difference has a part of an hour, and gives the words for the same time
-  when `direction` is `same`; it never gives "0 hours". The words are the mocks': "7 h behind",
-  "4 h 30 min ahead" and "Same time" on a Team row, and on the panel, which adds the viewer,
-  "7 h behind you" and "10 h ahead of you".
+- **`formatOffset(offset, form): string`** (`time/`) — pure function; `form` is `'row'` or
+  `'panel'`. It gives whole hours, adds minutes only when the difference has a part of an hour,
+  and gives the words for the same time when `direction` is `same`; it never gives "0 h". The
+  words are the mocks': "7 h behind", "4 h 30 min ahead" and "Same time" on a Team row, and on
+  the panel, which adds the viewer, "7 h behind you", "10 h ahead of you" and "Same time as
+  you".
 - **`WorkingDay`** (`time/`) — the constants of the working day in minutes from midnight:
   `startMinute` 540 and `endMinute` 1080. `statusAt` and `overlapBetween` read the same
   constants, so "Working hours" and the overlap cannot disagree.
@@ -86,7 +87,8 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
   18:00 on your clock."; on the 12-hour clock, "4 pm–6 pm your time" and "… 4 pm to 6 pm on your
   clock.". For `null` they are "None today" and "You and Noah share no working hours. Noah’s
   working day is 23:00 to 08:00 on your clock.", the teammate's working day being `theirDay`.
-  The first name is data and is rendered as text.
+  The first name is `firstName(name)` from `pins/`, the first word of the teammate's name,
+  which the page passes in; it is data and is rendered as text.
 
 `overlapBetween` uses the offset at the instant `now` for the whole day. On the day of a
 daylight-saving change the overlap shown before the change is the one that held before it, and
@@ -104,8 +106,9 @@ instant comes from `CLOCK`.
 - **`TeamPage`** — derives the offset text of each row in the same way and binds none for the
   viewer's own row.
 - **`TeammatePanel`** — presentation component. It takes the offset text, the `Overlap`, the
-  teammate's `DaySpan` and the `OverlapText` as inputs and shows no offset or overlap section
-  when the offset text and the `OverlapText` are `null`.
+  teammate's `DaySpan` and the `OverlapText` in its `content` (`TeammatePanelContent`, designed
+  in `team/view-teammate-panel`) and shows no offset or overlap section when the offset text
+  and the `OverlapText` are `null`.
 - **`TeamTable`** — presentation component. Its offset column shows the offset text of each row.
 - **`OverlapBar`** — presentation component, the `overlap` block of the mocks, under the title
   "Working-hours overlap". It takes the `Overlap` or `null`, the teammate's `DaySpan`, the

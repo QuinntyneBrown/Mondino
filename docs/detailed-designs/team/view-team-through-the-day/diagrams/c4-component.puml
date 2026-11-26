@@ -8,7 +8,7 @@ Container_Boundary(web, "Mondino web app") {
   Component(page, "TeamPage", "Angular page, mondino application", "Orders, filters and presents the team; navigates to the Globe screen")
   Component(store, "TeamStore", "Signal store, domain pins/", "Holds the pins and the counts")
   Component(rows, "teamRows and ribbonMarkers", "Pure functions, domain pins/", "West-to-east rows, status filter and ribbon positions")
-  Component(time, "time/ rules", "Pure functions, domain time/", "localTime, statusAt, offsetBetween, zoneOffsetMinutes")
+  Component(time, "time/ rules", "Pure functions, domain time/", "localTime, statusFor, offsetBetween, zoneOffsetMinutes")
   Component(clock, "BrowserClock", "Clock, domain time/", "The one shared clock and its minute tick")
   Component(ribbon, "DayRibbon", "Angular component, components library", "Places each teammate on the 24 hours of a day")
   Component(chips, "Segmented", "Angular component, components library", "All, Working now, Asleep, as tabs with counts")

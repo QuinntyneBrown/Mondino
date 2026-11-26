@@ -22,6 +22,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "TeamStore" as store
   participant "teammatePanelView" as view
   participant "TeammatePanel" as panel
+  participant "GroupPanel" as group
 end box
 actor -> globe : Select a pin by pointer, touch or keyboard
 globe -> page : select(teammateId)
@@ -32,7 +33,7 @@ page -> store : select(teammateId)
 alt the id is a pin of this team
   store --> page : selectedPin, viewerPin
   page -> view : teammatePanelView(pin, viewerPin, clock.now(), settings)
-  view -> view : localTime, statusAt, offsetBetween, overlapBetween
+  view -> view : localTime, statusFor, offsetBetween, overlapBetween
   view --> page : TeammatePanelContent (no offset or overlap for the viewer's own pin)
   page -> panel : content, fade of at most 200 ms (none under reduced motion)
   page -> globe : selectedId; the globe turns to the pin and holds
@@ -43,6 +44,23 @@ alt the id is a pin of this team
 else the id is unknown
   store --> page : false
   page -> router : navigate /globe, replacing the address
+  page --> actor : Week panel (L2-024)
+end
+== A group pin ==
+actor -> globe : Select a group pin
+globe -> page : selectGroup(teammate ids)
+page -> router : navigate /globe, removing the teammate parameter
+page -> page : groupTeammateIds.set(ids); groupRows, west to east
+page -> group : rows
+group --> actor : "3 teammates close together", each with city and local time; announced once (L2-023)
+alt a row is chosen
+  actor -> group : Choose a teammate
+  group -> page : teammateChosen(teammateId)
+  page -> router : navigate /globe?teammate={teammateId}
+  page --> actor : That teammate's panel
+else the close button, "This week around the world" or Escape
+  group -> page : closed
+  page -> page : groupTeammateIds.set([])
   page --> actor : Week panel (L2-024)
 end
 @enduml

@@ -12,7 +12,7 @@ is opened directly.
 The terms used below:
 
 - **breakpoint** — viewport width at which a layout changes: 576 px, 768 px, 992 px and 1200 px
-- **shell** — header, navigation and content area that surround every screen
+- **shell** — what surrounds the four teammate screens: the header with its navigation, the refresh banner and the toast
 - **teammate screen** — one of Globe, Team, Moments and Profile & Settings, shown only to a teammate
 - **membership** — record on the device that it has joined a team: the team's id, the teammate's id and the team's name
 
@@ -45,11 +45,14 @@ with `loadComponent`, so each screen is its own chunk.
 | `/left` | `LeftPage` | no |
 | `**` | `NotFoundPage` | no |
 
-The four teammate screens are children of one pathless parent route. The parent carries
-`canMatch: [teammateGuard]` and provides `TeamStore`, so the team's pins are shared by the
-four screens and released when the teammate leaves them. A second pathless parent follows it
-with the same four addresses, each loading `InviteNeededPage`; the router falls through to it
-when the guard refuses the first, so the address stays as it was opened. The empty address
+The four teammate screens are children of one pathless parent route, whose component is
+`TeamShell`. The parent carries `canMatch: [teammateGuard]` and `TeamShell` provides
+`TeamStore`, so the team's pins are shared by the four screens and released when the teammate
+leaves them. The parent has a last child, `**`, which loads `NotFoundPage`, so a teammate who
+opens an address that belongs to no screen keeps the header and its navigation, as the mock
+draws. A second pathless parent follows it with the same four addresses, each loading
+`InviteNeededPage`; the router falls through to it when the guard refuses the first, so the
+address stays as it was opened, and any other address then reaches the last `**` route. The empty address
 redirects to `/globe`. The router uses path addresses, so an address that is opened directly or reloaded
 shows its screen and the browser's back button returns to the previous screen (L2-038). The
 host that serves the app shall answer each of these addresses with the app's `index.html`; the
@@ -73,30 +76,40 @@ address again, which now shows `InviteNeededPage`. A membership that outlives it
 therefore leads to the same screen as no membership.
 
 **`InviteNeededPage`** — lazy route component. It says "You need an invite link" and that a
-teammate can give their team's. It reads no API and shows no team's name or data.
+teammate can give their team's. It reads no API and shows no team's name or data. It renders
+`mo-app-header` without navigation.
 
 **`NotFoundPage`** — lazy route component for an address that belongs to no screen. It says
-"This page isn’t on the map" and links back to the globe. It reads no API.
+"This page isn’t on the map" and links back to the globe. It reads no API. Inside `TeamShell`
+it sits under the shell's header; for a person with no membership it renders `mo-app-header`
+without navigation itself.
 
-**`App`** — root component of the `mondino` application. It renders `mo-app-shell` and the
-router outlet. It holds the three `NavItem`s (Globe, Team, Moments) and projects one link per
-item into the shell's `nav` slot, and it projects the link to Profile & Settings, the viewer's
-avatar with the accessible name "Profile & Settings", into the shell's `me` slot. Each link is
-an anchor with `routerLink` and `ariaCurrentWhenActive="page"`, so the current screen carries
-`aria-current="page"`. `App` sets `showNavigation` from `TeamMembership.current()` and the
-route's data: `LeftPage` and `InviteNeededPage` show the header without navigation, and the
-Join screen shows no header and carries the mark and wordmark at the top of its form. Where
-`App` reads the viewer's initials and colour for the avatar is `<TO SUPPLY>`: `Membership`
-holds neither, and `TeamStore` is provided below `App`. The header's "Invite teammate" button,
-which the mocks draw from 768 px, is not built until what it leads to is designed.
+**`App`** — root component of the `mondino` application. It renders the "Skip to content"
+link, which is the first focusable element of every screen, and the router outlet, and nothing
+else. Each screen renders its own `main`, which is the skip link's target.
 
-**`AppShell`** (`mo-app-shell`) — presentation component in `components`; its block is
-`app-header`. It renders the skip link, the header with `Wordmark`, the `nav` slot inside a
-`nav` landmark named "Primary", the `me` slot at the header's end, and the default slot inside
-`main`. It injects no router and no service. The navigation sits in the header at every width,
-and each target is at least 44 × 44 px; under 360 px the header's gaps and the options' padding
-tighten, so the three options and the avatar fit at 320 px. With navigation the mark and
-wordmark link to the Globe; without it they are not a link.
+**`TeamShell`** — route component of the guarded parent route, in the `mondino` application.
+It provides `TeamStore` and renders `mo-app-header`, the refresh banner (`keep-team-fresh`),
+the router outlet that holds Globe, Team, Moments and Profile & Settings, and the toast. The
+banner and the toast are therefore the same on all four screens and are not rendered by a
+page. `TeamShell` holds the three `NavItem`s (Globe, Team, Moments) and projects one link per
+item into the header's `nav` slot, the "Invite teammate" button into its `invite` slot, and
+the link to Profile & Settings, the viewer's avatar with the accessible name "Profile &
+Settings", into its `me` slot. Each link is an anchor with `routerLink` and
+`ariaCurrentWhenActive="page"`, so the current screen carries `aria-current="page"`. The
+avatar's initials and colour come from the viewer's pin in `TeamStore`. The "Invite teammate"
+button, which the mocks draw from 768 px, copies the team's invite link and shows the toast
+(`view-week-around-the-world`, L2-025).
+
+**`AppHeader`** (`mo-app-header`) — presentation component in `components`; its block is
+`app-header`. It renders the header with `Wordmark`, the `nav` slot inside a `nav` landmark
+named "Primary", and the `invite` and `me` slots at the header's end. It injects no router
+and no service. The navigation sits in the header at every width, and each target is at least
+44 × 44 px; under 360 px the header's gaps and the options' padding tighten, so the three
+options and the avatar fit at 320 px. With the input `showNavigation` the mark and wordmark
+link to the Globe; without it the header is the mocks' `app-header--bare`, which shows the
+mark and wordmark alone, not as a link. `LeftPage` and `InviteNeededPage` render it that way.
+The Join screen shows no header and carries the mark and wordmark at the top of its form.
 
 **`Wordmark`** (`mo-wordmark`) — presentation component in `components`. It renders the mark
 and the lowercase wordmark "mondino" in Gabarito. With the input `collapses` set, as in the
@@ -144,7 +157,7 @@ screen's address is shown that an invite link is needed.
 
 ### Containers
 
-The shell, the navigation, the lazy routes and each screen's layout are in the
+The shell, the header, the lazy routes and each screen's layout are in the
 `Mondino web app`. The `Mondino API` answers a teammate screen's requests for a teammate's
 session only.
 
@@ -153,15 +166,16 @@ session only.
 ### Components
 
 `app.routes.ts` runs `teammateGuard` to match a teammate screen and loads the screen's chunk.
-`App` renders `AppShell` with the navigation links. `teammateGuard`, `App` and
-`sessionExpiredInterceptor` all read or clear `TeamMembership`.
+`TeamShell` provides `TeamStore` and renders `AppHeader` with the navigation links, the
+refresh banner and the toast around the four screens. `teammateGuard` and
+`sessionExpiredInterceptor` read or clear `TeamMembership`.
 
 ![C4 component view for adapting to every width](diagrams/c4-component.png)
 
 ### Class structure
 
-`App` composes three `NavItem`s and renders `AppShell`, which shows `Wordmark` and is styled by
-the breakpoints. `teammateGuard` and `sessionExpiredInterceptor` depend on `TeamMembership`,
+`TeamShell` composes three `NavItem`s and renders `AppHeader`, which shows `Wordmark` and is
+styled by the breakpoints. `teammateGuard` and `sessionExpiredInterceptor` depend on `TeamMembership`,
 which holds one `Membership`.
 
 ![Class diagram for adapting to every width](diagrams/class-structure.png)

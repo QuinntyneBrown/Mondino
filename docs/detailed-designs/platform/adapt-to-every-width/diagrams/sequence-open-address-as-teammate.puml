@@ -19,7 +19,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "Router" as router
   participant "teammateGuard" as guard
   participant "TeamMembership" as membership
-  participant "App and AppShell" as shell
+  participant "TeamShell and AppHeader" as shell
   participant "TeamPage" as page
   participant "TeamStore" as store
   participant "HttpTeamApi" as client
@@ -39,8 +39,8 @@ router -> guard : canMatch for the guarded parent route
 guard -> membership : current()
 membership --> guard : Membership for this device
 guard --> router : true
+router -> shell : Create TeamShell, which provides TeamStore
 router -> page : loadComponent, then create TeamPage
-router -> shell : Activated route is /team
 shell --> actor : Navigation with aria-current="page" on Team
 page -> store : Read pins
 store -> client : getPins(teamId)
@@ -50,9 +50,10 @@ session --> controller : Teammate of the team
 controller -> handler : Send GetPinsQuery
 handler -> db : Load the team's pins
 db --> handler : Pins
-handler --> controller : PinDto list
+handler --> controller : TeamPinsDto
 controller --> client : 200 with pins
 client --> store : Pin list
 store --> page : pins signal
+store --> shell : The viewer's pin: initials and colour for the avatar
 page --> actor : Team screen in the layout for the current width (L2-037)
 @enduml

@@ -103,6 +103,6 @@ TeamScopeBehaviour ..> ProblemDetailsWriter : team_not_found
 ValidationBehaviour ..> JoinTeamCommandValidator : runs
 ValidationBehaviour ..> ProblemDetailsWriter : validation_failed
 JoinTeamCommandValidator ..> NameNormaliser : after
-GetPinsQuery ..> PinDto : answers with
+GetPinsQuery ..> PinDto : answers with, in a TeamPinsDto
 GetProfileQuery ..> ProfileDto : answers the owner with
 @enduml

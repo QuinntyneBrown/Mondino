@@ -75,8 +75,7 @@ class DetailStep {
   +modelDetail: number
 }
 
-class GlobeFallback {
-  +label: InputSignal<string>
+class GlobeFallback <<mo-globe-fallback, components>> {
 }
 
 interface Clock {
@@ -94,7 +93,7 @@ GlobeView *-- DetailLevel : owns
 GlobeView --> GlobeState : has
 GlobeView ..> SunPosition : asks each minute
 GlobeView ..> Clock : injects CLOCK
-GlobeView ..> GlobeFallback : shows in Fallback
+GlobeView ..> GlobeFallback : shows, projected by the page, in Fallback
 GlobeScene ..> GlobeSceneOptions : created from
 GlobeScene ..> GlobeUnavailableError : rejects with
 GlobeUnavailableError --> GlobeUnavailableReason : has

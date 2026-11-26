@@ -56,8 +56,10 @@ Frontend:
   `role="status"`) sits under the header of whichever screen is open: "Couldn't refresh just
   now. Clocks are still right; weather and moments are from 14:50. Mondino will try again
   shortly.", the time being `refreshedAt` on the viewer's clock, with "Try now", which calls
-  `refresh()`. It is rendered at the route that provides the `TeamStore`. The next refresh that
-  succeeds clears `refreshFailed` and the banner goes, with no message (L2-048, L2-049).
+  `refresh()`. `TeamShell`, the route component that provides the `TeamStore`, renders it under
+  `AppHeader`, where it also renders the toast. The screen keeps everything it showed. The next
+  refresh that succeeds clears `refreshFailed` and the banner goes, with no message (L2-048,
+  L2-049).
 - **`TeamApi`** (`TEAM_API`) and **`HttpTeamApi`** — contract and HTTP client in the `api`
   library. `getPins(teamId, signal)` calls `GET /api/teams/{teamId}/pins` and returns a
   `TeamPins`. The store passes an `AbortSignal` and aborts the pending request when the route
@@ -82,13 +84,15 @@ Backend:
   and its `Teammate` entities through `IAppDbContext`, and refuses when the session's teammate
   does not belong to the team. It reads the weather once for each distinct `City` through
   `IWeatherSource`, finds each city's moments through `MomentFinder`, and returns a
-  `TeamPinsDto`. A `PinDto` carries a null weather when the teammate does not share it or the
-  source fails; the pin is still returned with its time zone.
+  `TeamPinsDto`. A `PinDto` carries a null `Weather` when the teammate does not share it or the
+  source fails, and its `WeatherState` (`Available`, `Unavailable` or `NotShared`) says which;
+  the pin is still returned with its time zone.
 - **`TeamPinsDto`** — `TeamId`, `TeamName`, `InviteToken`, `ViewerTeammateId` and the `PinDto`
   list. It carries no postal code and no local time.
-- **`CachedWeatherSource`** — decorator over `OpenMeteoWeatherSource` with a timeout and a
-  circuit breaker. A refresh usually finds the weather in the cache; a miss sends Open-Meteo a
-  position and nothing else. The cache lifetime is `<TO SUPPLY>`.
+- **`CachedWeatherSource`** — decorator over `OpenMeteoWeatherSource` with a 5 second timeout
+  (L2-049) and a circuit breaker. Weather is fresh for 15 minutes (L2-018), the interval of a
+  refresh, so a refresh usually finds the weather in the cache; a miss sends Open-Meteo a
+  position and nothing else.
 
 The interval is one constant, `TeamStore.RefreshIntervalMinutes`. Unit tests advance a fake
 clock bound to `CLOCK`; none sleeps. How the web app learns its team id when a teammate returns

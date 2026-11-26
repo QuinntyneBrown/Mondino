@@ -59,14 +59,15 @@ The rule lives in `domain`'s `moments/`. The `globe` library draws the result an
   to its marker from `TeamStore`'s pins, the chosen kinds and the clock's minute tick. The page
   passes the map to `GlobeView`.
 - **`GlobeView`** — `mo-globe`. It takes the markers as an input beside the pins and hands them
-  to `PinLayer` and `PinList`.
+  to `PinLayer`.
 - **`PinLayer`** — draws each marker beside its pin in the sun colour, with the emblem inside. A
   marker for a moment today is larger and carries a ring. A count badge shows when `count` is 2
   or more. A marker is at least 16 px across at every globe size and sits clear of the pin's
   initials. A marker is not a control of its own: when its pin is pointed at, focused or
   selected and lifts, the label shows the moment's title and the `when` label as text. `dispose()` releases what the layer created.
-- **`PinList`** — the globe's text equivalent. Each pin's accessible name ends with its marker's
-  title and `when` label ("October Bank Holiday, today").
+  The marker is in the pin's text too: the accessible name of the pin's button, built by
+  `describePin` (`make-accessible`), ends with the marker's title and `when` label ("October
+  Bank Holiday, today").
 
 When the viewer turns a kind off, `markerFor` no longer sees moments of that kind. A pin whose
 only moment this week is of that kind carries no marker. `WeekPanel` receives the same chosen
@@ -106,15 +107,15 @@ each pin's marker and draws it.
 
 `GlobePage` reads the pins from `TeamStore` and the chosen kinds from `SettingsCache`. It calls
 `markerFor`, which calls `emblemFor`, and passes the markers to `GlobeView`. `PinLayer` draws
-them and `PinList` gives them as text.
+them, and each pin's accessible name gives its marker as text.
 
 ![C4 component view for marking pins with moments](diagrams/c4-component.png)
 
 ### Class structure
 
 `markerFor` reads a `Pin` and the chosen kinds and returns a `MomentMarker`, which holds a
-`Moment` and an `Emblem`. `GlobePage` passes the markers to `GlobeView`, and `PinLayer` and
-`PinList` present them.
+`Moment` and an `Emblem`. `GlobePage` passes the markers to `GlobeView`, and `PinLayer`
+presents them.
 
 ![Class diagram for marking pins with moments](diagrams/class-structure.png)
 

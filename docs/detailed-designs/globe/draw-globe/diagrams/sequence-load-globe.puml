@@ -27,8 +27,14 @@ actor -> page : Open the Globe screen
 page -> placeholder : Show in the globe's box (L2-008 AC5)
 placeholder --> actor : Placeholder, heading, counts and panel
 page -> origin : Dynamic import of the globe library (@defer)
+alt globe chunk fails to load
+  origin --> page : Error
+  page -> fallback : Show in the globe's box (@error)
+  fallback --> actor : Still picture of the globe (L2-008 AC3)
+  page --> actor : Notice that this is a still picture, with a link to Team
+else globe chunk loaded
 origin --> page : Globe chunk
-page -> view : Create mo-globe in the same box, placeholder projected
+page -> view : Create mo-globe in the same box, placeholder and still picture projected
 view -> scene : create(canvas, options)
 scene -> scene : Ask for a WebGL context
 alt WebGL context available
@@ -52,6 +58,7 @@ else no WebGL context
   view -> fallback : state = Fallback, show the still picture
   fallback --> actor : Still picture of the globe (L2-008 AC3)
   page --> actor : Notice that this is a still picture, with a link to Team
+end
 end
 actor -> page : Leave the Globe screen
 page -> view : Destroy

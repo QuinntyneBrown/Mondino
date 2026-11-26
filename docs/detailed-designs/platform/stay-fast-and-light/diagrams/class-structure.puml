@@ -68,7 +68,7 @@ class DetailLevel {
   +stepUp(): void
 }
 
-class GlobeFallback {
+class GlobeFallback <<mo-globe-fallback, components>> {
 }
 
 class TeamTable <<mo-team-table>> {
@@ -86,7 +86,7 @@ GlobePage ..> TeamStore : reads pins
 GlobePage ..> Clock : reads minute
 GlobePage ..> GlobeView : defers, dynamic import
 GlobeView *-- GlobeScene : creates and disposes
-GlobeView ..> GlobeFallback : when WebGL is unavailable
+GlobeView ..> GlobeFallback : projected by GlobePage, when WebGL is unavailable
 GlobeScene *-- DetailLevel
 GlobeScene ..> Clock : now()
 @enduml

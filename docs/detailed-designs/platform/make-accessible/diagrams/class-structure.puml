@@ -28,28 +28,16 @@ class GlobeView <<mo-globe>> {
   +selectedId: InputSignal<string | null>
   +interactive: InputSignal<boolean>
   +label: InputSignal<string>
-  +select: OutputEmitterRef<string>
-}
-
-class PinList {
-  +pins: InputSignal<Pin[]>
-  +descriptions: InputSignal<Map<string, string>>
-  +selectedId: InputSignal<string | null>
-  +select: OutputEmitterRef<string>
-  +focused: OutputEmitterRef<string | null>
-  -keys: FocusKeyManager<PinListItem>
-  +onKeydown(event: KeyboardEvent): void
-}
-
-class PinListItem {
-  +teammateId: string
-  +description: string
-  +focus(): void
+  +select: OutputEmitterRef<string | null>
 }
 
 class PinLayer {
-  +lift(teammateId: string | null): void
-  +showFocusRing(teammateId: string | null): void
+  +placements: InputSignal<PinPlacement[]>
+  +descriptions: InputSignal<Map<string, string>>
+  +selectedId: InputSignal<string | null>
+  +select: OutputEmitterRef<string | null>
+  +liftedId: Signal<string | null>
+  one button per pin: aria-label, aria-pressed
 }
 
 class describePin <<function>> {
@@ -65,21 +53,21 @@ class LiveAnnouncer <<Angular CDK>> {
   +announce(message: string, politeness: "polite"): Promise<void>
 }
 
-class AppShell <<mo-app-shell>> {
-  +skipTarget: InputSignal<string>
+class App {
+  skip link to the screen's main
 }
 
 class PostalCodeField <<mo-postal-code-field>> {
-  +result: InputSignal<PostalCodeResult | null>
-  +errorMessage: InputSignal<string | null>
+  +value: string
+  +country: Country
+  +lookupState: LookupState
+  +valueChange: string
+  +blurred: void
 }
 
 MotionPreference <|.. BrowserMotionPreference
-GlobeView *-- PinList
 GlobeView *-- PinLayer
 GlobeView ..> MotionPreference : reads
-PinList "1" *-- "*" PinListItem
-PinList ..> PinLayer : focused pin
 GlobePage --> GlobeView : renders
 GlobePage ..> describePin : calls
 GlobePage ..> LiveAnnouncer : announces through

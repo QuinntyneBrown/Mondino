@@ -39,8 +39,8 @@ else another teammate
   page -> offset : offsetBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
   offset -> offset : zoneOffsetMinutes of each zone at now, subtract
   offset --> page : Offset: minutes, direction
-  page -> offset : formatOffset(offset)
-  offset --> page : Hours and minutes ahead or behind, or the same time (L2-016)
+  page -> offset : formatOffset(offset, 'panel')
+  offset --> page : "7 h behind you", "10 h ahead of you" or "Same time as you" (L2-016)
 
   page -> overlap : workingDayOnViewerClock(now, pin.timeZoneId, viewerPin.timeZoneId)
   overlap -> overlap : Move the teammate's 09:00 to 18:00 onto the viewer's clock

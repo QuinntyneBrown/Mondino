@@ -39,8 +39,8 @@ alt more than 30 opens in a minute from this client
   controller -> problems : Rate limit policy rejects
   problems --> client : 429 ProblemDetails, code rate_limited, Retry-After
   client --> store : ApiError rate_limited
-  store --> page : inviteState RateLimited
-  page --> actor : Ask to wait a moment and try again
+  store --> page : inviteState Failed
+  page --> actor : Say the invite link could not be opened; offer "Try again" (L2-001)
 else within the limit
   controller -> handler : Send GetInviteQuery
   handler -> db : Load the team by invite token

@@ -33,6 +33,7 @@ screen.
 **Frontend (`mondino` application, `@mondino/api`)**
 
 - **`JoinPage`** — calls `JoinStore.join()` when the person chooses the button. On success it
+  calls `TeamMembership.remember(...)` with the team id, the teammate id and the team's name, and
   navigates to `/globe` and passes the new teammate's id and a "new" flag in the navigation
   state, never in the URL. `GlobePage` selects that pin and pulses it once.
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one

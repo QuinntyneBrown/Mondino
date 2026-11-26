@@ -67,7 +67,7 @@ else save fails
   client --> store : ApiError
   store -> store : The draft is kept; hasUnsavedChanges stays true
   store --> bar : state = failed
-  bar --> actor : "Couldn't save. Your changes are still here." and "Try again" (L2-035)
+  bar --> actor : "Couldn’t save. Your changes are still here." and "Try again" (L2-035)
   actor -> bar : Use "Try again"
   bar -> page : retry
   page -> store : save()

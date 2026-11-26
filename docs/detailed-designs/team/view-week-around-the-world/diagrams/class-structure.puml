@@ -16,7 +16,6 @@ class GlobePage <<mondino>> {
   +working: Signal<WorkingTeammate[]>
   +teamOfOne: Signal<boolean>
   +inviteLink: Signal<string | null>
-  +copyResult: WritableSignal<CopyResult | null>
   +onTeammateChosen(teammateId: string): void
   +onAllMoments(): void
   +onCopy(): void
@@ -51,7 +50,7 @@ class WeekMoments <<domain moments/>> {
 
 class WeekMoment <<domain moments/>> {
   +teammateId: string
-  +teammateName: string
+  +teammateFirstName: string
   +city: string
   +kind: MomentKind
   +title: string
@@ -92,6 +91,20 @@ class Toast <<components, mo-toast>> {
   +dismissed: OutputEmitterRef<void>
 }
 
+class AppHeader <<components, mo-app-header>> {
+  +invite: OutputEmitterRef<void>
+}
+
+class TeamShell <<mondino>> {
+  +onInvite(): void
+}
+
+class InviteLinkCopier <<mondino>> {
+  +result: Signal<CopyResult | null>
+  +copy(): void
+  +dismiss(): void
+}
+
 class Clipboard <<Angular CDK>> {
   +copy(text: string): boolean
 }
@@ -100,8 +113,13 @@ GlobePage --> TeamStore : reads / selects
 GlobePage ..> fn : calls
 GlobePage --> WeekPanel : renders
 GlobePage --> InviteCard : renders for a team of one
-GlobePage ..> Clipboard : injects
-GlobePage --> Toast : renders after Copy
+GlobePage ..> InviteLinkCopier : copies on Copy
+TeamShell --> AppHeader : renders
+TeamShell ..> InviteLinkCopier : copies on invite
+TeamShell --> Toast : renders from the result
+InviteLinkCopier ..> TeamStore : reads inviteToken
+InviteLinkCopier ..> Clipboard : injects
+InviteLinkCopier --> CopyResult
 TeamStore *-- TeamCounts
 fn ..> WeekMoments : builds
 fn ..> WorkingTeammate : builds

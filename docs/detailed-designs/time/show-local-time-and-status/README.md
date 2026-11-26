@@ -88,7 +88,9 @@ presentation components that show a time and a status.
 - **`statusFor(pin, time): Status | null`** — pure function. It returns `statusAt(time.hour)`
   when that status is `working-hours` or when `pin.showsStatusOutsideWorkingHours` is `true`,
   and `null` otherwise. A `null` status is shown nowhere and is counted neither as working nor
-  as asleep.
+  as asleep: such a teammate is listed under the Team screen's All filter only, not under
+  Asleep and not in its count. Anything that shows, counts or filters by status calls
+  `statusFor`, never `statusAt` directly.
 
 No function in `time/` calls `new Date()`. Each takes the instant as an argument, and the
 instant comes from `CLOCK`. Unit tests bind a fake `Clock` and advance it; none sleeps.

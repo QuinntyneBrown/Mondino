@@ -10,8 +10,7 @@ Container_Boundary(web, "Mondino web app") {
   Component(marker, "markerFor", "domain moments/", "Chooses a pin's nearest moment in the next 7 days")
   Component(emblem, "emblemFor", "domain moments/", "Chooses a held emblem or the icon of the kind")
   Component(view, "GlobeView", "globe library, mo-globe", "Takes pins and markers as inputs")
-  Component(layer, "PinLayer", "globe library", "Draws the moment marker beside each pin")
-  Component(list, "PinList", "globe library", "Gives each marker as text")
+  Component(layer, "PinLayer", "globe library", "Draws the moment marker beside each pin; each pin's accessible name gives it as text")
 }
 Container(api, "Mondino API", "ASP.NET Core", "EmblemCatalogue sets each moment's emblem key")
 
@@ -22,5 +21,4 @@ Rel(page, marker, "Calls for each pin")
 Rel(marker, emblem, "Calls for the chosen moment")
 Rel(page, view, "Passes pins and markers")
 Rel(view, layer, "Draws with")
-Rel(view, list, "Lists with")
 @enduml

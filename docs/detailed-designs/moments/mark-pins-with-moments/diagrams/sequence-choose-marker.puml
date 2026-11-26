@@ -42,7 +42,7 @@ alt Mondino holds the right to the emblem
 else right not held
   catalogue --> handler : No key
 end
-handler --> controller : PinDto list with moments
+handler --> controller : TeamPinsDto, each PinDto with its moments
 controller --> store : Pins
 store --> page : Pins signal
 page -> settings : Read the viewer's chosen kinds

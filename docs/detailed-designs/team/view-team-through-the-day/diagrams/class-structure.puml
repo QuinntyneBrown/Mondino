@@ -55,7 +55,7 @@ class TeamRow <<domain pins/>> {
   +country: string
   +localTime: string
   +offset: string | null
-  +status: Status
+  +status: Status | null
   +weather: Weather | null
   +nextMoment: Moment | null
 }
@@ -73,7 +73,7 @@ class RibbonMarker <<domain pins/>> {
 class Option <<components>> {
   +value: string
   +label: string
-  +count: number
+  +count: number | null
 }
 
 class DayRibbon <<components, mo-day-ribbon>> {
@@ -84,6 +84,7 @@ class DayRibbon <<components, mo-day-ribbon>> {
 class Segmented <<components, mo-segmented>> {
   +options: InputSignal<Option[]>
   +value: InputSignal<string>
+  +mode: InputSignal<'tabs' | 'radio'>
   +valueChange: OutputEmitterRef<string>
 }
 

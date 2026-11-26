@@ -22,6 +22,7 @@ package "api library" {
     +position: Position
     +timeZoneId: string
     +weather: Weather | null
+    +weatherState: WeatherState
     +showsStatusOutsideWorkingHours: boolean
     +isViewer: boolean
     +moments: Moment[]
@@ -47,6 +48,7 @@ package "domain library" {
 package "globe library" {
   class GlobeView {
     +pins: InputSignal<Pin[]>
+    +descriptions: InputSignal<Map<string, string>>
     +selectedId: InputSignal<string | null>
     +interactive: InputSignal<boolean>
     +select: OutputEmitterRef<string | null>
@@ -56,19 +58,13 @@ package "globe library" {
   }
   class PinLayer {
     +placements: InputSignal<PinPlacement[]>
+    +descriptions: InputSignal<Map<string, string>>
     +selectedId: InputSignal<string | null>
-    +focusedId: InputSignal<string | null>
     +compact: InputSignal<boolean>
     +select: OutputEmitterRef<string | null>
     +selectGroup: OutputEmitterRef<string[]>
     +liftedId: Signal<string | null>
     +update(scene: GlobeScene): void
-  }
-  class PinList {
-    +pins: InputSignal<Pin[]>
-    +selectedId: InputSignal<string | null>
-    +select: OutputEmitterRef<string | null>
-    +focusedId: OutputEmitterRef<string | null>
   }
   class LabelPlacer {
     {static} +place(points: ProjectedPin[], globe: DOMRect): LabelSide[]
@@ -90,7 +86,14 @@ package "Mondino.Application" {
     +Guid TeamId
   }
   class GetPinsQueryHandler {
-    +Handle(query: GetPinsQuery): Task<IReadOnlyList<PinDto>>
+    +Handle(query: GetPinsQuery): Task<TeamPinsDto>
+  }
+  class TeamPinsDto {
+    +Guid TeamId
+    +string TeamName
+    +string InviteToken
+    +Guid ViewerTeammateId
+    +IReadOnlyList<PinDto> Pins
   }
   class PinDto {
     +Guid TeammateId
@@ -101,6 +104,7 @@ package "Mondino.Application" {
     +Position Position
     +string TimeZoneId
     +WeatherDto? Weather
+    +WeatherState WeatherState
     +bool ShowsStatusOutsideWorkingHours
     +bool IsViewer
     +IReadOnlyList<MomentDto> Moments
@@ -112,13 +116,13 @@ PinSpreader ..> PinPlacement : returns
 PinPlacement "1" o-- "1..*" Pin
 GlobeView ..> PinSpreader : injects
 GlobeView *-- PinLayer
-GlobeView *-- PinList
 GlobeView ..> PinMarkTemplate : content
 GlobeView ..> PinLabelTemplate : content
 PinLayer ..> LabelPlacer : places labels with
 PinLayer ..> GlobeScene : projects with
 GlobeScene ..> ProjectedPoint : returns
 GetPinsQueryHandler ..> GetPinsQuery : handles
-GetPinsQueryHandler ..> PinDto : returns
+GetPinsQueryHandler ..> TeamPinsDto : returns
+TeamPinsDto "1" o-- "*" PinDto
 PinDto ..> Pin : serialised as
 @enduml

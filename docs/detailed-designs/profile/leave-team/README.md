@@ -39,26 +39,27 @@ exist yet; each part below is introduced by this design.
   "Remove my pin and leave". Focus starts on "Cancel". "Remove my pin and leave" calls
   `ProfileStore.leave()` and the dialog stays open: while `leaving` is true both buttons are
   disabled, the action reads "Removing your pin…" and Escape does not close it; when
-  `leaveFailed` is true an alert in the dialog reads "We couldn't remove your pin just now.
-  Nothing has changed — you're still in Northwind." and the action reads "Try again". The CDK
+  `leaveFailed` is true an alert in the dialog reads "We couldn’t remove your pin just now.
+  Nothing has changed — you’re still in Northwind." and the action reads "Try again". The CDK
   traps focus inside it, closes it on Escape, and returns focus to the button that opened it
   (L2-036). Under 576 px it is a sheet from the bottom.
 - **`ProfileStore`** — store provided at the `/profile` route. `leave()` calls
   `ProfileApi.leaveTeam(teamId)` and holds a `leaving` signal that disables the dialog's buttons
   while the request is pending, so a second request is not sent. On success it discards the
   draft, so the guard against unsaved changes does not stop the navigation, clears
-  `SettingsStore` and `SettingsCache`, and navigates to `/left`, replacing `/profile` in the
-  history, which closes the dialog. On failure it leaves everything as it was and sets
+  `SettingsStore` and `SettingsCache`, calls `TeamMembership.forget()`, and navigates to `/left` with the team's name in the
+  navigation state, replacing `/profile` in the history, which closes the dialog. On failure it leaves everything as it was and sets
   `leaveFailed`, and the dialog says so and offers to try again.
 - **`LeftPage`** — lazy route `/left`, not behind `teammateGuard`. It confirms that the team is
-  left ("You've left Northwind"), that the pin is gone from the globe and what Mondino has
+  left ("You’ve left Northwind"), that the pin is gone from the globe and what Mondino has
   deleted, and says the team's invite link is the way back. It reads nothing from the backend;
-  the team's name comes with the navigation from `ProfileStore`, and it shows no other team
-  data.
+  the team's name comes in the navigation state from `ProfileStore`, never in the URL, and is
+  rendered as text. Opened or reloaded without it, the title reads "You’ve left the team". It
+  shows no other team data.
 - **`teammateGuard`** — guards `/globe`, `/team`, `/moments` and `/profile`. After leaving, the
-  browser holds no session, so the guard refuses those routes and the team is not shown
-  (L2-036). Where the guard sends a person who has no session is `<TO SUPPLY>`; it depends on
-  how a teammate signs in again, which is not designed.
+  browser holds no membership and no session, so the guard refuses those routes and the team is not shown
+  (L2-036). The guard sends the person nowhere: the address they opened shows the no-team page
+  (`InviteNeededPage`, "You need an invite link") in place.
 
 ### Frontend — libraries
 
@@ -125,7 +126,7 @@ not designed.
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
 | `teamId` is not the teammate's own team | 404 | none | The alert in `LeaveTeamDialog` |
-| No session, or the teammate has already left | 401 | none | `<TO SUPPLY>` with the design of sign-in |
+| No session, or the teammate has already left | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows the no-team page in place |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | The alert in `LeaveTeamDialog`, which stays open, with "Try again"; the pin stays |
 
 ## Requirements

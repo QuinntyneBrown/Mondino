@@ -25,26 +25,26 @@ package "mondino application" {
     +lookUp(): void
     +clearFound(): void
   }
+}
+package "@mondino/components" {
+  class PostalCodeField {
+    +value: string
+    +country: Country
+    +lookupState: LookupState
+    +valueChange: string
+    +blurred: void
+    +retry: void
+  }
+}
+package "@mondino/api" {
   enum LookupState {
     Idle
-    Finding
+    Locating
     Found
     NotFound
     Unavailable
     RateLimited
   }
-}
-package "@mondino/components" {
-  class PostalCodeField {
-    +value: string
-    +state: LookupState
-    +country: Country
-    +valueChange: string
-    +left: void
-    +retry: void
-  }
-}
-package "@mondino/api" {
   interface InviteApi {
     +lookUpPostalCode(inviteToken, countryCode, postalCode, signal): Promise<PostalCodeResult>
   }

@@ -48,8 +48,8 @@ renderer is chosen.
   sustained interval, `stepDown()` lowers the detail level and the drawing resolution, and
   repeats until the frame rate recovers. The steps and the interval are `<TO SUPPLY>` with the
   renderer's ADR.
-- **`GlobeFallback`** — still picture shown when WebGL is unavailable. It allocates no
-  renderer.
+- **`GlobeFallback`** — component in `components`: the still picture shown when WebGL is
+  unavailable or the `globe` library fails to load. It allocates no renderer.
 - **Interactions stay under 200 ms.** State is held in signals, every component is `OnPush`
   and the app is zoneless, so a selection or a filter re-renders only what reads the changed
   signal.
@@ -143,7 +143,7 @@ percentile, compressed.
 ### Class structure
 
 `BrowserClock` implements `Clock`. `GlobeView` composes `GlobeScene`, which composes
-`DetailLevel`; `GlobeView` uses `GlobeFallback` when WebGL is unavailable. `GlobePage` depends
+`DetailLevel`; `GlobeView` shows the `GlobeFallback` that `GlobePage` gives it when WebGL is unavailable. `GlobePage` depends
 on `TeamStore`, `Clock` and, through a dynamic import, `GlobeView`. `TeamTable` and
 `MomentList` render windowed rows.
 

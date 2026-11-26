@@ -39,12 +39,12 @@ enum LoadState {
 
 interface Clock <<api, CLOCK>> {
   +now(): Date
-  +minute: Signal<number>
+  +minute: Signal<Date>
 }
 
 class BrowserClock <<domain time/>> {
   +now(): Date
-  +minute: Signal<number>
+  +minute: Signal<Date>
 }
 
 interface TeamApi <<api, TEAM_API>> {

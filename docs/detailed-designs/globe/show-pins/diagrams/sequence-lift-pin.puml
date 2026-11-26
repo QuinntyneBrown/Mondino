@@ -16,7 +16,6 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "PinList" as list
   participant "PinLayer" as layer
   participant "GlobeView" as view
   participant "GlobePage" as page
@@ -30,12 +29,11 @@ alt pointer moves over a pin (L2-012 AC1)
   layer -> layer : liftedId = null unless selected (L2-012 AC2)
   layer --> actor : Pin settles back
 else Tab moves to a pin (L2-012 AC3)
-  actor -> list : Focus the pin's button
-  list --> view : focusedId(teammate id)
-  view -> layer : focusedId input
+  actor -> layer : Focus the pin's button
+  layer -> layer : liftedId = teammate id
   layer --> actor : Pin lifts exactly as under the pointer, with a focus indicator
-  actor -> list : Enter or Space
-  list --> view : select(teammate id)
+  actor -> layer : Enter or Space
+  layer --> view : select(teammate id)
 else tap on a touch device (L2-012 AC4)
   actor -> layer : Tap a pin
   layer --> view : select(teammate id)

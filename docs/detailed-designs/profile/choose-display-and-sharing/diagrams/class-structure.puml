@@ -40,6 +40,7 @@ package "Frontend" {
     +retry: Output
   }
   class Segmented {
+    +mode: "tabs" | "radio"
     +options: Option[]
     +value: string
     +valueChange: Output
@@ -75,7 +76,7 @@ package "Backend" {
   }
   class UpdateProfileCommandValidator
   class GetPinsQueryHandler {
-    +Handle(query: GetPinsQuery): Task<IReadOnlyList<PinDto>>
+    +Handle(query: GetPinsQuery): Task<TeamPinsDto>
   }
   class Teammate {
     +Guid Id
@@ -101,13 +102,22 @@ package "Backend" {
   class PinDto {
     +Guid TeammateId
     +WeatherDto? Weather
+    +WeatherState WeatherState
     +bool ShowsStatusOutsideWorkingHours
+  }
+  enum WeatherState {
+    Available
+    Unavailable
+    NotShared
+  }
+  class TeamPinsDto {
+    +IReadOnlyList<PinDto> Pins
   }
 }
 
 ProfilePage --> ProfileStore : reads / sends changes
 ProfilePage --> SaveBar : state
-ProfilePage --> Segmented : unit, clock format
+ProfilePage --> Segmented : unit, clock format (mode radio)
 ProfilePage --> Switch : two sharing switches
 ProfileStore --> SaveState : has
 SaveBar --> SaveBarState : shows
@@ -123,5 +133,7 @@ Teammate *-- TeammateSettings
 TeammateSettings --> TemperatureUnit
 TeammateSettings --> ClockFormat
 GetPinsQueryHandler ..> TeammateSettings : reads the switches
-GetPinsQueryHandler ..> PinDto : builds per viewer
+GetPinsQueryHandler ..> TeamPinsDto : returns
+TeamPinsDto *-- PinDto : built per viewer
+PinDto --> WeatherState
 @enduml

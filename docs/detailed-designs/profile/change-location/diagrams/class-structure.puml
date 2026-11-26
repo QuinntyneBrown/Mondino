@@ -21,7 +21,7 @@ package "Frontend" {
   class ProfileStore {
     +saved: Signal<Profile>
     +draft: Signal<ProfileUpdate>
-    +lookup: Signal<LookupState>
+    +lookupState: Signal<LookupState>
     +canSave: Signal<boolean>
     +load(): void
     +changeCountry(countryCode: string): void
@@ -43,11 +43,20 @@ package "Frontend" {
     +settings: Settings
   }
   enum LookupState {
-    idle
-    finding
-    found
-    notFound
-    unavailable
+    Idle
+    Locating
+    Found
+    NotFound
+    Unavailable
+    RateLimited
+  }
+  class PostalCodeField {
+    +value: string
+    +country: Country
+    +lookupState: LookupState
+    +valueChange: string
+    +blurred: void
+    +retry: void
   }
 }
 
@@ -77,7 +86,16 @@ package "Backend" {
     +Guid TeamId
   }
   interface IPostalCodeLookup {
-    +FindCityAsync(postalCode: PostalCode): Task<City?>
+    +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
+  }
+  class PostalCodeLookupOutcome {
+    +PostalCodeLookupStatus Status
+    +City? City
+  }
+  enum PostalCodeLookupStatus {
+    Found
+    NotFound
+    Unavailable
   }
   class PostalCodeFormats {
     +Supported: IReadOnlyList<PostalCodeFormat>
@@ -114,6 +132,11 @@ ProfileApi <|.. HttpProfileApi
 ProfileStore --> Profile : saved
 ProfileStore --> ProfileUpdate : draft
 ProfileStore --> LookupState : has
+ProfilePage --> PostalCodeField : value, country, lookupState
+PostalCodeField ..> LookupState : shows
+IPostalCodeLookup ..> PostalCodeLookupOutcome : returns
+PostalCodeLookupOutcome --> PostalCodeLookupStatus
+PostalCodeLookupOutcome --> City
 HttpProfileApi ..> ProfileController : JSON/HTTPS
 ProfileController ..> GetProfileQueryHandler : GetProfileQuery
 ProfileController ..> LookUpPostalCodeQueryHandler : LookUpPostalCodeQuery

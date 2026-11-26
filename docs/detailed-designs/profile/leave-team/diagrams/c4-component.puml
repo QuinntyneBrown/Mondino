@@ -8,7 +8,7 @@ Container_Boundary(spa, "Mondino web app") {
   Component(dialog, "LeaveTeamDialog", "CDK Dialog", "Names the team; cancel or leave; busy and failed")
   Component(store, "ProfileStore", "Route-scoped signal store", "Leaves, clears settings, navigates")
   Component(client, "HttpProfileApi", "ProfileApi over HTTP", "Sends the DELETE")
-  Component(left, "LeftPage", "Angular page, lazy route", "Confirms the teammate has left")
+  Component(left, "LeftPage", "Angular page, lazy route", "Confirms the teammate has left; team name from the navigation state")
 }
 Container_Boundary(api, "Mondino API") {
   Component(ctrl, "ProfileController", "ASP.NET Core controller", "DELETE /api/teams/{teamId}/me")

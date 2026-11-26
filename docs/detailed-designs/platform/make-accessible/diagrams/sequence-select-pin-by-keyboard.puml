@@ -16,10 +16,9 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "AppShell" as shell
-  participant "PinList" as list
-  participant "GlobeView" as view
+  participant "App" as shell
   participant "PinLayer" as layer
+  participant "GlobeView" as view
   participant "MotionPreference" as motion
   participant "GlobePage" as page
   participant "TeamStore" as store
@@ -28,16 +27,14 @@ box "Frontend — Mondino web app" #E0F2FE
 end box
 actor -> shell : Tab: "Skip to content" is the first stop (L2-039)
 shell --> actor : Focus moves to the main content
-actor -> list : Tab into the list of pins
-list -> view : focused(teammateId)
-view -> layer : lift(teammateId), showFocusRing(teammateId)
-layer --> actor : Pin lifts with a visible focus ring
-actor -> list : Arrow key
-list -> list : FocusKeyManager moves to the next PinListItem
-list -> view : focused(nextTeammateId)
-view -> layer : lift and ring move to the next pin
-actor -> list : Enter or Space
-list -> view : select(teammateId)
+actor -> layer : Tab to a pin's button
+layer -> layer : liftedId = teammateId
+layer --> actor : Pin lifts with a visible focus indicator
+actor -> layer : Tab
+layer -> layer : liftedId = next teammateId, west to east
+layer --> actor : The next pin lifts
+actor -> layer : Enter or Space
+layer -> view : select(teammateId)
 view -> page : select(teammateId)
 page -> store : select(teammateId)
 store --> page : selected teammate id signal
@@ -52,7 +49,7 @@ page -> panel : Selected teammate's city, local time, offset, status, weather
 panel --> actor : Panel shows the teammate
 page -> announcer : announce("<name>, <city>, selected.", "polite") once (L2-040)
 announcer --> actor : Screen reader speaks the change
-note over list, announcer
+note over layer, announcer
   A minute tick updates the descriptions in place.
   Nothing is sent to LiveAnnouncer for it (L2-040).
 end note

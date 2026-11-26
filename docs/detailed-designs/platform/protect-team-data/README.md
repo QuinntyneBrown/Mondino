@@ -74,8 +74,10 @@ behind them.
   carry the city's name and country, and the city's position, never the postal code's own.
 - `ProfileDto` is the only DTO returned to a teammate that carries a postal code, and
   `GetProfileQueryHandler` builds it for the current teammate only.
-- `InviteDto` carries bare positions with no names, and `PostalCodeResultDto` answers the
-  person who typed the postal code.
+- `InviteDto` carries bare positions with no names, and `Avatars`: the initials and colour
+  of the five teammates who joined most recently, with no name, id or city. Initials and a
+  colour are the most a holder of an invite link learns of a teammate (L2-001).
+  `PostalCodeResultDto` answers the person who typed the postal code.
 - A postal code travels in a request body, never in a URL. In the browser it lives only in the
   form state of `JoinPage` and `ProfilePage`. `SettingsCache` and `TeamMembership` never hold
   one, so none is in local storage, session storage, IndexedDB, a cookie or the address bar.

@@ -38,7 +38,7 @@ participant "Postal code source" as postal
 participant "Open-Meteo" as meteo
 actor -> page : Leave the postal code field ("20121", Italy)
 page -> store : lookUp()
-store --> page : lookupState Finding
+store --> page : lookupState Locating
 page --> actor : "Finding 20121…", button "Placing your pin…" disabled (L2-003)
 store -> client : lookUpPostalCode(inviteToken, "IT", "20121")
 client -> controller : POST /api/invites/{inviteToken}/postal-code-lookups

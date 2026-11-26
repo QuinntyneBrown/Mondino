@@ -16,7 +16,7 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "AppShell" as shell
+  participant "AppHeader" as shell
   participant "Router" as router
   participant "unsavedChangesGuard" as guard
   participant "ProfileStore" as store

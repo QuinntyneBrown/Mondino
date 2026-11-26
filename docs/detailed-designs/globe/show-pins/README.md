@@ -41,12 +41,15 @@ decides how they are drawn.
 - **`GetPinsQueryHandler`** — loads the team only where the teammate named by
   `ICurrentTeammate` belongs to it, and answers 404 otherwise, the same answer as for a team
   that does not exist (L2-043). For each distinct city it asks `IWeatherSource` for the
-  weather and `MomentFinder` for the moments, then builds one `PinDto` for each teammate. A
-  teammate whose `TeammateSettings.ShareWeather` is false gets a null weather. When the
-  weather source fails or times out the weather is null and the pin is still returned
+  weather and `MomentFinder` for the moments, then builds one `PinDto` for each teammate and
+  answers them in a `TeamPinsDto` (the team's id and name, its invite token, the viewer's
+  teammate id and the pins). A teammate whose `TeammateSettings.ShareWeather` is false gets a
+  null weather and the `WeatherState` `NotShared`. When the weather source fails or times out
+  the weather is null, the `WeatherState` is `Unavailable` and the pin is still returned
   (L2-049). The weather source receives a position and nothing else.
 - **`PinDto`** — teammate id, name, colour, city name, country, position, time zone id,
-  weather or null, whether the status is shown, whether the pin is the viewer's own
+  weather or null, the weather's state (`WeatherState`: `Available`, `Unavailable` or
+  `NotShared`), whether the status is shown, whether the pin is the viewer's own
   (`IsViewer`), and the moments. The position is the city's. The DTO has no postal code field
   and no local time: the browser works the time out from the time zone id.
 - **`CachedWeatherSource`** — `IWeatherSource` decorator over `OpenMeteoWeatherSource`, with a
@@ -83,24 +86,29 @@ decides how they are drawn.
 
 **In the `globe` library**
 
-- **`GlobeView`** (`mo-globe`) — takes `pins`, `selectedId` and `interactive`, and emits
+- **`GlobeView`** (`mo-globe`) — takes `pins`, `descriptions`, `selectedId` and `interactive`, and emits
   `select` with a teammate id or null and `selectGroup` with a group pin's teammate ids. It measures its own width with a `ResizeObserver`,
   computes `placements` by calling `PIN_SPREADER` with the pins and that width, and passes
   them to `PinLayer`. It sets `compact` when the globe is less than 400 px wide.
 - **`PinLayer`** — component that draws the pins as HTML elements over the scene's canvas.
+  The pins it draws are the list a keyboard and a screen reader reach (L2-040): the mocks'
+  `ul.globe__pins`, with one `li.globe__pin` for each placement, holding a `button.pin`. A
+  button's accessible name is its pin's description (`descriptions`, see `make-accessible`),
+  it carries `aria-pressed`, which is true while its pin is selected, and the visible label
+  beside it is `aria-hidden`. The buttons are in a fixed order, west to east, which does not
+  change as the globe turns. Each is a Tab stop; Enter or Space emits `select`.
   On each frame in which the globe has turned it asks `GlobeScene.project` for each
   placement's point and moves the pin's element there with a transform. A placement that does
-  not face the viewer is hidden, with its label. A placement near the globe's edge is drawn
+  not face the viewer is hidden, with its label, so it takes no focus and is not in the list
+  until the globe turns it into view; its teammate is reached through the panel and the Team
+  screen. A placement near the globe's edge is drawn
   fainter and without its label (`globe__pin--far`) until it is lifted; how near is
   `<TO SUPPLY>`. `PinLayer` holds `liftedId`: the pin under
   the pointer, or else the pin with keyboard focus. A pin is drawn lifted when it is the
-  lifted pin or the selected pin. Its elements are not focusable and are hidden from the
-  accessibility tree; `PinList` is their text equivalent. Whether the renderer also draws a
+  lifted pin or the selected pin. The canvas under the layer is hidden from the accessibility
+  tree. Whether the renderer also draws a
   3D body under each pin is `<TO SUPPLY>` with the renderer ADR; the element over the canvas
   is what is pointed at, selected and tested.
-- **`PinList`** — list of the same pins as buttons, in a fixed order that does not change as
-  the globe turns. It is what the keyboard and a screen reader reach. Focusing a button emits
-  `focusedId`, and Enter or Space emits `select`.
 - **`PinMarkTemplate`** (`ng-template[moPinMark]`) and **`PinLabelTemplate`**
   (`ng-template[moPinLabel]`) — templates that the page projects into `GlobeView`. The `globe`
   library cannot import `components` or `domain`, so it does not know how to draw an avatar or
@@ -136,9 +144,9 @@ is removed and the pin changes size at once. Each minute the label's time change
 shared clock; no pin has a timer of its own.
 
 By pointer, entering the hit area lifts the pin and leaving it settles the pin back unless it
-is selected. By keyboard, focus on a `PinList` button lifts the matching pin exactly as the
-pointer does, and `PinLayer` draws the focus indicator on it. A focused pin on the far side
-of the globe should be turned into view, so that focus is never on something hidden. By
+is selected. By keyboard, focus on a pin's button lifts that pin exactly as the
+pointer does, and the focus indicator is drawn on the pin itself. A pin on the far side of
+the globe is hidden and takes no focus, so focus is never on something hidden. By
 touch, where nothing hovers, a tap on a pin selects it and a tap elsewhere on the globe emits
 `select` with null. `GlobeGestures` (see `turn-globe`) tells a tap from a drag. A selected
 pin stays lifted, and `GlobePage` shows its teammate in the panel (L2-023).
@@ -199,8 +207,7 @@ Open-Meteo.
 ### Components
 
 In the web app, `GlobePage` gives the pins from `TeamStore` to `GlobeView`, which asks
-`spreadPins` for placements and hands them to `PinLayer`; `PinList` takes keyboard focus and
-lifts the matching pin. In the API, `TeamsController` sends `GetPinsQuery` to
+`spreadPins` for placements and hands them to `PinLayer`, whose pin buttons take the pointer and keyboard focus. In the API, `TeamsController` sends `GetPinsQuery` to
 `GetPinsQueryHandler`, which reads the database and `CachedWeatherSource`.
 
 ![C4 component view for showing pins](diagrams/c4-component.png)
@@ -209,7 +216,7 @@ lifts the matching pin. In the API, `TeamsController` sends `GetPinsQuery` to
 
 `PinDto` is serialised as `Pin`. `spreadPins` realises the `PinSpreader` contract and returns
 `PinPlacement`s, each standing for one or more pins. `GlobeView` injects the contract and owns
-`PinLayer` and `PinList`; `PinLayer` uses `LabelPlacer` and `GlobeScene.project`.
+`PinLayer`, which uses `LabelPlacer` and `GlobeScene.project`.
 
 ![Class diagram for showing pins](diagrams/class-structure.png)
 
@@ -217,15 +224,15 @@ lifts the matching pin. In the API, `TeamsController` sends `GetPinsQuery` to
 
 The handler answers 404 to anyone who is not a teammate of the team. Otherwise it builds a
 `PinDto` for each teammate with the city's position and no postal code. A weather that is not
-shared, or that Open-Meteo did not give in time, is null, and the pin is returned all the
-same.
+shared, or that Open-Meteo did not give in time, is null, with the `WeatherState` saying
+which, and the pin is returned all the same.
 
 ![Sequence diagram for reading the team's pins](diagrams/sequence-read-pins.png)
 
 ### Behaviour — lift a pin
 
-The pointer lifts a pin in `PinLayer` directly. Keyboard focus arrives through `PinList` and
-lifts the same pin. A tap, or Enter or Space, selects it; the selection travels to `TeamStore`
+The pointer lifts a pin in `PinLayer`. Keyboard focus on the pin's button lifts it the same
+way. A tap, or Enter or Space, selects it; the selection travels to `TeamStore`
 and returns as an input, and the pin stays lifted until the selection is cleared.
 
 ![Sequence diagram for lifting a pin on hover, focus or tap](diagrams/sequence-lift-pin.png)

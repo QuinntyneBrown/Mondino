@@ -39,7 +39,7 @@ client -> controller : GET /api/invites/{inviteToken}
 controller -> controller : Apply the invite rate limit policy
 controller -> handler : Send GetInviteQuery
 handler -> db : Load the team by invite token
-db --> handler : Team and its teammates' cities
+db --> handler : Team and its teammates' cities, names, colours and joined dates
 handler -> current : Session's team
 current --> handler : Team id or none
 alt the session belongs to a teammate of this team (L2-001)
@@ -49,7 +49,7 @@ alt the session belongs to a teammate of this team (L2-001)
   store --> page : inviteState AlreadyJoined
   page --> actor : Navigate to /globe, no second pin
 else no session on this team
-  handler -> handler : Build bare positions: one city position per teammate, no id, name or city; up to five avatars (L2-001)
+  handler -> handler : Build bare positions: one city position per teammate, no id, name or city; avatars of the five who joined most recently (L2-001)
   handler --> controller : InviteDto
   controller --> client : 200 InviteDto
   client --> store : Invite
