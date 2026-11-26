@@ -50,7 +50,8 @@ and a .NET backend.
    which kinds of moment show on the globe, what you share, and leaving the team.
 
 A pin is a person, their clock and their sky: initials in the teammate's own colour, their local
-time, the weather and the temperature, and a sun dot when there is a moment there this week.
+time, the weather and the temperature, and a moment marker when there is a moment there this
+week.
 Only the city is shown; a postal code stays private.
 
 | Status | Local hour |

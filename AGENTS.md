@@ -7,6 +7,13 @@
 
 Mondino is Italian for "little world". Its tagline is "Your team, around the world, right now."
 
+**What it is for.** Teammates in Canada, the United States, Italy and anywhere else each give a
+name and a postal code, and the team appears on a beautiful 3D globe. A teammate opens it,
+sees who is where and what is happening there (a Raptors home game in Toronto, a Grand Prix in
+Italy), and has something to talk about. It is a way to get to know each other, and nothing
+more. It is a responsive web application, used on a phone, a tablet, a desktop and a large
+screen.
+
 **Direction.** One question decides everything: what is it like where my teammate is, right
 now? The whole app is five screens, and it stays that small:
 
@@ -32,16 +39,21 @@ now? The whole app is five screens, and it stays that small:
    team.
 
 - **A pin is a person, their clock and their sky.** It shows the teammate's initials in their
-  own colour, their local time, the weather and the temperature. A sun dot on a pin means there
-  is a moment there this week.
-- **Only the city is shown.** A postal code places a pin at city level and stays private: a
-  teammate sees another's city and country, never their postal code or an address.
+  own colour, their local time, the weather and the temperature. A pin that is pointed at,
+  focused or selected lifts out from the globe, so teammates stay clear on a small globe. A
+  moment marker beside a pin, in sun, means there is a moment there this week, and its emblem
+  says what it is.
+- **Only the city is shown.** A postal code places a pin at city level, enough to tell
+  Mississauga from Toronto and no more, and stays private: a teammate sees another's city and
+  country, never their postal code or an address.
 - **Status comes from the local hour.** Working hours are 09:00 to 18:00, early morning 07:00
   to 09:00, evening 18:00 to 23:00, and from 23:00 to 07:00 a teammate is "Probably asleep".
   The working-hours overlap is the part of both working days that coincides, shown on your own
   clock.
 - **A moment is one of four kinds**: a holiday, Formula 1, a local event, or sport. Holidays
-  come from public calendars, and the weather from Open-Meteo.
+  come from public calendars, and the weather from Open-Meteo. A moment's marker shows an
+  emblem for it; a team's or a series' own logo is used only where Mondino holds the right to
+  use it, and otherwise the marker shows Mondino's own icon for the kind.
 
 Mondino has no chat, no calendar or meeting scheduler, no presence or activity tracking, no
 precise location, no social feed and no adverts. The prototype has an "Invite teammate" button,
@@ -49,6 +61,10 @@ a "Message" button on a teammate's panel and an invite link, but what each leads
 and making a team are not designed yet; none is built before its design exists. Before adding or
 changing anything, ask how it serves seeing where a teammate is and what it is like there right
 now; if it does not, do not build it, and if a request works against it, say so.
+
+The requirements are in `docs/specs/L1.md` (what Mondino must do) and `docs/specs/L2.md` (each
+behaviour with its acceptance criteria). An acceptance test names the L2 requirements it covers
+in a header comment (`// Traces to: L2-012`).
 
 The mission, Mondino's single L0 requirement, is not written yet. When it is, it goes in
 `docs/specs/L0.md` and this section quotes it word for word; everything then points back to it.
@@ -79,8 +95,12 @@ in that order, before any code.
   else competes.
 - **Type:** Gabarito for the wordmark, names and clocks, and Inter for everything that is read.
   Times and temperatures use tabular figures.
-- **The globe** turns slowly on its own, turns to a selected pin and holds there, and is
-  dragged to spin. Its night side is shaded. A pin's label sits beside it, clear of other pins.
+- **The globe** is three-dimensional and beautiful: modelled in Blender, lit and shaded, with
+  the soft, rounded, toy-like look of a modern animated film, in the brand's colours. It turns
+  slowly on its own, turns to a selected pin and holds there, and is dragged to spin. Its night
+  side is shaded. A pin lifts out when it is pointed at, focused or selected, and its label
+  sits beside it, clear of other pins. The prototype draws the globe flat; it designs the
+  interface around the globe, not the globe's look.
 - **Phone:** one column. Globe puts the globe on top and the panel under it, and the header
   shows the mark without the wordmark. Team shows each teammate's name, local time and next
   moment.
@@ -159,9 +179,10 @@ better than one that keeps growing. A further application needs its own ADR.
 - **The browser calls only the backend.** It never calls a weather, postal code, calendar or
   map service itself, so no third party learns where a teammate is. The globe's map data is
   bundled and served with the app.
-- **How the globe is drawn is decided in an ADR before the Globe is built.** The prototype
-  draws it with d3-geo's orthographic projection; the interface around it is what the prototype
-  designs.
+- **The globe is 3D, built from assets modelled in Blender.** Which renderer draws it, and how
+  the assets are exported and scaled back for a low-power device, is decided in an ADR before
+  the Globe is built. The prototype draws it with d3-geo's orthographic projection, as a
+  placeholder; the interface around it is what the prototype designs.
 - Prettier and angular-eslint own formatting and lint; CI fails on either.
 - Current Angular: standalone components, signals for state, `OnPush` everywhere, zoneless.
 - **Responsive at every width.** Every screen works from the narrowest phone to the widest
