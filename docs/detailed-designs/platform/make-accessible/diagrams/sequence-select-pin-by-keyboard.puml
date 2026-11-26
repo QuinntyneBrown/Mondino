@@ -50,7 +50,7 @@ else Reduced motion requested (L2-042)
 end
 page -> panel : Selected teammate's city, local time, offset, status, weather
 panel --> actor : Panel shows the teammate
-page -> announcer : announce(name, city and local time, "polite") once (L2-040)
+page -> announcer : announce("<name>, <city>, selected.", "polite") once (L2-040)
 announcer --> actor : Screen reader speaks the change
 note over list, announcer
   A minute tick updates the descriptions in place.

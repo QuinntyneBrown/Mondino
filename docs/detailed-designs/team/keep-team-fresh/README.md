@@ -31,7 +31,7 @@ Frontend:
   Globe, Team, Moments and Profile & Settings screens. It injects `TEAM_API` and `CLOCK`.
   `load(teamId)` reads the pins once when the route opens. An effect on the clock's minute tick
   calls `refreshIfDue(now)`, which calls `refresh()` when `RefreshIntervalMinutes` (15) or more
-  have passed since `lastRefreshedAt` and no request is pending (L2-048). The store has no
+  have passed since `refreshedAt` and no request is pending (L2-048). The store has no
   timer of its own.
 - **`BrowserClock`** — the one shared clock, bound to `CLOCK`. It ticks each minute, stops its
   timer while the tab is hidden and ticks at once when the tab is shown again. Because the
@@ -48,8 +48,16 @@ Frontend:
   the list. `arrivedIds` and `arrivedShown` are an input and an output this design adds to
   `GlobeView`.
 - **`loadState`** — `Loading`, `Ready` or `Failed`, for the first load only. A refresh never
-  changes it: a failed refresh keeps the pins held and shows nothing, and the store tries again
-  at the next minute tick.
+  changes it: a failed refresh keeps the pins held, sets `refreshFailed`, and the store tries
+  again at the next minute tick. `Loading` shows skeletons and announces "Loading your team…";
+  `Failed` shows "We couldn't load your team" with "Try again", which calls `load` again.
+- **`refreshFailed`** and **`refreshedAt`** — whether the last refresh failed, and when the pins
+  held were read. While `refreshFailed` is true a banner (`Alert` as a banner, block `banner`,
+  `role="status"`) sits under the header of whichever screen is open: "Couldn't refresh just
+  now. Clocks are still right; weather and moments are from 14:50. Mondino will try again
+  shortly.", the time being `refreshedAt` on the viewer's clock, with "Try now", which calls
+  `refresh()`. It is rendered at the route that provides the `TeamStore`. The next refresh that
+  succeeds clears `refreshFailed` and the banner goes, with no message (L2-048, L2-049).
 - **`TeamApi`** (`TEAM_API`) and **`HttpTeamApi`** — contract and HTTP client in the `api`
   library. `getPins(teamId, signal)` calls `GET /api/teams/{teamId}/pins` and returns a
   `TeamPins`. The store passes an `AbortSignal` and aborts the pending request when the route
@@ -95,6 +103,9 @@ requirement cited by identifier.
 |-------|--------------|-------------|
 | `L2-048` | `L1-015` | A screen left open stays true: weather, moments and the team itself are refreshed quietly. |
 
+The banner is also what L2-049 asks of a screen when the backend cannot be reached; the rest of
+L2-049 is designed in `platform/survive-source-failure`.
+
 ## Diagrams
 
 ### System context
@@ -133,7 +144,7 @@ In the web app, `BrowserClock` ticks `TeamStore`, which calls `HttpTeamApi`. In 
 A minute tick finds 15 minutes passed, and the store reads the pins again. The handler returns
 every teammate's pin with weather or null. The store merges them, keeps the selection, and
 reports the new teammate's id, whose pin the globe adds and pulses once. A failed refresh keeps
-the pins held.
+the pins held and shows the banner until a refresh succeeds.
 
 ![Sequence diagram for a quiet refresh that brings in a new teammate](diagrams/sequence-quiet-refresh.png)
 

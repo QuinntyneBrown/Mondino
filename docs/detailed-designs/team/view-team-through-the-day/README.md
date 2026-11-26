@@ -18,9 +18,9 @@ screen.
 The screen has three parts. The day ribbon sits on top, with working hours and the night marked.
 Under it are the filters All, Working now and Asleep, each with the number of teammates it
 holds. Under them is every teammate from west to east, with location, local time, offset,
-weather and next moment. From 768 px the list is a table; on a phone it is a list of name, local
-time and next moment. Choosing a row or a ribbon marker opens the Globe screen with that
-teammate's pin selected.
+weather and next moment. From 768 px the list is a table; under 768 px each teammate shows
+name, status, local time with city and offset, and next moment. Choosing a row or a ribbon
+marker opens the Globe screen with that teammate's pin selected.
 
 The Team screen reads no data of its own. It presents the pins the `TeamStore` holds, and
 recomputes from the one shared clock each minute. A team may hold 500 teammates, so the list
@@ -32,7 +32,7 @@ The slice lives in the Mondino web app. The pins come from `GET /api/teams/{team
 loading and refreshing are designed in `keep-team-fresh`.
 
 - **`TeamPage`** — page of the `mondino` application at `/team`, a lazy route. It holds the
-  chosen `StatusFilter` as a signal, starting at `All`. Its `rows`, `markers` and `chips` are
+  chosen `StatusFilter` as a signal, starting at `All`. Its `rows`, `markers` and `options` are
   computed signals over `TeamStore.pins`, the filter and the clock's minute tick. It navigates
   to `/globe?teammate={teammateId}` when a teammate is chosen. The filter is the screen's own
   state and goes when the teammate leaves the screen.
@@ -53,23 +53,27 @@ loading and refreshing are designed in `keep-team-fresh`.
   `RibbonMarker` per pin. `dayFraction` is the local hour and minute as a fraction of 24 hours,
   so a local time of 08:05 sits just after the 08:00 mark. Markers at the same local hour take
   successive `lane` values, so each stays visible and can be chosen (L2-027).
-- **`DayRibbon`** (`mo-day-ribbon`) — presentation component. It draws the 24 hours, the span
-  09:00 to 18:00 labelled as working hours and the span 23:00 to 07:00 labelled as night, each
-  with a text label and not by colour alone. Each marker is a button holding an `Avatar`,
+- **`DayRibbon`** (`mo-day-ribbon`) — presentation component. It draws the 24 hours with a
+  mark every three hours, the span 09:00 to 18:00 labelled "Working hours" and the span 23:00
+  to 07:00 labelled "Night", each with a text label and not by colour alone; from 768 px the
+  spans between them are labelled "Morning" and "Evening". Each marker is a link holding an
+  `Avatar`,
   placed by percentage so the ribbon fits any width without scrolling the page. A marker's
   accessible name is the teammate's name and local time. It emits `teammateChosen`.
-- **`FilterChips`** (`mo-filter-chips`) — presentation component. It takes `chips` and
-  `selected`, and emits `selectedChange`. It is one `radiogroup`: the arrow keys move between
-  chips, one chip is in the tab order, and the chosen chip carries `aria-checked` (L2-028).
-  `TeamPage` builds the filter's three tabs from `TeamStore.counts`: "All 12", "Working now 7",
-  "Asleep 2".
+- **`Segmented`** (`mo-segmented`) — presentation component. It takes `options` and `value`,
+  and emits `valueChange`. Here it is one `tablist` named "Filter by status": the arrow keys
+  move between its tabs, one tab is in the tab order, the chosen tab carries `aria-selected`,
+  and the list under it is its `tabpanel` (L2-028). `TeamPage` builds the filter's three tabs
+  from `TeamStore.counts`: "All 12", "Working now 7", "Asleep 2".
 - **`TeamTable`** (`mo-team-table`) — presentation component. It takes `rows` and
   `emptyMessage`, and emits `teammateChosen`. From 768 px it has the columns Person, Location,
   Local time, vs you, Weather and Coming up; below that each row gives the name, the local time
   and the next moment. The viewer's row shows the name followed by "(you)" and a dash for the
-  offset. A row with no next moment shows a dash under Coming up. Each row holds one link-styled
-  button over the teammate's name that covers the row, so a row is chosen by pointer, touch or
-  keyboard.
+  offset. A row with no next moment shows a dash under Coming up. Each row holds one link over
+  the teammate's name that covers the row, so a row is chosen by pointer, touch or keyboard.
+  The list is headed "Everyone, west to east", and the table's caption names what it holds:
+  "Everyone, west to east", "Teammates in working hours, west to east" or "Teammates probably
+  asleep, west to east".
 - **Windowed rows** — `TeamTable` renders its rows through the Angular CDK virtual scroll
   viewport with a fixed row height per layout. The page holds the rows in and near the viewport
   and no more, whatever the size of the team (L2-026, L2-047). The table states
@@ -77,8 +81,11 @@ loading and refreshing are designed in `keep-team-fresh`.
   length.
 
 The heading of the screen gives the number of teammates and of distinct time zones from
-`TeamStore.counts`. The empty messages are "Nobody is in working hours right now." for Working
-now and "Everyone is awake right now." for Asleep.
+`TeamStore.counts`, as "12 teammates · 12 time zones · live". For a team of one it reads "Just
+you · 1 time zone · live", and under the viewer's own row the screen says "Just you, for now"
+and "When teammates join with your team's invite link, they appear here from west to east.",
+with "Get the invite link", which leads to the Globe screen. The empty messages are "Nobody is
+in working hours right now." for Working now and "Everyone is awake right now." for Asleep.
 
 A teammate whose settings hide their status outside working hours still has a row and a ribbon
 marker, since both follow from the local time. How the Asleep filter and its count treat such a
@@ -118,7 +125,7 @@ reads the team from the Mondino database.
 ### Components
 
 `TeamPage` reads the pins and counts from `TeamStore`, builds rows and markers with the `pins/`
-functions, and passes them to `DayRibbon`, `FilterChips` and `TeamTable`. Each of the three
+functions, and passes them to `DayRibbon`, `Segmented` and `TeamTable`. Each of the three
 reports a choice back to `TeamPage`.
 
 ![C4 component view for viewing the team through the day](diagrams/c4-component.png)
@@ -141,7 +148,7 @@ navigates to the Globe screen with that teammate's id.
 
 ### Behaviour — filter the team by status
 
-Choosing a chip sets the filter, and `filterByStatus` keeps the matching rows in west-to-east
+Choosing a tab sets the filter, and `filterByStatus` keeps the matching rows in west-to-east
 order. An empty result shows the filter's own message. A clock tick that changes a status
 changes the list and the counts with no reload.
 

@@ -17,7 +17,7 @@ interface IWeatherSource {
 }
 
 interface IPostalCodeLookup {
-  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupResult>
+  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
 }
 
 interface IHolidayCalendar {
@@ -32,18 +32,19 @@ class CachedWeatherSource {
   -inner: IWeatherSource
   -cache: IMemoryCache
   -time: TimeProvider
+  +{static} TimeSpan FreshFor = 15 minutes
   +{static} TimeSpan MaxAge = 3 hours
   +GetCurrentAsync(position: Position, ct): Task<Weather?>
   -Round(position: Position): Position
 }
 
 class PostalCodeLookupClient {
-  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupResult>
+  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
 }
 
 class CachedPostalCodeLookup {
   -inner: IPostalCodeLookup
-  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupResult>
+  +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
 }
 
 class CachedMomentCalendars {
@@ -73,7 +74,7 @@ class "SourceAnswer<T>" as SourceAnswer {
 }
 
 class GetPinsQueryHandler {
-  +Handle(query: GetPinsQuery, ct): Task<IReadOnlyList<PinDto>>
+  +Handle(query: GetPinsQuery, ct): Task<TeamPinsDto>
 }
 
 class PinDto {

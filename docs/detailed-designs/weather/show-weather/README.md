@@ -22,7 +22,8 @@ nothing about a teammate.
 Whatever Open-Meteo reports, the API maps it to one of the eight conditions, so the web app
 always has an icon and a word to show. The web app shows the condition as an icon with its
 word, and uses the night form of the icon for a clear or partly cloudy sky at night. It shows
-the temperature as whole degrees in the viewer's unit.
+the temperature as whole degrees in the viewer's unit: with the unit on a panel ("13°C") and as
+degrees alone on a pin's label and a Team row ("13°").
 
 A teammate may turn off "Share my local weather". The API then gives no weather for that
 teammate to anyone else, while the teammate still sees their own.
@@ -112,10 +113,15 @@ teammate to anyone else, while the teammate still sees their own.
 - **`formatTemperature(temperatureC, unit): string`** — pure function. For `fahrenheit` it
   converts with `temperatureC × 9 / 5 + 32`. It rounds to a whole degree, turns a negative zero
   into zero, and appends "°C" or "°F" with no space. 13 °C gives "13°C" and "55°F"; −0.4 °C
-  gives "0°C" (L2-019).
+  gives "0°C" (L2-019). This is the form a panel shows.
+- **`formatDegrees(temperatureC, unit): string`** — pure function. It converts and rounds as
+  `formatTemperature` does and appends the degree sign alone: 13 °C gives "13°" and, for
+  `fahrenheit`, "55°". This is the form a pin's label, a pin's accessible name and a Team row
+  show.
 - **`weatherLabel(condition, cityName): string`** — pure function. It gives the condition's
   word with the city ("Foggy in Milan"). The city's name is data and is rendered as text. The
-  word for each condition follows the mocks in `docs/mocks/`.
+  words are the mocks': "Clear", "Partly cloudy", "Cloudy", "Rainy", "Showers", "Stormy",
+  "Foggy" and "Windy".
 - **`isNightSky(localHour): boolean`** — pure function. It is `true` when `statusAt(localHour)`
   from `time/` is `probably-asleep`, that is from 23:00 to 06:59 at the pin's city (L2-018). It
   reads the hour only, so it applies whether or not the teammate's status is shown.
@@ -134,11 +140,17 @@ teammate to anyone else, while the teammate still sees their own.
   loaded from a CDN.
 - **`PinLabel`**, **`TeammatePanel`** and **`TeamTable`** — presentation components. Each takes
   the temperature text, the condition and the night flag as inputs and sets the temperature in
-  tabular figures.
+  tabular figures. A pin's label shows the degrees beside the local time and, when the pin is
+  lifted, the icon and the condition's word as well. The panel shows the icon, the temperature
+  with its unit and the label. A Team row shows the icon and the degrees.
 
-When `pin.weather` is `null` no temperature and no icon is shown; the local time and status are
-unaffected. A `null` stands both for weather a teammate does not share and for weather the
-source could not give. How `PinDto` tells the two apart, so that the weather's place can say it
+When `pin.weather` is `null` no temperature and no condition is shown, and a pin's label and
+its accessible name leave the weather out; the local time and status are unaffected. A `null`
+stands both for weather a teammate does not share and for weather the source could not give. In
+the weather's place the panel says "Weather is unavailable right now." with "Tomás’s local time
+is still right." under it, and a Team row shows a mark named "Weather unavailable"; for weather
+a teammate does not share the panel says "Ahmed doesn’t share local weather.". The teammate's
+first name is data and is rendered as text. How `PinDto` tells the two apart, so that the weather's place can say it
 is unavailable (L2-049), is `<TO SUPPLY>`.
 
 ## Requirements
@@ -148,8 +160,8 @@ level-1 (L1) requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-018` | `L1-006` | Each pin carries the current temperature and one of a fixed set of conditions (clear, partly cloudy, cloudy, rain, showers, storm, fog, wind) for its city, from Open-Meteo by way of the backend. Conditions are shown as an icon with its word; at night a clear or partly cloudy sky uses its night icon. |
-| `L2-019` | `L1-006` | Temperatures are shown in the unit the viewer has chosen, as whole degrees with tabular figures. A new teammate's unit starts from their country: °F for the United States, °C elsewhere. |
+| `L2-018` | `L1-006` | Each pin carries the current temperature and one of a fixed set of conditions (clear, partly cloudy, cloudy, rain, showers, storm, fog, wind) for its city, from Open-Meteo by way of the backend. Conditions are shown as an icon with its word ("Clear", "Partly cloudy", "Cloudy", "Rainy", "Showers", "Stormy", "Foggy", "Windy"); at night a clear or partly cloudy sky uses its night icon. |
+| `L2-019` | `L1-006` | Temperatures are shown in the unit the viewer has chosen, as whole degrees with tabular figures: with the unit on a panel ("13°C") and as degrees alone on a pin and a Team row ("13°"). A new teammate's unit starts from their country: °F for the United States, °C elsewhere. |
 
 ## Diagrams
 

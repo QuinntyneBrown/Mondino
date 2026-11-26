@@ -34,8 +34,8 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   against its surroundings. No component removes it.
 - Each interactive element in `components` has a minimum size of 44 × 44 CSS px, set in its own
   stylesheet from a foundation token.
-- `LeaveTeamDialog` opens through the CDK Dialog, which keeps focus inside the dialog, closes
-  on Escape and returns focus to the control that opened it.
+- `LeaveTeamDialog` and `DiscardChangesDialog` open through the CDK Dialog, which keeps focus
+  inside the dialog, closes on Escape and returns focus to the control that opened it.
 - On the globe, one finger spins and one tap selects. No interaction needs a multi-finger or
   path-based gesture; `PinList` is the single-pointer and keyboard alternative to dragging.
 
@@ -54,19 +54,21 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   it, with a contrast of at least 3:1 over the day side and the night side. Focus on a list
   item is therefore visible on the globe.
 - **`describePin(pin, now, settings)`** — function in `domain`'s `pins/`. It returns one
-  sentence: the teammate's name, city, local time, status, weather and any moment this week.
-  It calls `localTime`, `formatTime` and `statusAt` from `time/`, and reads weather as
-  "unavailable" when the pin has none. `globe` depends on `api` only, so `GlobePage` computes
+  sentence: the teammate's name, city, local time, status, weather and any moment this week,
+  as in "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°, Día de Muertos,
+  in 5 days". It calls `localTime`, `formatTime` and `statusFor` from `time/`. It leaves the
+  status out when `statusFor` gives none, and the weather out when the pin has none. `globe` depends on `api` only, so `GlobePage` computes
   the descriptions and passes them to `GlobeView` as the input `descriptions`, keyed by
   teammate id.
 - **Selection is announced once.** `GlobePage` calls the CDK `LiveAnnouncer` with politeness
   `polite` when the selected teammate id changes, whether the selection came from a tap, a
-  click or the keyboard. The message is the selected teammate's name, city and local time.
+  click or the keyboard. The message is the selected teammate's name and city and the word
+  "selected", as in "Tomás Herrera, Mexico City, selected.".
   `TeammatePanel` is not itself a live region.
 - **A minute tick is silent.** The descriptions and the panel update in place when the clock
   ticks. Neither is inside a live region, and `GlobePage` announces only a change of selection.
-- **The postal code lookup is announced.** `PostalCodeField` renders its result in an element
-  with `role="status"` and its error in an element with `role="alert"`, linked to the input
+- **The postal code lookup is announced.** `PostalCodeField` renders its result inside a
+  polite live region and its error in an element with `role="alert"`, linked to the input
   with `aria-describedby`; the input carries `aria-invalid` when the lookup fails.
 
 **Colour, contrast and text size (L2-041).**
@@ -77,8 +79,9 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 - `PinLabel` draws its text on its own surface, not on the globe, so its contrast does not
   depend on whether the pin is on the day side or the night side.
 - A state is never carried by colour alone. `StatusBadge` shows the status in words.
-  `FilterChips` and `Segmented` mark the chosen option with `aria-pressed` or `aria-checked`
-  and a visible mark. `MomentIcon` pairs the kind's icon with its name. An invalid field
+  `FilterChips` marks a pressed chip with `aria-pressed`, and `Segmented` marks the chosen
+  option with `aria-current` in the navigation, `aria-selected` in a tab list and
+  `aria-checked`, with a check mark, in a two-way choice. `MomentIcon` pairs the kind's icon with its name. An invalid field
   carries `aria-invalid` and a message.
 - Sizes are in `rem` and layouts are fluid (`adapt-to-every-width`, L2-037), so text at 200%
   reflows at 1280 px wide with no sideways scrolling.

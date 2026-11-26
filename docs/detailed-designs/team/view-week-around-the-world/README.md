@@ -42,12 +42,12 @@ the pins: the team's invite token.
   passes an hour that changes a status (L2-025).
 - **`weekMoments(pins, now, limit)`** — pure function in `moments/`. It takes each pin's
   moments, keeps those dated from today to 7 days ahead, where today is the date in that pin's
-  city, orders them by date and then west to east, and returns the first `limit` as `WeekMoment` values with a `more`
-  flag. `GlobePage` passes a limit of 8 (L2-024). The `when` text comes from `whenLabel` and the
-  emblem from `emblemFor`.
+  city, orders them by date and then west to east, and returns the first `limit` as
+  `WeekMoment` values with a `more` flag. `GlobePage` passes a limit of 8 (L2-024). The `when`
+  text comes from `whenLabel` and the emblem from `emblemFor`.
 - **`workingNow(pins, now)`** — pure function in `pins/`. It returns one `WorkingTeammate` for
-  each pin whose status is Working hours, ordered by local hour and then west to east, with city and formatted local
-  time. A pin whose status visibility flag hides the status is still listed, since Working hours
+  each pin whose status is Working hours, ordered by local hour and then west to east, with
+  city and formatted local time. A pin whose status visibility flag hides the status is still listed, since Working hours
   is not hidden by that setting.
 - **`WeekPanel`** (`mo-week-panel`) — presentation component. It takes `moments` and
   `working`, and emits `teammateChosen` with a teammate id and `allMoments`. Under the heading

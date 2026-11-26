@@ -88,7 +88,7 @@ enum CopyResult {
 class Toast <<components, mo-toast>> {
   +title: InputSignal<string>
   +text: InputSignal<string>
-  +tone: InputSignal<ToastTone>
+  +tone: InputSignal<'success' | 'danger'>
   +dismissed: OutputEmitterRef<void>
 }
 

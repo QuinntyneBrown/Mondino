@@ -11,9 +11,9 @@ Container_Boundary(web, "Mondino web app") {
   Component(store, "TeamStore", "domain, pins/", "Holds the pins, the selected teammate id and the viewer's pin")
   Component(clock, "BrowserClock", "domain, time/", "The one shared Clock")
   Component(offset, "offsetBetween, formatOffset", "domain, time/", "Difference between two zones at an instant, as words")
-  Component(overlap, "overlapBetween, formatOverlap", "domain, time/", "Shared part of two working days on the viewer's clock")
+  Component(overlap, "workingDayOnViewerClock, overlapBetween, formatOverlap", "domain, time/", "Shared part of two working days on the viewer's clock")
   Component(panel, "TeammatePanel, TeamTable", "components", "Show the offset as text")
-  Component(bar, "OverlapBar", "components", "Draws the overlap and gives it as text")
+  Component(bar, "OverlapBar", "components", "Draws both working days and the part they share, and gives it as text")
 }
 Rel(store, api, "Reads pins through TEAM_API", "JSON/HTTPS")
 Rel(page, store, "Reads selected pin and viewer's pin")

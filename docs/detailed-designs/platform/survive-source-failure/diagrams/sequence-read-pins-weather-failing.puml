@@ -43,7 +43,7 @@ db --> handler : Teammates
 loop Each distinct city, one call per city (L2-050)
   handler -> cached : GetCurrentAsync(position)
   cached -> cached : Round the position to two decimal places; look in the cache
-  alt Fresh answer cached
+  alt Answer under 15 minutes old cached
     cached --> handler : Weather
   else Nothing fresh
     cached -> resilience : ExecuteAsync("weather", call)
@@ -64,9 +64,9 @@ loop Each distinct city, one call per city (L2-050)
     end
   end
 end
-handler --> controller : PinDto list; weather null where unavailable, never zero
+handler --> controller : TeamPinsDto; weather null where unavailable, never zero
 controller --> client : 200 within 6 s
 client --> store : Pins
 store --> page : pins signal
-page --> actor : Each pin shows local time and status; weather, or "unavailable" in its place (L2-049)
+page --> actor : Each pin shows local time and status; the panel and the Team row say the weather is unavailable (L2-049)
 @enduml

@@ -81,6 +81,7 @@ package "Mondino.Infrastructure" {
 package "Mondino web app" {
   class "pins/ functions" as PinFns <<domain, pins/>> {
     +formatTemperature(temperatureC: number, unit: TemperatureUnit): string
+    +formatDegrees(temperatureC: number, unit: TemperatureUnit): string
     +weatherLabel(condition: WeatherCondition, cityName: string): string
     +isNightSky(localHour: number): boolean
   }

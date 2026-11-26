@@ -116,7 +116,7 @@ level-1 (L1) requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-014` | `L1-005` | A teammate's local time is worked out in the browser from the time zone of their pin and one shared clock. It is shown as a 24-hour or 12-hour time as the viewer has chosen, with the day of the week where a panel shows it. |
+| `L2-014` | `L1-005` | A teammate's local time is worked out in the browser from the time zone of their pin and one shared clock. It is shown as a 24-hour or 12-hour time as the viewer has chosen, with the day of the week and the date where a panel shows it ("Monday 27 Oct"). |
 | `L2-015` | `L1-005` | A teammate's status is decided only by their local hour. It is never taken from activity, presence or anything the teammate does. |
 
 ## Diagrams
