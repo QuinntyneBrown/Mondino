@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — List moments
+
+Person(teammate, "Teammate", "A person on a team")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "The Moments screen: groups moments by when they happen and filters them by kind")
+  Container(api, "Mondino API", "ASP.NET Core", "Returns the team's moments, each naming its teammate")
+  ContainerDb(db, "Mondino database", "EF Core; engine TO SUPPLY", "Teams, teammates and their cities")
+}
+
+Rel(teammate, web, "Uses", "HTTPS")
+Rel(web, api, "GET /api/teams/{teamId}/moments", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

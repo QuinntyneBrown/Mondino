@@ -1,0 +1,37 @@
+@startuml
+title UML sequence behaviour — the offset follows a daylight-saving change
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate (viewer)" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "BrowserClock" as clock
+  participant "GlobePage" as page
+  participant "offsetBetween" as offset
+  participant "overlapBetween" as overlap
+  participant "TeammatePanel" as panel
+end box
+
+note over clock : A teammate's panel is open.\nThe teammate's zone changes to or from\ndaylight-saving time; the viewer's does not.
+clock -> clock : Timer fires at the minute boundary
+clock --> page : minute signal changes
+page -> offset : offsetBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
+offset -> offset : zoneOffsetMinutes reads each zone's rule at now
+offset --> page : Offset changed by 60 minutes (L2-016)
+page -> overlap : overlapBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
+overlap --> page : Overlap moved by 60 minutes on the viewer's clock
+page -> panel : Bind the new offset and overlap
+panel --> actor : New offset and overlap, with no reload
+@enduml

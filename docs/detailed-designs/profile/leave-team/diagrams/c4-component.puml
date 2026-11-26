@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Leave team
+
+Container_Boundary(spa, "Mondino web app") {
+  Component(page, "ProfilePage", "Angular page, lazy route", "The button that opens the dialog")
+  Component(dialog, "LeaveTeamDialog", "CDK Dialog", "Names the team; cancel or leave")
+  Component(store, "ProfileStore", "Route-scoped signal store", "Leaves, clears settings, navigates")
+  Component(client, "HttpProfileApi", "ProfileApi over HTTP", "Sends the DELETE")
+  Component(left, "LeftPage", "Angular page, lazy route", "Confirms the teammate has left")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "ProfileController", "ASP.NET Core controller", "DELETE /api/teams/{teamId}/me")
+  Component(handler, "LeaveTeamCommandHandler", "MediatR handler", "Removes the current teammate")
+  Component(team, "Team", "Domain entity", "RemoveTeammate")
+  Component(sessions, "TeammateSessions", "ITeammateSessions", "Deletes sessions, expires the cookie")
+  ComponentDb(db, "Mondino database", "EF Core", "Teammate rows and sessions")
+}
+
+Rel(page, dialog, "Opens, awaits the decision")
+Rel(page, store, "leave()")
+Rel(store, client, "Calls through PROFILE_API")
+Rel(store, left, "Navigates to /left")
+Rel(client, ctrl, "DELETE", "HTTPS")
+Rel(ctrl, handler, "Sends LeaveTeamCommand")
+Rel(handler, team, "Removes the teammate from")
+Rel(handler, sessions, "Ends all sessions")
+Rel(handler, db, "Saves in one unit of work", "IAppDbContext")
+Rel(sessions, db, "Deletes sessions")
+@enduml

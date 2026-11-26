@@ -1,0 +1,81 @@
+@startuml
+title UML sequence behaviour — Change the postal code
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "PostalCodeField" as field
+  participant "ProfileStore" as store
+  participant "HttpProfileApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "ProfileController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeFormats" as formats
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedPostalCodeLookup" as lookup
+  participant "CachedWeatherSource" as weather
+end box
+participant "Postal code source" as source
+participant "Open-Meteo" as meteo
+actor -> field : Change the country or postal code, leave the field
+field -> store : changePostalCode(value), lookUp()
+store -> store : Clear the found city; lookup = finding; canSave = false
+field --> actor : "Finding M5V 2T6…"
+store -> client : lookUpPostalCode(teamId, countryCode, postalCode)
+client -> controller : POST /api/teams/{teamId}/me/postal-code-lookups (postal code in the body)
+controller -> controller : Authenticate the session; apply the lookup rate limit
+controller -> handler : Send LookUpPostalCodeQuery
+handler -> formats : Matches and Normalise
+alt wrong form for the country
+  formats --> handler : No match
+  handler --> controller : postal_code_not_found; the source is not called
+else right form
+  formats --> handler : PostalCode
+  handler -> lookup : FindCityAsync(postalCode)
+  lookup -> source : Country and postal code only
+  alt found
+    source --> lookup : City, position, time zone
+    lookup --> handler : City
+    handler -> weather : Weather at City.Position
+    weather -> meteo : Position only
+    meteo --> weather : Current weather
+    weather --> handler : Weather or none
+    handler --> controller : PostalCodeResultDto
+  else not known to the source
+    source --> lookup : No city
+    lookup --> handler : null
+    handler --> controller : postal_code_not_found
+  else no answer within 5 seconds
+    lookup --> handler : Lookup unavailable
+    handler --> controller : postal_code_unavailable
+  end
+end
+controller --> client : 200 PostalCodeResultDto, or ProblemDetails with a code
+client --> store : PostalCodeResult or ApiError
+alt found
+  store -> store : lookup = found; canSave = true
+  field --> actor : City and region; saving is offered
+else postal_code_not_found
+  store -> store : lookup = notFound; canSave = false
+  field --> actor : Alert of L2-004; saving is not offered; the pin stays (L2-032)
+else postal_code_unavailable
+  store -> store : lookup = unavailable; canSave = false
+  field --> actor : Could not be checked right now; offer to try again
+end
+@enduml

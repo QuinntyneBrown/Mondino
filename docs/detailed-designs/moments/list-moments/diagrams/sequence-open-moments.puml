@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Open the Moments screen
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "MomentsPage" as page
+  participant "HttpTeamApi" as client
+  participant "groupMoments" as group
+  participant "MomentList" as list
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetMomentsQueryHandler" as handler
+  participant "MomentFinder" as finder
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+end box
+
+actor -> page : Open /moments
+page -> client : getMoments(teamId)
+client -> controller : GET /api/teams/{teamId}/moments
+controller -> handler : Send GetMomentsQuery
+handler -> db : Load the team of the current teammate
+db --> handler : Teammates and their cities
+handler -> finder : FindFor(city) for each distinct city
+finder --> handler : Moments of each city
+handler --> controller : MomentDto list
+alt moments returned
+  controller --> client : 200 with the moments
+  client --> page : Moment list
+  page -> group : groupMoments(moments, clock.now())
+  group -> group : Days ahead of each moment,\nfrom today in the moment's own place (L2-020)
+  group -> group : Drop moments before today\nor more than 90 days ahead (L2-029)
+  group -> group : 0 days: today; 1 to 7: this week;\n8 to 90: later; each in date order (L2-029)
+  group --> page : MomentGroups with a when label on each moment
+  page -> list : groups
+  alt at least one moment
+    list --> actor : "Today in" and its city first, then "This week"\nand "Later"; a heading with no moments is absent
+  else no upcoming moment
+    list --> actor : Message that nothing is coming up for the team
+  end
+else request refused or failed
+  controller --> client : ProblemDetails with a code
+  client --> page : ApiError
+  page --> actor : Generic message and a way to try again
+end
+actor -> list : Choose a moment
+list --> page : select(moment)
+page -> page : TeamStore.select(teammateId), navigate to /globe (L2-029)
+@enduml

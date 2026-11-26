@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — Leave the screen with unsaved changes
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "AppShell" as shell
+  participant "Router" as router
+  participant "unsavedChangesGuard" as guard
+  participant "ProfileStore" as store
+  participant "DiscardChangesDialog" as dialog
+  participant "ProfilePage" as page
+end box
+actor -> shell : Choose "Globe" in the navigation
+shell -> router : Navigate to /globe
+router -> guard : canDeactivate(/profile)
+guard -> store : hasUnsavedChanges
+alt no unsaved changes
+  store --> guard : false
+  guard --> router : true
+  router --> actor : Globe screen
+else unsaved changes (L2-035)
+  store --> guard : true
+  guard -> dialog : Open through CDK Dialog
+  dialog --> actor : Ask whether to leave without saving
+  alt "Leave without saving"
+    actor -> dialog : Confirm
+    dialog --> guard : leave
+    guard --> router : true
+    router -> page : Destroy; ProfileStore and its draft go with the route
+    router --> actor : Globe screen; nothing was saved
+  else "Stay", or Escape
+    actor -> dialog : Cancel
+    dialog --> guard : stay
+    guard --> router : false
+    router --> actor : Profile & Settings with the changes still unsaved; focus returns
+  end
+end
+note over page : While there are unsaved changes, a beforeunload listener makes the browser ask before a reload or a closed tab.
+@enduml

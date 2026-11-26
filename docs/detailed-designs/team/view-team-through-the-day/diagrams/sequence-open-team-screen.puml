@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — Open the Team screen, ordered west to east
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "TeamPage" as page
+  participant "TeamStore" as store
+  participant "teamRows / ribbonMarkers" as fn
+  participant "DayRibbon" as ribbon
+  participant "FilterChips" as chips
+  participant "TeamTable" as table
+  participant "Router" as router
+end box
+actor -> page : Open /team
+page -> store : pins, viewerPin, counts
+store --> page : Pin[], TeamCounts
+page --> actor : "Where everyone is in their day", teammates and time zones (L2-026)
+page -> fn : teamRows(pins, viewerPin, clock.now(), settings)
+fn -> fn : orderWestToEast: current UTC offset, then longitude (L2-026)
+fn -> fn : localTime, statusAt, offsetBetween, next moment per pin
+fn --> page : TeamRow[] (city and country only)
+page -> fn : ribbonMarkers(pins, clock.now(), settings)
+fn -> fn : dayFraction from the local hour and minute; a lane per marker at the same hour (L2-027)
+fn --> page : RibbonMarker[]
+page -> ribbon : markers
+page -> chips : "All 12", "Working now 4", "Asleep 3"; All selected (L2-028)
+page -> table : rows
+table -> table : Render only the rows in and near the viewport (L2-026, L2-047)
+table --> actor : Table from 768 px; list of name, local time and next moment below
+== Each minute ==
+page -> page : Clock tick recomputes rows, markers and counts
+== Choose a teammate ==
+alt a row
+  actor -> table : Choose a row by pointer, touch or keyboard
+  table -> page : teammateChosen(teammateId)
+else a ribbon marker
+  actor -> ribbon : Choose a marker
+  ribbon -> page : teammateChosen(teammateId)
+end
+page -> router : navigate /globe?teammate={teammateId}
+router --> actor : Globe screen with that pin selected (L2-023)
+@enduml

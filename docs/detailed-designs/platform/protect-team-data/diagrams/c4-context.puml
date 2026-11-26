@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Protect team data
+
+Person(teammate, "Teammate", "Sees only their own team and changes only their own pin")
+Person(visitor, "Person with an invite link", "May open the invite link, look up a postal code and join")
+System(mondino, "Mondino", "Decides on the backend what each request is allowed")
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY. Called only for a valid invite link, within the rate limit")
+
+Rel(teammate, mondino, "Reads their team and changes their own pin")
+Rel(visitor, mondino, "Opens an invite link, looks up a postal code, joins")
+Rel(mondino, postal, "Looks up a country and postal code", "HTTPS")
+@enduml

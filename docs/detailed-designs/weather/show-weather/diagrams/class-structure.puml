@@ -1,0 +1,107 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Show weather
+
+
+set separator none
+package "Mondino.Domain" {
+  class Weather <<value object>> {
+    +double TemperatureC
+    +WeatherCondition Condition
+    +DateTimeOffset ObservedAt
+  }
+  enum WeatherCondition {
+    Clear
+    PartlyCloudy
+    Cloudy
+    Rain
+    Showers
+    Storm
+    Fog
+    Wind
+  }
+  class Position <<value object>> {
+    +double Latitude
+    +double Longitude
+  }
+  class TeammateSettings <<value object>> {
+    +TemperatureUnit TemperatureUnit
+    +bool ShareWeather
+    +{static} DefaultsFor(countryCode: string): TeammateSettings
+  }
+  enum TemperatureUnit {
+    Celsius
+    Fahrenheit
+  }
+}
+
+package "Mondino.Application" {
+  interface IWeatherSource {
+    +GetCurrentAsync(position: Position, ct: CancellationToken): Task<Weather?>
+  }
+  class GetPinsQueryHandler {
+    +Handle(query: GetPinsQuery, ct: CancellationToken): Task<IReadOnlyList<PinDto>>
+  }
+  class WeatherConditionMapper {
+    +Map(weatherCode: int, windSpeedKmh: double): WeatherCondition
+  }
+  class WeatherDto {
+    +double TemperatureC
+    +WeatherCondition Condition
+    +DateTimeOffset ObservedAt
+  }
+  class PinDto {
+    +Guid TeammateId
+    +WeatherDto? Weather
+  }
+}
+
+package "Mondino.Infrastructure" {
+  class CachedWeatherSource {
+    -FreshFor: TimeSpan = 15 minutes
+    -Timeout: TimeSpan = 5 seconds
+    +GetCurrentAsync(position: Position, ct: CancellationToken): Task<Weather?>
+    -KeyFor(position: Position): string
+  }
+  class OpenMeteoWeatherSource {
+    +GetCurrentAsync(position: Position, ct: CancellationToken): Task<Weather?>
+  }
+}
+
+package "Mondino web app" {
+  class "pins/ functions" as PinFns <<domain, pins/>> {
+    +formatTemperature(temperatureC: number, unit: TemperatureUnit): string
+    +weatherLabel(condition: WeatherCondition, cityName: string): string
+    +isNightSky(localHour: number): boolean
+  }
+  class WeatherIcon <<components>> {
+    +condition: WeatherCondition
+    +night: boolean
+  }
+}
+
+IWeatherSource <|.. CachedWeatherSource : implements
+IWeatherSource <|.. OpenMeteoWeatherSource : implements
+CachedWeatherSource o-- OpenMeteoWeatherSource : decorates
+OpenMeteoWeatherSource ..> WeatherConditionMapper : maps with
+GetPinsQueryHandler ..> IWeatherSource : asks once per city
+GetPinsQueryHandler ..> PinDto : returns
+GetPinsQueryHandler ..> TeammateSettings : reads ShareWeather
+PinDto --> WeatherDto : has 0..1
+IWeatherSource ..> Weather : returns
+IWeatherSource ..> Position : takes
+Weather --> WeatherCondition : has
+WeatherConditionMapper ..> WeatherCondition : returns
+TeammateSettings --> TemperatureUnit : has
+PinFns ..> WeatherDto : reads as Weather
+@enduml

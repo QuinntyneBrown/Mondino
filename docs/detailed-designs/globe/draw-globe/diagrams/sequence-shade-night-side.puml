@@ -1,0 +1,47 @@
+@startuml
+title UML sequence behaviour — Shade the night side from the clock
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "BrowserClock" as clock
+  participant "GlobeView" as view
+  participant "SunPosition" as sun
+  participant "GlobeScene" as scene
+end box
+view -> clock : now() when the scene is ready
+clock --> view : Current time
+view -> sun : subsolarPoint(now)
+sun --> view : Position where the sun is overhead
+view -> scene : setSun(position)
+scene --> actor : Half of the globe away from the sun is shaded (L2-010 AC1)
+loop each minute while the tab is visible
+  clock -> view : Minute tick
+  view -> clock : now()
+  clock --> view : Current time
+  view -> sun : subsolarPoint(now)
+  sun --> view : Position, 0.25 degrees further west
+  view -> scene : setSun(position)
+  scene --> actor : Edge of the shading moves westward (L2-010 AC3)
+end
+actor -> clock : Hide the tab
+clock -> clock : Rest, no ticks
+actor -> clock : Show the tab again
+clock -> view : Tick at once
+view -> sun : subsolarPoint(now)
+sun --> view : Position for the current time
+view -> scene : setSun(position)
+scene --> actor : Night side correct at once (L2-047 AC4)
+@enduml

@@ -1,0 +1,127 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Show pins
+set separator none
+
+package "api library" {
+  class Pin {
+    +teammateId: string
+    +name: string
+    +colour: string
+    +cityName: string
+    +country: string
+    +position: Position
+    +timeZoneId: string
+    +weather: Weather | null
+    +showsStatusOutsideWorkingHours: boolean
+    +isViewer: boolean
+    +moments: Moment[]
+  }
+  class PinPlacement {
+    +kind: 'pin' | 'group'
+    +position: Position
+    +pins: Pin[]
+    +offsetX: number
+    +offsetY: number
+  }
+  interface PinSpreader {
+    +spread(pins: Pin[], globeSize: number): PinPlacement[]
+  }
+}
+
+package "domain library" {
+  class "spreadPins" as spreadPins << (F,#D1FADF) function >> {
+    +spreadPins(pins: Pin[], globeSize: number): PinPlacement[]
+  }
+}
+
+package "globe library" {
+  class GlobeView {
+    +pins: InputSignal<Pin[]>
+    +selectedId: InputSignal<string | null>
+    +interactive: InputSignal<boolean>
+    +select: OutputEmitterRef<string | null>
+    +placements: Signal<PinPlacement[]>
+    +globeSize: Signal<number>
+  }
+  class PinLayer {
+    +placements: InputSignal<PinPlacement[]>
+    +selectedId: InputSignal<string | null>
+    +focusedId: InputSignal<string | null>
+    +compact: InputSignal<boolean>
+    +select: OutputEmitterRef<string | null>
+    +liftedId: Signal<string | null>
+    +update(scene: GlobeScene): void
+  }
+  class PinList {
+    +pins: InputSignal<Pin[]>
+    +selectedId: InputSignal<string | null>
+    +select: OutputEmitterRef<string | null>
+    +focusedId: OutputEmitterRef<string | null>
+  }
+  class LabelPlacer {
+    {static} +place(points: ProjectedPin[], globe: DOMRect): LabelSide[]
+  }
+  class GroupPinMenu {
+    +pins: InputSignal<Pin[]>
+    +choose: OutputEmitterRef<string>
+  }
+  class PinMarkTemplate << directive moPinMark >>
+  class PinLabelTemplate << directive moPinLabel >>
+  class GlobeScene {
+    +project(position: Position): ProjectedPoint
+  }
+  class ProjectedPoint {
+    +x: number
+    +y: number
+    +facing: boolean
+  }
+}
+
+package "Mondino.Application" {
+  class GetPinsQuery {
+    +Guid TeamId
+  }
+  class GetPinsQueryHandler {
+    +Handle(query: GetPinsQuery): Task<IReadOnlyList<PinDto>>
+  }
+  class PinDto {
+    +Guid TeammateId
+    +string Name
+    +string Colour
+    +string CityName
+    +string Country
+    +Position Position
+    +string TimeZoneId
+    +WeatherDto? Weather
+    +bool ShowsStatusOutsideWorkingHours
+    +bool IsViewer
+    +IReadOnlyList<MomentDto> Moments
+  }
+}
+
+spreadPins ..|> PinSpreader : bound to PIN_SPREADER
+PinSpreader ..> PinPlacement : returns
+PinPlacement "1" o-- "1..*" Pin
+GlobeView ..> PinSpreader : injects
+GlobeView *-- PinLayer
+GlobeView *-- PinList
+GlobeView ..> PinMarkTemplate : content
+GlobeView ..> PinLabelTemplate : content
+PinLayer ..> LabelPlacer : places labels with
+PinLayer ..> GroupPinMenu : opens for a group pin
+PinLayer ..> GlobeScene : projects with
+GlobeScene ..> ProjectedPoint : returns
+GetPinsQueryHandler ..> GetPinsQuery : handles
+GetPinsQueryHandler ..> PinDto : returns
+PinDto ..> Pin : serialised as
+@enduml

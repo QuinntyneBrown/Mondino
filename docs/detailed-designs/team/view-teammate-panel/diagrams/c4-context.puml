@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — View a teammate's panel
+
+Person(teammate, "Teammate", "A person on a team")
+System(mondino, "Mondino", "Shows a team on a 3D globe with each teammate's local time, weather and moments")
+System_Ext(meteo, "Open-Meteo", "Weather at a city")
+System_Ext(holidays, "Holiday calendar source", "Public holiday calendars; provider TO SUPPLY")
+System_Ext(races, "Race calendar source", "Formula 1 calendar; provider TO SUPPLY")
+System_Ext(events, "Event source", "Local events and sport fixtures; provider TO SUPPLY")
+
+Rel(teammate, mondino, "Selects a pin and reads that teammate's panel in")
+Rel(mondino, meteo, "Reads the weather at each city from", "HTTPS")
+Rel(mondino, holidays, "Reads holidays from", "HTTPS")
+Rel(mondino, races, "Reads races from", "HTTPS")
+Rel(mondino, events, "Reads local events and sport from", "HTTPS")
+@enduml

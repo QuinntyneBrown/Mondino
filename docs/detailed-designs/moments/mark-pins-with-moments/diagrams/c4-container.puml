@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Mark pins with moments
+
+Person(teammate, "Teammate", "A person on a team, looking at the globe")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Chooses each pin's moment marker and draws it on the globe")
+  Container(api, "Mondino API", "ASP.NET Core", "Gives each pin its moments and their emblem keys")
+  ContainerDb(db, "Mondino database", "EF Core; engine TO SUPPLY", "Teammates, their cities and their settings")
+}
+
+Rel(teammate, web, "Uses", "HTTPS")
+Rel(web, api, "Reads pins and the viewer's settings", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

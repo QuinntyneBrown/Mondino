@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — read weather for the team's cities
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+  participant "WeatherConditionMapper" as mapper
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+  participant "CachedWeatherSource" as cached
+  participant "OpenMeteoWeatherSource" as source
+end box
+participant "Open-Meteo" as openmeteo
+
+actor -> store : Open a screen that shows pins
+store -> client : getPins(teamId)
+client -> controller : GET /api/teams/{teamId}/pins
+controller -> handler : Send GetPinsQuery
+handler -> db : Load the team's teammates, cities and settings
+db --> handler : Teammates
+handler -> handler : Collect the distinct cities whose weather the viewer may see
+
+loop each distinct city, in parallel
+  handler -> cached : GetCurrentAsync(city.Position)
+  cached -> cached : Key from the position rounded to two decimal places
+  alt cache hit: fetched less than 15 minutes ago
+    cached --> handler : Cached Weather, source not called (L2-018)
+  else cache miss
+    cached -> source : GetCurrentAsync(position), 5 s timeout
+    source -> openmeteo : GET current temperature, weather code, wind speed
+    openmeteo --> source : 200 current weather
+    source -> mapper : Map(weatherCode, windSpeedKmh)
+    mapper --> source : One of the eight conditions (L2-018)
+    source --> cached : Weather
+    cached -> cached : Store with the time read from TimeProvider
+    cached --> handler : Weather
+  end
+end
+
+loop each teammate
+  alt ShareWeather is on, or the teammate is the viewer
+    handler -> handler : PinDto.Weather from the city's Weather
+  else ShareWeather is off
+    handler -> handler : PinDto.Weather is null
+  end
+end
+handler --> controller : PinDto per teammate
+controller --> client : 200 pins
+client --> store : Pin[] with weather or null
+@enduml

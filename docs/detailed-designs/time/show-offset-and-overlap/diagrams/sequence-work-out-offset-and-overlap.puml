@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — work out the offset and the overlap for a selected teammate
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate (viewer)" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "BrowserClock" as clock
+  participant "offsetBetween,\nformatOffset" as offset
+  participant "overlapBetween,\nformatOverlap" as overlap
+  participant "TeammatePanel" as panel
+  participant "OverlapBar" as bar
+end box
+
+actor -> page : Select a teammate's pin
+page -> store : Set selected teammate id
+store --> page : Selected pin and viewer's pin
+page -> clock : Read minute through CLOCK
+clock --> page : now
+
+alt the selected pin is the viewer's own
+  page -> panel : Bind offset null and overlap null
+  panel --> actor : Panel with no offset and no overlap (L2-016, L2-017)
+else another teammate
+  page -> offset : offsetBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
+  offset -> offset : zoneOffsetMinutes of each zone at now, subtract
+  offset --> page : Offset: minutes, direction
+  page -> offset : formatOffset(offset)
+  offset --> page : Hours and minutes ahead or behind, or the same time (L2-016)
+
+  page -> overlap : overlapBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
+  overlap -> overlap : Move the teammate's 09:00 to 18:00 onto the viewer's clock
+  overlap -> overlap : Intersect with the viewer's 09:00 to 18:00
+  alt the working days coincide
+    overlap --> page : Overlap: startMinute, endMinute, lengthMinutes
+  else no shared working hours
+    overlap --> page : null
+  end
+  page -> overlap : formatOverlap(overlap, viewer's ClockFormat)
+  overlap --> page : Start, end and length as text, or no shared working hours (L2-017)
+
+  page -> panel : Bind offset text, overlap and overlap text
+  panel -> bar : Bind startMinute, endMinute and label
+  bar --> actor : Bar on the viewer's day, with the overlap as its text (L2-017)
+  panel --> actor : Offset as text (L2-016)
+end
+@enduml

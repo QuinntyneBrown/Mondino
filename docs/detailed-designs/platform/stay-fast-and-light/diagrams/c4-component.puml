@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Stay fast and light
+
+Person(teammate, "Teammate", "Enters and leaves the Globe screen")
+Container_Boundary(spa, "Mondino web app") {
+  Component(routes, "app.routes.ts", "Angular router configuration", "loadComponent for each screen")
+  Component(page, "GlobePage", "Lazy route component", "Shows heading, counts and panel, then defers the globe")
+  Component(view, "GlobeView", "Component in globe, imported dynamically", "Owns GlobeScene for as long as it is on the page")
+  Component(scene, "GlobeScene", "Class in globe", "Renderer, Blender-built model and render loop; dispose releases all of it")
+  Component(detail, "DetailLevel", "Class in globe", "Steps detail and resolution down while the frame rate stays under 30")
+  Component(clock, "BrowserClock", "Service in domain time/", "The one shared clock; rests while the tab is hidden")
+  Component(store, "TeamStore", "Service in domain pins/", "Pins as signals; cancels a pending read when destroyed")
+  Component(lists, "TeamTable, MomentList", "Presentation components", "Windowed rows through CDK virtual scrolling")
+}
+Rel(teammate, routes, "Opens /globe")
+Rel(routes, page, "Loads the Globe chunk")
+Rel(page, view, "Defers and imports the globe library")
+Rel(view, scene, "Creates and disposes")
+Rel(scene, detail, "Reports frame times to")
+Rel(scene, clock, "Reads the night side's time from")
+Rel(page, store, "Reads pins from")
+Rel(page, clock, "Reads the minute tick from")
+@enduml

@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — A rate-limited postal code lookup
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "HttpInviteApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "RateLimitPolicies" as limits
+  participant "InvitesController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeFormats" as formats
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+  participant "CachedPostalCodeLookup" as lookup
+end box
+participant "Postal code source" as source
+actor -> page : Type a postal code
+page -> client : lookUpPostalCode(inviteToken, country, postalCode)
+client -> limits : POST /api/invites/{inviteToken}/postal-code-lookups, postal code in the body
+alt More than 10 lookups from this client in the minute (L2-045)
+  limits --> client : 429 ProblemDetails, code rate_limited, Retry-After
+  note over controller, source : No controller, handler or outside source is called
+  client --> page : ApiError rate_limited
+  page --> actor : "Wait a moment and try again"; what was typed is kept
+else Within the limit
+  limits -> controller : Request
+  controller -> handler : Send LookUpPostalCodeQuery
+  handler -> db : Find the team by invite token
+  alt No team for the token (L2-045)
+    db --> handler : None
+    handler --> controller : invite_not_found
+    controller --> client : 404 ProblemDetails
+  else Valid invite link
+    db --> handler : Team
+    handler -> formats : Validate and normalise for the country (L2-044)
+    formats --> handler : PostalCode
+    handler -> lookup : FindCityAsync(postalCode)
+    lookup -> source : Country and postal code only (L2-050)
+    source --> lookup : City, position, time zone
+    lookup --> handler : City
+    handler --> controller : PostalCodeResultDto
+    controller --> client : 200 with city and region
+    client --> page : PostalCodeResult
+    page --> actor : City shown; the button reads "Join" and the team's name
+  end
+end
+@enduml

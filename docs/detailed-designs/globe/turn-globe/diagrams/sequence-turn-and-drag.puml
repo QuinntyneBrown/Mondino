@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — Turn on its own and spin with a drag
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobeGestures" as gestures
+  participant "GlobeView" as view
+  participant "GlobeMotion" as motion
+  participant "GlobeScene" as scene
+end box
+loop each frame, mode TurningOnItsOwn
+  scene -> view : Frame listener (elapsed ms)
+  view -> motion : advance(elapsedMs)
+  motion --> view : Orientation, further east (L2-009 AC1)
+  view -> scene : setOrientation(orientation)
+end
+actor -> gestures : Pointer or touch down on the globe, then move
+gestures -> motion : dragStart()
+motion -> motion : mode = Dragged, stop turning on its own
+alt vertical touch drag and canTurn is false
+  gestures --> actor : Leave the touch to the browser, the page scrolls (L2-009 AC7)
+else globe can turn
+  gestures -> motion : dragBy(deltaLongitude, deltaTilt)
+  scene -> view : Frame listener (elapsed ms)
+  view -> motion : advance(elapsedMs)
+  motion --> view : Orientation following the drag (L2-009 AC2)
+  view -> scene : setOrientation(orientation)
+  scene --> actor : Globe spins with the drag
+end
+actor -> gestures : Pointer or touch up
+gestures -> motion : dragEnd()
+motion -> motion : mode = Waiting, count 5 s of frame time
+actor -> gestures : Arrow key while the globe has focus
+gestures -> motion : step(direction)
+motion -> motion : Turn by the fixed step, restart the 5 s count (L2-009 AC4)
+loop each frame, mode Waiting
+  scene -> view : Frame listener (elapsed ms)
+  view -> motion : advance(elapsedMs)
+  motion --> view : Orientation unchanged until 5 s have passed
+end
+motion -> motion : mode = TurningOnItsOwn after 5 s (L2-009 AC2)
+@enduml

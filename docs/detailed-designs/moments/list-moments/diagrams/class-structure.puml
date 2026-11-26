@@ -1,0 +1,109 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — List moments
+
+enum MomentKind {
+  holiday
+  formula1
+  localEvent
+  sport
+}
+
+interface Moment {
+  +kind: MomentKind
+  +title: string
+  +date: string
+  +detail: string
+  +emblemKey: string | null
+  +teammateId: string
+  +teammateName: string
+  +cityName: string
+  +countryCode: string
+  +timeZoneId: string
+}
+
+interface TeamApi {
+  +pins(teamId: string): Promise<Pin[]>
+  +getMoments(teamId: string): Promise<Moment[]>
+}
+
+class HttpTeamApi
+
+interface Clock {
+  +now(): Date
+  +minute: Signal<number>
+}
+
+interface DatedMoment {
+  +moment: Moment
+  +daysAhead: number
+  +when: string
+}
+
+interface MomentGroups {
+  +today: DatedMoment[]
+  +thisWeek: DatedMoment[]
+  +later: DatedMoment[]
+}
+
+class "moments/ (domain)" as moments <<functions>> {
+  +groupMoments(moments: Moment[], now: Date): MomentGroups
+  +whenLabel(daysAhead: number): string
+  +daysUntil(date: string, timeZoneId: string, now: Date): number
+}
+
+class MomentsPage {
+  -moments: Signal<Moment[]>
+  -filter: Signal<MomentKind | 'everything'>
+  -groups: Signal<MomentGroups>
+  -state: Signal<'loading' | 'loaded' | 'failed'>
+  +chooseFilter(filter): void
+  +openMoment(moment: Moment): void
+}
+
+class FilterChips {
+  +options: FilterOption[]
+  +selected: string
+  +select: Output<string>
+}
+
+class MomentList {
+  +groups: MomentGroups
+  +filtered: boolean
+  +select: Output<Moment>
+}
+
+class MomentCard {
+  +item: DatedMoment
+  +prominent: boolean
+  +select: Output<Moment>
+}
+
+class TeamStore {
+  +select(teammateId: string): void
+}
+
+HttpTeamApi ..|> TeamApi
+MomentsPage --> TeamApi : TEAM_API
+MomentsPage --> Clock : CLOCK
+MomentsPage ..> moments : calls groupMoments
+MomentsPage --> FilterChips
+MomentsPage --> MomentList
+MomentsPage --> TeamStore : selects a teammate
+MomentList "1" --> "*" MomentCard
+moments ..> MomentGroups : returns
+MomentGroups "1" --> "*" DatedMoment
+DatedMoment --> Moment
+Moment --> MomentKind
+@enduml

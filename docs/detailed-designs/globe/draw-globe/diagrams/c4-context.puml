@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Draw the globe
+
+Person(teammate, "Teammate", "A person on a team")
+Person(invitee, "Person with an invite link", "Not yet a teammate")
+System(mondino, "Mondino", "Shows a team on a 3D globe, with each teammate's local time, weather and moments")
+
+Rel(teammate, mondino, "Sees the team on the globe using")
+Rel(invitee, mondino, "Sees the team's globe before joining using")
+@enduml

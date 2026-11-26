@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Show offset and overlap
+
+
+Person(teammate, "Teammate", "The viewer: a person on a team comparing a teammate's day with their own")
+System(mondino, "Mondino", "Shows how far ahead or behind a teammate is and the working hours the two share")
+
+Rel(teammate, mondino, "Reads a teammate's offset and overlap in")
+@enduml

@@ -1,0 +1,103 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Keep the team fresh
+
+class TeamStore <<domain pins/>> {
+  +{static} RefreshIntervalMinutes: number = 15
+  +pins: Signal<Pin[]>
+  +teamName: Signal<string | null>
+  +inviteToken: Signal<string | null>
+  +viewerTeammateId: Signal<string | null>
+  +selectedTeammateId: Signal<string | null>
+  +counts: Signal<TeamCounts>
+  +arrivedTeammateIds: Signal<string[]>
+  +loadState: Signal<LoadState>
+  -lastRefreshedAt: Date | null
+  -pending: AbortController | null
+  +load(teamId: string): Promise<void>
+  +refresh(): Promise<void>
+  +acknowledgeArrived(): void
+  -refreshIfDue(now: Date): void
+  -merge(next: TeamPins): void
+}
+
+enum LoadState {
+  Loading
+  Ready
+  Failed
+}
+
+interface Clock <<api, CLOCK>> {
+  +now(): Date
+  +minute: Signal<number>
+}
+
+class BrowserClock <<domain time/>> {
+  +now(): Date
+  +minute: Signal<number>
+}
+
+interface TeamApi <<api, TEAM_API>> {
+  +getPins(teamId: string, signal: AbortSignal): Promise<TeamPins>
+  +getMoments(teamId: string, signal: AbortSignal): Promise<Moment[]>
+}
+
+class HttpTeamApi <<api>>
+
+class TeamPins <<api>> {
+  +teamId: string
+  +teamName: string
+  +inviteToken: string
+  +viewerTeammateId: string
+  +pins: Pin[]
+}
+
+class TeamsController <<Mondino.Api>> {
+  +GetPins(teamId: Guid): Task<ActionResult<TeamPinsDto>>
+}
+
+class GetPinsQuery <<Mondino.Application>> {
+  +Guid TeamId
+}
+
+class GetPinsQueryHandler <<Mondino.Application>> {
+  +Handle(query: GetPinsQuery): Task<TeamPinsDto>
+}
+
+class TeamPinsDto <<Mondino.Application>> {
+  +Guid TeamId
+  +string TeamName
+  +string InviteToken
+  +Guid ViewerTeammateId
+  +IReadOnlyList<PinDto> Pins
+}
+
+interface ICurrentTeammate <<Mondino.Application>>
+interface IAppDbContext <<Mondino.Application>>
+interface IWeatherSource <<Mondino.Application>>
+class MomentFinder <<Mondino.Application>>
+
+Clock <|.. BrowserClock
+TeamApi <|.. HttpTeamApi
+TeamStore ..> Clock : injects CLOCK
+TeamStore ..> TeamApi : injects TEAM_API
+TeamStore --> LoadState
+TeamStore ..> TeamPins : merges
+HttpTeamApi ..> TeamsController : GET /api/teams/{teamId}/pins
+TeamsController ..> GetPinsQuery : sends
+GetPinsQueryHandler ..> GetPinsQuery : handles
+GetPinsQueryHandler ..> TeamPinsDto : builds
+GetPinsQueryHandler ..> ICurrentTeammate
+GetPinsQueryHandler ..> IAppDbContext
+GetPinsQueryHandler ..> IWeatherSource
+GetPinsQueryHandler ..> MomentFinder
+@enduml

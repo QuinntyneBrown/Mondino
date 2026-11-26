@@ -1,0 +1,36 @@
+@startuml
+title UML sequence behaviour — Step detail down on a low-power device
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobeScene" as scene
+  participant "GlobeView" as view
+  participant "DetailLevel" as detail
+end box
+loop each frame
+  scene -> view : Frame listener (elapsed ms)
+  view -> detail : record(elapsedMs)
+  alt sustained rate under 30 frames a second (L2-046 AC6)
+    detail -> detail : Move to the next lower DetailStep
+    detail --> view : current changed
+    view -> scene : setDetail(step)
+    scene -> scene : Lower resolution and model detail, keep lighting and colour
+    scene --> actor : Same look at a lower level of detail (L2-008 AC4)
+  else rate holds
+    detail --> view : current unchanged
+  end
+end
+@enduml

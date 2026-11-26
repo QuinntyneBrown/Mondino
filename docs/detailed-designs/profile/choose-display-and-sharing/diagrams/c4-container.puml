@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Choose display and sharing
+
+Person(viewer, "Teammate", "Changes and saves their settings")
+Person(other, "Teammate (another)", "Reads the team's pins")
+System_Boundary(mondino, "Mondino") {
+  Container(spa, "Mondino web app", "Angular", "Profile and Settings: display, sharing, save bar")
+  Container(api, "Mondino API", "ASP.NET Core", "Stores settings; applies the sharing switches to every read of the pins")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Each teammate's settings")
+}
+System_Ext(meteo, "Open-Meteo", "Weather")
+
+Rel(viewer, spa, "Uses", "HTTPS")
+Rel(other, spa, "Uses", "HTTPS")
+Rel(spa, api, "Saves settings, reads pins", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, meteo, "Weather for pins that share it", "HTTPS")
+@enduml

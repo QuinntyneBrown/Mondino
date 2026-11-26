@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — View the week around the world
+
+Person(teammate, "Teammate", "A person on a team")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Single-page application; every screen and the globe")
+  Container(api, "Mondino API", "ASP.NET Core", "Teams, pins, weather and moments")
+  ContainerDb(db, "Mondino database", "Relational, EF Core; engine TO SUPPLY", "Teams and teammates")
+}
+System_Ext(sources, "Open-Meteo and the calendar sources", "Weather and moments at a city")
+
+Rel(teammate, web, "Opens the Globe screen with no pin selected in", "HTTPS")
+Rel(web, api, "Reads the team's pins from", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads the team and its teammates", "EF Core")
+Rel(api, sources, "Reads weather and moments, cached", "HTTPS")
+@enduml

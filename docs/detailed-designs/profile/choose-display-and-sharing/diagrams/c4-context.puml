@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Choose display and sharing
+
+Person(viewer, "Teammate", "Chooses how Mondino looks to them and what they share")
+Person(other, "Teammate (another)", "Reads the team's pins")
+System(mondino, "Mondino", "Shows a team on a 3D globe with each teammate's local time, weather and moments")
+System_Ext(meteo, "Open-Meteo", "Current weather at a position")
+
+Rel(viewer, mondino, "Chooses unit, clock format and sharing switches, and saves, using")
+Rel(other, mondino, "Sees only what each teammate shares using")
+Rel(mondino, meteo, "Reads weather for pins that share it via", "HTTPS")
+@enduml

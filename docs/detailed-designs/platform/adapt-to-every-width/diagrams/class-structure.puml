@@ -1,0 +1,77 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Adapt to every width
+
+enum Breakpoint {
+  ExtraSmall = under 576 px
+  Small = 576 px
+  Medium = 768 px
+  Large = 992 px
+  ExtraLarge = 1200 px
+}
+
+class App {
+  +navItems: NavItem[]
+  +showNavigation: Signal<boolean>
+}
+
+class NavItem {
+  +label: string
+  +path: string
+  +icon: string
+}
+
+class AppShell <<mo-app-shell>> {
+  +showNavigation: InputSignal<boolean>
+  +skipTarget: InputSignal<string>
+  slot nav
+  slot default
+}
+
+class Wordmark <<mo-wordmark>> {
+  +markOnly: InputSignal<boolean>
+}
+
+class TeamMembership {
+  +current: Signal<Membership | null>
+  +remember(membership: Membership): void
+  +forget(): void
+}
+
+class Membership {
+  +teamId: string
+  +teammateId: string
+  +teamName: string
+}
+
+class teammateGuard <<CanActivateFn>> {
+  +(route, state): boolean | UrlTree
+}
+
+class sessionExpiredInterceptor <<HttpInterceptorFn>> {
+  +(request, next): Observable<HttpEvent>
+}
+
+class InviteNeededPage {
+}
+
+App --> AppShell : renders
+App "1" *-- "4" NavItem
+App ..> TeamMembership : reads
+AppShell --> Wordmark : shows
+AppShell ..> Breakpoint : styled by
+teammateGuard ..> TeamMembership : reads
+teammateGuard ..> InviteNeededPage : redirects to
+sessionExpiredInterceptor ..> TeamMembership : forgets
+TeamMembership --> Membership : holds
+@enduml

@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — show a temperature in °C or °F
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate (viewer)" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "SettingsCache" as settings
+  participant "formatTemperature,\nweatherLabel" as fns
+  participant "isNightSky" as night
+  participant "TeammatePanel" as panel
+  participant "WeatherIcon" as icon
+end box
+
+actor -> page : Select a teammate's pin
+page -> store : Read the selected pin
+store --> page : Pin with weather: temperatureC 13, condition fog
+page -> settings : Read the viewer's settings
+settings --> page : temperatureUnit
+
+alt unit is fahrenheit
+  page -> fns : formatTemperature(13, fahrenheit)
+  fns -> fns : 13 x 9 / 5 + 32 = 55.4, round to a whole degree
+  fns --> page : "55°F" (L2-019)
+else unit is celsius
+  page -> fns : formatTemperature(13, celsius)
+  fns -> fns : Round to a whole degree, negative zero becomes zero
+  fns --> page : "13°C" (L2-019)
+end
+
+page -> fns : weatherLabel(fog, "Milan")
+fns --> page : "Foggy in Milan" (L2-018)
+page -> night : isNightSky(local hour of the pin)
+night --> page : true in "Probably asleep" hours
+page -> panel : Bind temperature text, label, condition and night
+panel -> icon : Bind condition and night
+icon --> actor : Icon with the condition's word as its accessible name (L2-018)
+panel --> actor : Temperature in tabular figures, and the label
+
+opt the viewer saves a new unit in Profile & Settings
+  settings --> page : settings signal changes
+  page -> fns : formatTemperature(13, new unit)
+  fns --> page : Temperature in the new unit (L2-019)
+  page -> panel : Bind the new text
+end
+@enduml

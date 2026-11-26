@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — Save the new location
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "ProfilePage" as page
+  participant "ProfileStore" as store
+  participant "HttpProfileApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "ProfileController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "UpdateProfileCommandHandler" as handler
+  participant "Teammate" as entity
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedPostalCodeLookup" as lookup
+  database "Mondino database" as db
+end box
+actor -> page : Use "Save changes"
+page -> store : save()
+store -> client : updateProfile(teamId, draft)
+client -> controller : PUT /api/teams/{teamId}/me (country, postal code, settings in the body)
+controller -> controller : Authenticate the session; check the anti-forgery token
+controller -> handler : Send UpdateProfileCommand (no teammate id)
+handler -> handler : UpdateProfileCommandValidator
+handler -> db : Load the teammate ICurrentTeammate names
+db --> handler : Teammate
+alt teamId is not the teammate's own team
+  handler --> controller : Not found; nothing changes (L2-032)
+else postal code or country differs from the stored one
+  handler -> lookup : FindCityAsync(normalised postal code)
+  lookup --> handler : City (from the cache after the lookup)
+  alt city found
+    handler -> entity : MoveTo(postalCode, city) (L2-032)
+    entity --> handler : Pin now at City.Position; same city, same position
+    handler -> db : Save changes in one unit of work
+    db --> handler : Commit result
+    handler --> controller : ProfileDto
+  else not found or unavailable
+    handler --> controller : postal_code_not_found or postal_code_unavailable; nothing stored
+  end
+else location unchanged
+  handler -> entity : ChangeSettings(settings)
+  handler -> db : Save changes
+  handler --> controller : ProfileDto
+end
+controller --> client : 200 ProfileDto, or ProblemDetails with a code
+client --> store : Profile or ApiError
+store --> page : saved = new profile; draft matches it
+page --> actor : Own pin at the new city with its local time and time zone
+note over page, db : Other teammates see the move at their next read of the pins and moments.
+@enduml

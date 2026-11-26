@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Stay fast and light
+
+Person(teammate, "Teammate", "Leaves Mondino open all day in a tab, on a phone or an ordinary laptop")
+System(mondino, "Mondino", "Loads only what a screen needs and gives back what it acquired")
+
+Rel(teammate, mondino, "Opens, glances at and leaves open")
+@enduml

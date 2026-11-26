@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Open an invite link
+
+Container_Boundary(web, "Mondino web app") {
+  Component(page, "JoinPage", "Angular page, lazy route", "Orchestrates the Join screen")
+  Component(store, "JoinStore", "Route-scoped service, signals", "Holds the invite and its state")
+  Component(client, "HttpInviteApi", "InviteApi contract, INVITE_API token", "Calls the invites endpoints")
+  Component(globe, "GlobeView", "mo-globe, imported dynamically", "Draws the bare pins")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "InvitesController", "ASP.NET Core controller", "Open to anyone, rate limited")
+  Component(handler, "GetInviteQueryHandler", "MediatR handler", "Finds the team and builds InviteDto")
+  Component(current, "ICurrentTeammate", "Application interface", "The teammate the session belongs to, if any")
+  Component(team, "Team", "Domain entity", "Name, invite token and teammates")
+  ComponentDb(db, "Mondino database", "EF Core, IAppDbContext", "Teams and teammates")
+}
+Rel(page, store, "Opens the invite through")
+Rel(page, globe, "Passes bare pins to")
+Rel(store, client, "getInvite(inviteToken)")
+Rel(client, ctrl, "GET /api/invites/{inviteToken}", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetInviteQuery")
+Rel(handler, current, "Asks whether the session is on this team")
+Rel(handler, team, "Reads")
+Rel(handler, db, "Loads the team by invite token", "EF Core")
+@enduml

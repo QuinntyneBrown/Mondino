@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — Look up a postal code that is found
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "JoinPage" as page
+  participant "JoinStore" as store
+  participant "HttpInviteApi" as client
+  participant "GlobeView" as globe
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "InvitesController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeFormats" as formats
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+  participant "CachedPostalCodeLookup" as lookup
+  participant "CachedWeatherSource" as weather
+end box
+participant "Postal code source" as postal
+participant "Open-Meteo" as meteo
+actor -> page : Leave the postal code field ("20121", Italy)
+page -> store : lookUp()
+store --> page : lookupState Finding
+page --> actor : "Finding 20121…", button disabled (L2-003)
+store -> client : lookUpPostalCode(inviteToken, "IT", "20121")
+client -> controller : POST /api/invites/{inviteToken}/postal-code-lookups
+controller -> controller : Apply the lookup rate limit policy
+controller -> handler : Send LookUpPostalCodeQuery
+handler -> db : Find the team by invite token
+db --> handler : Team exists
+handler -> formats : TryNormalise("IT", "20121")
+formats --> handler : PostalCode, form matches (L2-003)
+handler -> lookup : FindCityAsync(postalCode)
+alt cached
+  lookup --> handler : Found, City
+else not cached
+  lookup -> postal : Country and postal code only, with a timeout
+  postal --> lookup : Municipality, or nearest named locality (L2-006)
+  lookup --> handler : Found, City with the city's own position (L2-006)
+end
+handler -> weather : GetCurrentAsync(city position)
+weather -> meteo : City position only, with a timeout
+meteo --> weather : Current weather, or no answer
+weather --> handler : Weather, or null when Open-Meteo fails
+handler --> controller : PostalCodeResultDto
+controller --> client : 200 PostalCodeResultDto
+client --> store : PostalCodeResult
+store --> page : lookupState Found
+page -> globe : Turn to the city, add the pin "You" and the city
+page --> actor : "Milan, Lombardy", pin placed at city level, weather, button "Join Northwind" (L2-003)
+@enduml

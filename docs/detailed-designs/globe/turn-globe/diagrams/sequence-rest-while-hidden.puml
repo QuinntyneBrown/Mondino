@@ -1,0 +1,37 @@
+@startuml
+title UML sequence behaviour — Rest while the tab is hidden
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "Document" as doc
+  participant "GlobeView" as view
+  participant "GlobeMotion" as motion
+  participant "GlobeScene" as scene
+end box
+actor -> doc : Switch to another tab
+doc -> view : visibilitychange, hidden
+view -> scene : stop()
+scene -> scene : Cancel the pending animation frame
+note over view, scene : No frame listener runs, so GlobeMotion does not advance:\nthe globe neither turns nor draws (L2-009 AC6)
+actor -> doc : Return to the tab
+doc -> view : visibilitychange, visible
+view -> scene : start()
+scene -> view : Frame listener (elapsed ms, capped so the globe does not jump)
+view -> motion : advance(elapsedMs)
+motion --> view : Orientation continuing from where it rested
+view -> scene : setOrientation(orientation)
+scene --> actor : Globe turns again
+@enduml

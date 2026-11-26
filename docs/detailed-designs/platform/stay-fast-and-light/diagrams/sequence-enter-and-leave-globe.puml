@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Enter and leave the Globe screen
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "Router" as router
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "BrowserClock" as clock
+  participant "GlobeView" as view
+  participant "GlobeScene" as scene
+  participant "DetailLevel" as detail
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+actor -> router : Open /globe
+router -> page : loadComponent: fetch the Globe chunk, create GlobePage
+page -> store : pins
+store -> controller : GET /api/teams/{teamId}/pins
+controller --> store : Pins, compressed
+page --> actor : Heading, counts and panel are usable (L2-046)
+page -> view : @defer: import("@mondino/globe"), then create GlobeView
+view -> scene : new GlobeScene(canvas), load content-hashed assets from the app's origin
+scene -> scene : start(): requestAnimationFrame loop
+view -> view : Add pointer listeners and a ResizeObserver
+scene --> actor : 3D globe drawn and spinnable
+loop Each frame
+  scene -> detail : sample(frameMs)
+  opt Frame rate under 30, sustained (L2-046)
+    detail -> scene : stepDown(): lower detail and resolution
+  end
+end
+clock -> page : minute tick: one timer for every local time (L2-047)
+actor -> clock : Hide the tab
+clock -> clock : Clear the timer
+scene -> scene : stop(): no frame drawn while hidden
+actor -> clock : Show the tab again
+clock -> page : Tick at once with the current time
+scene -> scene : start()
+actor -> router : Go to /team while a refresh is pending
+router -> page : Destroy GlobePage
+page -> store : Subscription to the pending read ends
+store -> controller : Request cancelled (L2-047)
+page -> view : Destroy GlobeView (DestroyRef)
+view -> view : Remove pointer listeners, disconnect the ResizeObserver
+view -> scene : dispose()
+scene -> scene : cancelAnimationFrame; release model, materials, textures, renderer and WebGL context
+scene --> view : Nothing held
+router --> actor : Team screen; the Globe screen's memory is returned (L2-047)
+@enduml

@@ -1,0 +1,83 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Show offset and overlap
+
+
+class "time/ functions" as TimeFns <<domain, time/>> {
+  +zoneOffsetMinutes(now: Date, timeZoneId: string): number
+  +offsetBetween(now: Date, timeZoneId: string, viewerTimeZoneId: string): Offset
+  +formatOffset(offset: Offset): string
+  +overlapBetween(now: Date, timeZoneId: string, viewerTimeZoneId: string): Overlap | null
+  +formatOverlap(overlap: Overlap | null, format: ClockFormat): string
+}
+
+class Offset <<domain, time/>> {
+  +minutes: number
+  +direction: OffsetDirection
+}
+
+enum OffsetDirection <<domain, time/>> {
+  ahead
+  behind
+  same
+}
+
+class Overlap <<domain, time/>> {
+  +startMinute: number
+  +endMinute: number
+  +lengthMinutes: number
+}
+
+class WorkingDay <<domain, time/>> {
+  +{static} startMinute: number = 540
+  +{static} endMinute: number = 1080
+}
+
+interface Clock <<api>> {
+  +minute: Signal<Date>
+  +now(): Date
+}
+
+class TeamStore <<domain, pins/>> {
+  +pins: Signal<Pin[]>
+  +selectedTeammateId: Signal<string | null>
+  +viewerPin: Signal<Pin | null>
+}
+
+class Pin <<api>> {
+  +teammateId: string
+  +timeZoneId: string
+}
+
+class OverlapBar <<components>> {
+  +startMinute: number | null
+  +endMinute: number | null
+  +label: string
+}
+
+class TeammatePanel <<components>> {
+  +offset: string | null
+  +overlap: Overlap | null
+  +overlapLabel: string | null
+}
+
+TimeFns ..> Offset : returns
+TimeFns ..> Overlap : returns
+TimeFns ..> WorkingDay : reads
+Offset --> OffsetDirection : has
+TeamStore --> "*" Pin : holds
+TeammatePanel *-- OverlapBar : contains
+TeammatePanel ..> Overlap : shows
+TimeFns ..> Clock : takes now from
+TimeFns ..> Pin : reads timeZoneId
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — View the week around the world
+
+Person(teammate, "Teammate", "The viewer")
+Container_Boundary(web, "Mondino web app") {
+  Component(page, "GlobePage", "Angular page, mondino application", "Chooses between the week panel and the invite card; heads the globe with the counts")
+  Component(store, "TeamStore", "Signal store, domain pins/", "Holds the pins, the counts, the team's invite token and the selection")
+  Component(week, "weekMoments and workingNow", "Pure functions, domain moments/ and pins/", "The moments of the next 7 days and the teammates in working hours")
+  Component(counts, "teamCounts", "Pure function, domain pins/", "Teammates, time zones, working and asleep")
+  Component(clock, "BrowserClock", "Clock, domain time/", "The one shared clock and its minute tick")
+  Component(panel, "WeekPanel", "Angular component, components library", "Lists the week's moments and who is in working hours now")
+  Component(card, "InviteCard", "Angular component, components library", "Shows the invite link with a Copy button")
+  Component(clip, "Clipboard", "Angular CDK service", "Writes text to the clipboard")
+}
+Rel(teammate, panel, "Chooses a moment in")
+Rel(teammate, card, "Uses Copy on")
+Rel(page, store, "Reads pins, counts and invite token from; selects in")
+Rel(page, week, "Reads the panel's lists from")
+Rel(store, counts, "Derives counts with")
+Rel(week, clock, "Reads the minute tick of")
+Rel(counts, clock, "Reads the minute tick of")
+Rel(page, panel, "Passes moments and teammates to")
+Rel(page, card, "Passes the invite link to")
+Rel(page, clip, "Copies the invite link with")
+@enduml

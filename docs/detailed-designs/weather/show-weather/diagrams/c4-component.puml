@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Show weather
+
+
+Container(web, "Mondino web app", "Angular", "WeatherIcon, formatTemperature, weatherLabel")
+System_Ext(openmeteo, "Open-Meteo", "Current weather for a position")
+
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "TeamsController", "ASP.NET Core controller", "GET /api/teams/{teamId}/pins")
+  Component(handler, "GetPinsQueryHandler", "MediatR handler", "Asks for weather once per city; gives none for a teammate who does not share it")
+  Component(source, "IWeatherSource", "Application interface", "Current weather for a position")
+  Component(cached, "CachedWeatherSource", "Infrastructure decorator", "15-minute cache per city, timeout, circuit breaker")
+  Component(client, "OpenMeteoWeatherSource", "Infrastructure HTTP client", "Calls Open-Meteo with a rounded position")
+  Component(mapper, "WeatherConditionMapper", "Application service", "Maps a weather code and wind speed to one of eight conditions")
+  ComponentDb(db, "Mondino database", "TO SUPPLY", "Teammates, cities, settings")
+}
+Rel(web, ctrl, "Reads pins", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetPinsQuery")
+Rel(handler, db, "Reads teammates", "EF Core")
+Rel(handler, source, "Asks once per city")
+Rel(cached, source, "Implements")
+Rel(cached, client, "Calls on a miss")
+Rel(client, openmeteo, "Reads current weather", "JSON/HTTPS")
+Rel(client, mapper, "Maps the condition with")
+@enduml

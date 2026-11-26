@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Keep the team fresh
+
+Container_Boundary(web, "Mondino web app") {
+  Component(clock, "BrowserClock", "Clock, domain time/", "Ticks each minute; rests while the tab is hidden; ticks at once on return")
+  Component(store, "TeamStore", "Signal store, domain pins/", "Refreshes when 15 minutes have passed; merges pins; keeps the selection")
+  Component(client, "HttpTeamApi", "HTTP client, api library", "Implements TeamApi")
+  Component(page, "GlobePage", "Angular page, mondino application", "Passes pins and arrived ids to the globe")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "TeamsController", "ASP.NET Core controller", "GET /api/teams/{teamId}/pins")
+  Component(handler, "GetPinsQueryHandler", "MediatR handler", "Builds the team's pins for one of its teammates")
+  Component(weather, "CachedWeatherSource", "IWeatherSource", "Cached weather with a timeout and a circuit breaker")
+  Component(finder, "MomentFinder", "Application service", "The moments that belong to a city")
+}
+ContainerDb(db, "Mondino database", "Relational, EF Core; engine TO SUPPLY", "Teams and teammates")
+System_Ext(meteo, "Open-Meteo", "Weather at a city")
+
+Rel(clock, store, "Minute tick")
+Rel(store, client, "getPins(teamId, signal)")
+Rel(client, ctrl, "GET pins", "JSON/HTTPS, session cookie")
+Rel(ctrl, handler, "Sends GetPinsQuery")
+Rel(handler, db, "Reads the team", "IAppDbContext")
+Rel(handler, weather, "Reads the weather at each city")
+Rel(handler, finder, "Finds each city's moments")
+Rel(weather, meteo, "Reads on a cache miss", "HTTPS")
+Rel(page, store, "Reads pins, counts and arrived ids from")
+@enduml

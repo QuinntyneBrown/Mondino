@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Protect team data
+
+Person(teammate, "Teammate", "Holds a session cookie")
+Person(visitor, "Person with an invite link", "Holds an invite token only")
+
+System_Boundary(mondino, "Mondino") {
+  Container(spa, "Mondino web app", "Angular", "Shows or hides controls for convenience; renders everything a person wrote as text")
+  Container(api, "Mondino API", "ASP.NET Core", "Authenticates the session, scopes each request to the team, validates, rate limits")
+  ContainerDb(db, "Mondino database", "EF Core, engine TO SUPPLY", "Teams, teammates and their postal codes")
+}
+
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+Rel(teammate, spa, "Uses", "HTTPS")
+Rel(visitor, spa, "Uses the Join screen", "HTTPS")
+Rel(spa, api, "Calls with the session cookie or an invite token", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, postal, "Looks up a postal code", "HTTPS")
+@enduml

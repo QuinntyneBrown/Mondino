@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — Another teammate reads the pins after sharing is switched off
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate (another)" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedWeatherSource" as weather
+  database "Mondino database" as db
+end box
+participant "Open-Meteo" as meteo
+note over actor, db : A teammate has saved "Share my local weather" off and "Show when I'm outside working hours" off.
+actor -> page : Open the Globe, or the 15 minute refresh arrives
+page -> store : refresh()
+store -> client : getPins(teamId)
+client -> controller : GET /api/teams/{teamId}/pins
+controller -> controller : Authenticate the session
+controller -> handler : Send GetPinsQuery
+handler -> db : Load the teammates of the viewer's team with their settings
+db --> handler : Teammates
+loop each teammate
+  alt the viewer's own pin
+    handler -> weather : Weather at City.Position
+    weather --> handler : Weather or none
+    handler -> handler : PinDto with weather; status visibility flag true
+  else another teammate, ShareWeather is false
+    handler -> handler : PinDto with no weather and no temperature; the source is not asked (L2-034)
+  else another teammate, ShareWeather is true
+    handler -> weather : Weather at City.Position
+    weather -> meteo : Position only, when not cached
+    meteo --> weather : Current weather
+    weather --> handler : Weather or none
+    handler -> handler : PinDto with weather
+  end
+  handler -> handler : Another teammate with ShowOutsideWorkingHours false: status visibility flag false (L2-034)
+end
+handler --> controller : PinDto list
+controller --> client : 200 pins; no settings and no postal code of any other teammate
+client --> store : Pin list
+store --> page : pins signal
+page -> page : statusFor(pin, local time)
+page --> actor : That pin shows its local time, no weather, and no status at 23:30 its time
+@enduml

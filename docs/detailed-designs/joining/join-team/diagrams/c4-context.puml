@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Join the team
+
+Person(person, "Person with an invite link", "Has given a name and a found postal code")
+System(mondino, "Mondino", "Adds the teammate to the team with a pin at their city")
+System_Ext(postal, "Postal code source", "Resolves a postal code to its city; provider TO SUPPLY")
+
+Rel(person, mondino, "Chooses Join and becomes a teammate")
+Rel(mondino, postal, "Asks for the city again when it is no longer cached", "HTTPS")
+@enduml

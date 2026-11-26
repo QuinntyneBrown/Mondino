@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — Open a screen's address as a non-teammate
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person with an invite link" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "Router" as router
+  participant "teammateGuard" as guard
+  participant "TeamMembership" as membership
+  participant "InviteNeededPage" as needed
+  participant "sessionExpiredInterceptor" as expired
+  participant "HttpTeamApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "TeammateSessionHandler" as session
+end box
+actor -> router : Open /globe
+router -> guard : canActivate for the guarded parent route
+guard -> membership : current()
+alt No membership on this device
+  membership --> guard : null
+  guard --> router : UrlTree for /invite-needed
+  router -> needed : loadComponent, then create InviteNeededPage
+  needed --> actor : An invite link is needed; no team data and no API request (L2-038)
+else Membership held, session no longer valid
+  membership --> guard : Membership for this device
+  guard --> router : true
+  router -> client : GlobePage reads pins through TeamStore
+  client -> controller : GET /api/teams/{teamId}/pins
+  controller -> session : Authenticate the session cookie
+  session --> controller : No valid session
+  controller --> client : 401 ProblemDetails, no team data (L2-043)
+  client --> expired : 401 response
+  expired -> membership : forget()
+  expired -> router : Navigate to /invite-needed
+  router -> needed : Create InviteNeededPage
+  needed --> actor : An invite link is needed
+end
+@enduml

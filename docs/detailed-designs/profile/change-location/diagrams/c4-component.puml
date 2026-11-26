@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Change location
+
+Container_Boundary(spa, "Mondino web app") {
+  Component(page, "ProfilePage", "Angular page, lazy route", "Own pin on a small globe, location fields")
+  Component(store, "ProfileStore", "Route-scoped signal store", "Saved profile, draft, lookup state")
+  Component(client, "HttpProfileApi", "ProfileApi over HTTP", "Postal code in the body only")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "ProfileController", "ASP.NET Core controller", "The /api/teams/{teamId}/me endpoints")
+  Component(get, "GetProfileQueryHandler", "MediatR handler", "Returns the current teammate's own profile")
+  Component(lookup, "LookUpPostalCodeQueryHandler", "MediatR handler", "Checks the format, finds the city")
+  Component(update, "UpdateProfileCommandHandler", "MediatR handler", "Resolves the city and moves the pin")
+  Component(source, "CachedPostalCodeLookup", "IPostalCodeLookup", "Cache, timeout, circuit breaker")
+  ComponentDb(db, "Mondino database", "EF Core", "Teammate, postal code, city")
+}
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+
+Rel(page, store, "Reads signals, sends changes")
+Rel(store, client, "Calls through PROFILE_API")
+Rel(client, ctrl, "GET, PUT, POST", "JSON/HTTPS")
+Rel(ctrl, get, "Sends GetProfileQuery")
+Rel(ctrl, lookup, "Sends LookUpPostalCodeQuery")
+Rel(ctrl, update, "Sends UpdateProfileCommand")
+Rel(lookup, source, "Finds the city")
+Rel(update, source, "Finds the city")
+Rel(get, db, "Reads", "IAppDbContext")
+Rel(update, db, "Saves", "IAppDbContext")
+Rel(source, postal, "Country and postal code", "HTTPS")
+@enduml

@@ -1,0 +1,132 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Change location
+
+package "Frontend" {
+  interface ProfileApi {
+    +getProfile(teamId: string): Promise<Profile>
+    +lookUpPostalCode(teamId: string, countryCode: string, postalCode: string): Promise<PostalCodeResult>
+    +updateProfile(teamId: string, update: ProfileUpdate): Promise<Profile>
+  }
+  class HttpProfileApi
+  class ProfileStore {
+    +saved: Signal<Profile>
+    +draft: Signal<ProfileUpdate>
+    +lookup: Signal<LookupState>
+    +canSave: Signal<boolean>
+    +load(): void
+    +changeCountry(countryCode: string): void
+    +changePostalCode(value: string): void
+    +lookUp(): void
+    +save(): void
+  }
+  class ProfilePage
+  class Profile {
+    +teamName: string
+    +pin: Pin
+    +countryCode: string
+    +postalCode: string
+    +settings: Settings
+  }
+  class ProfileUpdate {
+    +countryCode: string
+    +postalCode: string
+    +settings: Settings
+  }
+  enum LookupState {
+    idle
+    finding
+    found
+    notFound
+    unavailable
+  }
+}
+
+package "Backend" {
+  class ProfileController {
+    +Get(teamId: Guid): Task<ProfileDto>
+    +Put(teamId: Guid, body): Task<ProfileDto>
+    +LookUpPostalCode(teamId: Guid, body): Task<PostalCodeResultDto>
+  }
+  class UpdateProfileCommand {
+    +Guid TeamId
+    +string CountryCode
+    +string PostalCode
+    +TeammateSettings Settings
+  }
+  class UpdateProfileCommandHandler {
+    +Handle(command: UpdateProfileCommand): Task<ProfileDto>
+  }
+  class LookUpPostalCodeQueryHandler {
+    +Handle(query: LookUpPostalCodeQuery): Task<PostalCodeResultDto>
+  }
+  class GetProfileQueryHandler {
+    +Handle(query: GetProfileQuery): Task<ProfileDto>
+  }
+  interface ICurrentTeammate {
+    +Guid TeammateId
+    +Guid TeamId
+  }
+  interface IPostalCodeLookup {
+    +FindCityAsync(postalCode: PostalCode): Task<City?>
+  }
+  class PostalCodeFormats {
+    +Supported: IReadOnlyList<PostalCodeFormat>
+    +TryNormalise(countryCode: string, value: string, out postalCode: PostalCode): bool
+  }
+  class Teammate {
+    +Guid Id
+    +Guid TeamId
+    +string CountryCode
+    +PostalCode PostalCode
+    +City City
+    +MoveTo(postalCode: PostalCode, city: City): void
+  }
+  class City {
+    +string Name
+    +string Region
+    +string CountryCode
+    +Position Position
+    +string TimeZoneId
+  }
+  class Position {
+    +double Latitude
+    +double Longitude
+  }
+  class PostalCode {
+    +string CountryCode
+    +string Value
+  }
+}
+
+ProfilePage --> ProfileStore : reads / sends changes
+ProfileStore ..> ProfileApi : PROFILE_API
+ProfileApi <|.. HttpProfileApi
+ProfileStore --> Profile : saved
+ProfileStore --> ProfileUpdate : draft
+ProfileStore --> LookupState : has
+HttpProfileApi ..> ProfileController : JSON/HTTPS
+ProfileController ..> GetProfileQueryHandler : GetProfileQuery
+ProfileController ..> LookUpPostalCodeQueryHandler : LookUpPostalCodeQuery
+ProfileController ..> UpdateProfileCommandHandler : UpdateProfileCommand
+UpdateProfileCommandHandler ..> UpdateProfileCommand : handles
+UpdateProfileCommandHandler ..> ICurrentTeammate : whose pin
+UpdateProfileCommandHandler ..> IPostalCodeLookup : finds the city
+UpdateProfileCommandHandler ..> PostalCodeFormats : normalises
+UpdateProfileCommandHandler --> Teammate : loads / moves
+LookUpPostalCodeQueryHandler ..> PostalCodeFormats : checks the form
+LookUpPostalCodeQueryHandler ..> IPostalCodeLookup : finds the city
+GetProfileQueryHandler ..> ICurrentTeammate : whose profile
+Teammate *-- PostalCode
+Teammate *-- City
+City *-- Position
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Show weather
+
+
+Person(teammate, "Teammate", "Reads each pin's weather")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Shows the condition as an icon with its word and the temperature in the viewer's unit")
+  Container(api, "Mondino API", "ASP.NET Core", "Reads weather once per city, caches it for 15 minutes, maps it to eight conditions")
+  ContainerDb(db, "Mondino database", "TO SUPPLY", "Teammates, their cities and settings")
+}
+System_Ext(openmeteo, "Open-Meteo", "Current weather for a position")
+
+Rel(teammate, web, "Uses", "HTTPS")
+Rel(web, api, "Reads the team's pins", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+Rel(api, openmeteo, "Reads current weather", "JSON/HTTPS")
+@enduml

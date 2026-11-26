@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Adapt to every width
+
+Person(teammate, "Teammate", "Opens Mondino on a phone, a tablet, a desktop or a large screen")
+Person(visitor, "Person with an invite link", "Not yet a teammate of a team on this device")
+System(mondino, "Mondino", "Shows a team on a 3D globe, laid out for the width it is given")
+
+Rel(teammate, mondino, "Opens Globe, Team, Moments and Profile & Settings at any width")
+Rel(visitor, mondino, "Opens a screen's address and is shown that an invite link is needed")
+@enduml

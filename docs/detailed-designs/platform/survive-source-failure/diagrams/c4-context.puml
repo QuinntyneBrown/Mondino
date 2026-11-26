@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Survive source failure
+
+Person(teammate, "Teammate", "Sees every pin and local time whatever an outside source does")
+System(mondino, "Mondino", "Calls each outside source with a timeout, a cache and a circuit breaker")
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+System_Ext(weather, "Open-Meteo", "Weather at a position")
+System_Ext(holidays, "Holiday calendar source", "Provider TO SUPPLY")
+System_Ext(races, "Race calendar source", "Provider TO SUPPLY")
+System_Ext(events, "Event source", "Provider TO SUPPLY")
+
+Rel(teammate, mondino, "Reads the team")
+Rel(mondino, postal, "Sends a country and postal code", "HTTPS")
+Rel(mondino, weather, "Sends a position rounded to two decimal places", "HTTPS")
+Rel(mondino, holidays, "Sends a country and year", "HTTPS")
+Rel(mondino, races, "Sends a year", "HTTPS")
+Rel(mondino, events, "Sends a city's place", "HTTPS")
+@enduml

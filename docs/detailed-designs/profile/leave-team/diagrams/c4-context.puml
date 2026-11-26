@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Leave team
+
+Person(viewer, "Teammate", "Removes their pin and leaves the team")
+Person(other, "Teammate (another)", "No longer sees the pin")
+System(mondino, "Mondino", "Shows a team on a 3D globe with each teammate's local time, weather and moments")
+
+Rel(viewer, mondino, "Confirms leaving the team using")
+Rel(other, mondino, "Reads the team's pins using")
+@enduml

@@ -1,0 +1,117 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Find moments
+
+enum MomentKind {
+  Holiday
+  Formula1
+  LocalEvent
+  Sport
+}
+
+class Moment {
+  +MomentKind Kind
+  +string Title
+  +DateOnly Date
+  +string Detail
+  +string? EmblemKey
+  +{static} Create(entry: CalendarEntry, emblemKey: string?): Moment
+}
+
+class CalendarEntry <<record>> {
+  +MomentKind Kind
+  +string Title
+  +DateOnly Date
+  +string Detail
+  +string CountryCode
+  +string? Region
+  +Position? Position
+  +string? Subject
+}
+
+class City <<value object>> {
+  +string Name
+  +string Region
+  +string CountryCode
+  +Position Position
+  +string TimeZoneId
+}
+
+class Position <<value object>> {
+  +double Latitude
+  +double Longitude
+  +DistanceKmTo(other: Position): double
+}
+
+interface IHolidayCalendar {
+  +HolidaysIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+}
+interface IRaceCalendar {
+  +RaceWeekendsIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+}
+interface IEventCalendar {
+  +EventsNear(position: Position, radiusKm: double, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+}
+
+class MomentFinder {
+  +{static} RadiusKm = 100
+  +{static} DaysAhead = 90
+  +FindFor(city: City): Task<IReadOnlyList<Moment>>
+  -BelongsTo(entry: CalendarEntry, city: City): bool
+}
+
+class EmblemCatalogue {
+  +KeyFor(subject: string?): string?
+}
+
+class GetMomentsQuery {
+  +Guid TeamId
+}
+
+class GetMomentsQueryHandler {
+  +Handle(query: GetMomentsQuery): Task<IReadOnlyList<MomentDto>>
+}
+
+class MomentDto {
+  +MomentKind Kind
+  +string Title
+  +DateOnly Date
+  +string Detail
+  +string? EmblemKey
+  +Guid TeammateId
+  +string TeammateName
+  +string CityName
+  +string CountryCode
+  +string TimeZoneId
+}
+
+class CachedMomentCalendars
+
+GetMomentsQueryHandler ..> GetMomentsQuery : handles
+GetMomentsQueryHandler --> MomentFinder : asks per city
+GetMomentsQueryHandler ..> MomentDto : returns
+MomentFinder --> IHolidayCalendar
+MomentFinder --> IRaceCalendar
+MomentFinder --> IEventCalendar
+MomentFinder --> EmblemCatalogue
+MomentFinder ..> City : reads
+MomentFinder ..> CalendarEntry : filters
+MomentFinder ..> Moment : creates
+Moment --> MomentKind
+CalendarEntry --> MomentKind
+City *-- Position
+CachedMomentCalendars ..|> IHolidayCalendar
+CachedMomentCalendars ..|> IRaceCalendar
+CachedMomentCalendars ..|> IEventCalendar
+@enduml

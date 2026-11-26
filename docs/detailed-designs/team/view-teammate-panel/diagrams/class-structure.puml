@@ -1,0 +1,106 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — View a teammate's panel
+
+class GlobePage <<mondino>> {
+  +teammate: InputSignal<string | undefined>
+  -openedFromKeyboard: boolean
+  +panel: Signal<TeammatePanelContent | null>
+  +onSelect(teammateId: string): void
+  +onClosed(): void
+  +onEscape(): void
+}
+
+class TeamStore <<domain pins/>> {
+  +pins: Signal<Pin[]>
+  +viewerTeammateId: Signal<string | null>
+  +selectedTeammateId: Signal<string | null>
+  +selectedPin: Signal<Pin | null>
+  +viewerPin: Signal<Pin | null>
+  +select(teammateId: string): boolean
+  +clearSelection(): void
+}
+
+class "teammatePanelView" as view <<function, domain pins/>> {
+  +teammatePanelView(pin: Pin, viewer: Pin, now: Date, settings: Settings): TeammatePanelContent
+}
+
+class TeammatePanelContent <<domain pins/>> {
+  +teammateId: string
+  +name: string
+  +initials: string
+  +colour: string
+  +isViewer: boolean
+  +city: string
+  +country: string
+  +localTime: string
+  +localDay: string
+  +offset: string | null
+  +status: Status | null
+  +weather: Weather | null
+  +moments: Moment[]
+  +overlap: Overlap | null
+}
+
+class Overlap <<domain time/>> {
+  +startHour: number
+  +endHour: number
+  +hours: number
+}
+
+class TeammatePanel <<components, mo-teammate-panel>> {
+  +content: InputSignal<TeammatePanelContent>
+  +closed: OutputEmitterRef<void>
+  +focusHeading(): void
+}
+
+class OverlapBar <<components, mo-overlap-bar>> {
+  +overlap: InputSignal<Overlap>
+}
+
+class GlobeView <<globe, mo-globe>> {
+  +pins: InputSignal<Pin[]>
+  +selectedId: InputSignal<string | null>
+  +select: OutputEmitterRef<string>
+  +focusPin(teammateId: string): void
+}
+
+class Pin <<api>> {
+  +teammateId: string
+  +name: string
+  +colour: string
+  +city: string
+  +country: string
+  +position: Position
+  +timeZoneId: string
+  +weather: Weather | null
+  +showsStatusOutsideWorkingHours: boolean
+  +moments: Moment[]
+}
+
+interface Clock <<api, CLOCK>> {
+  +now(): Date
+  +minute: Signal<number>
+}
+
+GlobePage --> TeamStore : sets selection
+GlobePage ..> view : calls
+GlobePage --> TeammatePanel : renders
+GlobePage --> GlobeView : renders
+GlobePage ..> Clock : injects CLOCK
+view ..> TeammatePanelContent : builds
+view ..> Pin : reads
+TeammatePanelContent *-- Overlap
+TeammatePanel ..> TeammatePanelContent : presents
+TeammatePanel --> OverlapBar : renders
+TeamStore "1" o-- "*" Pin
+@enduml

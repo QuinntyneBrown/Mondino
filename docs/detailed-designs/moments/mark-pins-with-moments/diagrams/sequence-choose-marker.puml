@@ -1,0 +1,71 @@
+@startuml
+title UML sequence behaviour — Choose a marker and its emblem for a pin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "GlobePage" as page
+  participant "TeamStore" as store
+  participant "SettingsCache" as settings
+  participant "markerFor" as marker
+  participant "emblemFor" as emblem
+  participant "GlobeView" as view
+  participant "PinLayer" as layer
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+  participant "EmblemCatalogue" as catalogue
+end box
+
+actor -> page : Open the Globe screen
+page -> store : Read pins
+store -> controller : GET /api/teams/{teamId}/pins
+controller -> handler : Send GetPinsQuery
+handler -> catalogue : KeyFor(subject) for each moment,\nthrough MomentFinder
+alt Mondino holds the right to the emblem
+  catalogue --> handler : Emblem key
+else right not held
+  catalogue --> handler : No key
+end
+handler --> controller : PinDto list with moments
+controller --> store : Pins
+store --> page : Pins signal
+page -> settings : Read the viewer's chosen kinds
+settings --> page : momentKinds (all four at first, L2-022)
+loop each pin
+  page -> marker : markerFor(pin, kinds, now)
+  marker -> marker : Drop moments of a kind turned off (L2-022)
+  marker -> marker : Keep moments today or in the next 7 days,\nin the pin's own time zone (L2-021)
+  alt no moment left
+    marker --> page : No marker
+  else at least one moment
+    marker -> emblem : emblemFor(nearest moment)
+    alt emblemKey is in HELD_EMBLEMS
+      emblem --> marker : Held emblem
+    else no key, or key not bundled
+      emblem --> marker : Icon of the moment's kind
+    end
+    marker --> page : MomentMarker with emblem, count,\ntoday flag and when label
+  end
+end
+page -> view : pins and markers
+view -> layer : setMarkers(markers)
+layer --> actor : Marker in sun beside each marked pin,\nstronger by size and ring when today
+actor -> layer : Point at or focus a marker
+layer --> actor : Title and when label as text (L2-021)
+@enduml

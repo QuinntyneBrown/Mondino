@@ -1,0 +1,103 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Mark pins with moments
+
+enum MomentKind {
+  holiday
+  formula1
+  localEvent
+  sport
+}
+
+interface Moment {
+  +kind: MomentKind
+  +title: string
+  +date: string
+  +detail: string
+  +emblemKey: string | null
+}
+
+interface Pin {
+  +teammateId: string
+  +timeZoneId: string
+  +moments: Moment[]
+}
+
+interface Settings {
+  +momentKinds: MomentKind[]
+}
+
+interface Emblem {
+  +source: 'held' | 'kind'
+  +key: string | null
+  +kind: MomentKind
+}
+
+interface MomentMarker {
+  +moment: Moment
+  +emblem: Emblem
+  +count: number
+  +today: boolean
+  +when: string
+}
+
+class "moments/ (domain)" as moments <<functions>> {
+  +markerFor(pin: Pin, kinds: MomentKind[], now: Date): MomentMarker | null
+  +emblemFor(moment: Moment): Emblem
+  +daysUntil(date: string, timeZoneId: string, now: Date): number
+  +whenLabel(daysAhead: number): string
+  +HELD_EMBLEMS: ReadonlySet<string>
+}
+
+class EmblemCatalogue <<backend>> {
+  +KeyFor(subject: string?): string?
+}
+
+class GlobePage {
+  -markers: Signal<Map<string, MomentMarker>>
+}
+
+class GlobeView {
+  +pins: Pin[]
+  +markers: Map<string, MomentMarker>
+  +selectedId: string | null
+}
+
+class PinLayer {
+  +setMarkers(markers: Map<string, MomentMarker>): void
+  +dispose(): void
+}
+
+class PinList
+
+class MomentIcon {
+  +kind: MomentKind
+}
+
+GlobePage ..> moments : calls markerFor
+GlobePage --> GlobeView : passes pins and markers
+moments ..> Pin : reads
+moments ..> Settings : takes momentKinds from
+moments ..> MomentMarker : returns
+MomentMarker --> Moment
+MomentMarker --> Emblem
+Pin "1" --> "*" Moment
+Moment --> MomentKind
+EmblemCatalogue ..> Moment : sets emblemKey
+GlobeView --> PinLayer
+GlobeView --> PinList
+PinLayer ..> MomentMarker : draws
+PinList ..> MomentMarker : gives as text
+PinList ..> MomentIcon : uses
+@enduml

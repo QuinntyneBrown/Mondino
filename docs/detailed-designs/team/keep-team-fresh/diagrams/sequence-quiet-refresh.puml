@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — A quiet refresh brings in a new teammate
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Frontend — Mondino web app" #E0F2FE
+  participant "BrowserClock" as clock
+  participant "TeamStore" as store
+  participant "HttpTeamApi" as client
+  participant "GlobePage" as page
+  participant "GlobeView" as globe
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "GetPinsQueryHandler" as handler
+  participant "MomentFinder" as finder
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedWeatherSource" as weather
+  database "Mondino database" as db
+end box
+participant "Open-Meteo" as meteo
+clock -> store : Minute tick, tab visible
+store -> store : refreshIfDue: 15 minutes since lastRefreshedAt (L2-048)
+store -> client : getPins(teamId, signal)
+client -> controller : GET /api/teams/{teamId}/pins
+controller -> handler : Send GetPinsQuery
+handler -> db : Load the team; the session's teammate belongs to it (L2-043)
+db --> handler : Team and teammates
+loop each distinct city
+  handler -> weather : Weather at the city's position
+  opt cache miss
+    weather -> meteo : Position only (L2-050)
+    meteo --> weather : Weather, or a failure within the timeout
+  end
+  weather --> handler : Weather or null (L2-049)
+  handler -> finder : Moments for the city
+  finder --> handler : Moment[]
+end
+handler --> controller : TeamPinsDto (no postal code, L2-007)
+controller --> client : 200 with the pins
+client --> store : TeamPins
+alt refresh succeeded
+  store -> store : merge: replace pins, keep selectedTeammateId, note ids not held before
+  store --> page : pins, counts, arrivedTeammateIds
+  page -> globe : pins, selectedId unchanged, arrivedIds
+  globe -> globe : Add the new pin and pulse it once; keep the globe's position (L2-048)
+  globe -> page : arrivedShown
+  page -> store : acknowledgeArrived()
+else refresh failed
+  client --> store : ApiError
+  store -> store : Keep the pins held; try again at the next minute tick that is due
+end
+@enduml

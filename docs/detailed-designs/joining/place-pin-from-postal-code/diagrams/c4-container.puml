@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Place a pin from a postal code
+
+Person(person, "Person with an invite link", "Fills in the Join form")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Join form, lookup status and the new pin on the globe")
+  Container(api, "Mondino API", "ASP.NET Core", "Checks the format, finds the city and its weather")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams and invite tokens")
+}
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+System_Ext(meteo, "Open-Meteo", "Weather")
+
+Rel(person, web, "Types a name, a country and a postal code", "HTTPS")
+Rel(web, api, "POST /api/invites/{inviteToken}/postal-code-lookups", "JSON/HTTPS, postal code in the body")
+Rel(api, db, "Checks the invite token", "EF Core")
+Rel(api, postal, "Country and postal code only", "HTTPS, timeout, cached")
+Rel(api, meteo, "City position only", "HTTPS, timeout, cached")
+@enduml

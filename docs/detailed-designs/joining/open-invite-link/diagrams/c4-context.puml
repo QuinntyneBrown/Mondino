@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Open an invite link
+
+Person(person, "Person with an invite link", "Holds a team's invite link and is not yet a teammate")
+Person(teammate, "Teammate", "Already on the team on this device")
+System(mondino, "Mondino", "Shows a team on a globe: each teammate's pin, local time, weather and moments")
+
+Rel(person, mondino, "Opens the invite link and sees the Join screen")
+Rel(teammate, mondino, "Opens the invite link and is taken to the Globe screen")
+@enduml

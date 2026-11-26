@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Observe without exposing
+
+Person(visitor, "Person with an invite link", "Joins a team; nothing about them is recorded")
+Person(teammate, "Teammate", "Uses Mondino; nothing about them is recorded")
+System(mondino, "Mondino", "Emits traces, metrics and logs that carry no teammate")
+System_Ext(telemetry, "Telemetry backend", "Receives OpenTelemetry signals. Product TO SUPPLY")
+System_Ext(sources, "Outside sources", "Postal code, weather and calendar sources, measured by source and outcome")
+
+Rel(visitor, mondino, "Joins")
+Rel(teammate, mondino, "Uses")
+Rel(mondino, telemetry, "Exports traces, metrics and logs", "OTLP")
+Rel(mondino, sources, "Calls and measures", "HTTPS")
+@enduml

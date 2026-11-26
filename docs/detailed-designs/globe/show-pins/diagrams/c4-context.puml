@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Show pins
+
+Person(teammate, "Teammate", "A person on a team")
+System(mondino, "Mondino", "Shows each teammate as a pin on the globe with their local time and weather")
+System_Ext(openmeteo, "Open-Meteo", "Current weather at a place")
+
+Rel(teammate, mondino, "Sees and selects teammates' pins using")
+Rel(mondino, openmeteo, "Reads the weather at each city from", "HTTPS")
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Draw the globe
+
+Person(teammate, "Teammate", "A person on a team")
+System_Boundary(mondino, "Mondino") {
+  Container(spa, "Mondino web app", "Angular", "Draws the globe from assets bundled with the app and served from its own origin")
+  Container(api, "Mondino API", "ASP.NET Core", "Holds the team and its pins")
+  ContainerDb(db, "Mondino database", "EF Core, engine TO SUPPLY", "Teams, teammates and their cities")
+}
+Rel(teammate, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads the team's pins", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

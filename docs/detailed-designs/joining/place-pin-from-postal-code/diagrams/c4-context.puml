@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Place a pin from a postal code
+
+Person(person, "Person with an invite link", "Gives a name, a country and a postal code")
+System(mondino, "Mondino", "Finds the postal code's city and places a pin there")
+System_Ext(postal, "Postal code source", "Resolves a postal code to its city; provider TO SUPPLY")
+System_Ext(meteo, "Open-Meteo", "Current weather at a position")
+
+Rel(person, mondino, "Gives a postal code and sees the city, its weather and a new pin")
+Rel(mondino, postal, "Asks for the city of a country and postal code", "HTTPS")
+Rel(mondino, meteo, "Asks for the weather at the city's position", "HTTPS")
+@enduml
