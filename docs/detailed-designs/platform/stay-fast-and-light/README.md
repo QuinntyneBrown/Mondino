@@ -68,8 +68,9 @@ renderer is chosen.
   holds nothing. `GlobeScene.stop()` and `start()` pause and resume the render loop without
   releasing anything.
 - **`TeamStore`** is provided on the parent route of the four teammate screens, not in `root`.
-  It holds the subscription to its pending read and the timer for its 15-minute refresh. When
-  it is destroyed, or when a newer read starts, it ends the subscription, which cancels the
+  It holds the subscription to its pending read; its 15-minute refresh runs from the one
+  clock's minute tick, so it has no timer of its own (`keep-team-fresh`). When it is
+  destroyed, or when a newer read starts, it ends the subscription, which cancels the
   HTTP request. A page that starts its own request ties it to `takeUntilDestroyed`, so leaving
   a screen cancels the request.
 - **Scoped state.** A screen's own state (a filter, a draft of the settings) lives in the page

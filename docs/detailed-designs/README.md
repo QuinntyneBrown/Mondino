@@ -75,7 +75,8 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   `PIN_SPREADER`, the placement of pins that are close together.
 - `TeamStore` is provided at the route that holds Globe, Team, Moments and Profile & Settings.
   The browser knows its team from `TeamMembership`, which holds ids and the team's name and
-  never a postal code.
+  never a postal code. Without a membership, the four addresses show `InviteNeededPage` in
+  place, and any other address shows `NotFoundPage`.
 
 ## Not decided yet
 
@@ -86,6 +87,10 @@ The designs mark these as `<TO SUPPLY>`:
 - The database engine and the hosting platform.
 - The providers of the postal code source and of the holiday, race and event calendars.
 - How a team is made, and how a teammate signs in again on another device.
+- What the "Invite teammate" and "Message" buttons lead to; neither is built before it is
+  designed.
+- Where the header reads the viewer's initials and colour for the avatar that links to
+  Profile & Settings.
 - Which emblems Mondino holds the right to use.
 - How a `PinDto` tells weather that is not shared from weather that is unavailable.
 - How the Asleep filter and its count treat a teammate who hides their status, beyond L2-015's
