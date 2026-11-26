@@ -71,7 +71,7 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   of a group with no moments. With no moment at all the page shows no filter and says "Nothing is coming up
   for your team", "Holidays, races and local happenings where your teammates live appear here
   up to 90 days ahead." and "Back to the globe". With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
-  team." It emits a chosen moment.
+  team." in a `role="status"` element (the mocks' `list-note`), so the empty result is announced. It emits a chosen moment.
 - **`MomentRow`** — presentation component for one moment (`moment-row`): the `dateLabel`, kind icon
   and `when` label, title, detail, and the teammate's `Avatar` with their first name and city
   ("Jordan · Austin"). The prominent form (`today-moment`) is used for a moment today: "Today

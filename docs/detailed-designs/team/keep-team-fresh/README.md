@@ -62,7 +62,7 @@ Frontend:
   "You’re on the globe." before the selection's announcement.
 - **`loadState`** — `Loading`, `Ready` or `Failed`, for the first load only. A refresh never
   changes it: a failed refresh keeps the pins held, sets `refreshFailed`, and the store tries
-  again at the next minute tick. `Loading` shows skeletons, on the Globe screen under the heading "Your team", and announces
+  again at the next minute tick. `Loading` shows skeletons, on the Globe screen under the heading "Your team" with the panel's place named "Loading", and announces
   "Loading your team…";
   `Failed` shows "We couldn’t load your team" with "Try again", which calls `load` again.
 - **`refreshFailed`** and **`refreshedAt`** — whether the last refresh failed, and when the pins

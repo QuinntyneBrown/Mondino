@@ -36,7 +36,10 @@ loading and refreshing are designed in `keep-team-fresh`.
   address, the `TeamStore`, the `GlobeView` and the panel. It receives the `teammate` query
   parameter as a component input and passes it to `TeamStore.select`. It renders `TeammatePanel`
   when a pin is selected, `GroupPanel` when a group pin is selected, and `WeekPanel` otherwise.
-  It listens for Escape while a teammate's or a group's panel is open.
+  It listens for Escape while a teammate's or a group's panel is open. The panel sits in the
+  mocks' `aside.globe-screen__panel`, which `GlobePage` names for what it holds: the
+  teammate's name ("Tomás Herrera", without "(you)"), the group's heading ("3 teammates close
+  together"), "This week around the world", or "Loading" while the team is first read.
 - **Address** — `/globe?teammate={teammateId}`. The parameter carries the teammate's id, an
   opaque `Guid`, and no name, city or postal code (L2-023). The address is the source of the
   selection: a select or a close navigates, and the store follows the address.

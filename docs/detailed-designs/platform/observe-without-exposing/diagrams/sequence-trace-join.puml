@@ -40,11 +40,11 @@ client -> aspnet : POST /api/invites/{inviteToken}/teammates, values in the body
 aspnet -> telemetry : Start a server span
 aspnet -> controller : Request
 controller -> handler : Send JoinTeamCommand
-handler -> lookup : FindCityAsync(postalCode)
+handler -> lookup : FindCityAsync(postalCode),\nthrough PostalCodeResolver
 lookup -> source : Country and postal code
 source --> lookup : City, position, time zone
 lookup -> telemetry : RecordSourceCall("postal_code", Success, duration) (L2-051)
-lookup --> handler : City
+lookup --> handler : PostalCodeLookupOutcome: found, with the City
 handler -> db : Save the teammate
 db --> handler : Saved
 handler -> telemetry : Log TeammateJoined: a fixed message with no fields

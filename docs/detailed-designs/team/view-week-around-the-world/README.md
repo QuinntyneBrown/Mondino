@@ -68,7 +68,7 @@ the pins: the team's invite token.
 - **`InviteCard`** (`mo-invite-card`) — presentation component. It takes `inviteLink` and
   emits `copy`. It is headed "Bring the team onto the globe", says "Anyone with this invite link
   adds their pin with a postal code. No addresses are shown.", and shows the link as selectable
-  text beside "Copy".
+  text beside "Copy", which the link describes (`aria-describedby`).
 - **`AppHeader`** (`mo-app-header`) — presentation component, the header of the four screens.
   Its "Invite teammate" button emits `invite`; it opens nothing.
 - **`TeamShell`** — route component of the `mondino` application that holds the Globe, Team,
@@ -84,7 +84,8 @@ the pins: the team's invite token.
   in a `role="status"` region and dismisses itself after 4 seconds; the timer pauses while the
   toast is pointed at or focused. "Couldn’t copy the invite link", with "Your browser didn’t
   allow it. Select the link in the card and copy it yourself.", sits in a `role="alert"` region
-  and stays until dismissed. Assistive technology announces both (L2-025).
+  and stays until dismissed. Each has a close button named "Dismiss", which emits `dismissed`.
+  Assistive technology announces both (L2-025).
 - **`inviteLinkFor(origin, inviteToken)`** — pure function in `pins/` that returns
   `{origin}/join/{inviteToken}`, the address of `JoinPage`.
 - **`Clipboard`** — Angular CDK service. `InviteLinkCopier` calls `copy(inviteLink)` and sets
