@@ -36,7 +36,7 @@ end box
 participant "Postal code source" as source
 participant "Open-Meteo" as meteo
 actor -> field : Change the country or postal code, leave the field
-field -> store : changePostalCode(value), lookUp()
+field -> store : changePostalCode(value); on blurred, lookUp() (nothing while empty or the same as saved)
 store -> store : Keep what was typed; clear the found city; the draft's location is the saved one; lookupState = Locating
 field --> actor : "Finding M5V 2T6…"
 store -> client : lookUpPostalCode(teamId, countryCode, postalCode, signal)
@@ -82,7 +82,7 @@ alt found
 else postal_code_not_found
   store -> store : lookupState = NotFound; nothing to save
   field --> actor : Alert of L2-004, ending "Your pin stays in Milan.", aria-invalid on the input; saving is not offered; the pin stays (L2-032)
-else postal_code_unavailable
+else postal_code_unavailable, any other code, or no answer
   store -> store : lookupState = Unavailable; nothing to save
   field --> actor : Could not be checked right now, "Your pin stays in Milan."; "Try again" emits retry, which runs lookUp() again (L2-032)
 else rate_limited (429 from the lookup rate limit, before the handler)

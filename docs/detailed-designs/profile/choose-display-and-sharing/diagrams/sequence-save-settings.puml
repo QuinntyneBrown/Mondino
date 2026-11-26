@@ -58,6 +58,7 @@ alt save succeeds
   client --> store : Profile
   store -> store : saved = response; hasUnsavedChanges = false
   store -> settings : replace(settings); SettingsCache is written
+  store -> store : TeamStore.refresh()
   settings --> page : Every local time and temperature uses the new choice (L2-033)
   store --> bar : state = saved
   bar --> actor : "Saved — your pin is up to date", announced (L2-035)

@@ -96,9 +96,14 @@ loading and refreshing are designed in `keep-team-fresh`.
 The heading of the screen gives the number of teammates and of distinct time zones from
 `TeamStore.counts`, as "12 teammates · 12 time zones · live". For a team of one it reads "Just
 you · 1 time zone · live", and under the viewer's own row the screen says "Just you, for now"
-and "When teammates join with your team's invite link, they appear here from west to east.",
+and "When teammates join with your team’s invite link, they appear here from west to east.",
 with "Get the invite link", which leads to the Globe screen. The empty messages are "Nobody is
 in working hours right now." for Working now and "Everyone is awake right now." for Asleep.
+
+While any pin's `weatherState` is `Unavailable`, `TeamPage` shows an `Alert` (the mocks'
+`alert alert--warning`, `role="status"`) between the heading and the day ribbon: "Weather is
+unavailable right now. Local times are still right." (mock `team/weather-unavailable`,
+L2-049). Each such row shows the mark named "Weather unavailable" (`weather/show-weather`).
 
 A teammate whose settings hide their status outside working hours still has a row and a ribbon
 marker, since both follow from the local time. Outside working hours their row shows no status

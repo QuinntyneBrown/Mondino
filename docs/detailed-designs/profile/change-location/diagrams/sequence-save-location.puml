@@ -48,6 +48,7 @@ else postal code or country differs from the stored one
   alt city found
     handler -> entity : MoveTo(postalCode, city) (L2-032)
     entity --> handler : Pin now at City.Position; same city, same position
+    handler -> entity : ChangeSettings(settings)
     handler -> db : Save changes in one unit of work
     db --> handler : Commit result
     handler --> controller : ProfileDto
@@ -61,7 +62,13 @@ else location unchanged
 end
 controller --> client : 200 ProfileDto, or ProblemDetails with a code
 client --> store : Profile or ApiError
-store --> page : saved = new profile; draft matches it
-page --> actor : Own pin at the new city with its local time and time zone
+alt saved
+  store --> page : saved = new profile; draft matches it
+  store -> store : TeamStore.refresh(), so the viewer's pin has moved on Globe, Team and Moments
+  page --> actor : Own pin at the new city with its local time and time zone; "Saved — your pin is up to date"
+else refused or no answer, whatever the code
+  store --> page : The draft is kept; SaveBar in failed
+  page --> actor : "Couldn’t save. Your changes are still here." and "Try again"
+end
 note over page, db : Other teammates see the move at their next read of the pins and moments.
 @enduml

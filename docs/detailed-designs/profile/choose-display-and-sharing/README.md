@@ -50,15 +50,20 @@ exist yet; each part below is introduced by this design.
   see “Probably asleep” from 23:00 to 07:00 your time." or, off, "Teammates see no status for
   you outside 09:00 to 18:00." While either
   switch is off in the saved profile, the card of the viewer's own pin adds the note "You still
-  see your own weather and status. Teammates don’t." (L2-034).
+  see your own weather and status. Teammates don’t." (L2-034). The card's local time is shown
+  in the draft's clock format, so a choice of clock shows there before it is saved, as the
+  mocks of the save bar draw ("3:05 pm local · Central European Time"); nothing else follows
+  the draft.
 - **`ProfileStore`** — store provided at the `/profile` route. It holds the saved `Profile` and
   the draft as signals. `hasUnsavedChanges` is computed by comparing the draft with the saved
   profile field by field, so a setting changed back to what was saved removes the bar (L2-035).
   A new postal code enters the draft only once it is found
   ([Change location](../change-location/README.md)), so one that is not found shows no bar.
   `save()` calls `ProfileApi.updateProfile` and moves `saveState` through `SaveState`. On
-  success it replaces the saved profile with the response and writes the display settings to
-  `SettingsStore`. On failure it keeps the draft as it is. The 4 second dismissal of the
+  success it replaces the saved profile with the response, writes the settings to
+  `SettingsStore` and calls `TeamStore.refresh()`, so the viewer's own pin and the team as
+  they now see it are read again for the other screens. On failure, whatever the status or
+  `code`, it keeps the draft as it is. The 4 second dismissal of the
   confirmation is one timer, cleared when the store is destroyed; unit tests advance a fake
   clock.
 - **`SaveState`** — feature-local union: `idle`, `saving`, `saved`, `failed`.
@@ -66,8 +71,12 @@ exist yet; each part below is introduced by this design.
   `hasUnsavedChanges` is true it opens `DiscardChangesDialog` and lets the navigation continue
   only on "Leave without saving" (L2-035).
 - **`DiscardChangesDialog`** — CDK Dialog titled "Leave without saving?". It names the settings
-  that have unsaved changes, says they are dropped on leaving, and offers "Leave without saving"
-  and "Keep editing". Escape and "Keep editing" close it and return focus to where it was.
+  that have unsaved changes and says they are dropped on leaving: "Your changes to temperature
+  and clock haven’t been saved. If you leave now, they’re dropped." Each changed setting is
+  named by its label on the screen, in lower case and in the screen's order ("location",
+  "temperature", "clock", "moments on the globe", "privacy"), joined with commas and "and". It
+  offers "Leave without saving" and "Keep editing", and focus starts on "Keep editing". Escape
+  and "Keep editing" close it and return focus to where it was.
 - **Closing the tab** — while `hasUnsavedChanges` is true, `ProfilePage` holds a `beforeunload`
   listener so the browser asks before a reload or a closed tab. The listener is removed when the
   changes are saved and when the page is destroyed.
@@ -92,8 +101,11 @@ exist yet; each part below is introduced by this design.
 - **`SettingsStore`** (`@mondino/domain`, `storage/`) — the viewer's `Settings` as a signal,
   provided in `root` because every screen reads it. `formatTime` and the temperature formatting
   read the clock format and the unit from it, so a saved choice applies on every screen without
-  a reload (L2-033). It starts from `SettingsCache` and is replaced when a profile is read or
-  saved.
+  a reload (L2-033). It starts from `SettingsCache` and is replaced when a teammate joins,
+  with the `settings` of the `JoinResult` (the defaults the backend gave for their country,
+  so a teammate who joins from the United States sees °F and the 12-hour clock on the first
+  screen, L2-019, L2-033), and when a profile is read or saved. Each `replace` writes
+  `SettingsCache`.
 - **`SettingsCache`** (`@mondino/domain`, `storage/`) — keeps the display settings in browser
   storage so the first screen of a later visit is drawn in the chosen unit and clock before the
   profile arrives. It never holds a postal code. The backend's copy is the one that holds
@@ -163,6 +175,7 @@ exist yet; each part below is introduced by this design.
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
 | A setting outside its allowed values | 400 | `validation_failed` | `SaveBar` in `failed` |
+| The new postal code cannot be found or checked on saving | 422 or 503 | `postal_code_not_found` or `postal_code_unavailable` | `SaveBar` in `failed`; the draft stays |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | `SaveBar` in `failed`; the draft stays |
 | The session has ended | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows the no-team page in place; how a teammate signs in again is not designed |
 
@@ -212,8 +225,8 @@ settings and `GetPinsQueryHandler` reads them to decide what each `PinDto` carri
 
 ### Behaviour — save display and sharing settings
 
-A change shows the save bar. A save that succeeds confirms for 4 seconds and applies the
-display settings on every screen. A save that fails keeps the changes on the screen unsaved and
+A change shows the save bar. A save that succeeds confirms for 4 seconds, applies the
+settings on every screen and reads the team's pins again. A save that fails keeps the changes on the screen unsaved and
 offers to try again (L2-035).
 
 ![Sequence diagram for saving display and sharing settings](diagrams/sequence-save-settings.png)

@@ -63,7 +63,11 @@ The rule lives in `domain`'s `moments/`. The `globe` library draws the result an
   passes the map to `GlobeView`.
 - **`GlobeView`** — `mo-globe`. It takes the map as its `markers` input, keyed by teammate
   id, beside `pins`, and hands it to `PinLayer`'s `markers` input.
-- **`PinLayer`** — draws each marker beside its pin in the sun colour, with the emblem inside. A
+- **`PinLayer`** — draws each marker beside its pin in the sun colour, with the emblem inside:
+  the mocks' `moment-marker` inside the pin's button, `moment-marker--today` for a moment
+  today. `globe` depends on `api` only and holds no pictures, so the layer hands the pin's
+  `MomentMarker` to the page's pin and label templates (`globe/show-pins`), and `GlobePage`'s
+  mark template draws the emblem there, the held emblem or `MomentIcon` for the kind. A
   marker for a moment today is larger and carries a ring. A count badge shows when `count` is 2
   or more. A marker is at least 16 px across at every globe size and sits clear of the pin's
   initials. A marker is not a control of its own: when its pin is pointed at, focused or

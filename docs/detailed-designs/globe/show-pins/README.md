@@ -45,10 +45,13 @@ decides how they are drawn.
   weather and `MomentFinder` for the moments, then builds one `PinDto` for each teammate and
   answers them in a `TeamPinsDto` (the team's id and name, its invite token, the viewer's
   teammate id and the pins). A teammate whose `TeammateSettings.ShareWeather` is false gets a
-  null weather and the `WeatherState` `NotShared`. When the weather source fails or times out
+  null weather and the `WeatherState` `NotShared`, except on the viewer's own pin
+  (`weather/show-weather`). When the weather source fails or times out
   the weather is null, the `WeatherState` is `Unavailable` and the pin is still returned
   (L2-049). The weather source receives a position and nothing else.
-- **`PinDto`** — `TeammateId`, `Name`, `Colour`, `CityName`, `Country`, `Position`,
+- **`PinDto`** — `TeammateId`, `Name`, `Colour`, `CityName`, `Country` (the country's name,
+  "Mexico", "United Arab Emirates", which `PostalCodeFormats` holds as
+  `PostalCodeFormat.CountryName` for the city's `CountryCode`), `Position`,
   `TimeZoneId`, `Weather` or null, `WeatherState` (`Available`, `Unavailable` or
   `NotShared`), `ShowsStatusOutsideWorkingHours`, whether the pin is the viewer's own
   (`IsViewer`), and `Moments`, a list of `MomentDto` (`moments/find-moments`). The position is the city's. The DTO has no postal code field
@@ -118,7 +121,9 @@ decides how they are drawn.
   (`ng-template[moPinLabel]`) — templates that the page projects into `GlobeView`. The `globe`
   library cannot import `components` or `domain`, so it does not know how to draw an avatar or
   format a time. It places and lifts; the page says what a pin and its label show. Each
-  template receives the `Pin` and whether it is lifted.
+  template receives the `Pin`, whether it is lifted, and the pin's `MomentMarker` from
+  `markers` or null, so the page draws the marker's emblem in the mark and its title and
+  `when` in the lifted label (`moments/mark-pins-with-moments`).
 - **`LabelPlacer`** — pure helper. Given the projected pins and the globe's area it picks a
   side for each shown label (right, left, above or below), so that the label sits beside its
   pin, inside the globe's area and clear of other pins.
@@ -156,8 +161,11 @@ touch, where nothing hovers, a tap on a pin selects it and a tap elsewhere on th
 `select` with null. `GlobeGestures` (see `turn-globe`) tells a tap from a drag. A selected
 pin stays lifted, and `GlobePage` shows its teammate in the panel (L2-023).
 
-A newly placed pin, the viewer's own after joining (L2-005) or one in `arrivedIds` (see
-`keep-team-fresh`), carries the `pin--new` modifier and pulses once. Reduced motion removes
+A newly placed pin, one in `arrivedIds`, carries the `pin--new` modifier and pulses once.
+`GlobePage` fills `arrivedIds` from `TeamStore.arrivedTeammateIds` (a teammate who joined
+while the screen was open, `keep-team-fresh`) and, when it was opened with
+`{ justJoined: true }` in the navigation state (`joining/join-team`, L2-005), with the
+viewer's own teammate id, until `GlobeView` emits `arrivedShown`. Reduced motion removes
 the pulse.
 
 **Keeping pins apart**

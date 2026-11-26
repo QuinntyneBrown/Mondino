@@ -40,7 +40,8 @@ exist yet; each part below is introduced by this design.
   `ProfileStore.leave()` and the dialog stays open: while `leaving` is true both buttons are
   disabled, the action reads "Removing your pin…" and Escape does not close it; when
   `leaveFailed` is true an alert in the dialog reads "We couldn’t remove your pin just now.
-  Nothing has changed — you’re still in Northwind." and the action reads "Try again". The CDK
+  Nothing has changed — you’re still in Northwind.", the action reads "Try again" and takes
+  focus, and "Cancel" works again. The CDK
   traps focus inside it, closes it on Escape, and returns focus to the button that opened it
   (L2-036). Under 576 px it is a sheet from the bottom.
 - **`ProfileStore`** — store provided at the `/profile` route. `leave()` calls

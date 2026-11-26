@@ -69,7 +69,8 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   choice.
 - **`MomentList`** — presentation component. It renders the three groups and omits the heading
   of a group with no moments. With no moment at all the page shows no filter and says "Nothing is coming up
-  for your team", with a link back to the globe. With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
+  for your team", "Holidays, races and local happenings where your teammates live appear here
+  up to 90 days ahead." and "Back to the globe". With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
   team." It emits a chosen moment.
 - **`MomentRow`** — presentation component for one moment (`moment-row`): the `dateLabel`, kind icon
   and `when` label, title, detail, and the teammate's `Avatar` with their first name and city
@@ -95,7 +96,9 @@ up to 500 teammates (L2-047, `platform/stay-fast-and-light`).
 
 While the request is pending the page is marked busy and announces "Loading moments…". When it
 fails the page says "We couldn’t load moments", with "Try again", which asks again, and "Back
-to the globe".
+to the globe". The list needs `TeamStore`'s pins as well as the moments (the order and the
+avatars), so the page stays in its loading state until both first reads have answered and
+shows its error state when either has failed; "Try again" reads again whichever failed.
 
 ## Requirements
 

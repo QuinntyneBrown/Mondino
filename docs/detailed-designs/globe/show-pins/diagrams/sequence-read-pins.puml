@@ -16,6 +16,7 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
+  participant "TeamShell" as shell
   participant "GlobePage" as page
   participant "TeamStore" as store
   participant "HttpTeamApi" as client
@@ -33,7 +34,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 participant "Open-Meteo" as openmeteo
 actor -> page : Open the Globe screen
-page -> store : Load the team's pins
+shell -> store : load(teamId), once, when the route opens
 store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> handler : Send GetPinsQuery

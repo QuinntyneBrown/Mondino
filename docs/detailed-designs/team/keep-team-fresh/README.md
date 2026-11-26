@@ -36,7 +36,9 @@ Frontend:
   designed in `view-teammate-panel` and `counts` in `view-week-around-the-world`; the team's
   moments are not held here but read by `MomentsPage` (`moments/list-moments`), again after
   each refresh.
-  `load(teamId)` reads the pins once when the route opens. An effect on the clock's minute tick
+  `load(teamId)` reads the pins once when the route opens: `TeamShell` calls it when it is
+  created, with the `teamId` of the `Membership`, and no page calls it except through "Try
+  again", so moving between the four screens reads nothing again. An effect on the clock's minute tick
   calls `refreshIfDue(now)`, which calls `refresh()` when `RefreshIntervalMinutes` (15) or more
   have passed since `refreshedAt` and no request is pending (L2-048). The store has no
   timer of its own.
@@ -53,7 +55,11 @@ Frontend:
   them to `GlobeView` as `arrivedIds`; the globe pulses each new pin once (not under reduced
   motion) and emits `arrivedShown`, and `GlobePage` calls `acknowledgeArrived()`, which empties
   the list. `arrivedIds` and `arrivedShown` are an input and an output this design adds to
-  `GlobeView`.
+  `GlobeView`. The first load records none, so the viewer's own pin after joining comes another
+  way: `JoinPage` navigates to `/globe?teammate={teammateId}` with `{ justJoined: true }` in the
+  navigation state (`joining/join-team`), and `GlobePage` then adds the viewer's teammate id to
+  what it passes as `arrivedIds`, beside `arrivedTeammateIds`, until `arrivedShown`, and puts
+  "You’re on the globe." before the selection's announcement.
 - **`loadState`** — `Loading`, `Ready` or `Failed`, for the first load only. A refresh never
   changes it: a failed refresh keeps the pins held, sets `refreshFailed`, and the store tries
   again at the next minute tick. `Loading` shows skeletons, on the Globe screen under the heading "Your team", and announces

@@ -153,8 +153,9 @@ When `pin.weather` is `null` no temperature and no condition is shown, and a pin
 its accessible name leave the weather out; the local time and status are unaffected.
 `pin.weatherState` says why. When it is `Unavailable`, the source could not give the weather:
 in the weather's place the panel says "Weather is unavailable right now." with "Tomás’s local
-time is still right." under it, and a Team row shows a mark named "Weather unavailable"
-(L2-049). When it is `NotShared`, the panel says "Ahmed doesn’t share local weather.". The
+time is still right." under it, a Team row shows a mark named "Weather unavailable", and the
+Team screen says once, above the day ribbon, "Weather is unavailable right now. Local times
+are still right." (`team/view-team-through-the-day`, L2-049). When it is `NotShared`, the panel says "Ahmed doesn’t share local weather.". The
 teammate is named by `firstName(name)` from `pins/`, the first word of their name; it is data
 and is rendered as text.
 
