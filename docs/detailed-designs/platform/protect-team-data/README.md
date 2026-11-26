@@ -46,7 +46,8 @@ behind them.
   (`observe-without-exposing`). No endpoint is open by omission (L2-045).
 - **Cross-site request forgery.** State-changing requests under `/api/teams/` require an
   antiforgery token: the API issues it in a script-readable cookie, and Angular's `HttpClient`
-  returns it in a request header. The three open endpoints carry no session and are exempt.
+  returns it in a request header. The three open endpoints carry no session. How the join
+  request, which changes state before a session exists, is protected is `<TO SUPPLY>`.
 
 **Team scope (L2-043, L2-007).**
 
@@ -118,8 +119,8 @@ controller and any outside source.
 | `Join` | `POST /api/invites/{inviteToken}/teammates` | 5 a minute |
 
 A refused request is answered 429 with a `Retry-After` header and the code `rate_limited`.
-`JoinPage` shows a message asking the person to wait a moment and try again, and keeps what
-was typed. `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
+`JoinPage` shows "That was a lot of tries in a short time. Wait a moment, then try again." and
+keeps what was typed. `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
 `IPostalCodeLookup`, so the lookup cannot be used without a valid invite link. Behind a proxy,
 the client address is read from the forwarded header the hosting platform sets, which is
 `<TO SUPPLY>`. The limit on `POST /api/teams/{teamId}/me/postal-code-lookups`, which needs a
@@ -133,7 +134,7 @@ level-1 (L1) requirement, cited by identifier.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-007` | `L1-002` | A postal code is returned only to the teammate it belongs to, on their own Join and Profile & Settings screens. Everything another teammate receives carries the city and country only. |
-| `L2-043` | `L1-014` | The backend decides what is allowed. Every request except opening an invite link and looking up a postal code while joining must come from a teammate of the team it concerns. |
+| `L2-043` | `L1-014` | The backend decides what is allowed. Every request except opening an invite link, looking up a postal code while joining and joining must come from a teammate of the team it concerns. |
 | `L2-044` | `L1-014` | Every value from a browser is validated by the backend whatever the frontend checked. A teammate's name, a team's name, a city and a moment's title and detail are rendered as text, never as HTML, wherever they appear. |
 | `L2-045` | `L1-014` | Opening an invite link, looking up a postal code while joining and joining are open to anyone who holds an invite link. Each is marked as open explicitly and is rate limited. |
 
