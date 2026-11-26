@@ -85,7 +85,7 @@ available to the page. On the first move of a touch drag `GlobeGestures` asks
 direction, the listener does not cancel the event and the page scrolls. Otherwise it cancels
 the event and the globe takes the drag. The globe therefore never traps the page on a phone.
 
-*Arrow keys.* The globe's element is focusable and has a visible focus indicator. Left and
+*Arrow keys.* The interactive globe's element is focusable and has a visible focus indicator. Left and
 right turn the longitude by one step and up and down turn the tilt by one step, within the
 limit.
 

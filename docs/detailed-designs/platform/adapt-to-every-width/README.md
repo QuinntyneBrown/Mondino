@@ -66,7 +66,10 @@ hosting platform is `<TO SUPPLY>`.
 **`TeamMembership`** — service in `domain`'s `storage/`. It holds a `Membership` (`teamId`,
 `teammateId`, `teamName`, and the viewer's `initials` and `colour`) in the browser's local
 storage and exposes it as the signal `current`. `JoinPage` calls `remember(membership)` after
-a successful join, with the colour the `JoinResult` returns (`join-team`); `TeamShell` calls
+a successful join, with the colour the `JoinResult` returns (`join-team`), and when an
+invite link answers `AlreadyJoined`, with the `Membership` the `InviteDto` then carries
+(`open-invite-link`), so a browser that holds a session and no membership gets it back by
+opening the team's invite link; `TeamShell` calls
 `remember(membership)` again with the initials and colour of the viewer's pin whenever the
 pins are read; and leaving the team calls `forget()`. It holds no postal code, no city, no
 position and no session: the session is an `HttpOnly`
@@ -92,7 +95,9 @@ link, which is the first focusable element of every screen, and the router outle
 else. Each screen renders its own `main`, which is the skip link's target.
 
 **`TeamShell`** — route component of the guarded parent route, in the `mondino` application.
-It provides `TeamStore` and `InviteLinkCopier` and renders `mo-app-header`, the refresh banner (`keep-team-fresh`),
+It provides `TeamStore` and `InviteLinkCopier`, calls `TeamStore.load(teamId)` once, when it
+is created, with the `teamId` of the `Membership` (no page calls `load` except through "Try
+again"), and renders `mo-app-header`, the refresh banner (`keep-team-fresh`),
 the router outlet that holds Globe, Team, Moments and Profile & Settings, and the toast. The
 banner and the toast are therefore the same on all four screens and are not rendered by a
 page. `TeamShell` holds the three `NavItem`s (Globe, Team, Moments) and projects one link per
@@ -192,8 +197,8 @@ styled by the breakpoints. `teammateGuard`, `sessionExpiredInterceptor` and `Tea
 
 The teammate opens or reloads `/team`. `teammateGuard` finds a membership, the router loads
 `TeamPage`, and the navigation marks Team with `aria-current="page"` beside the avatar drawn
-from the membership (L2-038). The screen
-reads its pins with the session cookie and shows them in the layout for the current width
+from the membership (L2-038). `TeamShell`
+reads the pins once, with the session cookie, and the screen shows them in the layout for the current width
 (L2-037).
 
 ![Sequence diagram for opening a screen's address as a teammate](diagrams/sequence-open-address-as-teammate.png)

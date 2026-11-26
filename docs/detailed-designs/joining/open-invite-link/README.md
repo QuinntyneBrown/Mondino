@@ -17,7 +17,9 @@ heading "Put yourself on the map.", the team's name, how many teammates are alre
 globe ("Joining Northwind · 11 already here"), the initials of up to five of them (the five who
 joined most recently), and the globe with their bare pins. It shows all of this before the person has given anything. An invite link that does not exist or has been withdrawn shows a
 message and nothing about any team. A person who is already a teammate of the team on this
-device is taken to the Globe screen instead, and no second pin is made.
+device is taken to the Globe screen instead, and no second pin is made; a browser that still
+holds the session but no longer remembers the team gets its own membership and settings back
+with that answer.
 
 The person opening the link has no session, so the endpoint behind this feature is one of the
 three that are open to anyone who holds an invite link. It answers with the least a stranger to
@@ -37,8 +39,10 @@ source.
 
 - **`JoinPage`** — page at the lazy route `/join/:inviteToken`. It reads the invite token from
   the route, provides `JoinStore`, and renders one of four states: loading, ready, invite link
-  cannot be used, and could not be opened. On the state `AlreadyJoined` it navigates to
-  `/globe`.
+  cannot be used, and could not be opened. On the state `AlreadyJoined` it calls
+  `TeamMembership.remember(invite.membership)` and `SettingsStore.replace(invite.settings)`,
+  so a browser that holds the session but no remembered membership has both again, and then
+  navigates to `/globe`.
   - Loading shows the heading, skeletons for the team and the form, and a globe placeholder,
     and announces "Opening your invite link…" in a `role="status"` element.
   - `NotFound` shows "This invite link can’t be used" and no form. `Failed` shows "We couldn’t
@@ -59,13 +63,20 @@ source.
 - **`InviteApi` / `INVITE_API`, `HttpInviteApi`** — contract, injection token and HTTP client.
   `getInvite(inviteToken)` sends `GET /api/invites/{inviteToken}` and returns an `Invite`. The
   Join route binds the token, so the client stays out of the initial bundle.
-- **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined` and
-  `countries`. The `countries` list serves the Join form and is described in
-  `place-pin-from-postal-code`.
+- **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined`,
+  `countries`, and `membership` and `settings`, which are null unless `alreadyJoined` is
+  true. The `countries` list serves the Join form and is described in
+  `place-pin-from-postal-code`. `membership` is a `Membership`, the type in `@mondino/api`
+  that `TeamMembership` holds (`teamId`, `teammateId`, `teamName`, `initials`, `colour`), and
+  `settings` the viewer's `Settings`.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
   avatar.
 - **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block. `JoinPage` passes
-  it the bare pins in `pins` and sets it not interactive. A bare pin comes from a position
+  it the bare pins in `pins`, sets it not interactive and gives it its `label` ("The globe,
+  with 11 pins: one for each teammate already in Northwind"; once the city is found, "The
+  globe, turned to Milan, with your new pin and 11 teammates’ pins"). A globe that is not
+  interactive is one picture, `role="img"` named by `label`; its pins are not buttons and are
+  not in the tab order (`globe/show-pins`). A bare pin comes from a position
   alone, so `JoinPage` gives each a local id from its place in `Invite.positions` (`bare-0`,
   `bare-1`, …), never a teammate id, and projects no label for it. A globe that is not
   interactive cannot be dragged and does not turn on its own (`globe/turn-globe`); on Join it
@@ -82,14 +93,18 @@ source.
 - **`GetInviteQueryHandler`** — loads the `Team` whose `InviteToken` equals the token, through
   `IAppDbContext`. When no team matches, it refuses with `invite_not_found`. A withdrawn invite
   link receives the same refusal as one that was never issued. When `ICurrentTeammate` reports a
-  session on this team, the handler returns an `InviteDto` with `AlreadyJoined` set and no
-  positions or avatars. Otherwise it builds the full `InviteDto`.
-- **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined` and
-  `Countries`. `Positions` holds one `Position` for each teammate: the position of the
+  session on this team, the handler returns an `InviteDto` with `AlreadyJoined` set, that
+  teammate's own `Membership` and `Settings`, and no positions or avatars. Otherwise it
+  builds the full `InviteDto`, with no `Membership` and no `Settings`.
+- **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined`,
+  `Countries`, `Membership` and `Settings`. `Positions` holds one `Position` for each teammate: the position of the
   teammate's `City`. `Avatars` holds the initials and colour of at most five teammates, the
-  five who joined most recently (by `Teammate.JoinedAt`), in no order that matches `Positions`. The DTO carries no teammate id,
+  five who joined most recently (by `Teammate.JoinedAt`), in no order that matches `Positions`. Of the team's teammates the DTO carries no teammate id,
   full name, city name, time zone or weather, and never a postal code.
-  `Avatars`, `AlreadyJoined` and `Countries` are additions this subsystem makes to the shared `InviteDto`.
+  `Membership` (`MembershipDto`: `TeamId`, `TeammateId`, `TeamName`, `Initials`, `Colour`) and
+  `Settings` are set only when `AlreadyJoined` is true, and are the session's own teammate's:
+  they carry nothing about anyone else.
+  `Avatars`, `AlreadyJoined`, `Countries`, `Membership` and `Settings` are additions this subsystem makes to the shared `InviteDto`.
 - **`ICurrentTeammate`** — the teammate the session cookie belongs to, or none. The session
   cookie is issued by `join-team`.
 - **`ProblemDetailsWriter`** — writes each refusal as ProblemDetails with a `code` extension:
@@ -145,14 +160,17 @@ whether the session is already on that team.
 
 `JoinStore` depends on the `InviteApi` contract, which `HttpInviteApi` implements.
 `GetInviteQueryHandler` handles `GetInviteQuery`, loads a `Team` with its `Teammate` cities, and
-builds an `InviteDto` whose positions are bare `Position` values.
+builds an `InviteDto` whose positions are bare `Position` values. For a session already on the
+team the `InviteDto` carries that teammate's own `MembershipDto` and settings, which `JoinPage`
+hands to `TeamMembership` and `SettingsStore`.
 
 ![Class diagram for opening an invite link](diagrams/class-structure.png)
 
 ### Behaviour — open a valid invite link
 
 The handler finds the team by its invite token. When the session already belongs to a teammate
-of that team, the response says so and `JoinPage` navigates to `/globe`. Otherwise the response
+of that team, the response says so and carries that teammate's own membership and settings;
+`JoinPage` remembers the membership, replaces the settings and navigates to `/globe`. Otherwise the response
 carries the team's name, the count, one bare position for each teammate and up to five
 avatars, and `JoinPage` shows the Join screen with the globe (`L2-001`).
 

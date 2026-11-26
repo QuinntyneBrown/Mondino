@@ -58,8 +58,9 @@ not exist yet; each part below is introduced by this design.
   `lookUp()` on the field's `blurred` and `retry`. `lookUp()` does nothing, and the state
   stays `Idle`, while the postal code typed is empty or the country and postal code typed are
   the saved ones, so moving through the field looks nothing up. The store aborts a pending
-  lookup when a newer one starts and when the route is destroyed. After a save that moved the
-  pin, the store calls `TeamStore.refresh()`, so the Globe, Team and Moments screens the
+  lookup when a newer one starts and when the route is destroyed. After every save that
+  succeeds, the store calls `TeamStore.refresh()`
+  ([Choose display and sharing](../choose-display-and-sharing/README.md)), so after a move the Globe, Team and Moments screens the
   viewer opens next show their own pin at the new city without waiting for the 15 minute
   refresh (`team/keep-team-fresh`).
 - **`LookupState`** (`@mondino/api`) — the union the Join screen uses: `Idle`, `Locating`,

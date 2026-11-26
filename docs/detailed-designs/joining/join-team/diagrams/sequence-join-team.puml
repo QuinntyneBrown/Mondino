@@ -44,17 +44,18 @@ handler -> db : Load the team by invite token, with its teammates
 db --> handler : Team
 handler -> lookup : ResolveAsync(countryCode, postalCode)
 lookup --> handler : PostalCodeResolution: Found, PostalCode, City (from the cache after the lookup)
-handler -> team : AddTeammate(name, postalCode, city, colour, joinRequestId, now)
+handler -> team : AddTeammate(name, postalCode, city, colour, settings from DefaultsFor(countryCode), joinRequestId, now)
 team --> handler : Teammate with a pin at the city (L2-005)
 handler -> db : Save changes in one unit of work
 db --> handler : Committed
-handler --> controller : JoinResultDto with the colour assigned
+handler --> controller : JoinResultDto with the colour assigned and the settings (defaults for the country)
 controller -> session : Sign in the teammate
 session --> controller : Session cookie: HttpOnly, Secure, SameSite
 controller --> client : 201 JoinResultDto, Set-Cookie
 client --> store : JoinResult
-store --> page : Team id, teammate id and colour
+store --> page : Team id, teammate id, colour and settings
 page -> page : TeamMembership.remember(Membership: teamId, teammateId, teamName, initials, colour)
+page -> page : SettingsStore.replace(settings)
 page --> actor : Navigate to /globe?teammate={teammateId} with justJoined in the navigation state:\nthe new pin selected, pulsing once (L2-005)
 note over page, client
   When the request fails, JoinStore sets joinState Failed, keeps what was typed

@@ -68,7 +68,12 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   and worded differently.
 - `GET /api/invites/{inviteToken}` answers an `InviteDto`. Its `Avatars` are the initials and
   colour of the five teammates who joined most recently, with no name, id or city; they are
-  the most a holder of an invite link learns of a teammate.
+  the most a holder of an invite link learns of a teammate. When the request carries the
+  session of a teammate of that team, the `InviteDto` has `AlreadyJoined` set, no positions
+  or avatars, and that session's own `Membership` (a `MembershipDto`: team id, teammate id,
+  team name, initials and colour) and `Settings`, and nothing about anyone else; `JoinPage` then calls
+  `TeamMembership.remember` and `SettingsStore.replace` before it goes to `/globe`, so a
+  browser that holds a session and no remembered membership has both again.
 - `PinDto.ShowsStatusOutsideWorkingHours` (`Pin.showsStatusOutsideWorkingHours`) is false when a
   teammate has switched off "Show when I'm outside working hours". Anything that shows, counts
   or filters by status calls `statusFor(pin, time)`, never `statusAt` directly. While such a
@@ -148,21 +153,27 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   signals `pins`, `teamName`, `inviteToken`, `viewerTeammateId`, `selectedTeammateId`,
   `counts`, `arrivedTeammateIds`, `loadState`, `refreshFailed` and `refreshedAt`, the derived
   `viewerPin` and `selectedPin`, and the methods `load(teamId)`, `refresh()`,
-  `select(teammateId)`, `clearSelection()` and `acknowledgeArrived()`. It reads the pins with
+  `select(teammateId)`, `clearSelection()` and `acknowledgeArrived()`. `TeamShell` alone
+  calls `load(teamId)`, once, when its route opens; a page calls it only through "Try
+  again", and `ProfileStore` calls `refresh()` after a save. It reads the pins with
   `TeamApi.getPins(teamId, signal)`, which returns a `TeamPins`; the team's moments are not
   held in it but read by `MomentsPage` with `TeamApi.getMoments(teamId, signal)`.
 - `SettingsStore`, in `domain`'s `storage/`, holds the viewer's `Settings` (the temperature
   unit, the clock format, the kinds of moment shown on the globe and the two sharing
   switches) as a signal. It is provided in `root`, because every screen reads it, starts from
-  `SettingsCache` and is replaced when a teammate joins (the `settings` of the `JoinResult`,
-  the defaults for their country) and when a profile is read or saved
+  `SettingsCache` and is replaced, through `replace(settings)`, when a teammate joins (the
+  `settings` of the `JoinResult`, the defaults for their country), when an invite link
+  answers `AlreadyJoined` (the `Settings` of the `InviteDto`) and when a profile is read or
+  saved
   (`profile/choose-display-and-sharing`); leaving the team clears both. After a save,
   `ProfileStore` also calls `TeamStore.refresh()`, so the viewer's own pin follows on every
   screen.
-- The browser knows its team from `TeamMembership`, whose `Membership` holds the team's id and
+- The browser knows its team from `TeamMembership`, whose `Membership` (a type in
+  `@mondino/api`) holds the team's id and
   name, the teammate's id and the viewer's `initials` and `colour` (the colour from the
   `JoinResult`, which returns the one the backend assigned, beside the new teammate's
-  `settings`), and never a postal code or a city. Without a membership, the four addresses show `InviteNeededPage` in
+  `settings`), and never a postal code or a city. `JoinPage` remembers it after a join and
+  when an invite link answers `AlreadyJoined`. Without a membership, the four addresses show `InviteNeededPage` in
   place, and any other address shows `NotFoundPage`. `LeftPage` takes the team's name from the
   navigation state; opened or reloaded without it, it reads "You’ve left the team".
 
@@ -176,7 +187,8 @@ The designs mark these as `<TO SUPPLY>`:
 - The database engine and the hosting platform, and what follows from them: the guard that
   keeps the limit of 500 teammates exact under concurrency, a cache shared between instances
   of the API, the forwarded header the client address is read from, the CSP nonce for
-  component styles, and the header that caches the assets.
+  component styles, the header that caches the assets, and the answer of each screen's address
+  with the app's `index.html`.
 - The product that receives the telemetry, and its sampling rate.
 - The providers of the postal code source and of the holiday, race and event calendars, and
   what depends on each: how the city's own position is obtained, what the event source is

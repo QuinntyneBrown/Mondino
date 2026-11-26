@@ -136,8 +136,15 @@ weather is available, unavailable or not shared, so the web app can say which.
 - **`GlobePage`**, **`TeamPage`** and **`JoinPage`** — pages in the `mondino` application. Each
   derives, in a `computed`, the temperature text from `pin.weather` and the viewer's
   `TemperatureUnit`, the label, and the night flag from the pin's local hour. The viewer's
-  settings are a signal held by `SettingsStore` and updated when `ProfilePage` saves, so a saved
-  change of unit reaches every temperature on every screen (L2-019).
+  settings are a signal held by `SettingsStore`, replaced when a teammate joins (the
+  `settings` of the `JoinResult`, the defaults for their country, `joining/join-team`) and
+  when a profile is read or saved (`profile/choose-display-and-sharing`), so the first screen
+  after joining is in the new teammate's unit and a saved change of unit reaches every
+  temperature on every screen (L2-019). Before joining there is no viewer: `JoinPage` formats
+  the found city's temperature as degrees alone ("13°", `formatDegrees`) in the unit a new
+  teammate of the chosen country starts with, °F for the United States and °C elsewhere, and
+  when the result's `weather` is null the Found message ends after "pinned at city level."
+  (`joining/place-pin-from-postal-code`).
 - **`WeatherIcon`** (`mo-weather-icon`) — presentation component with inputs `condition` and
   `night`. It draws one bundled SVG per condition, with a night form for `clear` and
   `partly-cloudy`; `night` has no effect on the other six. The icon is exposed as an image whose

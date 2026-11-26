@@ -52,8 +52,8 @@ exist yet; each part below is introduced by this design.
   switch is off in the saved profile, the card of the viewer's own pin adds the note "You still
   see your own weather and status. Teammates don’t." (L2-034). The card's local time is shown
   in the draft's clock format, so a choice of clock shows there before it is saved, as the
-  mocks of the save bar draw ("3:05 pm local · Central European Time"); nothing else follows
-  the draft.
+  mocks of the save bar draw ("3:05 pm local · Central European Time"); no other display or sharing setting
+  shows before it is saved.
 - **`ProfileStore`** — store provided at the `/profile` route. It holds the saved `Profile` and
   the draft as signals. `hasUnsavedChanges` is computed by comparing the draft with the saved
   profile field by field, so a setting changed back to what was saved removes the bar (L2-035).

@@ -77,8 +77,12 @@ any other origin.
   same picture stays in the same box from the first paint to the first 3D frame. In `Fallback`
   it renders the fallback content projected into it, which the page fills with
   `GlobeFallback`; the `globe` library depends on `api` only and imports neither component.
-  The canvas carries `aria-hidden="true"`; the text equivalent is `PinLayer`'s list of pins
-  (L2-040).
+  The canvas carries `aria-hidden="true"`; on the Globe screen, where `interactive` is true,
+  the host is a labelled group (`role="group"`) and the text equivalent is `PinLayer`'s list
+  of pins (L2-040). Where `interactive` is false (Join, and the small globe on Profile &
+  Settings) the host is one picture, `role="img"` named by `label`, and its pins are not
+  buttons, are not in the tab order and are hidden from the accessibility tree; it emits no
+  `select` or `selectGroup` (`show-pins`, `platform/make-accessible`).
 - **`GlobeScene`** — class that hides the renderer. Nothing outside it imports the renderer or
   reads the asset format. `GlobeScene.create(canvas, options)` asks for a WebGL context,
   imports the renderer with a dynamic `import()`, fetches the model and textures from

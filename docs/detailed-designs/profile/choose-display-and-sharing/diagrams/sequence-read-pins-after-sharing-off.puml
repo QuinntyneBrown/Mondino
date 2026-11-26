@@ -16,6 +16,7 @@ skinparam package {
 }
 actor "Teammate (another)" as actor
 box "Frontend — Mondino web app" #E0F2FE
+  participant "TeamShell" as shell
   participant "GlobePage" as page
   participant "TeamStore" as store
   participant "HttpTeamApi" as client
@@ -32,8 +33,8 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 participant "Open-Meteo" as meteo
 note over actor, db : A teammate has saved "Share my local weather" off and "Show when I’m outside working hours" off.
-actor -> page : Open the Globe, or the 15 minute refresh arrives
-page -> store : refresh()
+actor -> shell : Open the Globe, or the 15 minute refresh arrives
+shell -> store : load(teamId) when the route opens; the store calls refresh() itself when 15 minutes have passed
 store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> controller : Authenticate the session

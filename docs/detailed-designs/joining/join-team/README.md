@@ -33,11 +33,13 @@ screen.
 **Frontend (`mondino` application, `@mondino/api`)**
 
 - **`JoinPage`** — calls `JoinStore.join()` when the person chooses the button. On success it
-  calls `TeamMembership.remember(membership)` with a `Membership`: the `teamId`, `teammateId`
+  calls `TeamMembership.remember(membership)` with a `Membership` (a type in `@mondino/api`): the `teamId`, `teammateId`
   and `colour` of the `JoinResult`, the `teamName` of the `Invite` and the `initials` that
   `initialsOf(name)` from `domain`'s `pins/` gives for the name typed, and never the postal
   code or the city. The header avatar is drawn from the membership, so it shows before the
-  pins are read. It then
+  pins are read. Beside it, it calls `SettingsStore.replace(settings)` with the `settings` of
+  the `JoinResult`, the defaults for the country, so the first screen is drawn in the new
+  teammate's unit and clock (`profile/choose-display-and-sharing`). It then
   navigates to `/globe?teammate={teammateId}`, the address that selects a pin
   (`team/view-teammate-panel`), so the new pin is selected as any pin is, and passes
   `{ justJoined: true }` in the navigation state, never in the URL. `GlobePage` reads the flag
@@ -71,8 +73,9 @@ screen.
   `Failed`.
 - **`InviteApi.join(inviteToken, request)`** — sends
   `POST /api/invites/{inviteToken}/teammates` with a `JoinRequest` body: `name`, `countryCode`,
-  `postalCode` and `joinRequestId`. It returns a `JoinResult`: `teamId`, `teammateId` and
-  `colour`, the colour the backend assigned to the pin.
+  `postalCode` and `joinRequestId`. It returns a `JoinResult`: `teamId`, `teammateId`,
+  `colour`, the colour the backend assigned to the pin, and `settings`, the new teammate's
+  `Settings`.
 - The postal code is held in memory by `JoinStore` only. It is never written to browser storage
   and goes when the person leaves the Join screen.
 
@@ -98,20 +101,23 @@ screen.
      (`place-pin-from-postal-code`), as the lookup on the Join screen did. The outcome is
      normally in the cache of `CachedPostalCodeLookup` from that lookup. `NotFound` and
      `Unavailable` are refused with `postal_code_not_found` and `postal_code_unavailable`.
-  4. It picks the pin's colour with `PinColourPicker` and calls `Team.AddTeammate` with the
-     time from `TimeProvider`.
+  4. It picks the pin's colour with `PinColourPicker`, takes the new teammate's settings from
+     `TeammateSettings.DefaultsFor(countryCode)` (`profile/choose-display-and-sharing`) and
+     calls `Team.AddTeammate` with the time from `TimeProvider`.
   5. It saves through `IAppDbContext` in one unit of work.
   6. When the save is rejected by the unique index on (`TeamId`, `JoinRequestId`), it loads the
      teammate the other request made and returns it.
-- **`Team.AddTeammate(name, postalCode, city, colour, joinRequestId, joinedAt)`** — creates the
-  `Teammate` with a random `Guid` id and the default `TeammateSettings`, and adds it to the
-  team. When the team already has `MaxTeammates` (500) teammates, it throws `TeamFullException`.
+- **`Team.AddTeammate(name, postalCode, city, colour, settings, joinRequestId, joinedAt)`** —
+  creates the `Teammate` with a random `Guid` id and the `TeammateSettings` it is given, and
+  adds it to the team. When the team already has `MaxTeammates` (500) teammates, it throws `TeamFullException`.
 - **`Teammate.JoinRequestId`** — addition this feature makes to the shared `Teammate` entity. It
   is never returned in any DTO.
 - **`TeamFullException`** — feature-local domain exception. `ProblemDetailsWriter` maps it to
   409 with the code `team_full`.
-- **`JoinResultDto`** — `TeamId`, `TeammateId` and `Colour`, the colour `PinColourPicker`
-  assigned. The Globe screen reads the pin itself through `GetPinsQuery`.
+- **`JoinResultDto`** — `TeamId`, `TeammateId`, `Colour`, the colour `PinColourPicker`
+  assigned, and `Settings`, the teammate's settings: the defaults for their country for a new
+  teammate, and the stored ones for a repeated join request. The Globe screen reads the pin
+  itself through `GetPinsQuery`.
 - **`TeammateSessionHandler`** — issues the session cookie: `HttpOnly`, `Secure` and `SameSite`.
   The cookie carries the team id and teammate id; its lifetime is `<TO SUPPLY>`.
 
@@ -174,7 +180,8 @@ the Description.
 ### Class structure
 
 `JoinStore` holds a `JoinState` and a `joinRequestId` and depends on `InviteApi`. `JoinPage`
-remembers a `Membership` in `TeamMembership` from the `JoinResult`.
+remembers a `Membership` in `TeamMembership` from the `JoinResult` and replaces the `Settings`
+in `SettingsStore` with its `settings`.
 `JoinTeamCommandHandler` loads and mutates `Team`, which owns up to 500 `Teammate` entities and
 throws `TeamFullException` at the limit. `Teammate` carries the `JoinRequestId` that makes a
 repeated request recognisable.
@@ -185,8 +192,8 @@ repeated request recognisable.
 
 The handler loads the team, resolves the city through `PostalCodeResolver`, adds the teammate
 and commits in one unit of work. The controller issues the session cookie, `JoinPage` remembers
-the membership with the pin's initials and colour, and opens the Globe screen with the new pin
-selected (`L2-005`). A failed request leaves the person on the Join screen with what
+the membership with the pin's initials and colour, replaces the settings in `SettingsStore`,
+and opens the Globe screen with the new pin selected (`L2-005`). A failed request leaves the person on the Join screen with what
 they typed.
 
 ![Sequence diagram for joining the team](diagrams/sequence-join-team.png)

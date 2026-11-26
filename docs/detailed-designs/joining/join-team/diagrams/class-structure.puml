@@ -33,12 +33,8 @@ package "@mondino/domain" {
   class TeamMembership {
     +remember(membership: Membership): void
   }
-  class Membership {
-    +teamId: string
-    +teammateId: string
-    +teamName: string
-    +initials: string
-    +colour: string
+  class SettingsStore {
+    +replace(settings: Settings): void
   }
 }
 package "@mondino/api" {
@@ -54,6 +50,15 @@ package "@mondino/api" {
   class JoinResult {
     +teamId: string
     +teammateId: string
+    +colour: string
+    +settings: Settings
+  }
+  class Settings
+  class Membership {
+    +teamId: string
+    +teammateId: string
+    +teamName: string
+    +initials: string
     +colour: string
   }
 }
@@ -78,6 +83,7 @@ package "Mondino.Application" {
     +Guid TeamId
     +Guid TeammateId
     +string Colour
+    +SettingsDto Settings
   }
   class PostalCodeResolver {
     +ResolveAsync(countryCode: string, postalCode: string, ct): Task<PostalCodeResolution>
@@ -94,7 +100,7 @@ package "Mondino.Domain" {
     +string InviteToken
     +{static} int MaxTeammates = 500
     +IReadOnlyList<Teammate> Teammates
-    +AddTeammate(name, postalCode, city, colour, joinRequestId, joinedAt): Teammate
+    +AddTeammate(name, postalCode, city, colour, settings, joinRequestId, joinedAt): Teammate
   }
   class Teammate {
     +Guid Id
@@ -120,6 +126,8 @@ JoinPage --> JoinStore
 JoinPage ..> GlobePage : navigates to /globe
 JoinPage ..> TeamMembership : remembers the team after joining
 TeamMembership --> Membership : holds
+JoinPage ..> SettingsStore : replaces the settings after joining
+JoinResult --> Settings
 JoinStore --> JoinState
 JoinStore ..> InviteApi : INVITE_API
 InviteApi ..> JoinRequest

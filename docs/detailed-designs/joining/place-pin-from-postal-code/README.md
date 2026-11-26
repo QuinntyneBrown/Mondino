@@ -75,10 +75,12 @@ source and Open-Meteo. The browser calls only the Mondino API.
     "Enter your name, up to 60 characters, so teammates know whose pin this is."
   - `postalCodeMissing` reports an empty postal code. A submit with it makes no lookup;
     `JoinPage` sets the field's `invalid` and gives it the message "Enter your postal code."
-  - A submit with either problem makes `JoinPage` show a summary alert above the fields
-    ("Two things are missing") that links to each field and takes focus.
+  - A submit with either problem makes `JoinPage` show a summary alert above the fields that
+    counts what is missing, "Two things are missing" for both and "One thing is missing" for
+    one, links to each field with a problem ("Enter your name", "Enter your postal code") and
+    takes focus.
   - A submit with no problem and no found city runs `lookUp()` and does not join: the button
-    read "Place my pin". The person joins with a second submit, once the city is found
+    reads "Place my pin". The person joins with a second submit, once the city is found
     and the button reads "Join" and the team's name (`join-team`).
 - **`LookupState`** — union in `@mondino/api` of `Idle`, `Locating`, `Found` (with its
   `PostalCodeResult`), `NotFound`, `Unavailable` and `RateLimited`. Profile & Settings uses the

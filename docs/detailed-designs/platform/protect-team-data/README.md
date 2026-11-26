@@ -44,11 +44,13 @@ behind them.
   request's body.
 - **Fallback policy.** The API's fallback authorisation policy requires an authenticated
   teammate. `InvitesController` is the only controller marked `[AllowAnonymous]`, and each of
-  its actions names a rate limit policy. The health endpoints are marked the same way
+  its actions names a rate limit policy. Its actions need no session, but
+  `GET /api/invites/{inviteToken}` reads one when the request carries it, to tell a teammate
+  who has already joined that team. The health endpoints are marked the same way
   (`observe-without-exposing`). No endpoint is open by omission (L2-045).
 - **Cross-site request forgery.** State-changing requests under `/api/teams/` require an
   antiforgery token: the API issues it in a script-readable cookie, and Angular's `HttpClient`
-  returns it in a request header. The three open endpoints carry no session. How the join
+  returns it in a request header. The three open endpoints need no session. How the join
   request, which changes state before a session exists, is protected is `<TO SUPPLY>`.
 
 **Team scope (L2-043, L2-007).**
@@ -82,7 +84,13 @@ behind them.
   `GetProfileQueryHandler` builds it for the current teammate only.
 - `InviteDto` carries bare positions with no names, and `Avatars`: the initials and colour
   of the five teammates who joined most recently, with no name, id or city. Initials and a
-  colour are the most a holder of an invite link learns of a teammate (L2-001).
+  colour are the most a holder of an invite link learns of a teammate (L2-001). For a
+  request that carries the session of a teammate of that team it has `AlreadyJoined` set,
+  no positions or avatars, and that session's own `Membership` (team id, teammate id, team
+  name, initials and colour) and `Settings`, from which `JoinPage` rebuilds `TeamMembership`
+  and `SettingsStore`; it carries nothing about anyone else. `JoinResultDto` carries the new
+  teammate's own `TeamId`, `TeammateId`, `Colour` and `Settings`. Neither carries a postal
+  code or a city.
   `PostalCodeResultDto` answers the person who typed the postal code.
 - A postal code travels in a request body, never in a URL. In the browser it lives only in the
   form state of `JoinPage` and `ProfilePage`. `SettingsCache` and `TeamMembership` never hold

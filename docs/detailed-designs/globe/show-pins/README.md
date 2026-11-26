@@ -93,7 +93,8 @@ decides how they are drawn.
 **In the `globe` library**
 
 - **`GlobeView`** (`mo-globe`) — takes `pins`, `descriptions`, `selectedId` and `interactive`, and emits
-  `select` with a teammate id or null and `selectGroup` with a group pin's teammate ids. Its
+  `select` with a teammate id or null and `selectGroup` with a group pin's teammate ids,
+  both only while `interactive` is true. Its
   other inputs and outputs (`markers`, `label`, `arrivedIds`, `arrivedShown`) are listed in
   `draw-globe`; it hands `markers` and `arrivedIds` on to `PinLayer`. It measures its own width with a `ResizeObserver`,
   computes `placements` by calling `PIN_SPREADER` with the pins and that width, and passes
@@ -109,7 +110,14 @@ decides how they are drawn.
   placement's point and moves the pin's element there with a transform. A placement that does
   not face the viewer is hidden, with its label, so it takes no focus and is not in the list
   until the globe turns it into view; its teammate is reached through the panel and the Team
-  screen. A placement near the globe's edge is drawn
+  screen. All of that is the interactive globe, on the Globe screen. Where `interactive` is
+  false (Join, and the small globe on Profile & Settings) the globe is one picture
+  (`role="img"`, named by `label`), and `PinLayer` draws the mocks' `div.globe__pins` with
+  `aria-hidden="true"` and a `span.globe__pin` holding a `span.pin-dot` for each placement
+  (`pin-dot--you` for the viewer's own or Join's found pin, `pin-dot--new` while it is in
+  `arrivedIds`): no button, no Tab stop, no
+  hit area, no `select`, and no lifting by pointer or focus; only the pin `selectedId` names
+  is drawn lifted. A placement near the globe's edge is drawn
   fainter and without its label (`globe__pin--far`) until it is lifted; how near is
   `<TO SUPPLY>`. `PinLayer` holds `liftedId`: the pin under
   the pointer, or else the pin with keyboard focus. A pin is drawn lifted when it is the

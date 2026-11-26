@@ -30,6 +30,14 @@ package "mondino application" {
     Failed
   }
 }
+package "@mondino/domain" {
+  class TeamMembership {
+    +remember(membership: Membership): void
+  }
+  class SettingsStore {
+    +replace(settings: Settings): void
+  }
+}
 package "@mondino/api" {
   interface InviteApi {
     +getInvite(inviteToken: string): Promise<Invite>
@@ -42,6 +50,15 @@ package "@mondino/api" {
     +avatars: InviteAvatar[]
     +alreadyJoined: boolean
     +countries: Country[]
+    +membership: Membership | null
+    +settings: Settings | null
+  }
+  class Membership {
+    +teamId: string
+    +teammateId: string
+    +teamName: string
+    +initials: string
+    +colour: string
   }
   class InviteAvatar {
     +initials: string
@@ -70,6 +87,15 @@ package "Mondino.Application" {
     +IReadOnlyList<InviteAvatarDto> Avatars
     +bool AlreadyJoined
     +IReadOnlyList<CountryDto> Countries
+    +MembershipDto? Membership
+    +SettingsDto? Settings
+  }
+  class MembershipDto {
+    +Guid TeamId
+    +Guid TeammateId
+    +string TeamName
+    +string Initials
+    +string Colour
   }
   class InviteAvatarDto {
     +string Initials
@@ -108,10 +134,14 @@ package "Mondino.Domain" {
 
 JoinPage --> JoinStore : provides and reads
 JoinStore --> InviteState : holds
+JoinPage ..> TeamMembership : remembers the membership when already joined
+JoinPage ..> SettingsStore : replaces the settings when already joined
+InviteDto --> MembershipDto : the session's own, when already joined
 JoinStore ..> InviteApi : INVITE_API
 HttpInviteApi ..|> InviteApi
 InviteApi ..> Invite : returns
 Invite --> InviteAvatar : at most five
+Invite --> Membership : the session's own, when already joined
 InviteApi ..> ApiError : refuses with
 HttpInviteApi ..> InvitesController : GET /api/invites/{inviteToken}
 InvitesController ..> GetInviteQuery : sends

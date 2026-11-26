@@ -97,8 +97,8 @@ Backend:
 - **`GetPinsQueryHandler`** — MediatR handler. It reads `ICurrentTeammate` and loads the `Team`
   and its `Teammate` entities through `IAppDbContext`. `GetPinsQuery` is an
   `ITeamScopedRequest`, so `TeamScopeBehaviour` has already answered 404, `team_not_found`,
-  when the session's teammate does not belong to the team (`platform/protect-team-data`). It reads the weather once for each distinct `City` through
-  `IWeatherSource`, finds each city's moments through `MomentFinder`, and returns a
+  when the session's teammate does not belong to the team (`platform/protect-team-data`). It reads the weather once for each distinct `City` whose weather the viewer may see, through
+  `IWeatherSource` (`weather/show-weather`), finds each city's moments through `MomentFinder`, and returns a
   `TeamPinsDto`. A `PinDto` carries a null `Weather` when the teammate does not share it or the
   source fails, and its `WeatherState` (`Available`, `Unavailable` or `NotShared`) says which;
   the pin is still returned with its time zone.

@@ -99,7 +99,7 @@ renderer is chosen.
   `<TO SUPPLY>`.
 - `TeamStore` replaces its pins on each refresh; it keeps no history. A team has at most 500
   teammates (`Team.MaxTeammates`).
-- `PinLayer` groups close pins (`spreadPins`), so the labels drawn at once are bounded by the
+- `GlobeView` groups close pins through `PIN_SPREADER` (`spreadPins`, `show-pins`), so the labels `PinLayer` draws at once are bounded by the
   globe's size, not the team's.
 
 **Prove it.** A heap check enters and leaves the Globe screen 20 times and compares the heap
