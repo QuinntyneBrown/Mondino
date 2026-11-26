@@ -1,0 +1,15 @@
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: calc(-1 * var(--space-24));
+  z-index: var(--z-tooltip);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-fg-on-accent);
+  text-decoration: none;
+  font: var(--text-label);
+}
+.skip-link:focus-visible {
+  top: var(--space-3);
+}

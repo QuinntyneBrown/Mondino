@@ -1,0 +1,10 @@
+<main id="main" class="notice-page" tabindex="-1">
+  <mo-wordmark />
+  <div class="notice-page__body">
+    <div class="notice-page__art"><mo-globe-fallback label="A small globe" /></div>
+    <h1 class="notice-page__title">{{ title() }}</h1>
+    <!-- prettier-ignore -->
+    <p class="notice-page__text">{{ lead() }}@if (emphasis()) {<strong class="tnum">{{ emphasis() }}</strong>}{{ rest() }}</p>
+    <div class="notice-page__actions"><ng-content select="[slot=actions]" /></div>
+  </div>
+</main>
