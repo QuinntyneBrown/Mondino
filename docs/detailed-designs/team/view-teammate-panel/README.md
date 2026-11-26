@@ -53,7 +53,8 @@ loading and refreshing are designed in `keep-team-fresh`.
 - **`TeammatePanel`** (`mo-teammate-panel`) — presentation component. It takes `content` and
   emits `closed`. It renders the `Avatar`, the name (followed by "(you)" when `isViewer`), the
   city and country, the local time and day in tabular figures, the offset, a `StatusBadge`, a
-  `WeatherIcon` with the temperature, one `MomentIcon` row per moment and the `OverlapBar`. It
+  `WeatherIcon` with the temperature and the weather in words, one moment card per moment (its
+  kind and when, its title and its detail) and the `OverlapBar`. It
   omits the moments section when `moments` is empty and the offset and overlap when they are
   null. Its heading is focusable by script through `focusHeading()`. A change of `content` fades
   in at most 200 ms; the `prefers-reduced-motion` query removes the fade.

@@ -12,9 +12,10 @@ Container_Boundary(web, "Mondino web app") {
   Component(clock, "BrowserClock", "Clock, domain time/", "The one shared clock and its minute tick")
   Component(panel, "WeekPanel", "Angular component, components library", "Lists the week's moments and who is in working hours now")
   Component(card, "InviteCard", "Angular component, components library", "Shows the invite link with a Copy button")
+  Component(toast, "Toast", "Angular component, components library", "Says the invite link was copied, or could not be")
   Component(clip, "Clipboard", "Angular CDK service", "Writes text to the clipboard")
 }
-Rel(teammate, panel, "Chooses a moment in")
+Rel(teammate, panel, "Chooses a moment or a teammate in")
 Rel(teammate, card, "Uses Copy on")
 Rel(page, store, "Reads pins, counts and invite token from; selects in")
 Rel(page, week, "Reads the panel's lists from")
@@ -24,4 +25,5 @@ Rel(counts, clock, "Reads the minute tick of")
 Rel(page, panel, "Passes moments and teammates to")
 Rel(page, card, "Passes the invite link to")
 Rel(page, clip, "Copies the invite link with")
+Rel(page, toast, "Confirms the copy with")
 @enduml

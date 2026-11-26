@@ -13,12 +13,11 @@ title Class structure — View the week around the world
 
 class GlobePage <<mondino>> {
   +week: Signal<WeekMoment[]>
-  +moreMoments: Signal<boolean>
   +working: Signal<WorkingTeammate[]>
   +teamOfOne: Signal<boolean>
   +inviteLink: Signal<string | null>
-  +copied: WritableSignal<boolean>
-  +onMomentChosen(teammateId: string): void
+  +copyResult: WritableSignal<CopyResult | null>
+  +onTeammateChosen(teammateId: string): void
   +onAllMoments(): void
   +onCopy(): void
 }
@@ -71,16 +70,26 @@ class WorkingTeammate <<domain pins/>> {
 
 class WeekPanel <<components, mo-week-panel>> {
   +moments: InputSignal<WeekMoment[]>
-  +moreMoments: InputSignal<boolean>
   +working: InputSignal<WorkingTeammate[]>
-  +momentChosen: OutputEmitterRef<string>
+  +teammateChosen: OutputEmitterRef<string>
   +allMoments: OutputEmitterRef<void>
 }
 
 class InviteCard <<components, mo-invite-card>> {
   +inviteLink: InputSignal<string>
-  +copied: InputSignal<boolean>
   +copy: OutputEmitterRef<void>
+}
+
+enum CopyResult {
+  Copied
+  Refused
+}
+
+class Toast <<components, mo-toast>> {
+  +title: InputSignal<string>
+  +text: InputSignal<string>
+  +tone: InputSignal<ToastTone>
+  +dismissed: OutputEmitterRef<void>
 }
 
 class Clipboard <<Angular CDK>> {
@@ -92,6 +101,7 @@ GlobePage ..> fn : calls
 GlobePage --> WeekPanel : renders
 GlobePage --> InviteCard : renders for a team of one
 GlobePage ..> Clipboard : injects
+GlobePage --> Toast : renders after Copy
 TeamStore *-- TeamCounts
 fn ..> WeekMoments : builds
 fn ..> WorkingTeammate : builds
