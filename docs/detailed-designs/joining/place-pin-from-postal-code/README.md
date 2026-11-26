@@ -50,8 +50,8 @@ source and Open-Meteo. The browser calls only the Mondino API.
 
 **Frontend (`mondino` application, `@mondino/api`, `@mondino/components`, `@mondino/globe`)**
 
-- **`JoinPage`** — renders the form beside the globe on a tablet and wider, and in one column on
-  a phone. It lists `Invite.countries` in the Country field in alphabetical order. It passes the
+- **`JoinPage`** — renders the form beside the globe from 992 px, and in one column under
+  it. It lists `Invite.countries` in the Country field in alphabetical order. It passes the
   found city to `GlobeView` as the selected pin labelled "You".
 - **`JoinStore`** — route-scoped service. It holds the writable signals `name`, `countryCode`
   and `postalCode`, and the signals `lookupState`, `found`, `nameProblem` and
@@ -191,7 +191,7 @@ source and Open-Meteo. The browser calls only the Mondino API.
 | Source timed out or circuit open | 503 | `postal_code_unavailable` | The postal code field is switched off and "Your city" takes its place |
 | Over 10 lookups a minute | 429 | `rate_limited` | "Too many tries from this device. You can try again in 9:42."; the button is disabled until the countdown ends |
 | Unsupported country or over 12 characters | 400 | `validation_failed` | A generic message |
-| Unknown invite token | 404 | `invite_not_found` | The invite link cannot be used |
+| Unknown or reset invite token | 404 | `invite_not_found` | "This invite link no longer works", in the form's place |
 
 In each case but the last, what the person typed is kept; an unknown invite token replaces the
 form with the message.

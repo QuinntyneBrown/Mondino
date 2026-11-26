@@ -50,9 +50,9 @@ browser alone; only the reset calls the Mondino API. No outside source takes par
   the header's `invite` it calls `InviteDialogOpener.open(trigger)`. It renders the `Toast`
   from `InviteLinkCopier.result`, so the toast outlives the dialog and is the same on all four
   screens.
-- **`TeamPage`** — for a team of one it shows the card "It’s just you on Northwind so far"
-  (`view-team-through-the-day`), whose button "Invite teammates" calls the same
-  `InviteDialogOpener.open(trigger)`.
+- **`TeamPage`** — for a team of one it shows `InvitePrompt`, the card "It’s just you on
+  Northwind so far" (`view-team-through-the-day`), whose button "Invite teammates" calls the
+  same `InviteDialogOpener.open(trigger)`.
 - **`InviteDialogOpener`** — service of the `mondino` application, provided at `TeamShell`'s
   route. `open(trigger)` imports `InviteDialog` dynamically, so the dialog's code is loaded
   when it is first opened and is in no screen's chunk, then opens it through the CDK `Dialog`
@@ -70,7 +70,8 @@ browser alone; only the reset calls the Mondino API. No outside source takes par
   - "Reset link" calls `TeamApi.resetInviteLink(teamId)` and, on the answer, calls
     `TeamStore.replaceInviteToken`, so the dialog and the invite card show the new link without
     a further read. What the dialog asks before the request, what it shows while the request
-    is pending and what it shows when the request fails are `<TO SUPPLY>`.
+    is pending, what it says once the link has been reset and what it shows when the request
+    fails are `<TO SUPPLY>`.
   - Under 576 px the dialog is a sheet from the bottom.
 - **`CopyField`** (`mo-copy-field`, block `copy-field`) — presentation component in
   `@mondino/components`: the link in a read-only input (`copy-field__value`) and the button
@@ -91,7 +92,7 @@ browser alone; only the reset calls the Mondino API. No outside source takes par
 
   The 4 s dismissal is one timer, cleared when `InviteLinkCopier` is destroyed; unit tests
   advance a fake clock. On the invite card, where there is no dialog, a refused copy selects
-  the link in the card instead.
+  the link in the card instead, through `InviteCard.selectLink()`.
 - **`TeamApi.resetInviteLink(teamId)`** — sends `POST /api/teams/{teamId}/invite-link-resets`
   with the antiforgery token and no body, and returns an `InviteLink`: the new `inviteToken`.
 - **`TeamStore.replaceInviteToken(inviteToken)`** — replaces the invite token the store holds.

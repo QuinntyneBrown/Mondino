@@ -272,6 +272,12 @@
       "note": "initials on teammate colour 12"
     },
     {
+      "fg": "--color-on-teammate",
+      "bg": "--palette-teammate-13",
+      "min": 4.5,
+      "note": "initials on teammate colour 13"
+    },
+    {
       "fg": "--color-info-fg",
       "bg": "--color-info-bg",
       "min": 4.5,
@@ -329,7 +335,7 @@
       "fg": "--color-fg-on-danger",
       "bg": "--color-danger-solid",
       "min": 4.5,
-      "note": "\"Remove my pin and leave\""
+      "note": "“Leave Northwind”, the danger button"
     },
     {
       "fg": "--color-fg-on-danger",
@@ -342,6 +348,42 @@
       "bg": "--color-bg-inverse",
       "min": 3,
       "note": "icon in a toast and the save bar"
+    },
+    {
+      "fg": "--color-danger-icon",
+      "bg": "--color-bg-surface-raised",
+      "min": 3,
+      "note": "icon on a failure toast"
+    },
+    {
+      "fg": "--color-danger-border",
+      "bg": "--color-bg-surface-raised",
+      "min": 3,
+      "note": "pin edge of a failure toast, against its own surface"
+    },
+    {
+      "fg": "--color-danger-border",
+      "bg": "--color-bg-canvas",
+      "min": 3,
+      "note": "pin edge of a failure toast, against the page"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-working-subtle",
+      "min": 4.5,
+      "note": "the count over the tallest bar, and the bars, on the working-hours band of the day ribbon"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-working-subtle",
+      "min": 4.5,
+      "note": "band label on leaf, on the day ribbon"
+    },
+    {
+      "fg": "--color-globe-outline",
+      "bg": "--color-bg-canvas",
+      "min": 3,
+      "note": "the globe’s outline against the page"
     }
   ]
 }

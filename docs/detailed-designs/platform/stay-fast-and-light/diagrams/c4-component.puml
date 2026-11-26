@@ -14,7 +14,7 @@ Container_Boundary(spa, "Mondino web app") {
   Component(store, "TeamStore", "Service in domain pins/", "Pins as signals; aborts a pending read when destroyed")
   Component(opener, "InviteDialogOpener", "Service provided by TeamShell", "Imports InviteDialog dynamically when Invite teammate is first chosen")
   Component(auth, "SignInPage, CreateTeamPage", "Lazy route components", "Chunks of their own, with their own API tokens and stores")
-  Component(lists, "TeamTable, MomentList", "Presentation components", "Windowed rows through CDK virtual scrolling")
+  Component(lists, "TeamTable, MomentList", "Presentation components", "A bounded number of rows: city sections of at most 50, and CDK virtual scrolling for moments")
 }
 Rel(teammate, routes, "Opens /globe")
 Rel(routes, page, "Loads the Globe chunk")

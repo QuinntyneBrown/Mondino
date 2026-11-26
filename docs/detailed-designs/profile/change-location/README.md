@@ -37,8 +37,8 @@ not exist yet; each part below is introduced by this design.
 ### Frontend — `mondino` application
 
 - **`ProfilePage`** — lazy route `/profile`, guarded by `teammateGuard`. It reads the profile
-  through `PROFILE_API`, lays out "Your pin" beside the settings from tablet width up and in one
-  column on a phone, and passes values to presentation components. It holds no rule of its own.
+  through `PROFILE_API`, lays out "Your pin" beside the settings from 992 px and in one
+  column under it, and passes values to presentation components. It holds no rule of its own.
   While the profile is being read it shows a placeholder for the globe and for each section, and
   announces "Loading your pin and settings…". When the read fails it shows "Your settings
   didn’t load" and "We couldn’t reach Mondino. Your pin is unchanged — try again in a moment."

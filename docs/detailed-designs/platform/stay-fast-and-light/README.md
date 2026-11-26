@@ -18,6 +18,7 @@ The terms used below:
 - **reference laptop** — laptop with integrated graphics
 - **detail step** — one level of resolution and model detail at which the globe's scene can be drawn
 - **windowed list** — list that keeps in the page only the rows near the visible part
+- **city section** — part of the Team list of a large team that holds one city's teammates and opens and closes
 
 The globe's renderer and the format its Blender-built assets are exported to are decided in an
 ADR before the Globe is built; both are `<TO SUPPLY>`. This design fixes what holds whichever
@@ -111,14 +112,21 @@ renderer is chosen.
 
 **Bound what grows (L2-047).**
 
-- **`TeamTable`** and **`MomentList`** render their rows through CDK virtual scrolling
-  (`cdkVirtualFor`), so the number of rows in the page stays under a fixed limit for a team of
-  500. The limit follows from the viewport's height and the buffer; the buffer size is
-  `<TO SUPPLY>`.
+- **The Team list** is bounded by its sections, not by virtual scrolling. Past
+  `LargeTeamThreshold` (40) teammates it is split into one `CitySection` per city; a closed
+  section holds no rows, and an open one holds at most `CityRowLimit` (50)
+  (`view-team-through-the-day`, L2-056). The day ribbon of such a team is 48 bars, whatever
+  the team's size.
+- **`MomentList`** renders its rows through CDK virtual scrolling (`cdkVirtualFor`), so the
+  number of rows in the page stays under a fixed limit. The limit follows from the viewport's
+  height and the buffer; the buffer size is `<TO SUPPLY>`.
+- **The Globe's panel** lists at most six moments and six teammates in working hours
+  (`view-week-around-the-world`).
 - `TeamStore` replaces its pins on each refresh; it keeps no history. A team has at most 500
   teammates (`Team.MaxTeammates`).
-- `PinLayer` groups close pins (`spreadPins`), so the labels drawn at once are bounded by the
-  globe's size, not the team's.
+- `PinLayer` groups close pins (`groupPins`, through `PIN_GROUPER`), so the pins and labels
+  drawn at once are bounded by the globe's size, not the team's: a team of 500 is drawn as
+  group pins with counts.
 
 **Prove it.** A heap check enters and leaves the Globe screen 20 times and compares the heap
 after garbage collection with its size after the first visit; a second check runs the Globe
@@ -165,7 +173,7 @@ percentile, compressed.
 `BrowserClock` implements `Clock`. `GlobeView` composes `GlobeScene` and
 `DetailLevel`; `GlobeView` shows the `GlobeFallback` that `GlobePage` gives it when WebGL is unavailable. `GlobePage` depends
 on `TeamStore`, `Clock` and, through a dynamic import, `GlobeView`. `TeamTable` and
-`MomentList` render windowed rows.
+`MomentList` hold a bounded number of rows.
 
 ![Class diagram for staying fast and light](diagrams/class-structure.png)
 

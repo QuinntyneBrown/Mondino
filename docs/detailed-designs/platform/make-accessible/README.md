@@ -76,16 +76,17 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   no separate, visually hidden list. A pin with focus lifts and carries the focus indicator,
   with a contrast of at least 3:1 over the day side and the night side.
 - **The still picture keeps its pins.** Where the still picture stands in for the globe
-  (`draw-globe`), the same list of pins is drawn over it, in the same places: each pin is
-  still a button, lifts, and opens its panel. The group is named "A still picture of the
+  (`draw-globe`), `GlobeFallback` draws the same list of pins over it, placed by
+  `stillPlacements` and named by the same `descriptions`: each pin is still a button, lifts,
+  and opens its panel through the outputs `select` and `selectGroup`. The group is named "A still picture of the
   globe, with 13 teammates’ pins." and is not a Tab stop itself, since it does not turn and
   is not dragged. The legend says why it is still, in words: "Still view — 3D isn’t available
   in this browser"; on a phone a line under the globe reads the same and adds "Pins still
   open."
 - **`describePin(pin, now, settings)`** — function in `domain`'s `pins/`. It returns one
   sentence: the teammate's name, city, local time, status, weather and any moment this week,
-  as in "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°, Día de Muertos,
-  in 5 days". It calls `localTime`, `formatTime` and `statusFor` from `time/`. It leaves the
+  as in "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°, 2 moments this
+  week: Día de Muertos, in 5 days; Clásico Nacional, in 6 days". It calls `localTime`, `formatTime` and `statusFor` from `time/`. It leaves the
   status out when `statusFor` gives none, and the weather out when the pin has none. `globe` depends on `api` only, so `GlobePage` computes
   the descriptions and passes them to `GlobeView` as the input `descriptions`, keyed by
   teammate id.
