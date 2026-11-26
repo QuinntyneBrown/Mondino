@@ -14,7 +14,7 @@ skinparam package {
   FontColor #101828
   BackgroundColor #F9FAFB
 }
-actor "Person with an invite link" as actor
+actor "Person who is not a teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
   participant "Router" as router
   participant "teammateGuard" as guard
