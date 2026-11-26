@@ -36,11 +36,11 @@ wraps the client. Handlers see the interface only.
 
 - **`CachedWeatherSource`** — decorates `IWeatherSource`. It rounds the position to two
   decimal places and uses the rounded position as the cache key, so two teammates in one city
-  share one entry and one call. A fresh entry is returned without a call. Otherwise it calls
+  share one entry and one call. An entry younger than 15 minutes is fresh and is returned
+  without a call. Otherwise it calls
   `OpenMeteoWeatherSource` through `SourceResilience`. When the call gives no value, it
   returns the cached `Weather` if that is under 3 hours old (`MaxAge`), and `null` otherwise.
-  It never returns a zero temperature in place of a missing one. The interval for which an
-  entry counts as fresh is `<TO SUPPLY>`.
+  It never returns a zero temperature in place of a missing one.
 - **`CachedPostalCodeLookup`** — decorates `IPostalCodeLookup`. The key is the normalised
   `PostalCode`. A postal code's city does not change from hour to hour, so entries are kept
   for a long interval, which is `<TO SUPPLY>`. When the source fails and no entry exists, the
@@ -70,18 +70,51 @@ on the hosting platform and is `<TO SUPPLY>`.
 
 - **`GetPinsQueryHandler`** loads the team's teammates, takes the distinct cities, and asks
   `IWeatherSource` once per city, concurrently. Each `PinDto` carries the city, the position
-  and the time zone id from the database, and `Weather` is `null` where the source gave none.
-  The response succeeds in every case.
+  and the time zone id from the database. Where the source gave none, `Weather` is `null` and
+  `WeatherState` is `Unavailable`; `WeatherState` is `NotShared` where the teammate does not
+  share their weather and `Available` otherwise, so the browser can tell the two apart. The
+  response succeeds in every case.
 - **`GetMomentsQueryHandler`** returns the moments `CachedMomentCalendars` has for each kind.
 - **A response waits at most 6 s on outside sources.** The calls for one request run
   concurrently under one deadline of 5 s, so the request completes with what the backend has.
 - **The web app shows what it has.** Local time, status, offset and overlap are worked out in
   the browser from the pin's time zone and the clock, so they need no outside source. Where a
-  pin's weather is `null`, `PinLabel`, `TeammatePanel` and the Team row say that the weather
-  is unavailable in the weather's place.
+  pin's `weatherState` is `Unavailable`, `PinLabel` leaves the weather out, and `TeammatePanel`
+  and the Team row say in the weather's place that it is unavailable ("Weather is unavailable
+  right now."). `NotShared` has its own words (`show-weather`).
+- **A first read that is pending shows the screen's loading state.** Until a screen's first
+  read answers, the screen shows a placeholder in the shape of its content and announces the
+  mock's words once, politely, in a visually hidden `role="status"` element:
+
+  | Screen | Loading state announces |
+  |--------|-------------------------|
+  | Join | "Opening your invite link…" |
+  | Globe | "Loading your team…" |
+  | Team | "Loading your team…" |
+  | Moments | "Loading moments…" |
+  | Profile & Settings | "Loading your pin and settings…" |
+
+  On Join, Globe and Profile & Settings the globe's box holds `GlobePlaceholder` ("The globe
+  is loading"); on Team and Moments `main` carries `aria-busy="true"`.
+- **A first read that fails shows the screen's error state.** The screen shows the mocks'
+  `message-page` (on Join, the same title and text in the form's place) with "Try again",
+  which reads again, and nothing of the team: no stale or partial pins, moments or settings.
+  Team, Moments and Profile & Settings also offer "Back to the globe".
+
+  | Screen | Title | Text |
+  |--------|-------|------|
+  | Join | "We couldn’t open this invite link" | "Mondino didn’t answer just now. Your link may be fine." |
+  | Globe, Team | "We couldn’t load your team" | "Mondino didn’t answer just now. Nothing is lost — your pin and your team are as you left them." |
+  | Moments | "We couldn’t load moments" | "Mondino didn’t answer just now. Your team’s moments are still there." |
+  | Profile & Settings | "We couldn’t load your pin" | "Mondino didn’t answer just now. Your pin and settings are as you left them." |
+
+  The error state is for a first read only: once a screen has data, a failed refresh keeps it
+  and shows the banner below.
 - **The backend itself unreachable.** When a refresh fails, `TeamStore` keeps its last pins,
-  sets its `refreshFailed` signal and tries again at the next refresh. The screen shows a
-  message that it could not be refreshed and will try again, and the clocks keep ticking.
+  sets its `refreshFailed` signal and tries again at the next refresh. `TeamShell` shows, above whichever screen is
+  open, a banner that it could not be refreshed, which time the weather and moments are
+  from, and that Mondino will try again, with "Try now"; the clocks keep ticking, and the
+  banner goes as soon as a refresh succeeds.
 
 **What an outside source receives (L2-050).**
 
@@ -137,7 +170,7 @@ clients within the timeout.
 `CachedWeatherSource` and `OpenMeteoWeatherSource` both implement `IWeatherSource`, and the
 decorator wraps the client; `CachedPostalCodeLookup` and `PostalCodeLookupClient` relate the
 same way. Each decorator depends on `SourceResilience`, which returns a `SourceAnswer<T>` with
-a `SourceOutcome`. `PinDto.Weather` is nullable.
+a `SourceOutcome`. `PinDto.Weather` is nullable, and `PinDto.WeatherState` says why.
 
 ![Class diagram for surviving source failure](diagrams/class-structure.png)
 
@@ -147,7 +180,7 @@ a `SourceOutcome`. `PinDto.Weather` is nullable.
 `CachedWeatherSource` returns a fresh entry when it has one. Otherwise `SourceResilience`
 calls Open-Meteo with a 5 s timeout, or does not call it while the circuit is open. With no
 value, the decorator gives the cached weather when it is under 3 hours old, and `null`
-otherwise. The response succeeds, and each pin shows its local time and status, with the
-weather or "unavailable" in its place (L2-049).
+otherwise, which the handler marks `Unavailable`. The response succeeds, and each pin shows its local time and status; the panel
+and the Team row say the weather is unavailable in its place (L2-049).
 
 ![Sequence diagram for reading pins while the weather source is failing](diagrams/sequence-read-pins-weather-failing.png)

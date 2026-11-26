@@ -71,16 +71,17 @@ class PinDto {
   +Guid TeammateId
   +string Name
   +string CityName
-  +string CountryCode
+  +string Country
   +Position Position
   +string TimeZoneId
   no postal code
 }
 
 class ProfileDto {
-  +string PostalCode
+  +string TeamName
+  +PinDto Pin
   +string CountryCode
-  +City City
+  +string PostalCode
   +TeammateSettings Settings
 }
 
@@ -102,6 +103,6 @@ TeamScopeBehaviour ..> ProblemDetailsWriter : team_not_found
 ValidationBehaviour ..> JoinTeamCommandValidator : runs
 ValidationBehaviour ..> ProblemDetailsWriter : validation_failed
 JoinTeamCommandValidator ..> NameNormaliser : after
-GetPinsQuery ..> PinDto : answers with
+GetPinsQuery ..> PinDto : answers with, in a TeamPinsDto
 GetProfileQuery ..> ProfileDto : answers the owner with
 @enduml

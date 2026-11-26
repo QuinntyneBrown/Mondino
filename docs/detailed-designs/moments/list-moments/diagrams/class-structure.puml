@@ -34,21 +34,24 @@ interface Moment {
 }
 
 interface TeamApi {
-  +pins(teamId: string): Promise<Pin[]>
-  +getMoments(teamId: string): Promise<Moment[]>
+  +getPins(teamId: string, signal: AbortSignal): Promise<TeamPins>
+  +getMoments(teamId: string, signal: AbortSignal): Promise<Moment[]>
 }
 
 class HttpTeamApi
 
 interface Clock {
   +now(): Date
-  +minute: Signal<number>
+  +minute: Signal<Date>
 }
 
 interface DatedMoment {
   +moment: Moment
   +daysAhead: number
   +when: string
+  +teammateFirstName: string
+  +teammateInitials: string
+  +teammateColour: string
 }
 
 interface MomentGroups {
@@ -58,7 +61,7 @@ interface MomentGroups {
 }
 
 class "moments/ (domain)" as moments <<functions>> {
-  +groupMoments(moments: Moment[], now: Date): MomentGroups
+  +groupMoments(moments: Moment[], pins: Pin[], now: Date): MomentGroups
   +whenLabel(daysAhead: number): string
   +daysUntil(date: string, timeZoneId: string, now: Date): number
 }
@@ -73,9 +76,9 @@ class MomentsPage {
 }
 
 class FilterChips {
-  +options: FilterOption[]
+  +chips: FilterChip[]
   +selected: string
-  +select: Output<string>
+  +selectedChange: Output<string>
 }
 
 class MomentList {
@@ -84,14 +87,14 @@ class MomentList {
   +select: Output<Moment>
 }
 
-class MomentCard {
+class MomentRow {
   +item: DatedMoment
   +prominent: boolean
   +select: Output<Moment>
 }
 
 class TeamStore {
-  +select(teammateId: string): void
+  +pins: Signal<Pin[]>
 }
 
 HttpTeamApi ..|> TeamApi
@@ -100,8 +103,8 @@ MomentsPage --> Clock : CLOCK
 MomentsPage ..> moments : calls groupMoments
 MomentsPage --> FilterChips
 MomentsPage --> MomentList
-MomentsPage --> TeamStore : selects a teammate
-MomentList "1" --> "*" MomentCard
+MomentsPage --> TeamStore : reads pins for order and avatars
+MomentList "1" --> "*" MomentRow
 moments ..> MomentGroups : returns
 MomentGroups "1" --> "*" DatedMoment
 DatedMoment --> Moment

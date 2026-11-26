@@ -37,6 +37,9 @@ not exist yet; each part below is introduced by this design.
 - **`ProfilePage`** — lazy route `/profile`, guarded by `teammateGuard`. It reads the profile
   through `PROFILE_API`, lays out "Your pin" beside the settings from tablet width up and in one
   column on a phone, and passes values to presentation components. It holds no rule of its own.
+  While the profile is being read it shows a placeholder for the globe and for each section, and
+  announces "Loading your pin and settings…". When the read fails it shows "We couldn’t load
+  your pin" in place of the screen, with "Try again" and "Back to the globe".
 - **`ProfileStore`** — store provided at the `/profile` route, so its state goes when the viewer
   leaves the screen. It holds the saved `Profile`, the draft, the state of the postal code lookup
   and the state of the save as signals. `changeCountry(countryCode)` and
@@ -44,12 +47,15 @@ not exist yet; each part below is introduced by this design.
   `ProfileApi.lookUpPostalCode`. `canSave` is false while a changed postal code has no found
   city, so saving is not offered for a postal code that was not found (L2-032). The store aborts
   a pending lookup when a newer one starts and when the route is destroyed.
-- **`LookupState`** — feature-local union: `idle`, `finding`, `found` (with a `PostalCodeResult`),
-  `notFound`, `unavailable`.
+- **`LookupState`** (`@mondino/api`) — the union the Join screen uses: `Idle`, `Locating`,
+  `Found` (with its `PostalCodeResult`), `NotFound`, `Unavailable`, `RateLimited`. `ProfileStore`
+  maps `postal_code_not_found`, `postal_code_unavailable` and `rate_limited` to the last three.
 - **The small globe** — `ProfilePage` imports `GlobeView` from `@mondino/globe` dynamically and
   renders `mo-globe` with one pin, the viewer's own, and `interactive` set to `false`. A globe
-  that is not interactive does not turn on its own and cannot be dragged (L2-031). `GlobeScene`
-  is disposed when the page is destroyed.
+  that is not interactive does not turn on its own and cannot be dragged (L2-031). While the
+  draft holds a found city that is not saved, the globe shows the pin there, marked as new
+  ("New · Toronto"); the city and local time beside it stay the saved ones until the save.
+  `GlobeScene` is disposed when the page is destroyed.
 
 ### Frontend — libraries
 
@@ -63,10 +69,22 @@ not exist yet; each part below is introduced by this design.
 - **`ProfileUpdate`** — feature-local type sent on save: `countryCode`, `postalCode`, `settings`.
 - **`ApiError`** — error with a `code`. `ProfileStore` branches on `postal_code_not_found`,
   `postal_code_unavailable` and `rate_limited`; the page shows its own message for each.
-- **`PostalCodeField`** (`@mondino/components`) — the country and postal code inputs that Join
-  also uses. It shows "Finding 20121…" while the lookup runs, the found city and region when it
-  answers, and the alert of L2-004 when it does not. It emits the change and the blur; it injects
-  nothing.
+- **`PostalCodeField`** (`@mondino/components`) — the postal code field that Join also uses, in
+  the same shape: inputs `value`, `country` and `lookupState`, outputs `valueChange`, `blurred`
+  and `retry`. It injects nothing. The states are Join's, with this screen's own copy:
+  - `Locating`: "Finding M5V 2T6…".
+  - `Found`: "Toronto, Ontario — your pin moves here when you save. 9° and cloudy right now."
+  - `NotFound`: the alert of L2-004, ending "Your pin stays in Milan." ("We couldn’t find
+    “M5V 2T” in Canada. Canadian postal codes look like A1A 1A1. Your pin stays in Milan."),
+    with `aria-invalid` on the input.
+  - `Unavailable` (mock `profile/lookup-unavailable`): "We couldn’t check M5V 2T6 right now.
+    Your postal code may be fine — nothing is wrong with what you typed. Your pin stays in
+    Milan.", with "Try again", which emits `retry` and runs `lookUp()` again.
+  - `RateLimited` (mock `profile/rate-limited`): "That was a lot of tries in a short time. Wait
+    a moment, then try again. Your pin stays in Milan."
+
+  In the last three states what the viewer typed is kept, saving is not offered for it, and
+  the pin stays where it was.
 - **`localTime` and `formatTime`** (`@mondino/domain`, `time/`) — work out the viewer's local
   time from the pin's time zone id and the injected `CLOCK`, in the clock format the viewer chose.
 
@@ -86,13 +104,14 @@ not exist yet; each part below is introduced by this design.
 - **`LookUpPostalCodeQuery` / `LookUpPostalCodeQueryHandler`** — the same query the Join screen
   sends. `PostalCodeFormats` checks the postal code against the country's format and normalises
   it; a postal code in the wrong form is refused without a call to the `Postal code source`.
-  `IPostalCodeLookup` resolves the normalised postal code to a `City`, and `IWeatherSource`
-  gives the weather there. The handler returns a `PostalCodeResultDto` and changes nothing.
+  `IPostalCodeLookup.FindCityAsync` answers a `PostalCodeLookupOutcome` (found with a `City`,
+  not found, or unavailable), and `IWeatherSource` gives the weather at a found city. The handler returns a `PostalCodeResultDto` and changes nothing.
 - **`UpdateProfileCommand` / `UpdateProfileCommandHandler`** — carries `TeamId`, `CountryCode`,
   `PostalCode` and `Settings`. The command has no teammate id: the handler changes the teammate
   that `ICurrentTeammate` names, so a request cannot change another teammate's location
   (L2-032). When the country or postal code differs from the stored one, the handler resolves
-  the city again through `IPostalCodeLookup` and calls `Teammate.MoveTo(postalCode, city)`. It
+  the city again through `IPostalCodeLookup.FindCityAsync` and, when the outcome is found, calls
+  `Teammate.MoveTo(postalCode, city)`. It
   saves in one unit of work through `IAppDbContext` and returns the new `ProfileDto`. A postal
   code that cannot be found or checked is refused and nothing is stored.
 - **`UpdateProfileCommandValidator`** — refuses a country outside the supported list and a
@@ -126,9 +145,9 @@ not exist yet; each part below is introduced by this design.
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
 | Postal code in the wrong form, or not known to the source | 422 | `postal_code_not_found` | The alert of L2-004, naming the postal code, the country and the form its postal codes take |
-| `Postal code source` does not answer in time | 503 | `postal_code_unavailable` | That the postal code could not be checked right now, with an offer to try again |
+| `Postal code source` does not answer in time | 503 | `postal_code_unavailable` | That the postal code could not be checked right now and nothing is wrong with what was typed, "Your pin stays in Milan.", and "Try again" |
 | Country unsupported or postal code over 12 characters | 400 | `validation_failed` | A generic message |
-| Too many lookups | 429 | `rate_limited` | A request to wait a moment and try again |
+| Too many lookups | 429 | `rate_limited` | A request to wait a moment and try again, and "Your pin stays in Milan." |
 | `teamId` is not the teammate's own team | 404 | none | The screen is not shown |
 
 The lookup limit for a teammate, per minute, is `<TO SUPPLY>`; L2-045 sets 10 per minute for
@@ -192,8 +211,10 @@ draws one pin on a globe that does not turn and cannot be dragged.
 ### Behaviour — change the postal code
 
 Leaving the postal code field starts a lookup. A found postal code shows its city and offers
-saving. A postal code that cannot be found shows the alert of L2-004, and one that cannot be
-checked says so; in both cases saving is not offered and the pin stays where it was.
+saving. A postal code that cannot be found shows the alert of L2-004, one that cannot be
+checked says so and offers "Try again", and a lookup refused with 429 asks the viewer to wait;
+in each case the message ends "Your pin stays in Milan.", saving is not offered and the pin
+stays where it was (L2-032).
 
 ![Sequence diagram for changing the postal code](diagrams/sequence-change-postal-code.png)
 

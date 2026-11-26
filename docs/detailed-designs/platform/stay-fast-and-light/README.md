@@ -16,7 +16,7 @@ The terms used below:
 - **initial bundle** — code the browser downloads before the first screen is shown
 - **reference phone** — mid-range phone on a 4G connection throttled to 1.6 Mbps and 150 ms
 - **reference laptop** — laptop with integrated graphics
-- **detail level** — step on a scale of the globe's geometry, texture and drawing resolution
+- **detail step** — one level of resolution and model detail at which the globe's scene can be drawn
 - **windowed list** — list that keeps in the page only the rows near the visible part
 
 The globe's renderer and the format its Blender-built assets are exported to are decided in an
@@ -43,13 +43,15 @@ renderer is chosen.
 - **Assets are cached.** The globe's assets and each chunk have content-hashed file names and
   are served with a long-lived, immutable `Cache-Control`. The hosting platform that sets the
   header is `<TO SUPPLY>`.
-- **`DetailLevel`** — class in `globe`, owned by `GlobeScene`. `GlobeScene` passes it each
-  frame's duration through `sample(frameMs)`. When the frame rate stays under 30 for a
-  sustained interval, `stepDown()` lowers the detail level and the drawing resolution, and
-  repeats until the frame rate recovers. The steps and the interval are `<TO SUPPLY>` with the
-  renderer's ADR.
-- **`GlobeFallback`** — still picture shown when WebGL is unavailable. It allocates no
-  renderer.
+- **`DetailLevel`** — class in `globe`, owned by `GlobeView` (`draw-globe`). It holds an
+  ordered list of `DetailStep`s (`pixelRatio`, `modelDetail`) and the current one. `GlobeView`
+  passes it each frame's duration, which `GlobeScene.onFrame` reports, through
+  `record(elapsedMs)`. When the frame rate stays under 30 for a sustained interval, it moves
+  to the next lower step and `GlobeView` calls `GlobeScene.setDetail(step)`, which lowers the
+  model's detail and the drawing resolution; this repeats until the frame rate recovers. The
+  steps and the interval are `<TO SUPPLY>` with the renderer's ADR.
+- **`GlobeFallback`** — component in `components`: the still picture shown when WebGL is
+  unavailable or the `globe` library fails to load. It allocates no renderer.
 - **Interactions stay under 200 ms.** State is held in signals, every component is `OnPush`
   and the app is zoneless, so a selection or a filter re-renders only what reads the changed
   signal.
@@ -67,9 +69,10 @@ renderer is chosen.
   materials and textures, the renderer and the WebGL context. After it returns, the scene
   holds nothing. `GlobeScene.stop()` and `start()` pause and resume the render loop without
   releasing anything.
-- **`TeamStore`** is provided on the parent route of the four teammate screens, not in `root`.
-  It holds the subscription to its pending read and the timer for its 15-minute refresh. When
-  it is destroyed, or when a newer read starts, it ends the subscription, which cancels the
+- **`TeamStore`** is provided by `TeamShell`, the parent route of the four teammate screens,
+  not in `root`. It holds the `AbortController` of its pending read; its 15-minute refresh runs
+  from the one clock's minute tick, so it has no timer of its own (`keep-team-fresh`). When it
+  is destroyed, or when a newer read starts, it aborts, which cancels the
   HTTP request. A page that starts its own request ties it to `takeUntilDestroyed`, so leaving
   a screen cancels the request.
 - **Scoped state.** A screen's own state (a filter, a draft of the settings) lives in the page
@@ -134,15 +137,15 @@ percentile, compressed.
 ### Components
 
 `app.routes.ts` loads the Globe chunk. `GlobePage` shows its text first, then defers
-`GlobeView`, which creates and disposes `GlobeScene`. `GlobeScene` reports frame times to
-`DetailLevel`. `GlobePage` and `GlobeScene` read the one `BrowserClock`.
+`GlobeView`, which creates and disposes `GlobeScene` and reports its frame times to
+`DetailLevel`. `GlobePage` and `GlobeView` read the one `BrowserClock`.
 
 ![C4 component view for staying fast and light](diagrams/c4-component.png)
 
 ### Class structure
 
-`BrowserClock` implements `Clock`. `GlobeView` composes `GlobeScene`, which composes
-`DetailLevel`; `GlobeView` uses `GlobeFallback` when WebGL is unavailable. `GlobePage` depends
+`BrowserClock` implements `Clock`. `GlobeView` composes `GlobeScene` and
+`DetailLevel`; `GlobeView` shows the `GlobeFallback` that `GlobePage` gives it when WebGL is unavailable. `GlobePage` depends
 on `TeamStore`, `Clock` and, through a dynamic import, `GlobeView`. `TeamTable` and
 `MomentList` render windowed rows.
 
@@ -154,7 +157,7 @@ On entry, the router loads the Globe chunk, `GlobePage` shows its heading, count
 and the `@defer` block imports `@mondino/globe` and starts `GlobeScene` (L2-046). While the
 screen is open, `DetailLevel` steps down when the frame rate stays under 30, one clock ticks
 every local time, and both the clock and the render loop rest while the tab is hidden. On
-leaving, the pending read is cancelled, `GlobeView` removes its listeners and observer, and
+leaving, a pending request of the page's own is cancelled, `GlobeView` removes its listeners and observer, and
 `GlobeScene.dispose()` releases the renderer and the WebGL context (L2-047).
 
 ![Sequence diagram for entering and leaving the Globe screen](diagrams/sequence-enter-and-leave-globe.png)

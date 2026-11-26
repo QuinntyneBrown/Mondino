@@ -13,7 +13,7 @@ The terms used below:
 
 - **telemetry** — traces, metrics and logs the backend emits
 - **span** — record of one operation within a trace, with a name, a duration and attributes
-- **route template** — route as it is declared, with placeholders in place of values, for example `/teams/{teamId}/pins`
+- **route template** — route as it is declared, with placeholders in place of values, for example `/api/teams/{teamId}/pins`
 - **correlation id** — identifier of one request's trace, present in its logs and in the error returned to the browser
 - **outside source** — service outside Mondino that the backend calls for postal codes, weather or calendars
 

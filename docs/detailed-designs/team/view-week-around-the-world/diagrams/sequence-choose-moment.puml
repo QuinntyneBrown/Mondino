@@ -26,27 +26,27 @@ end box
 actor -> page : Open the Globe screen with no pin selected
 page -> store : pins, counts
 store --> page : Pin[], TeamCounts
-page --> actor : "12 teammates" and "11 time zones · 4 working · 3 asleep" (L2-025)
+page --> actor : "12 teammates" and "12 time zones · 7 working · 2 asleep" (L2-025)
 page -> fn : weekMoments(pins, clock.now(), 8)
-fn -> fn : Keep moments from today to 7 days ahead in each city, in date order (L2-024)
+fn -> fn : Keep moments from today to 7 days ahead in each city, in date order, then west to east (L2-024)
 fn --> page : WeekMoments (first 8, more flag)
 page -> fn : workingNow(pins, clock.now())
-fn -> fn : Keep status Working hours, order by local hour (L2-024)
+fn -> fn : Keep status Working hours, order by local hour, then west to east (L2-024)
 fn --> page : WorkingTeammate[]
-page -> panel : moments, moreMoments, working
+page -> panel : moments, working
 alt no teammate in working hours
-  panel --> actor : "Nobody — it's quiet everywhere."
+  panel --> actor : "Nobody — it’s quiet everywhere."
 else
   panel --> actor : "This week around the world" and "In working hours now"
 end
-actor -> panel : Choose a moment
-panel -> page : momentChosen(teammateId)
+actor -> panel : Choose a moment, or a teammate in working hours
+panel -> page : teammateChosen(teammateId)
 page -> router : navigate /globe?teammate={teammateId}
 router --> page : teammate input changes
 page -> store : select(teammateId)
 page -> globe : selectedId; the globe turns to the pin (L2-024)
 page --> actor : That teammate's panel (L2-023)
-opt more than 8 moments this week
+opt the teammate wants every moment
   actor -> panel : Choose "All moments"
   panel -> page : allMoments
   page -> router : navigate /moments

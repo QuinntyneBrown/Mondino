@@ -51,13 +51,13 @@ else teammate of the team
       openmeteo --> weather : Temperature and conditions
       weather --> handler : Weather
     else Open-Meteo fails or times out
-      weather --> handler : null, the pin keeps its local time (L2-049)
+      weather --> handler : null (WeatherState Unavailable),\nthe pin keeps its local time (L2-049)
     end
     handler -> moments : Moments at the city
     moments --> handler : Moments
   end
-  handler -> handler : Build PinDto: name, colour, city, country, position,\ntime zone id, IsViewer; weather null when not shared (L2-011 AC4);\nno postal code (L2-007)
-  handler --> controller : PinDto list
+  handler -> handler : Build PinDto: name, colour, city, country, position,\ntime zone id, IsViewer; weather null and WeatherState NotShared\nwhen not shared (L2-011 AC4);\nno postal code (L2-007)
+  handler --> controller : TeamPinsDto
   controller --> client : 200, compressed JSON
   client --> store : Pin[]
   store --> page : pins signal

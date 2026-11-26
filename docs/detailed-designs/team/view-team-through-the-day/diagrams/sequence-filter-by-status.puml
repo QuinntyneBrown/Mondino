@@ -16,18 +16,18 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "FilterChips" as chips
+  participant "Segmented" as chips
   participant "TeamPage" as page
   participant "filterByStatus" as fn
   participant "TeamTable" as table
   participant "Clock" as clock
 end box
 actor -> chips : Move with the arrow keys and choose "Working now"
-chips -> chips : Roving focus in one radio group; aria-checked on the chosen chip (L2-028)
-chips -> page : selectedChange("working")
+chips -> chips : Roving focus in one tab list; aria-selected on the chosen tab (L2-028)
+chips -> page : valueChange("working")
 page -> page : filter.set(Working)
 page -> fn : filterByStatus(rows, Working)
-fn --> page : Rows whose status is Working hours, still west to east
+fn --> page : Rows whose statusFor is Working hours, still west to east;\na row with no status shown is under All only
 alt at least one row
   page -> table : rows, emptyMessage = null
   table --> actor : The teammates in working hours

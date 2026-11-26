@@ -14,7 +14,7 @@ skinparam package {
   FontColor #101828
   BackgroundColor #F9FAFB
 }
-actor "Person with an invite link" as actor
+actor "Person who is not a teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
   participant "Router" as router
   participant "teammateGuard" as guard
@@ -30,12 +30,12 @@ box "Backend — Mondino Infrastructure" #FFF4E5
   participant "TeammateSessionHandler" as session
 end box
 actor -> router : Open /globe
-router -> guard : canActivate for the guarded parent route
+router -> guard : canMatch for the guarded parent route
 guard -> membership : current()
 alt No membership on this device
   membership --> guard : null
-  guard --> router : UrlTree for /invite-needed
-  router -> needed : loadComponent, then create InviteNeededPage
+  guard --> router : false
+  router -> needed : Match the same address, loadComponent, then create InviteNeededPage
   needed --> actor : An invite link is needed; no team data and no API request (L2-038)
 else Membership held, session no longer valid
   membership --> guard : Membership for this device
@@ -47,8 +47,8 @@ else Membership held, session no longer valid
   controller --> client : 401 ProblemDetails, no team data (L2-043)
   client --> expired : 401 response
   expired -> membership : forget()
-  expired -> router : Navigate to /invite-needed
-  router -> needed : Create InviteNeededPage
+  expired -> router : Navigate to the current address again
+  router -> needed : teammateGuard refuses; create InviteNeededPage
   needed --> actor : An invite link is needed
 end
 @enduml

@@ -8,11 +8,12 @@ Container_Boundary(web, "Mondino web app") {
   Component(store, "TeamStore", "Signal store, domain pins/", "Refreshes when 15 minutes have passed; merges pins; keeps the selection")
   Component(client, "HttpTeamApi", "HTTP client, api library", "Implements TeamApi")
   Component(page, "GlobePage", "Angular page, mondino application", "Passes pins and arrived ids to the globe")
+  Component(shell, "TeamShell", "Route component, mondino application", "Provides TeamStore; renders AppHeader, the refresh banner and the toast")
 }
 Container_Boundary(api, "Mondino API") {
   Component(ctrl, "TeamsController", "ASP.NET Core controller", "GET /api/teams/{teamId}/pins")
   Component(handler, "GetPinsQueryHandler", "MediatR handler", "Builds the team's pins for one of its teammates")
-  Component(weather, "CachedWeatherSource", "IWeatherSource", "Cached weather with a timeout and a circuit breaker")
+  Component(weather, "CachedWeatherSource", "IWeatherSource", "Weather cached for 15 minutes, with a 5 s timeout and a circuit breaker")
   Component(finder, "MomentFinder", "Application service", "The moments that belong to a city")
 }
 ContainerDb(db, "Mondino database", "Relational, EF Core; engine TO SUPPLY", "Teams and teammates")
@@ -27,4 +28,5 @@ Rel(handler, weather, "Reads the weather at each city")
 Rel(handler, finder, "Finds each city's moments")
 Rel(weather, meteo, "Reads on a cache miss", "HTTPS")
 Rel(page, store, "Reads pins, counts and arrived ids from")
+Rel(shell, store, "Reads refreshFailed and refreshedAt from; asks to refresh")
 @enduml

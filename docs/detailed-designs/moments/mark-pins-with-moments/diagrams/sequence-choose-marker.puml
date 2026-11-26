@@ -42,7 +42,7 @@ alt Mondino holds the right to the emblem
 else right not held
   catalogue --> handler : No key
 end
-handler --> controller : PinDto list with moments
+handler --> controller : TeamPinsDto, each PinDto with its moments
 controller --> store : Pins
 store --> page : Pins signal
 page -> settings : Read the viewer's chosen kinds
@@ -66,6 +66,6 @@ end
 page -> view : pins and markers
 view -> layer : setMarkers(markers)
 layer --> actor : Marker in sun beside each marked pin,\nstronger by size and ring when today
-actor -> layer : Point at or focus a marker
-layer --> actor : Title and when label as text (L2-021)
+actor -> layer : Point at, focus or select a marked pin
+layer --> actor : Pin lifts; its label gives the title\nand when label as text (L2-021)
 @enduml

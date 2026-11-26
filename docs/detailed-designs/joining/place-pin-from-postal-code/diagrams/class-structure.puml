@@ -21,29 +21,30 @@ package "mondino application" {
     +lookupState: Signal<LookupState>
     +found: Signal<PostalCodeResult | null>
     +nameProblem: Signal<NameProblem | null>
+    +postalCodeMissing: Signal<boolean>
     +lookUp(): void
     +clearFound(): void
-  }
-  enum LookupState {
-    Idle
-    Finding
-    Found
-    NotFound
-    Unavailable
-    RateLimited
   }
 }
 package "@mondino/components" {
   class PostalCodeField {
     +value: string
-    +state: LookupState
     +country: Country
+    +lookupState: LookupState
     +valueChange: string
-    +left: void
+    +blurred: void
     +retry: void
   }
 }
 package "@mondino/api" {
+  enum LookupState {
+    Idle
+    Locating
+    Found
+    NotFound
+    Unavailable
+    RateLimited
+  }
   interface InviteApi {
     +lookUpPostalCode(inviteToken, countryCode, postalCode, signal): Promise<PostalCodeResult>
   }

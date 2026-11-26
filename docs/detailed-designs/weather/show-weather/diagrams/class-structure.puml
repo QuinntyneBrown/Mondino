@@ -50,7 +50,7 @@ package "Mondino.Application" {
     +GetCurrentAsync(position: Position, ct: CancellationToken): Task<Weather?>
   }
   class GetPinsQueryHandler {
-    +Handle(query: GetPinsQuery, ct: CancellationToken): Task<IReadOnlyList<PinDto>>
+    +Handle(query: GetPinsQuery, ct: CancellationToken): Task<TeamPinsDto>
   }
   class WeatherConditionMapper {
     +Map(weatherCode: int, windSpeedKmh: double): WeatherCondition
@@ -63,6 +63,12 @@ package "Mondino.Application" {
   class PinDto {
     +Guid TeammateId
     +WeatherDto? Weather
+    +WeatherState WeatherState
+  }
+  enum WeatherState {
+    Available
+    Unavailable
+    NotShared
   }
 }
 
@@ -81,6 +87,7 @@ package "Mondino.Infrastructure" {
 package "Mondino web app" {
   class "pins/ functions" as PinFns <<domain, pins/>> {
     +formatTemperature(temperatureC: number, unit: TemperatureUnit): string
+    +formatDegrees(temperatureC: number, unit: TemperatureUnit): string
     +weatherLabel(condition: WeatherCondition, cityName: string): string
     +isNightSky(localHour: number): boolean
   }
@@ -95,7 +102,8 @@ IWeatherSource <|.. OpenMeteoWeatherSource : implements
 CachedWeatherSource o-- OpenMeteoWeatherSource : decorates
 OpenMeteoWeatherSource ..> WeatherConditionMapper : maps with
 GetPinsQueryHandler ..> IWeatherSource : asks once per city
-GetPinsQueryHandler ..> PinDto : returns
+GetPinsQueryHandler ..> PinDto : returns in a TeamPinsDto
+PinDto --> WeatherState : has
 GetPinsQueryHandler ..> TeammateSettings : reads ShareWeather
 PinDto --> WeatherDto : has 0..1
 IWeatherSource ..> Weather : returns

@@ -70,8 +70,8 @@ A few states need something the cast cannot give at that hour, and say so in a n
 - **A team of one**, Sofia: `globe/empty`, `team/empty` and the invite link notifications.
 - **Edges**, in `team/edge`: three more teammates with a very long name, a one-word name and a
   name typed as markup, on a 12-hour clock in °F.
-- **A move**, in `profile/locating`, `location-found` and `invalid`: Sofia types a Toronto
-  postal code, M5V 2T6.
+- **A move**, in `profile/locating`, `location-found`, `invalid`, `lookup-unavailable` and
+  `rate-limited`: Sofia types a Toronto postal code, M5V 2T6.
 - **°F and the 12-hour clock**, the prototype's own controls, in `globe/fahrenheit-12-hour` and
   `team/edge`.
 - **Sharing off**, in `globe/sharing-off`: Ahmed shares neither his weather nor when he is
@@ -86,7 +86,7 @@ A few states need something the cast cannot give at that hour, and say so in a n
 | Offsets as "−7h", "+4h 30m". | "7 h behind", "4 h 30 min ahead", "Same time". | Read aloud and at a glance without a sign (L2-016). |
 | A sun dot on a pin with a moment this week. | A moment marker with the kind's icon, larger and ringed when the moment is today. | A marker shows an emblem for the moment, and today's is stronger by more than colour (L2-021). |
 | A selected pin's label is an ink chip with the time and weather. | A lifted pin, pointed at, focused or selected, shows name, city, local time, weather and its moment. | A lifted pin is how a teammate is read on a small globe (L2-012). |
-| "Schedule a message for Aiko’s morning" when a teammate is asleep. | "Message Aiko" in every status. | Mondino has no scheduler. See the open questions. |
+| A "Message" button on a teammate’s panel, and "Schedule a message for Aiko’s morning" when a teammate is asleep. | No message button, in any status. | Mondino has no chat and no scheduler, so the button would lead nowhere. It is not built. |
 | Today's moment adds "Liam is probably offline." | The moment's own detail and its teammate. | Mondino infers nothing about presence. |
 | The globe fetches its land from a CDN and is drawn live with d3-geo. | A still SVG of the same cartoon globe, drawn into each mock. | Mocks open from disk with no network. |
 | Fonts from Google Fonts. | Gabarito and Inter bundled in `assets/fonts/`. | Fonts are self-hosted, never from a CDN. |
@@ -99,9 +99,9 @@ A few states need something the cast cannot give at that hour, and say so in a n
 The prototype draws only the happy path of each frame and a few states (Join: default, locating,
 found, error; Globe: default, empty; Profile & Settings: default, unsaved, saved). Every other
 state here is new: loading, errors, an invite link that cannot be used, a full team, a rate
-limit, a lifted pin, a group pin, weather unavailable, the still picture where the 3D globe
-cannot be drawn, the dialogs and the pages that say one thing. Their copy is written for these
-mocks from the L2 requirements.
+limit (on Join and on Profile & Settings), a lifted pin, a group pin, weather unavailable, the
+still picture where the 3D globe cannot be drawn, the dialogs and the pages that say one thing.
+Their copy is written for these mocks from the L2 requirements.
 
 ## The globe
 
@@ -122,13 +122,12 @@ projection gives.
    Pop and Lagoon are on that canvas as options and none has been applied to the app. The mocks
    use Current. Choosing another changes the primitives at the top of
    `docs/design-system/tokens/tokens.css` and nothing else.
-2. **Sea.** The brand names sea (navy) as the globe's colour, and L2-008 lists "sea navy" among
-   the globe's colours. The cartoon globe's ocean is a bright blue. The mocks keep sea as a brand
-   colour and give the globe its own ocean. L2-008 and the Design section of `AGENTS.md` now
-   say the same.
-3. **"Invite teammate" and "Message".** Both buttons are drawn as the prototype draws them. What
-   each leads to is not designed, so no mock shows it, and neither is built until it is.
-   "Message" sits uneasily with "Mondino has no chat"; it may be better removed.
+2. **Sea.** Settled. Sea is the brand's navy and the globe has an ocean of its own, a bright
+   blue with a deeper rim. L2-008 and the Design section of `AGENTS.md` say the same.
+3. **"Invite teammate" and "Message".** Decided. "Invite teammate", in the header, copies the
+   team's invite link to the clipboard and shows the same toast as the invite card
+   (`notifications/invite-link`: "Invite link copied", or the refused copy); it opens nothing
+   else. "Message" is removed from the mocks and is not built: Mondino has no chat.
 4. **Dark theme.** Not in the prototype. It is drawn here because the mocks are themed; whether
    Mondino ships it is not decided.
 5. **A count on a moment marker** when a teammate has two moments in the week (L2-021) is not
@@ -141,7 +140,15 @@ projection gives.
    no team sees `no-team`.
 9. **The Team filter** is a tab list and the Moments filter a set of pressed buttons, as L2-028
    and L2-030 word them.
-10. **Selecting a teammate** from a row, a ribbon marker or a moment opens the Globe with that
+10. **The initials on Join** are those of the five teammates who joined most recently, with
+    their colours and nothing else: no name, no city.
+11. **The countries on Join** are the supported list to begin with: Australia, Brazil, Canada,
+    Germany, Ghana, India, Ireland, Italy, Japan, Mexico, Sweden, United Arab Emirates and the
+    United States.
+12. **Leaving.** `left-team` takes the team's name from the screen the teammate left from;
+    opened or reloaded without it, its title reads "You’ve left the team". Someone with no
+    team who opens a screen sees `no-team` in place.
+13. **Selecting a teammate** from a row, a ribbon marker or a moment opens the Globe with that
     pin selected. In the mocks those links lead to the nearest drawn state: Tomás, Sofia, Noah
     and Ahmed have their own, and every other teammate leads to Tomás's.
 
@@ -155,11 +162,11 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 
 | Screen | default | loading | empty | error | locating | found | not-found | lookup-unavailable | invalid | submitting | join-failed | rate-limited | team-full | invite-unusable | selected | selected-self | selected-asleep | pin-lifted | just-joined | group | sharing-off | quiet | globe-unavailable | fahrenheit-12-hour | weather-unavailable | working | asleep | no-results | edge | filtered | location-found | Requirements |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Join (`join`) | [✅](pages/join/default.html) | [✅](pages/join/loading.html) | ➖ | [✅](pages/join/error.html) | [✅](pages/join/locating.html) | [✅](pages/join/found.html) | [✅](pages/join/not-found.html) | [✅](pages/join/lookup-unavailable.html) | [✅](pages/join/invalid.html) | [✅](pages/join/submitting.html) | [✅](pages/join/join-failed.html) | [✅](pages/join/rate-limited.html) | [✅](pages/join/team-full.html) | [✅](pages/join/invite-unusable.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-001`, `L2-002`, `L2-003`, `L2-004`, `L2-005`, `L2-006`, `L2-037`, `L2-045` |
-| Globe (`globe`) | [✅](pages/globe/default.html) | [✅](pages/globe/loading.html) | [✅](pages/globe/empty.html) | [✅](pages/globe/error.html) |  |  |  |  |  |  |  |  |  |  | [✅](pages/globe/selected.html) | [✅](pages/globe/selected-self.html) | [✅](pages/globe/selected-asleep.html) | [✅](pages/globe/pin-lifted.html) | [✅](pages/globe/just-joined.html) | [✅](pages/globe/group.html) | [✅](pages/globe/sharing-off.html) | [✅](pages/globe/quiet.html) | [✅](pages/globe/globe-unavailable.html) | [✅](pages/globe/fahrenheit-12-hour.html) | [✅](pages/globe/weather-unavailable.html) |  |  |  |  |  |  | `L2-008`, `L2-009`, `L2-010`, `L2-011`, `L2-012`, `L2-013`, `L2-014`, `L2-015`, `L2-016`, `L2-017`, `L2-018`, `L2-019`, `L2-021`, `L2-022`, `L2-023`, `L2-024`, `L2-025`, `L2-033`, `L2-037`, `L2-038`, `L2-040`, `L2-049` |
-| Team (`team`) | [✅](pages/team/default.html) | [✅](pages/team/loading.html) | [✅](pages/team/empty.html) | [✅](pages/team/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/team/weather-unavailable.html) | [✅](pages/team/working.html) | [✅](pages/team/asleep.html) | [✅](pages/team/no-results.html) | [✅](pages/team/edge.html) |  |  | `L2-007`, `L2-014`, `L2-015`, `L2-016`, `L2-018`, `L2-019`, `L2-026`, `L2-027`, `L2-028`, `L2-037`, `L2-044`, `L2-049` |
-| Moments (`moments`) | [✅](pages/moments/default.html) | [✅](pages/moments/loading.html) | [✅](pages/moments/empty.html) | [✅](pages/moments/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/moments/no-results.html) |  | [✅](pages/moments/filtered.html) |  | `L2-007`, `L2-020`, `L2-029`, `L2-030`, `L2-037` |
-| Profile & Settings (`profile`) | [✅](pages/profile/default.html) | [✅](pages/profile/loading.html) | ➖ | [✅](pages/profile/error.html) | [✅](pages/profile/locating.html) |  |  |  | [✅](pages/profile/invalid.html) |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/profile/sharing-off.html) |  |  |  |  |  |  |  |  |  | [✅](pages/profile/location-found.html) | `L2-007`, `L2-019`, `L2-022`, `L2-031`, `L2-032`, `L2-033`, `L2-034`, `L2-035`, `L2-036`, `L2-037` |
+| Join (`join`) | [✅](pages/join/default.html) | [✅](pages/join/loading.html) | ➖ | [✅](pages/join/error.html) | [✅](pages/join/locating.html) | [✅](pages/join/found.html) | [✅](pages/join/not-found.html) | [✅](pages/join/lookup-unavailable.html) | [✅](pages/join/invalid.html) | [✅](pages/join/submitting.html) | [✅](pages/join/join-failed.html) | [✅](pages/join/rate-limited.html) | [✅](pages/join/team-full.html) | [✅](pages/join/invite-unusable.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-001`, `L2-002`, `L2-003`, `L2-004`, `L2-005`, `L2-006`, `L2-037`, `L2-040`, `L2-045`, `L2-049` |
+| Globe (`globe`) | [✅](pages/globe/default.html) | [✅](pages/globe/loading.html) | [✅](pages/globe/empty.html) | [✅](pages/globe/error.html) |  |  |  |  |  |  |  |  |  |  | [✅](pages/globe/selected.html) | [✅](pages/globe/selected-self.html) | [✅](pages/globe/selected-asleep.html) | [✅](pages/globe/pin-lifted.html) | [✅](pages/globe/just-joined.html) | [✅](pages/globe/group.html) | [✅](pages/globe/sharing-off.html) | [✅](pages/globe/quiet.html) | [✅](pages/globe/globe-unavailable.html) | [✅](pages/globe/fahrenheit-12-hour.html) | [✅](pages/globe/weather-unavailable.html) |  |  |  |  |  |  | `L2-005`, `L2-007`, `L2-008`, `L2-009`, `L2-010`, `L2-011`, `L2-012`, `L2-013`, `L2-014`, `L2-015`, `L2-016`, `L2-017`, `L2-018`, `L2-019`, `L2-021`, `L2-022`, `L2-023`, `L2-024`, `L2-025`, `L2-033`, `L2-034`, `L2-037`, `L2-038`, `L2-040`, `L2-049` |
+| Team (`team`) | [✅](pages/team/default.html) | [✅](pages/team/loading.html) | [✅](pages/team/empty.html) | [✅](pages/team/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/team/weather-unavailable.html) | [✅](pages/team/working.html) | [✅](pages/team/asleep.html) | [✅](pages/team/no-results.html) | [✅](pages/team/edge.html) |  |  | `L2-007`, `L2-014`, `L2-015`, `L2-016`, `L2-018`, `L2-019`, `L2-026`, `L2-027`, `L2-028`, `L2-037`, `L2-038`, `L2-044`, `L2-049` |
+| Moments (`moments`) | [✅](pages/moments/default.html) | [✅](pages/moments/loading.html) | [✅](pages/moments/empty.html) | [✅](pages/moments/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/moments/no-results.html) |  | [✅](pages/moments/filtered.html) |  | `L2-007`, `L2-020`, `L2-029`, `L2-030`, `L2-037`, `L2-038`, `L2-049` |
+| Profile & Settings (`profile`) | [✅](pages/profile/default.html) | [✅](pages/profile/loading.html) | ➖ | [✅](pages/profile/error.html) | [✅](pages/profile/locating.html) |  |  | [✅](pages/profile/lookup-unavailable.html) | [✅](pages/profile/invalid.html) |  |  | [✅](pages/profile/rate-limited.html) |  |  |  |  |  |  |  |  | [✅](pages/profile/sharing-off.html) |  |  |  |  |  |  |  |  |  | [✅](pages/profile/location-found.html) | `L2-007`, `L2-019`, `L2-022`, `L2-031`, `L2-032`, `L2-033`, `L2-034`, `L2-035`, `L2-036`, `L2-037`, `L2-038`, `L2-049` |
 | Left the team (`left-team`) | [✅](pages/left-team/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-036` |
 | Invite link needed (`no-team`) | [✅](pages/no-team/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-038`, `L2-043` |
 | Not found (`not-found`) | [✅](pages/not-found/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-038` |

@@ -31,7 +31,7 @@ Frontend:
   Globe, Team, Moments and Profile & Settings screens. It injects `TEAM_API` and `CLOCK`.
   `load(teamId)` reads the pins once when the route opens. An effect on the clock's minute tick
   calls `refreshIfDue(now)`, which calls `refresh()` when `RefreshIntervalMinutes` (15) or more
-  have passed since `lastRefreshedAt` and no request is pending (L2-048). The store has no
+  have passed since `refreshedAt` and no request is pending (L2-048). The store has no
   timer of its own.
 - **`BrowserClock`** — the one shared clock, bound to `CLOCK`. It ticks each minute, stops its
   timer while the tab is hidden and ticks at once when the tab is shown again. Because the
@@ -48,15 +48,26 @@ Frontend:
   the list. `arrivedIds` and `arrivedShown` are an input and an output this design adds to
   `GlobeView`.
 - **`loadState`** — `Loading`, `Ready` or `Failed`, for the first load only. A refresh never
-  changes it: a failed refresh keeps the pins held and shows nothing, and the store tries again
-  at the next minute tick.
+  changes it: a failed refresh keeps the pins held, sets `refreshFailed`, and the store tries
+  again at the next minute tick. `Loading` shows skeletons, on the Globe screen under the heading "Your team", and announces
+  "Loading your team…";
+  `Failed` shows "We couldn’t load your team" with "Try again", which calls `load` again.
+- **`refreshFailed`** and **`refreshedAt`** — whether the last refresh failed, and when the pins
+  held were read. While `refreshFailed` is true a banner (`Alert` as a banner, block `banner`,
+  `role="status"`) sits under the header of whichever screen is open: "Couldn’t refresh just
+  now. Clocks are still right; weather and moments are from 14:50. Mondino will try again
+  shortly.", the time being `refreshedAt` on the viewer's clock, with "Try now", which calls
+  `refresh()`. `TeamShell`, the route component that provides the `TeamStore`, renders it under
+  `AppHeader`, where it also renders the toast. The screen keeps everything it showed. The next
+  refresh that succeeds clears `refreshFailed` and the banner goes, with no message (L2-048,
+  L2-049).
 - **`TeamApi`** (`TEAM_API`) and **`HttpTeamApi`** — contract and HTTP client in the `api`
   library. `getPins(teamId, signal)` calls `GET /api/teams/{teamId}/pins` and returns a
   `TeamPins`. The store passes an `AbortSignal` and aborts the pending request when the route
   is destroyed.
 - **`TeamPins`** — type in `api`: `teamId`, `teamName`, `inviteToken`, `viewerTeammateId` and
   `pins`. It mirrors `TeamPinsDto`.
-- **Moments across midnight** — `groupMoments(moments, now)` in `moments/` is called from
+- **Moments across midnight** — `groupMoments(moments, pins, now)` in `moments/` is called from
   computed signals that read the clock's minute tick, with today taken in the teammate's city.
   When the clock passes a teammate's midnight, their moments move between Today, This week and
   Later with no request (L2-048).
@@ -74,13 +85,15 @@ Backend:
   and its `Teammate` entities through `IAppDbContext`, and refuses when the session's teammate
   does not belong to the team. It reads the weather once for each distinct `City` through
   `IWeatherSource`, finds each city's moments through `MomentFinder`, and returns a
-  `TeamPinsDto`. A `PinDto` carries a null weather when the teammate does not share it or the
-  source fails; the pin is still returned with its time zone.
+  `TeamPinsDto`. A `PinDto` carries a null `Weather` when the teammate does not share it or the
+  source fails, and its `WeatherState` (`Available`, `Unavailable` or `NotShared`) says which;
+  the pin is still returned with its time zone.
 - **`TeamPinsDto`** — `TeamId`, `TeamName`, `InviteToken`, `ViewerTeammateId` and the `PinDto`
   list. It carries no postal code and no local time.
-- **`CachedWeatherSource`** — decorator over `OpenMeteoWeatherSource` with a timeout and a
-  circuit breaker. A refresh usually finds the weather in the cache; a miss sends Open-Meteo a
-  position and nothing else. The cache lifetime is `<TO SUPPLY>`.
+- **`CachedWeatherSource`** — decorator over `OpenMeteoWeatherSource` with a 5 second timeout
+  (L2-049) and a circuit breaker. Weather is fresh for 15 minutes (L2-018), the interval of a
+  refresh, so a refresh usually finds the weather in the cache; a miss sends Open-Meteo a
+  position and nothing else.
 
 The interval is one constant, `TeamStore.RefreshIntervalMinutes`. Unit tests advance a fake
 clock bound to `CLOCK`; none sleeps. How the web app learns its team id when a teammate returns
@@ -94,6 +107,9 @@ requirement cited by identifier.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-048` | `L1-015` | A screen left open stays true: weather, moments and the team itself are refreshed quietly. |
+
+The banner is also what L2-049 asks of a screen when the backend cannot be reached; the rest of
+L2-049 is designed in `platform/survive-source-failure`.
 
 ## Diagrams
 
@@ -133,7 +149,7 @@ In the web app, `BrowserClock` ticks `TeamStore`, which calls `HttpTeamApi`. In 
 A minute tick finds 15 minutes passed, and the store reads the pins again. The handler returns
 every teammate's pin with weather or null. The store merges them, keeps the selection, and
 reports the new teammate's id, whose pin the globe adds and pulses once. A failed refresh keeps
-the pins held.
+the pins held and shows the banner until a refresh succeeds.
 
 ![Sequence diagram for a quiet refresh that brings in a new teammate](diagrams/sequence-quiet-refresh.png)
 

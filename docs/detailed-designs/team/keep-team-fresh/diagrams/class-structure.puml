@@ -21,7 +21,8 @@ class TeamStore <<domain pins/>> {
   +counts: Signal<TeamCounts>
   +arrivedTeammateIds: Signal<string[]>
   +loadState: Signal<LoadState>
-  -lastRefreshedAt: Date | null
+  +refreshFailed: Signal<boolean>
+  +refreshedAt: Signal<Date | null>
   -pending: AbortController | null
   +load(teamId: string): Promise<void>
   +refresh(): Promise<void>
@@ -38,12 +39,12 @@ enum LoadState {
 
 interface Clock <<api, CLOCK>> {
   +now(): Date
-  +minute: Signal<number>
+  +minute: Signal<Date>
 }
 
 class BrowserClock <<domain time/>> {
   +now(): Date
-  +minute: Signal<number>
+  +minute: Signal<Date>
 }
 
 interface TeamApi <<api, TEAM_API>> {

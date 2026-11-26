@@ -44,7 +44,7 @@ alt teamId is not the teammate's own team
   handler --> controller : Not found; nothing changes (L2-032)
 else postal code or country differs from the stored one
   handler -> lookup : FindCityAsync(normalised postal code)
-  lookup --> handler : City (from the cache after the lookup)
+  lookup --> handler : PostalCodeLookupOutcome (from the cache after the lookup)
   alt city found
     handler -> entity : MoveTo(postalCode, city) (L2-032)
     entity --> handler : Pin now at City.Position; same city, same position

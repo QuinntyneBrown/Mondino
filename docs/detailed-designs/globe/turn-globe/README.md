@@ -57,7 +57,7 @@ API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`.
   `GlobeGestures`, and registers a frame listener on `GlobeScene`. On each frame it calls
   `motion.advance(elapsedMs)` and passes the result to `GlobeScene.setOrientation`. It attaches
   `GlobeGestures` only when its `interactive` input is true, so the small globe on Profile &
-  Settings is not dragged.
+  Settings is not dragged, and never over the still picture (see `draw-globe`).
 - **`GlobeScene`** — draws the globe at the orientation it is given and owns the render loop
   (`start`, `stop`, `onFrame`). It decides nothing about motion.
 

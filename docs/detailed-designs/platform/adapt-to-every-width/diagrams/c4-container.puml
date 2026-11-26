@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title Containers — Adapt to every width
 
 Person(teammate, "Teammate", "Opens a screen's address")
-Person(visitor, "Person with an invite link", "Not yet a teammate")
+Person(visitor, "Person who is not a teammate", "Not a teammate of any team on this device")
 
 System_Boundary(mondino, "Mondino") {
   Container(spa, "Mondino web app", "Angular", "Shell, navigation, lazy routes and the layout of each screen per breakpoint")

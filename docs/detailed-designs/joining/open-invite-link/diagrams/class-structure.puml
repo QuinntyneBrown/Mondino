@@ -27,7 +27,6 @@ package "mondino application" {
     Ready
     AlreadyJoined
     NotFound
-    RateLimited
     Failed
   }
 }
@@ -40,8 +39,13 @@ package "@mondino/api" {
     +teamName: string
     +teammateCount: number
     +positions: Position[]
+    +avatars: InviteAvatar[]
     +alreadyJoined: boolean
     +countries: Country[]
+  }
+  class InviteAvatar {
+    +initials: string
+    +colour: string
   }
   class ApiError {
     +code: string
@@ -63,12 +67,18 @@ package "Mondino.Application" {
     +string TeamName
     +int TeammateCount
     +IReadOnlyList<Position> Positions
+    +IReadOnlyList<InviteAvatarDto> Avatars
     +bool AlreadyJoined
     +IReadOnlyList<CountryDto> Countries
   }
+  class InviteAvatarDto {
+    +string Initials
+    +string Colour
+  }
   interface ICurrentTeammate {
-    +Guid? TeamId
-    +Guid? TeammateId
+    +Guid TeammateId
+    +Guid TeamId
+    +bool IsAuthenticated
   }
   interface IAppDbContext
 }
@@ -81,7 +91,10 @@ package "Mondino.Domain" {
   }
   class Teammate {
     +Guid Id
+    +string Name
+    +string Colour
     +City City
+    +DateTimeOffset JoinedAt
   }
   class City {
     +string Name
@@ -98,6 +111,7 @@ JoinStore --> InviteState : holds
 JoinStore ..> InviteApi : INVITE_API
 HttpInviteApi ..|> InviteApi
 InviteApi ..> Invite : returns
+Invite --> InviteAvatar : at most five
 InviteApi ..> ApiError : refuses with
 HttpInviteApi ..> InvitesController : GET /api/invites/{inviteToken}
 InvitesController ..> GetInviteQuery : sends
@@ -110,4 +124,5 @@ Team "1" *-- "0..500" Teammate
 Teammate --> City
 City --> Position
 InviteDto --> Position : bare positions
+InviteDto --> InviteAvatarDto : the five who joined most recently
 @enduml

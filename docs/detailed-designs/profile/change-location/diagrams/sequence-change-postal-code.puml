@@ -35,13 +35,13 @@ participant "Postal code source" as source
 participant "Open-Meteo" as meteo
 actor -> field : Change the country or postal code, leave the field
 field -> store : changePostalCode(value), lookUp()
-store -> store : Clear the found city; lookup = finding; canSave = false
+store -> store : Clear the found city; lookupState = Locating; canSave = false
 field --> actor : "Finding M5V 2T6…"
 store -> client : lookUpPostalCode(teamId, countryCode, postalCode)
 client -> controller : POST /api/teams/{teamId}/me/postal-code-lookups (postal code in the body)
 controller -> controller : Authenticate the session; apply the lookup rate limit
 controller -> handler : Send LookUpPostalCodeQuery
-handler -> formats : Matches and Normalise
+handler -> formats : TryNormalise(countryCode, postalCode)
 alt wrong form for the country
   formats --> handler : No match
   handler --> controller : postal_code_not_found; the source is not called
@@ -51,7 +51,7 @@ else right form
   lookup -> source : Country and postal code only
   alt found
     source --> lookup : City, position, time zone
-    lookup --> handler : City
+    lookup --> handler : Found, City
     handler -> weather : Weather at City.Position
     weather -> meteo : Position only
     meteo --> weather : Current weather
@@ -59,23 +59,26 @@ else right form
     handler --> controller : PostalCodeResultDto
   else not known to the source
     source --> lookup : No city
-    lookup --> handler : null
+    lookup --> handler : NotFound
     handler --> controller : postal_code_not_found
   else no answer within 5 seconds
-    lookup --> handler : Lookup unavailable
+    lookup --> handler : Unavailable
     handler --> controller : postal_code_unavailable
   end
 end
 controller --> client : 200 PostalCodeResultDto, or ProblemDetails with a code
 client --> store : PostalCodeResult or ApiError
 alt found
-  store -> store : lookup = found; canSave = true
-  field --> actor : City and region; saving is offered
+  store -> store : lookupState = Found; canSave = true
+  field --> actor : City and region, "your pin moves here when you save"; the small globe shows the pin there as new; saving is offered
 else postal_code_not_found
-  store -> store : lookup = notFound; canSave = false
-  field --> actor : Alert of L2-004; saving is not offered; the pin stays (L2-032)
+  store -> store : lookupState = NotFound; canSave = false
+  field --> actor : Alert of L2-004, ending "Your pin stays in Milan."; saving is not offered; the pin stays (L2-032)
 else postal_code_unavailable
-  store -> store : lookup = unavailable; canSave = false
-  field --> actor : Could not be checked right now; offer to try again
+  store -> store : lookupState = Unavailable; canSave = false
+  field --> actor : Could not be checked right now, "Your pin stays in Milan."; "Try again" runs lookUp() again (L2-032)
+else rate_limited (429 from the lookup rate limit, before the handler)
+  store -> store : lookupState = RateLimited; canSave = false
+  field --> actor : Wait a moment, then try again, "Your pin stays in Milan."; what was typed is kept (L2-032)
 end
 @enduml

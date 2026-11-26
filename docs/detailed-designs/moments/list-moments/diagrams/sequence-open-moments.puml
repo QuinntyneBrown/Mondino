@@ -33,7 +33,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 
 actor -> page : Open /moments
-page -> client : getMoments(teamId)
+page -> client : getMoments(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/moments
 controller -> handler : Send GetMomentsQuery
 handler -> db : Load the team of the current teammate
@@ -44,23 +44,23 @@ handler --> controller : MomentDto list
 alt moments returned
   controller --> client : 200 with the moments
   client --> page : Moment list
-  page -> group : groupMoments(moments, clock.now())
+  page -> group : groupMoments(moments, TeamStore pins, clock.now())
   group -> group : Days ahead of each moment,\nfrom today in the moment's own place (L2-020)
   group -> group : Drop moments before today\nor more than 90 days ahead (L2-029)
-  group -> group : 0 days: today; 1 to 7: this week;\n8 to 90: later; each in date order (L2-029)
+  group -> group : 0 days: today; 1 to 7: this week;\n8 to 90: later; each in date order,\nthen west to east by teammate (L2-029)
   group --> page : MomentGroups with a when label on each moment
   page -> list : groups
   alt at least one moment
     list --> actor : "Today in" and its city first, then "This week"\nand "Later"; a heading with no moments is absent
   else no upcoming moment
-    list --> actor : Message that nothing is coming up for the team
+    list --> actor : "Nothing is coming up for your team"
   end
 else request refused or failed
   controller --> client : ProblemDetails with a code
   client --> page : ApiError
-  page --> actor : Generic message and a way to try again
+  page --> actor : "We couldn’t load moments" and "Try again"
 end
 actor -> list : Choose a moment
 list --> page : select(moment)
-page -> page : TeamStore.select(teammateId), navigate to /globe (L2-029)
+page -> page : navigate to /globe?teammate={teammateId} (L2-029)
 @enduml

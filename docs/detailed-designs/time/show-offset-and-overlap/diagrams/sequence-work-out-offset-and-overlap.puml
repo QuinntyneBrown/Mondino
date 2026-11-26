@@ -39,23 +39,25 @@ else another teammate
   page -> offset : offsetBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
   offset -> offset : zoneOffsetMinutes of each zone at now, subtract
   offset --> page : Offset: minutes, direction
-  page -> offset : formatOffset(offset)
-  offset --> page : Hours and minutes ahead or behind, or the same time (L2-016)
+  page -> offset : formatOffset(offset, 'panel')
+  offset --> page : "7 h behind you", "10 h ahead of you" or "Same time as you" (L2-016)
 
-  page -> overlap : overlapBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
+  page -> overlap : workingDayOnViewerClock(now, pin.timeZoneId, viewerPin.timeZoneId)
   overlap -> overlap : Move the teammate's 09:00 to 18:00 onto the viewer's clock
+  overlap --> page : DaySpan: the teammate's working day on the viewer's clock
+  page -> overlap : overlapBetween(now, pin.timeZoneId, viewerPin.timeZoneId)
   overlap -> overlap : Intersect with the viewer's 09:00 to 18:00
   alt the working days coincide
     overlap --> page : Overlap: startMinute, endMinute, lengthMinutes
   else no shared working hours
     overlap --> page : null
   end
-  page -> overlap : formatOverlap(overlap, viewer's ClockFormat)
-  overlap --> page : Start, end and length as text, or no shared working hours (L2-017)
+  page -> overlap : formatOverlap(overlap, theirDay, first name, viewer's ClockFormat)
+  overlap --> page : OverlapText: start, end and length, or no shared working hours\nand the teammate's working day (L2-017)
 
-  page -> panel : Bind offset text, overlap and overlap text
-  panel -> bar : Bind startMinute, endMinute and label
-  bar --> actor : Bar on the viewer's day, with the overlap as its text (L2-017)
+  page -> panel : Bind offset text, overlap, the teammate's DaySpan and OverlapText
+  panel -> bar : Bind overlap, theirDay, nowMinute, first name and text
+  bar --> actor : Both working days on the viewer's day, with the overlap as text (L2-017)
   panel --> actor : Offset as text (L2-016)
 end
 @enduml

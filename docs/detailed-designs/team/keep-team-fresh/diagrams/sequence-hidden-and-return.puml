@@ -39,7 +39,7 @@ alt hidden for 15 minutes or more
   client -> controller : GET /api/teams/{teamId}/pins
   controller --> client : 200 with the pins
   client --> store : TeamPins
-  store -> store : merge; lastRefreshedAt = clock.now()
+  store -> store : merge; refreshedAt = clock.now()
   store --> page : pins, counts
   page --> actor : Current pins, weather and moments, selection kept
 else hidden for less than 15 minutes

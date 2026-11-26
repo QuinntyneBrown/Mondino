@@ -24,13 +24,13 @@ end box
 
 note over chips, page : The screen opens with "Everything" pressed (L2-030)
 actor -> chips : Choose "Sport"
-chips --> page : select("sport")
+chips --> page : selectedChange("sport")
 page -> page : Set the filter signal
 page --> chips : selected = "sport"
 chips --> actor : "Sport" exposed with aria-pressed="true",\nits icon and its name (L2-030)
 page -> page : Keep the loaded moments whose kind is sport
 note right of page : No request is sent: the filter\nworks on the moments already loaded
-page -> group : groupMoments(filtered moments, clock.now())
+page -> group : groupMoments(filtered moments, TeamStore pins, clock.now())
 group --> page : MomentGroups
 page -> list : groups, filtered = true
 alt at least one sport moment
@@ -39,8 +39,8 @@ else no upcoming sport moment
   list --> actor : "Nothing of this kind coming up for your team."
 end
 actor -> chips : Choose "Everything"
-chips --> page : select("everything")
-page -> group : groupMoments(all moments, clock.now())
+chips --> page : selectedChange("everything")
+page -> group : groupMoments(all moments, TeamStore pins, clock.now())
 group --> page : MomentGroups
 page -> list : groups, filtered = false
 list --> actor : All upcoming moments

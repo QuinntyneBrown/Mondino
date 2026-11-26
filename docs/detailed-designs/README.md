@@ -62,20 +62,52 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 - `GET /api/teams/{teamId}/pins` answers a `TeamPinsDto`: the team's id and name, its invite
   token, the viewer's teammate id and the list of `PinDto`. Each `PinDto` also carries
   `IsViewer`, which agrees with the viewer's teammate id.
+- `PinDto.Weather` is null unless the weather is available, and `PinDto.WeatherState`
+  (`Pin.weatherState`, the type `WeatherState` in `@mondino/api`) is `Available`, `Unavailable`
+  or `NotShared`, so weather that is not shared and weather that is unavailable are told apart
+  and worded differently.
+- `GET /api/invites/{inviteToken}` answers an `InviteDto`. Its `Avatars` are the initials and
+  colour of the five teammates who joined most recently, with no name, id or city; they are
+  the most a holder of an invite link learns of a teammate.
 - `PinDto.ShowsStatusOutsideWorkingHours` (`Pin.showsStatusOutsideWorkingHours`) is false when a
   teammate has switched off "Show when I'm outside working hours". Anything that shows, counts
-  or filters by status calls `statusFor(pin, time)`, never `statusAt` directly.
-- A postal code travels only in a request body. `IPostalCodeLookup.FindCityAsync` answers
-  found, not found or unavailable; the API answers 422 `postal_code_not_found` and 503
-  `postal_code_unavailable`.
+  or filters by status calls `statusFor(pin, time)`, never `statusAt` directly. While such a
+  teammate's status is hidden they are listed under All only: not under Asleep, not in its
+  count and not in "asleep" on the Globe.
+- A postal code travels only in a request body. `IPostalCodeLookup.FindCityAsync` answers a
+  `PostalCodeLookupOutcome`: found with a `City`, not found or unavailable; the API answers 422 `postal_code_not_found` and 503
+  `postal_code_unavailable`, and 429 `rate_limited` over the limit. A person joining looks one up
+  with `POST /api/invites/{inviteToken}/postal-code-lookups`, and a teammate changing their
+  location with `POST /api/teams/{teamId}/me/postal-code-lookups`.
+- `LookupState`, in `@mondino/api`, is the state of a postal code lookup on Join and on Profile
+  & Settings: `Idle`, `Locating`, `Found` (with its `PostalCodeResult`), `NotFound`,
+  `Unavailable` or `RateLimited`. `PostalCodeField` takes it as `lookupState` and has one shape
+  on both screens.
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
-  shown as zero.
+  shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
+  15 minutes.
 - The `globe` library depends on `api` only. `GlobePage` hands `GlobeView` what `domain` works
   out: the pin and label templates, the moment markers, the pin descriptions and, through
   `PIN_SPREADER`, the placement of pins that are close together.
-- `TeamStore` is provided at the route that holds Globe, Team, Moments and Profile & Settings.
-  The browser knows its team from `TeamMembership`, which holds ids and the team's name and
-  never a postal code.
+- The pins on the globe are the accessible list. `PinLayer` renders them as the mocks'
+  `ul.globe__pins > li.globe__pin > button.pin`; each button is named by `describePin` and
+  carries `aria-pressed`, and the visible label is `aria-hidden`. There is no separate hidden
+  list. `GlobeFallback` (the still picture) and `GlobePlaceholder` are in `components`, so
+  they show when the `globe` library's chunk fails to load; the still picture has no pins.
+- `TeamShell`, in the app, is the component of the route that holds Globe, Team, Moments and
+  Profile & Settings. It provides `TeamStore` and renders `AppHeader` (`mo-app-header`, block
+  `app-header`), the refresh banner and the toast. The header avatar's initials and colour come
+  from the viewer's pin in `TeamStore`. `AppHeader`'s "Invite teammate" button emits `invite`;
+  `TeamShell` provides `InviteLinkCopier`, a service of the `mondino` application, and calls
+  its `copy()`, as "Copy" on the invite card does, so both copy the team's invite link and
+  end in the same toast; it opens nothing. There is no "Message" button: Mondino has no chat.
+- `GroupPanel` (`mo-group-panel`, `team/view-teammate-panel`) is `TeammatePanel`'s sibling.
+  `GlobePage` shows it on `GlobeView`'s `selectGroup`; it lists the group's teammates west to
+  east, each a link that selects that pin, and closes as the teammate panel does.
+- The browser knows its team from `TeamMembership`, which holds ids and the team's name and
+  never a postal code. Without a membership, the four addresses show `InviteNeededPage` in
+  place, and any other address shows `NotFoundPage`. `LeftPage` takes the team's name from the
+  navigation state; opened or reloaded without it, it reads "You’ve left the team".
 
 ## Not decided yet
 
@@ -87,9 +119,6 @@ The designs mark these as `<TO SUPPLY>`:
 - The providers of the postal code source and of the holiday, race and event calendars.
 - How a team is made, and how a teammate signs in again on another device.
 - Which emblems Mondino holds the right to use.
-- How a `PinDto` tells weather that is not shared from weather that is unavailable.
-- How the Asleep filter and its count treat a teammate who hides their status, beyond L2-015's
-  rule that they are not counted as asleep.
 - Protection against cross-site request forgery for the join request, which is made before a
   session exists.
 - What becomes of a team when its last teammate leaves.

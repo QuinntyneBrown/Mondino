@@ -22,10 +22,12 @@ nothing about a teammate.
 Whatever Open-Meteo reports, the API maps it to one of the eight conditions, so the web app
 always has an icon and a word to show. The web app shows the condition as an icon with its
 word, and uses the night form of the icon for a clear or partly cloudy sky at night. It shows
-the temperature as whole degrees in the viewer's unit.
+the temperature as whole degrees in the viewer's unit: with the unit on a panel ("13°C") and as
+degrees alone on a pin's label and a Team row ("13°").
 
 A teammate may turn off "Share my local weather". The API then gives no weather for that
-teammate to anyone else, while the teammate still sees their own.
+teammate to anyone else, while the teammate still sees their own. Each pin says whether its
+weather is available, unavailable or not shared, so the web app can say which.
 
 ## Description
 
@@ -47,12 +49,15 @@ teammate to anyone else, while the teammate still sees their own.
   position and no teammate. It returns `null` when no weather can be given.
 - **`GetPinsQueryHandler`** — MediatR handler for `GetPinsQuery`. It loads the team's teammates,
   collects the distinct cities among those whose weather the viewer may see, and calls
-  `IWeatherSource` once per city, in parallel. It then builds each `PinDto`. A teammate whose
-  `ShareWeather` is off gets `Weather` `null`, except on the viewer's own pin. A city whose
-  weather is `null` gives `Weather` `null` and the rest of the pin unchanged; the handler does
-  not fail.
+  `IWeatherSource` once per city, in parallel. It then builds each `PinDto` and returns them in
+  the `TeamPinsDto`. A teammate whose `ShareWeather` is off gets `Weather` `null` and
+  `WeatherState` `NotShared`, except on the viewer's own pin. A city whose weather is `null`
+  gives `Weather` `null`, `WeatherState` `Unavailable` and the rest of the pin unchanged; the
+  handler does not fail. Every other pin has its `Weather` and `WeatherState` `Available`.
 - **`WeatherDto`** — `TemperatureC`, `Condition` and `ObservedAt`, carried as `PinDto.Weather`
   and in `PostalCodeResultDto`. It carries no unit and no temperature in °F.
+- **`WeatherState`** — enumeration carried as `PinDto.WeatherState`: `Available`, `Unavailable`
+  or `NotShared`. `PinDto.Weather` is `null` unless the state is `Available`.
 - **`WeatherConditionMapper`** — service with
   `Map(int weatherCode, double windSpeedKmh): WeatherCondition`. It turns Open-Meteo's WMO
   weather code into one of the eight conditions by the table below. Each code has a row, and a
@@ -104,7 +109,8 @@ teammate to anyone else, while the teammate still sees their own.
 - **`Weather`** — `temperatureC: number`, `condition: WeatherCondition`, `observedAt: string`.
 - **`WeatherCondition`** — `'clear' | 'partly-cloudy' | 'cloudy' | 'rain' | 'showers' | 'storm'
   | 'fog' | 'wind'`.
-- **`Pin`** — its `weather` is a `Weather` or `null`.
+- **`Pin`** — its `weather` is a `Weather` or `null`, and its `weatherState` a `WeatherState`.
+- **`WeatherState`** — `'Available' | 'Unavailable' | 'NotShared'`, the names `PinDto.WeatherState` carries.
 - **`TemperatureUnit`** — `'celsius' | 'fahrenheit'`, in the viewer's `Settings`.
 
 ### Frontend — `domain` library, `pins/`
@@ -112,10 +118,15 @@ teammate to anyone else, while the teammate still sees their own.
 - **`formatTemperature(temperatureC, unit): string`** — pure function. For `fahrenheit` it
   converts with `temperatureC × 9 / 5 + 32`. It rounds to a whole degree, turns a negative zero
   into zero, and appends "°C" or "°F" with no space. 13 °C gives "13°C" and "55°F"; −0.4 °C
-  gives "0°C" (L2-019).
+  gives "0°C" (L2-019). This is the form a panel shows.
+- **`formatDegrees(temperatureC, unit): string`** — pure function. It converts and rounds as
+  `formatTemperature` does and appends the degree sign alone: 13 °C gives "13°" and, for
+  `fahrenheit`, "55°". This is the form a pin's label, a pin's accessible name and a Team row
+  show.
 - **`weatherLabel(condition, cityName): string`** — pure function. It gives the condition's
   word with the city ("Foggy in Milan"). The city's name is data and is rendered as text. The
-  word for each condition follows the mocks in `docs/mocks/`.
+  words are the mocks': "Clear", "Partly cloudy", "Cloudy", "Rainy", "Showers", "Stormy",
+  "Foggy" and "Windy".
 - **`isNightSky(localHour): boolean`** — pure function. It is `true` when `statusAt(localHour)`
   from `time/` is `probably-asleep`, that is from 23:00 to 06:59 at the pin's city (L2-018). It
   reads the hour only, so it applies whether or not the teammate's status is shown.
@@ -134,12 +145,18 @@ teammate to anyone else, while the teammate still sees their own.
   loaded from a CDN.
 - **`PinLabel`**, **`TeammatePanel`** and **`TeamTable`** — presentation components. Each takes
   the temperature text, the condition and the night flag as inputs and sets the temperature in
-  tabular figures.
+  tabular figures. A pin's label shows the degrees beside the local time and, when the pin is
+  lifted, the icon and the condition's word as well. The panel shows the icon, the temperature
+  with its unit and the label. A Team row shows the icon and the degrees.
 
-When `pin.weather` is `null` no temperature and no icon is shown; the local time and status are
-unaffected. A `null` stands both for weather a teammate does not share and for weather the
-source could not give. How `PinDto` tells the two apart, so that the weather's place can say it
-is unavailable (L2-049), is `<TO SUPPLY>`.
+When `pin.weather` is `null` no temperature and no condition is shown, and a pin's label and
+its accessible name leave the weather out; the local time and status are unaffected.
+`pin.weatherState` says why. When it is `Unavailable`, the source could not give the weather:
+in the weather's place the panel says "Weather is unavailable right now." with "Tomás’s local
+time is still right." under it, and a Team row shows a mark named "Weather unavailable"
+(L2-049). When it is `NotShared`, the panel says "Ahmed doesn’t share local weather.". The
+teammate is named by `firstName(name)` from `pins/`, the first word of their name; it is data
+and is rendered as text.
 
 ## Requirements
 
@@ -148,8 +165,8 @@ level-1 (L1) requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-018` | `L1-006` | Each pin carries the current temperature and one of a fixed set of conditions (clear, partly cloudy, cloudy, rain, showers, storm, fog, wind) for its city, from Open-Meteo by way of the backend. Conditions are shown as an icon with its word; at night a clear or partly cloudy sky uses its night icon. |
-| `L2-019` | `L1-006` | Temperatures are shown in the unit the viewer has chosen, as whole degrees with tabular figures. A new teammate's unit starts from their country: °F for the United States, °C elsewhere. |
+| `L2-018` | `L1-006` | Each pin carries the current temperature and one of a fixed set of conditions (clear, partly cloudy, cloudy, rain, showers, storm, fog, wind) for its city, from Open-Meteo by way of the backend. Conditions are shown as an icon with its word ("Clear", "Partly cloudy", "Cloudy", "Rainy", "Showers", "Stormy", "Foggy", "Windy"); at night a clear or partly cloudy sky uses its night icon. |
+| `L2-019` | `L1-006` | Temperatures are shown in the unit the viewer has chosen, as whole degrees with tabular figures: with the unit on a panel ("13°C") and as degrees alone on a pin and a Team row ("13°"). A new teammate's unit starts from their country: °F for the United States, °C elsewhere. |
 
 ## Diagrams
 
@@ -178,8 +195,8 @@ asks `IWeatherSource` once per city. `CachedWeatherSource` implements the interf
 ### Class structure
 
 `CachedWeatherSource` and `OpenMeteoWeatherSource` both implement `IWeatherSource`, and the
-first decorates the second. `GetPinsQueryHandler` depends on the interface and returns `PinDto`,
-which has a `WeatherDto` or none. The web app's functions and `WeatherIcon` read the same shape.
+first decorates the second. `GetPinsQueryHandler` depends on the interface and returns a
+`TeamPinsDto` of `PinDto`, each with a `WeatherState` and a `WeatherDto` or none. The web app's functions and `WeatherIcon` read the same shape.
 
 ![Class diagram for showing weather](diagrams/class-structure.png)
 
@@ -187,7 +204,8 @@ which has a `WeatherDto` or none. The web app's functions and `WeatherIcon` read
 
 `GetPinsQueryHandler` asks for each distinct city once. A cache hit younger than 15 minutes is
 returned without a call (L2-018). A miss calls Open-Meteo, maps the answer to one of the eight
-conditions (L2-018) and stores it. A teammate who does not share weather gets none.
+conditions (L2-018) and stores it. A teammate who does not share weather gets none, with
+`WeatherState` `NotShared`; a city the source could not answer for gives `Unavailable`.
 
 ![Sequence diagram for reading weather for the team's cities](diagrams/sequence-read-weather.png)
 

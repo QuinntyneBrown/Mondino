@@ -46,7 +46,8 @@ behind them.
   (`observe-without-exposing`). No endpoint is open by omission (L2-045).
 - **Cross-site request forgery.** State-changing requests under `/api/teams/` require an
   antiforgery token: the API issues it in a script-readable cookie, and Angular's `HttpClient`
-  returns it in a request header. The three open endpoints carry no session and are exempt.
+  returns it in a request header. The three open endpoints carry no session. How the join
+  request, which changes state before a session exists, is protected is `<TO SUPPLY>`.
 
 **Team scope (L2-043, L2-007).**
 
@@ -73,8 +74,10 @@ behind them.
   carry the city's name and country, and the city's position, never the postal code's own.
 - `ProfileDto` is the only DTO returned to a teammate that carries a postal code, and
   `GetProfileQueryHandler` builds it for the current teammate only.
-- `InviteDto` carries bare positions with no names, and `PostalCodeResultDto` answers the
-  person who typed the postal code.
+- `InviteDto` carries bare positions with no names, and `Avatars`: the initials and colour
+  of the five teammates who joined most recently, with no name, id or city. Initials and a
+  colour are the most a holder of an invite link learns of a teammate (L2-001).
+  `PostalCodeResultDto` answers the person who typed the postal code.
 - A postal code travels in a request body, never in a URL. In the browser it lives only in the
   form state of `JoinPage` and `ProfilePage`. `SettingsCache` and `TeamMembership` never hold
   one, so none is in local storage, session storage, IndexedDB, a cookie or the address bar.
@@ -84,8 +87,9 @@ behind them.
 - **`ValidationBehaviour`** — MediatR pipeline behaviour. It runs the request's validator and
   stops the pipeline with `validation_failed`, written as 400, before anything is stored.
 - **`JoinTeamCommandValidator`** and **`UpdateProfileCommandValidator`** — a name of 1 to 60
-  characters, a country in the supported list, a postal code of at most 12 characters, then
-  the country's format through `PostalCodeFormats`.
+  characters, a country in the supported list and a postal code of at most 12 characters. The
+  country's format is checked afterwards by the handler through `PostalCodeFormats`, which
+  refuses with `postal_code_not_found` (422), not `validation_failed`.
 - **`NameNormaliser`** — service in `Mondino.Application`. It removes control characters and
   trims leading and trailing spaces before validation and storage.
 - **Narrow request bodies.** A request body binds to a record that has only the fields a
@@ -118,8 +122,10 @@ controller and any outside source.
 | `Join` | `POST /api/invites/{inviteToken}/teammates` | 5 a minute |
 
 A refused request is answered 429 with a `Retry-After` header and the code `rate_limited`.
-`JoinPage` shows a message asking the person to wait a moment and try again, and keeps what
-was typed. `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
+For a lookup or a join request, `JoinPage` shows "That was a lot of tries in a short time. Wait
+a moment, then try again." and keeps what was typed. For an open of an invite link, nothing has
+been typed yet, and `JoinPage` shows "We couldn’t open this invite link" with "Try again"
+(L2-001). `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
 `IPostalCodeLookup`, so the lookup cannot be used without a valid invite link. Behind a proxy,
 the client address is read from the forwarded header the hosting platform sets, which is
 `<TO SUPPLY>`. The limit on `POST /api/teams/{teamId}/me/postal-code-lookups`, which needs a
@@ -133,7 +139,7 @@ level-1 (L1) requirement, cited by identifier.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-007` | `L1-002` | A postal code is returned only to the teammate it belongs to, on their own Join and Profile & Settings screens. Everything another teammate receives carries the city and country only. |
-| `L2-043` | `L1-014` | The backend decides what is allowed. Every request except opening an invite link and looking up a postal code while joining must come from a teammate of the team it concerns. |
+| `L2-043` | `L1-014` | The backend decides what is allowed. Every request except opening an invite link, looking up a postal code while joining and joining must come from a teammate of the team it concerns. |
 | `L2-044` | `L1-014` | Every value from a browser is validated by the backend whatever the frontend checked. A teammate's name, a team's name, a city and a moment's title and detail are rendered as text, never as HTML, wherever they appear. |
 | `L2-045` | `L1-014` | Opening an invite link, looking up a postal code while joining and joining are open to anyone who holds an invite link. Each is marked as open explicitly and is rate limited. |
 

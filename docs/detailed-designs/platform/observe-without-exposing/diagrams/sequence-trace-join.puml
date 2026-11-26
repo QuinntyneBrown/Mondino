@@ -52,7 +52,7 @@ handler --> controller : Result
 controller --> aspnet : 201, session cookie set
 aspnet -> telemetry : End the span: method, status, route template
 telemetry -> redaction : Each span and log record
-redaction -> redaction : Keep http.route = api/invites/{inviteToken}/teammates; drop path, query, client address and outgoing URL
+redaction -> redaction : Keep http.route = /api/invites/{inviteToken}/teammates; drop path, query, client address and outgoing URL
 redaction -> backend : Export over OTLP
 note over redaction, backend
   No name, postal code, city, position

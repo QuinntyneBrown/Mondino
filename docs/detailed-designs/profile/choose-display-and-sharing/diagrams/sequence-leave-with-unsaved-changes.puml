@@ -16,7 +16,7 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "AppShell" as shell
+  participant "AppHeader" as shell
   participant "Router" as router
   participant "unsavedChangesGuard" as guard
   participant "ProfileStore" as store
@@ -34,14 +34,14 @@ alt no unsaved changes
 else unsaved changes (L2-035)
   store --> guard : true
   guard -> dialog : Open through CDK Dialog
-  dialog --> actor : Ask whether to leave without saving
+  dialog --> actor : "Leave without saving?", naming the settings changed
   alt "Leave without saving"
     actor -> dialog : Confirm
     dialog --> guard : leave
     guard --> router : true
     router -> page : Destroy; ProfileStore and its draft go with the route
     router --> actor : Globe screen; nothing was saved
-  else "Stay", or Escape
+  else "Keep editing", or Escape
     actor -> dialog : Cancel
     dialog --> guard : stay
     guard --> router : false

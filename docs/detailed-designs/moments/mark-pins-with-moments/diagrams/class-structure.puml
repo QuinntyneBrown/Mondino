@@ -79,8 +79,6 @@ class PinLayer {
   +dispose(): void
 }
 
-class PinList
-
 class MomentIcon {
   +kind: MomentKind
 }
@@ -96,8 +94,6 @@ Pin "1" --> "*" Moment
 Moment --> MomentKind
 EmblemCatalogue ..> Moment : sets emblemKey
 GlobeView --> PinLayer
-GlobeView --> PinList
 PinLayer ..> MomentMarker : draws
-PinList ..> MomentMarker : gives as text
-PinList ..> MomentIcon : uses
+PinLayer ..> MomentIcon : draws a kind's icon with
 @enduml

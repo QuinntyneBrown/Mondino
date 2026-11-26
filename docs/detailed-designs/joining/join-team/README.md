@@ -33,13 +33,19 @@ screen.
 **Frontend (`mondino` application, `@mondino/api`)**
 
 - **`JoinPage`** — calls `JoinStore.join()` when the person chooses the button. On success it
+  calls `TeamMembership.remember(membership)` with a `Membership`: the `teamId` and `teammateId`
+  of the `JoinResult` and the `teamName` of the `Invite`, and never the postal code. It then
   navigates to `/globe` and passes the new teammate's id and a "new" flag in the navigation
   state, never in the URL. `GlobePage` selects that pin and pulses it once.
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one
   `joinRequestId`, made with `crypto.randomUUID()` when the store is created.
-  - `join()` sets `Joining`, which disables the button, and calls `InviteApi.join`.
+  - `join()` sets `Joining` and calls `InviteApi.join`. While `Joining`, the button reads
+    "Joining" and the team's name with an ellipsis ("Joining Northwind…") and is disabled, the
+    name and postal code are read-only and the country cannot be changed.
   - A failure sets `TeamFull`, `RateLimited` or `Failed` by the `code` of the `ApiError`. The
     signals `name`, `countryCode` and `postalCode` and the found city are left as they are.
+    `TeamFull` keeps the button disabled; `Failed` and `RateLimited` enable it again. The code
+    `invite_not_found` sets `inviteState` to `NotFound` instead, which replaces the form.
   - A retry sends the same `joinRequestId`, so a join whose response was lost does not make a
     second pin.
 - **`JoinState`** — feature-local union of `Idle`, `Joining`, `TeamFull`, `RateLimited` and
@@ -59,8 +65,8 @@ screen.
   answers 201 for a new teammate and 200 for a repeated join request. Fields the body does not
   define, such as a teammate id, a position or a colour, are ignored.
 - **`JoinTeamCommand`** — `InviteToken`, `Name`, `CountryCode`, `PostalCode`, `JoinRequestId`.
-- **`JoinTeamCommandValidator`** — removes control characters from the name and trims it, then
-  refuses an empty name, a name over 60 characters, a country outside the supported list, a
+- **`JoinTeamCommandValidator`** — after `NameNormaliser` has removed control characters from
+  the name and trimmed it (`protect-team-data`), refuses an empty name, a name over 60 characters, a country outside the supported list, a
   postal code over 12 characters or an empty `JoinRequestId`. The refusal is 400 with the code
   `validation_failed`, and nothing is stored (L2-044).
 - **`JoinTeamCommandHandler`** — runs these steps in order.
@@ -93,13 +99,14 @@ screen.
 
 | Case | Status | `code` | The screen says |
 |------|--------|--------|-----------------|
-| Team has 500 teammates | 409 | `team_full` | The team is full |
+| Team has 500 teammates | 409 | `team_full` | The team is full and holds up to 500 teammates; the button is disabled |
 | Over 5 join requests a minute | 429 | `rate_limited` | Wait a moment and try again |
 | Invalid name, country or postal code | 400 | `validation_failed` | A generic message, try again |
 | Unknown invite token | 404 | `invite_not_found` | The invite link cannot be used |
 | Network failure or any other error | — | — | Joining did not work; try again |
 
-In each case the person stays on the Join screen and what they typed is kept.
+In each case the person stays on the Join screen. What they typed is kept, except for an unknown
+invite token, which replaces the form with the message.
 
 **Open points**
 
@@ -174,6 +181,7 @@ one pin (`L2-005`).
 ### Behaviour — joining a team that is full
 
 `Team.AddTeammate` refuses when the team has 500 teammates. Nothing is saved, the Mondino API
-answers 409 with the code `team_full`, and the screen says the team is full (`L2-005`).
+answers 409 with the code `team_full`, and the screen says the team is full and disables the
+button (`L2-005`).
 
 ![Sequence diagram for joining a team that is full](diagrams/sequence-team-full.png)

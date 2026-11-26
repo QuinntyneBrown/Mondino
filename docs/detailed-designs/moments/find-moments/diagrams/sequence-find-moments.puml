@@ -48,8 +48,8 @@ loop each distinct city
     holidays --> cache : Entries
     cache --> finder : Entries
   end
-  finder -> cache : RaceWeekendsIn(country, window)
-  cache -> races : Race weekends of the country
+  finder -> cache : RaceCalendarIn(country, window)
+  cache -> races : Race weekends of the country, and dated\nhappenings in those races' calendars
   races --> cache : Entries
   cache --> finder : Entries
   finder -> cache : EventsNear(city position, 100 km, window)
@@ -57,7 +57,7 @@ loop each distinct city
   alt source answers in time
     events --> cache : Entries
     cache --> finder : Entries
-  else timeout, failure or open circuit
+  else 5 s timeout, failure or open circuit
     cache --> finder : No entries
   end
   finder -> finder : Keep entries that belong to the city (L2-020 table)

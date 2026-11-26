@@ -14,14 +14,15 @@ link.
 
 This feature covers the first step of joining: opening the link. The Join screen shows the
 heading "Put yourself on the map.", the team's name, how many teammates are already on the
-globe ("11 already here") and the globe with their bare pins. It shows all of this before the
-person has given anything. An invite link that does not exist or has been withdrawn shows a
+globe ("Joining Northwind · 11 already here"), the initials of up to five of them (the five who
+joined most recently), and the globe with their bare pins. It shows all of this before the person has given anything. An invite link that does not exist or has been withdrawn shows a
 message and nothing about any team. A person who is already a teammate of the team on this
 device is taken to the Globe screen instead, and no second pin is made.
 
 The person opening the link has no session, so the endpoint behind this feature is one of the
 three that are open to anyone who holds an invite link. It answers with the least a stranger to
-the team may learn: a name, a count and positions.
+the team may learn: a name, a count, positions and up to five teammates' initials and colours.
+Initials and a colour are the most a holder of an invite link learns of a teammate.
 
 The features `place-pin-from-postal-code` and `join-team` cover the rest of the Join screen.
 How a team and its invite link are made, and how an invite link is withdrawn, are not designed:
@@ -36,20 +37,33 @@ source.
 
 - **`JoinPage`** — page at the lazy route `/join/:inviteToken`. It reads the invite token from
   the route, provides `JoinStore`, and renders one of four states: loading, ready, invite link
-  cannot be used, and wait and try again. On the state `AlreadyJoined` it navigates to `/globe`.
+  cannot be used, and could not be opened. On the state `AlreadyJoined` it navigates to
+  `/globe`.
+  - Loading shows the heading, skeletons for the team and the form, and a globe placeholder,
+    and announces "Opening your invite link…" in a `role="status"` element.
+  - `NotFound` shows "This invite link can’t be used" and no form. `Failed` shows "We couldn’t
+    open this invite link", says the link may be fine, and offers "Try again", which calls
+    `JoinStore.open(inviteToken)` again. Both show the globe with no pins.
+  - An open refused with 429 (`rate_limited`) has no state of its own: it shows the same
+    `Failed` state, with "Try again".
+  - Ready shows the team's name and the count as text, never as HTML, in the `join__team`
+    line, with the avatars beside it. The avatars are decorative and hidden from assistive
+    technology.
 - **`JoinStore`** — service provided at the `JoinPage` route, so its state goes when the person
   leaves the screen. It holds the `invite` signal and the `inviteState` signal. Its
   `open(inviteToken)` method calls `InviteApi.getInvite` and maps an `ApiError` to a state by
-  its `code`. It aborts the pending request when it is destroyed.
-- **`InviteState`** — feature-local union of `Loading`, `Ready`, `AlreadyJoined`, `NotFound`,
-  `RateLimited` and `Failed`.
+  its `code`: `invite_not_found` to `NotFound`, and `rate_limited`, any other code and no answer
+  to `Failed`. It aborts the pending request when it is destroyed.
+- **`InviteState`** — feature-local union of `Loading`, `Ready`, `AlreadyJoined`, `NotFound`
+  and `Failed`.
 - **`InviteApi` / `INVITE_API`, `HttpInviteApi`** — contract, injection token and HTTP client.
   `getInvite(inviteToken)` sends `GET /api/invites/{inviteToken}` and returns an `Invite`. The
   Join route binds the token, so the client stays out of the initial bundle.
-- **`Invite`** — `teamName`, `teammateCount`, `positions`, `alreadyJoined` and `countries`. The
-  `countries` list serves the Join form and is described in `place-pin-from-postal-code`.
-- **`InviteCard`** — presentation component for the team's name and the count. It renders the
-  team's name as text, never as HTML.
+- **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined` and
+  `countries`. The `countries` list serves the Join form and is described in
+  `place-pin-from-postal-code`.
+- **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
+  avatar.
 - **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block. `JoinPage` passes
   it the bare pins and sets it not interactive. The globe's renderer is `<TO SUPPLY>`.
 
@@ -64,11 +78,13 @@ source.
   `IAppDbContext`. When no team matches, it refuses with `invite_not_found`. A withdrawn invite
   link receives the same refusal as one that was never issued. When `ICurrentTeammate` reports a
   session on this team, the handler returns an `InviteDto` with `AlreadyJoined` set and no
-  positions. Otherwise it builds the full `InviteDto`.
-- **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `AlreadyJoined` and `Countries`.
-  `Positions` holds one `Position` for each teammate: the position of the teammate's `City`.
-  It carries no teammate id, name, city name, time zone or weather, and never a postal code.
-  `AlreadyJoined` and `Countries` are additions this subsystem makes to the shared `InviteDto`.
+  positions or avatars. Otherwise it builds the full `InviteDto`.
+- **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined` and
+  `Countries`. `Positions` holds one `Position` for each teammate: the position of the
+  teammate's `City`. `Avatars` holds the initials and colour of at most five teammates, the
+  five who joined most recently (by `Teammate.JoinedAt`), in no order that matches `Positions`. The DTO carries no teammate id,
+  full name, city name, time zone or weather, and never a postal code.
+  `Avatars`, `AlreadyJoined` and `Countries` are additions this subsystem makes to the shared `InviteDto`.
 - **`ICurrentTeammate`** — the teammate the session cookie belongs to, or none. The session
   cookie is issued by `join-team`.
 - **`ProblemDetailsWriter`** — writes each refusal as ProblemDetails with a `code` extension:
@@ -78,7 +94,8 @@ source.
 
 **Rules the slice applies**
 
-- The response for an unknown invite token carries no team name, no count and no positions.
+- The response for an unknown invite token carries no team name, no count, no positions and
+  no avatars.
 - `JoinPage` branches on the `code` of an `ApiError` and shows its own message.
 - The invite token appears in the address of the Join screen and in the API route only. The
   response header `Referrer-Policy: no-referrer` from `SecurityHeadersMiddleware` keeps it from
@@ -91,7 +108,7 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-001` | `L1-001` | An invite link opens the Join screen for its team. The screen shows the team's name, how many teammates are already on the globe, and the globe with their pins, before the person has given anything. |
+| `L2-001` | `L1-001` | An invite link opens the Join screen for its team. The screen shows the team's name, how many teammates are already on the globe, the initials of up to five of them, and the globe with their pins, before the person has given anything. |
 
 ## Diagrams
 
@@ -131,8 +148,8 @@ builds an `InviteDto` whose positions are bare `Position` values.
 
 The handler finds the team by its invite token. When the session already belongs to a teammate
 of that team, the response says so and `JoinPage` navigates to `/globe`. Otherwise the response
-carries the team's name, the count and one bare position for each teammate, and `JoinPage`
-shows the Join screen with the globe (`L2-001`).
+carries the team's name, the count, one bare position for each teammate and up to five
+avatars, and `JoinPage` shows the Join screen with the globe (`L2-001`).
 
 ![Sequence diagram for opening a valid invite link](diagrams/sequence-open-valid-invite-link.png)
 
@@ -140,6 +157,8 @@ shows the Join screen with the globe (`L2-001`).
 
 An invite token that matches no team is refused with 404 and the code `invite_not_found`, and
 `JoinPage` says the invite link cannot be used, with no team name, count or pins (`L2-001`). A
-client over the limit of 30 opens a minute is refused with 429 before the handler runs.
+client over the limit of 30 opens a minute is refused with 429 before the handler runs. That
+refusal, and a request that gets no answer, set `Failed`, and `JoinPage` says the invite link
+could not be opened and offers "Try again" (`L2-001`).
 
 ![Sequence diagram for opening an invalid invite link](diagrams/sequence-open-invalid-invite-link.png)

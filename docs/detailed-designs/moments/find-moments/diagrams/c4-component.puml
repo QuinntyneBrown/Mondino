@@ -8,7 +8,7 @@ Container_Boundary(api, "Mondino API") {
   Component(handler, "GetMomentsQueryHandler", "MediatR handler", "Reads the team's cities and names each moment's teammate")
   Component(finder, "MomentFinder", "Application service", "Decides which moments belong to a city")
   Component(emblems, "EmblemCatalogue", "Application service", "Gives an emblem key where Mondino holds the right")
-  Component(cache, "CachedMomentCalendars", "Infrastructure decorator", "Caches answers by place, with a timeout and a circuit breaker")
+  Component(cache, "CachedMomentCalendars", "Infrastructure decorator", "Caches answers by place, with a 5 s timeout and a circuit breaker")
   Component(clients, "Calendar clients", "HolidayCalendarClient, RaceCalendarClient, EventCalendarClient", "Call the outside sources")
   ComponentDb(db, "Mondino database", "EF Core; engine TO SUPPLY", "Teams, teammates and their cities")
 }

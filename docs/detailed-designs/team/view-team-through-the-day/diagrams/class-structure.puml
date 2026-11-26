@@ -16,7 +16,7 @@ class TeamPage <<mondino>> {
   +rows: Signal<TeamRow[]>
   +visibleRows: Signal<TeamRow[]>
   +markers: Signal<RibbonMarker[]>
-  +chips: Signal<FilterChip[]>
+  +options: Signal<Option[]>
   +emptyMessage: Signal<string | null>
   +onFilter(filter: StatusFilter): void
   +onTeammateChosen(teammateId: string): void
@@ -55,9 +55,11 @@ class TeamRow <<domain pins/>> {
   +country: string
   +localTime: string
   +offset: string | null
-  +status: Status
+  +status: Status | null
   +weather: Weather | null
+  +weatherState: WeatherState
   +nextMoment: Moment | null
+  +nextMomentWhen: string | null
 }
 
 class RibbonMarker <<domain pins/>> {
@@ -70,10 +72,10 @@ class RibbonMarker <<domain pins/>> {
   +lane: number
 }
 
-class FilterChip <<components>> {
+class Option <<components>> {
   +value: string
   +label: string
-  +count: number
+  +count: number | null
 }
 
 class DayRibbon <<components, mo-day-ribbon>> {
@@ -81,10 +83,11 @@ class DayRibbon <<components, mo-day-ribbon>> {
   +teammateChosen: OutputEmitterRef<string>
 }
 
-class FilterChips <<components, mo-filter-chips>> {
-  +chips: InputSignal<FilterChip[]>
-  +selected: InputSignal<string>
-  +selectedChange: OutputEmitterRef<string>
+class Segmented <<components, mo-segmented>> {
+  +options: InputSignal<Option[]>
+  +value: InputSignal<string>
+  +mode: InputSignal<'tabs' | 'radio'>
+  +valueChange: OutputEmitterRef<string>
 }
 
 class TeamTable <<components, mo-team-table>> {
@@ -97,12 +100,12 @@ TeamPage --> TeamStore : reads
 TeamPage ..> fn : calls
 TeamPage --> StatusFilter : holds
 TeamPage --> DayRibbon : renders
-TeamPage --> FilterChips : renders
+TeamPage --> Segmented : renders
 TeamPage --> TeamTable : renders
 fn ..> off : orders by
 fn ..> TeamRow : builds
 fn ..> RibbonMarker : builds
 DayRibbon ..> RibbonMarker : presents
-FilterChips ..> FilterChip : presents
+Segmented ..> Option : presents
 TeamTable ..> TeamRow : presents a window of
 @enduml

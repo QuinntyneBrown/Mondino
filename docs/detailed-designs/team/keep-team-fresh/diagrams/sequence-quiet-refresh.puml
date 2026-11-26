@@ -18,6 +18,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "BrowserClock" as clock
   participant "TeamStore" as store
   participant "HttpTeamApi" as client
+  participant "TeamShell" as shell
   participant "GlobePage" as page
   participant "GlobeView" as globe
 end box
@@ -34,7 +35,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 participant "Open-Meteo" as meteo
 clock -> store : Minute tick, tab visible
-store -> store : refreshIfDue: 15 minutes since lastRefreshedAt (L2-048)
+store -> store : refreshIfDue: 15 minutes since refreshedAt (L2-048)
 store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> handler : Send GetPinsQuery
@@ -62,6 +63,8 @@ alt refresh succeeded
   page -> store : acknowledgeArrived()
 else refresh failed
   client --> store : ApiError
-  store -> store : Keep the pins held; try again at the next minute tick that is due
+  store -> store : Keep the pins held; refreshFailed = true; try again at the next minute tick that is due
+  store --> shell : refreshFailed, refreshedAt
+  shell -> shell : Banner "Couldn’t refresh just now." with "Try now", until a refresh succeeds;\nthe screen keeps what it shows (L2-048, L2-049)
 end
 @enduml

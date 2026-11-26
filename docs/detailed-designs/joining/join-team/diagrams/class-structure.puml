@@ -29,6 +29,11 @@ package "mondino application" {
   class JoinPage
   class GlobePage
 }
+package "@mondino/domain" {
+  class TeamMembership {
+    +remember(membership: Membership): void
+  }
+}
 package "@mondino/api" {
   interface InviteApi {
     +join(inviteToken: string, request: JoinRequest): Promise<JoinResult>
@@ -103,6 +108,7 @@ package "Mondino.Infrastructure" {
 
 JoinPage --> JoinStore
 JoinPage ..> GlobePage : navigates to /globe
+JoinPage ..> TeamMembership : remembers the team after joining
 JoinStore --> JoinState
 JoinStore ..> InviteApi : INVITE_API
 InviteApi ..> JoinRequest

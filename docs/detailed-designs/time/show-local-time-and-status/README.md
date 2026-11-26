@@ -37,7 +37,7 @@ presentation components that show a time and a status.
 - **`City`** — value object in `Mondino.Domain`. Its `TimeZoneId` holds the IANA name found when
   the teammate's postal code was looked up.
 - **`TeammateSettings`** — value object in `Mondino.Domain`. Its `ShowOutsideWorkingHours`
-  records the teammate's choice for "Show when I'm outside working hours".
+  records the teammate's choice for "Show when I’m outside working hours".
 - **`GetPinsQueryHandler`** — MediatR handler in `Mondino.Application`. It returns one `PinDto`
   per teammate of the viewer's team.
 - **`PinDto`** — carries `TimeZoneId` and `ShowsStatusOutsideWorkingHours`, and no local time
@@ -70,12 +70,15 @@ presentation components that show a time and a status.
   timer. It removes the listener and clears the timer through `DestroyRef`.
 - **`localTime(now, timeZoneId): LocalTime`** — pure function. It reads the hour, minute,
   weekday and calendar date of `now` in the given time zone through `Intl.DateTimeFormat` with
-  `timeZone` set and a 23-hour cycle. The browser's time zone data supplies the zone's rule,
+  `timeZone` set and the `h23` hour cycle. The browser's time zone data supplies the zone's rule,
   including daylight-saving changes. Formatters are kept in a map keyed by time zone id, which
   is bounded by the number of IANA time zones.
 - **`LocalTime`** — `hour` (0 to 23), `minute` (0 to 59), `weekday` (`Weekday`) and `date` (the
   local calendar date as `YYYY-MM-DD`). The `weekday` is the teammate's own day, so a panel
   shows Tuesday for Melbourne while the viewer in Milan is on Monday evening.
+- **`formatDay(time): string`** — pure function. It gives the weekday in full, the day of the
+  month and the short month of the teammate's own date ("Monday 27 Oct", "Tuesday 28 Oct"), the
+  day line of a panel.
 - **`formatTime(time, format): string`** — pure function. On the 24-hour clock it gives two-digit
   hours and minutes ("08:05"). On the 12-hour clock it gives the hour without a leading zero and
   a lowercase "am" or "pm" ("8:05 am").
@@ -85,7 +88,9 @@ presentation components that show a time and a status.
 - **`statusFor(pin, time): Status | null`** — pure function. It returns `statusAt(time.hour)`
   when that status is `working-hours` or when `pin.showsStatusOutsideWorkingHours` is `true`,
   and `null` otherwise. A `null` status is shown nowhere and is counted neither as working nor
-  as asleep.
+  as asleep: such a teammate is listed under the Team screen's All filter only, not under
+  Asleep and not in its count. Anything that shows, counts or filters by status calls
+  `statusFor`, never `statusAt` directly.
 
 No function in `time/` calls `new Date()`. Each takes the instant as an argument, and the
 instant comes from `CLOCK`. Unit tests bind a fake `Clock` and advance it; none sleeps.
@@ -98,9 +103,10 @@ instant comes from `CLOCK`. Unit tests bind a fake `Clock` and advance it; none 
   `minute` therefore changes every local time on the screen in one pass. A page's `computed` is
   released with the page.
 - **`PinLabel`**, **`TeammatePanel`**, **`TeamTable`** and **`DayRibbon`** — presentation
-  components in `components`. Each takes the time text, and where it shows one the weekday, as
+  components in `components`. Each takes the time text, and where it shows one the day text, as
   inputs. Times are set in Gabarito with tabular figures. None injects `CLOCK`.
-- **`StatusBadge`** — presentation component. It takes a `Status` and shows it as its words;
+- **`StatusBadge`** — presentation component, the `status` block of the mocks. It takes a
+  `Status` and shows it as its words;
   colour accompanies the words and never replaces them. It renders nothing for `null`.
 
 The words for each status and for each weekday follow the mocks in `docs/mocks/`.
@@ -112,7 +118,7 @@ level-1 (L1) requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-014` | `L1-005` | A teammate's local time is worked out in the browser from the time zone of their pin and one shared clock. It is shown as a 24-hour or 12-hour time as the viewer has chosen, with the day of the week where a panel shows it. |
+| `L2-014` | `L1-005` | A teammate's local time is worked out in the browser from the time zone of their pin and one shared clock. It is shown as a 24-hour or 12-hour time as the viewer has chosen, with the day of the week and the date where a panel shows it ("Monday 27 Oct"). |
 | `L2-015` | `L1-005` | A teammate's status is decided only by their local hour. It is never taken from activity, presence or anything the teammate does. |
 
 ## Diagrams

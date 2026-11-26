@@ -21,25 +21,30 @@ enum Breakpoint {
 }
 
 class App {
+  skip link and router outlet
+}
+
+class TeamShell {
   +navItems: NavItem[]
-  +showNavigation: Signal<boolean>
+  provides TeamStore and InviteLinkCopier
+  renders the refresh banner and the toast
+  +onInvite(): void
 }
 
 class NavItem {
   +label: string
   +path: string
-  +icon: string
 }
 
-class AppShell <<mo-app-shell>> {
+class AppHeader <<mo-app-header>> {
   +showNavigation: InputSignal<boolean>
-  +skipTarget: InputSignal<string>
+  +invite: OutputEmitterRef<void>
   slot nav
-  slot default
+  slot me
 }
 
 class Wordmark <<mo-wordmark>> {
-  +markOnly: InputSignal<boolean>
+  +collapses: InputSignal<boolean>
 }
 
 class TeamMembership {
@@ -54,8 +59,8 @@ class Membership {
   +teamName: string
 }
 
-class teammateGuard <<CanActivateFn>> {
-  +(route, state): boolean | UrlTree
+class teammateGuard <<CanMatchFn>> {
+  +(route, segments): boolean
 }
 
 class sessionExpiredInterceptor <<HttpInterceptorFn>> {
@@ -65,13 +70,21 @@ class sessionExpiredInterceptor <<HttpInterceptorFn>> {
 class InviteNeededPage {
 }
 
-App --> AppShell : renders
-App "1" *-- "4" NavItem
-App ..> TeamMembership : reads
-AppShell --> Wordmark : shows
-AppShell ..> Breakpoint : styled by
+class NotFoundPage {
+}
+
+class TeamStore {
+}
+
+App ..> TeamShell : router outlet
+TeamShell --> AppHeader : renders
+TeamShell "1" *-- "3" NavItem
+TeamShell ..> TeamStore : provides; reads the viewer's pin for the avatar
+InviteNeededPage --> AppHeader : renders without navigation
+AppHeader --> Wordmark : shows
+AppHeader ..> Breakpoint : styled by
 teammateGuard ..> TeamMembership : reads
-teammateGuard ..> InviteNeededPage : redirects to
+teammateGuard ..> InviteNeededPage : shown when it refuses
 sessionExpiredInterceptor ..> TeamMembership : forgets
 TeamMembership --> Membership : holds
 @enduml

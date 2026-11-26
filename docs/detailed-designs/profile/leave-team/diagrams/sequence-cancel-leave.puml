@@ -25,13 +25,13 @@ box "Backend — Mondino API" #D1FADF
 end box
 actor -> page : Choose "Remove my pin and leave Northwind"
 page -> dialog : Open through CDK Dialog with the team's name
-dialog --> actor : Names the team; focus moves into the dialog and is trapped there
+dialog --> actor : "Leave Northwind?"; focus starts on "Cancel" and is trapped in the dialog
 alt Escape is pressed
   actor -> dialog : Escape
 else "Cancel" is chosen
   actor -> dialog : Cancel
 end
-dialog --> page : Close with cancel
+dialog --> page : Close
 page -> page : Focus returns to the button that opened the dialog (L2-036)
 page --> actor : Profile & Settings as it was
 note over store, controller : ProfileStore.leave() is not called and no request reaches the backend. Nothing has changed.

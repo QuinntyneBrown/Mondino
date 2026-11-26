@@ -56,9 +56,10 @@ now? The whole app is five screens, and it stays that small:
   use it, and otherwise the marker shows Mondino's own icon for the kind.
 
 Mondino has no chat, no calendar or meeting scheduler, no presence or activity tracking, no
-precise location, no social feed and no adverts. The prototype has an "Invite teammate" button,
-a "Message" button on a teammate's panel and an invite link, but what each leads to, sign-in,
-and making a team are not designed yet; none is built before its design exists. Before adding or
+precise location, no social feed and no adverts. "Invite teammate" copies the team's
+invite link and opens nothing else. The prototype's "Message" button on a teammate's panel is
+not in the mocks and is not built. Sign-in and making a team are not designed yet; neither is
+built before its design exists. Before adding or
 changing anything, ask how it serves seeing where a teammate is and what it is like there right
 now; if it does not, do not build it, and if a request works against it, say so.
 
@@ -111,7 +112,7 @@ detailed design are brought in line with it in that order, before any code.
   the mocks draw the globe as a cartoon in two dimensions; that is the look the 3D globe
   aims for.
 - **Phone:** one column. Globe puts the globe on top and the panel under it, and the header
-  shows the mark without the wordmark. Team shows each teammate's name, local time and next
+  shows the mark without the wordmark. Team shows each teammate's name, status, local time and next
   moment.
 - **Tablet and desktop:** Join puts the form beside the globe, Globe puts the panel to the
   right of the globe, Team is a table, and Profile & Settings keeps the teammate's pin beside
