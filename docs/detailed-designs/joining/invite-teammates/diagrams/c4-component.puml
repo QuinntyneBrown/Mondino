@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Invite teammates
+
+Container_Boundary(web, "Mondino web app") {
+  Component(header, "AppHeader", "mo-app-header, @mondino/components", "Emits invite from its Invite teammate button")
+  Component(shell, "TeamShell", "Route component", "Provides TeamStore, InviteLinkCopier and InviteDialogOpener; renders the Toast")
+  Component(teampage, "TeamPage", "Angular page", "Invite teammates on the card of a team of one")
+  Component(opener, "InviteDialogOpener", "Service of the mondino application", "Imports the dialog on demand and opens it with the CDK Dialog")
+  Component(dialog, "InviteDialog", "CDK Dialog, lazy chunk", "The link, Copy link and Reset link")
+  Component(field, "CopyField", "mo-copy-field, @mondino/components", "The read-only link and its button")
+  Component(copier, "InviteLinkCopier", "Service of the mondino application", "Copies through the CDK Clipboard; holds the CopyResult")
+  Component(store, "TeamStore", "@mondino/domain, pins/", "The team's name, invite token and count")
+  Component(client, "HttpTeamApi", "TeamApi, @mondino/api", "resetInviteLink(teamId)")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "TeamsController", "ASP.NET Core controller", "Needs a teammate's session")
+  Component(scope, "TeamScopeBehaviour", "MediatR pipeline behaviour", "Refuses a team that is not the current teammate's")
+  Component(handler, "ResetInviteLinkCommandHandler", "MediatR handler", "Replaces the team's invite token")
+  Component(tokens, "InviteTokens", "IInviteTokens", "Makes the invite token")
+  ComponentDb(db, "Mondino database", "EF Core, IAppDbContext", "Teams")
+}
+Rel(header, shell, "invite")
+Rel(shell, opener, "open(trigger)")
+Rel(teampage, opener, "open(trigger)")
+Rel(opener, dialog, "Dynamic import, Dialog.open")
+Rel(dialog, field, "Renders")
+Rel(dialog, copier, "copy()")
+Rel(dialog, store, "Reads the link and the count; replaceInviteToken")
+Rel(dialog, client, "resetInviteLink(teamId)")
+Rel(client, ctrl, "POST invite-link-resets", "JSON/HTTPS")
+Rel(ctrl, scope, "ResetInviteLinkCommand", "MediatR pipeline")
+Rel(scope, handler, "Team in scope")
+Rel(handler, tokens, "Create()")
+Rel(handler, db, "Loads the team, saves the new token", "EF Core")
+@enduml

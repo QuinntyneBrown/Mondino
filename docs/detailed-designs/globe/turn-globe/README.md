@@ -4,8 +4,9 @@
 
 Mondino shows a team as pins on a 3D globe. This feature covers how that globe moves. Left
 alone it turns slowly eastward on its own. A teammate drags it to spin, by pointer or by touch,
-or turns it with the arrow keys. When a pin is selected the globe turns to bring that pin to
-the front and holds there. While the browser tab is hidden the globe neither turns nor draws.
+or turns it with the arrow keys. When a pin or a group pin is selected the globe turns to
+bring it to the front and holds there. While the browser tab is hidden the globe neither turns
+nor draws.
 
 The feature exists because a globe shows only half the team at once. Turning is how the other
 half comes into view, and holding on a selected pin is how the globe and the panel beside it
@@ -15,13 +16,17 @@ Terms used below:
 
 - **orientation** — which way the globe faces the viewer: the longitude at the centre of the view and the tilt towards a pole
 - **turning on its own** — slow eastward turn that runs while nothing is selected and nobody has interacted for 5 seconds
-- **hold** — state in which the globe stays turned to a selected pin until the selection is cleared
+- **hold** — state in which the globe stays turned to a selected pin or group pin until the selection is cleared
+- **group pin** — one pin with a count that stands for pins that would cover each other (`show-pins`)
 - **step** — fixed turn made by one press of an arrow key
 - **rest** — state in which the render loop is stopped because the tab is hidden
 - **reduced motion** — system setting, read from the `prefers-reduced-motion` media query, that asks for motion to be removed
 
 Everything here happens in the browser, inside the `globe` library. No turn reaches the Mondino
-API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`.
+API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`. The still
+picture shown where the 3D globe cannot be drawn (`draw-globe`) is outside this feature's
+motion: it does not turn on its own, is not dragged, takes no arrow key and does not turn to a
+selected pin.
 
 ## Description
 
@@ -57,14 +62,17 @@ API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`.
   `GlobeGestures`, and registers a frame listener on `GlobeScene`. On each frame it calls
   `motion.advance(elapsedMs)` and passes the result to `GlobeScene.setOrientation`. It attaches
   `GlobeGestures` only when its `interactive` input is true, so the small globe on Profile &
-  Settings is not dragged, and never over the still picture (see `draw-globe`).
+  Settings is not dragged. In the `Fallback` state it creates neither `GlobeMotion` nor
+  `GlobeGestures` and registers no frame listener: `GlobeFallback`, the still picture, has no
+  drag, no arrow keys and no focus of its own, and its pins stay where they are.
 - **`GlobeScene`** — draws the globe at the orientation it is given and owns the render loop
   (`start`, `stop`, `onFrame`). It decides nothing about motion.
 
 **In the `mondino` application and the `domain` library**
 
 - **`GlobePage`** passes `TeamStore`'s selected teammate id to `GlobeView`'s `selectedId` input
-  and writes `GlobeView`'s `select` output back to the store.
+  and writes `GlobeView`'s `select` output back to the store. It passes the teammate ids of a
+  selected group pin to `selectedGroupIds` (`team/view-teammate-panel`).
 - **`TeamStore`** holds the selected teammate id. A refresh of the team (L2-048) leaves the
   selection and the orientation as they are, because neither is rebuilt from the response.
 
@@ -86,10 +94,15 @@ the event and the globe takes the drag. The globe therefore never traps the page
 right turn the longitude by one step and up and down turn the tilt by one step, within the
 limit.
 
-*Selecting.* An effect on `selectedId` looks up the pin's position and calls
-`motion.hold(position)`. The globe turns to face the pin within 1 second and holds. Clearing
-the selection calls `release()`, which moves to `Waiting`, so the globe turns on its own again
-5 seconds later. What a drag does while a pin is selected (whether it is ignored, or turns the
+*Selecting.* An effect on `selectedId` and `selectedGroupIds` looks up the position to face
+and calls `motion.hold(position)`. For a selected teammate it is their pin's position. For a
+selected group pin it is the position the group pin is anchored to, which `PinLayer` gives
+for the group's teammate ids. The globe turns to face it within 1 second and holds. Turning
+to a group pin groups the pins again as its cities come to the front (`show-pins`); the
+selected group stays one group pin while its panel is open. Choosing a teammate in the
+group's panel sets `selectedId`, and the globe turns from the group pin to that teammate's
+pin. Clearing the selection calls `release()`, which moves to `Waiting`, so the globe turns on
+its own again 5 seconds later. What a drag does while a pin is selected (whether it is ignored, or turns the
 globe and returns to the pin) is `<TO SUPPLY>`; the mocks do not draw it.
 
 *Reduced motion.* `GlobeView` reads `matchMedia('(prefers-reduced-motion: reduce)')` and
@@ -117,7 +130,7 @@ requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-009` | `L1-003` | Left alone, the globe turns slowly on its own. It is dragged to spin, by pointer or touch, and turned with the arrow keys. When a pin is selected the globe turns to bring it to the front and holds there. |
+| `L2-009` | `L1-003` | Left alone, the globe turns slowly on its own. It is dragged to spin, by pointer or touch, and turned with the arrow keys. When a pin or a group pin is selected the globe turns to bring it to the front and holds there. |
 
 ## Diagrams
 
@@ -138,7 +151,8 @@ the globe to a pin's position, and that position came from the API.
 
 `GlobeGestures` reports drags and steps to `GlobeMotion`. `GlobeView` advances `GlobeMotion` on
 each frame, passes the orientation to `GlobeScene`, and holds on a pin when `GlobePage` sets
-the selected teammate id from `TeamStore`.
+the selected teammate id from `TeamStore`, or on a group pin when it sets the group's
+teammate ids.
 
 ![C4 component view for turning the globe](diagrams/c4-component.png)
 
@@ -161,8 +175,9 @@ globe waits 5 seconds of frame time and turns on its own again.
 ### Behaviour — turn to a selected pin and hold
 
 A selection travels from `GlobeView` to `GlobePage` and `TeamStore` and returns as the
-`selectedId` input. `GlobeMotion` then turns to the pin within 1 second, or at once under
-reduced motion, and holds until the selection is cleared.
+`selectedId` input; a selected group pin returns as `selectedGroupIds`. `GlobeMotion` then
+turns to the pin, or to the group pin's anchor, within 1 second, or at once under reduced
+motion, and holds until the selection is cleared.
 
 ![Sequence diagram for turning to a selected pin and holding](diagrams/sequence-turn-to-selected-pin.png)
 

@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Ask for a sign-in link
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "SignInPage" as page
+  participant "SignInStore" as store
+  participant "HttpSignInApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "SignInController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "RequestSignInLinkCommandHandler" as handler
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "SignInTokens" as tokens
+  database "Mondino database" as db
+  participant "SignInEmailSender" as sender
+end box
+actor -> page : Type a work email, choose "Email me a sign-in link"
+page -> store : requestLink()
+alt the email is not in the form of an address
+  store --> page : state Invalid
+  page --> actor : "That doesn’t look like an email address.", focus on the field
+else
+  store --> page : state Sending, button "Sending link…" disabled
+  store -> client : requestLink(email)
+  client -> controller : POST /api/sign-in-links, email in the body
+  controller -> controller : Apply the SignInLink rate limit policy (L2-045)
+  controller -> handler : Send RequestSignInLinkCommand (validated in the pipeline)
+  handler -> tokens : Create()
+  tokens --> handler : Token and its hash
+  handler -> db : Add SignInLink: hash, email, ExpiresAt = now + 15 minutes
+  db --> handler : Committed
+  handler -> sender : SendAsync(email, link)
+  sender --> handler : Sent
+  handler --> controller : Done, the same for an email on a team and on none
+  controller --> client : 202 Accepted, no body
+  client --> store : Accepted
+  store --> page : state Sent
+  page --> actor : "Check your inbox", the same whatever the email (L2-052)
+end
+note over page, client
+  A request that gets no answer, a 429 and a 503 set the state Failed. The page says
+  "We couldn’t send the link." and the button reads "Try again"; the email typed is kept.
+end note
+@enduml

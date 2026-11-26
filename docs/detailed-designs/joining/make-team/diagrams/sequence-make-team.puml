@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Make a team
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person starting a team" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "CreateTeamPage" as page
+  participant "CreateTeamStore" as store
+  participant "HttpTeamCreationApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamCreationController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "CreateTeamCommandHandler" as handler
+  participant "Team" as team
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "CachedPostalCodeLookup" as lookup
+  database "Mondino database" as db
+  participant "TeammateSessionHandler" as session
+end box
+actor -> page : Fill the form, choose "Create team"
+page -> store : create()
+store --> page : createState Creating, button "Creating your team…" disabled
+store -> client : createTeam(teamName, name, email, countryCode, postalCode, createRequestId)
+client -> controller : POST /api/teams, everything in the body
+controller -> controller : Apply the CreateTeam rate limit policy (L2-045)
+controller -> handler : Send CreateTeamCommand (validated in the pipeline, L2-044)
+handler -> db : Find a team with this CreateRequestId
+db --> handler : None
+handler -> lookup : FindCityAsync(normalised postal code)
+lookup --> handler : Found, City with the city's own position (L2-006)
+handler -> team : Create(name, new invite token, createRequestId, now)
+handler -> team : AddTeammate(name, postalCode, city, colour, createRequestId, now), SetEmail(email)
+team --> handler : Team with one teammate and a pin at the city (L2-053)
+handler -> db : Save changes in one unit of work
+db --> handler : Committed
+handler --> controller : CreatedTeamDto
+controller -> session : Sign in the maker
+session --> controller : Session cookie: HttpOnly, Secure, SameSite
+controller --> client : 201 CreatedTeamDto, Set-Cookie
+client --> store : CreatedTeam
+store --> page : createState Created
+page -> page : TeamMembership.remember(teamId, teammateId, teamName)
+page --> actor : "Northwind is on the map", "Now bring everyone in.", the invite link,\nthe globe turned to the new pin "You · Milan", pulsing (L2-053)
+note over page, client
+  When the request fails, CreateTeamStore sets createState Failed, keeps what was typed
+  and keeps createRequestId. The page says "We couldn’t create Northwind. Nothing was
+  saved — try again." and the button reads "Try again".
+end note
+@enduml

@@ -14,19 +14,24 @@ link.
 
 This feature covers the first step of joining: opening the link. The Join screen shows the
 heading "Put yourself on the map.", the team's name, how many teammates are already on the
-globe ("Joining Northwind · 11 already here"), the initials of up to five of them (the five who
-joined most recently), and the globe with their bare pins. It shows all of this before the person has given anything. An invite link that does not exist or has been withdrawn shows a
-message and nothing about any team. A person who is already a teammate of the team on this
-device is taken to the Globe screen instead, and no second pin is made.
+globe ("Joining Northwind · 12 already here"), the initials of up to five of them (the five who
+joined most recently), and the globe with their bare pins. It shows all of this before the person has given anything. Under the form, on every state,
+the footer reads "Already on Mondino? Sign in" and leads to the Sign In screen (`sign-in`).
+
+An invite link that does not exist, was mistyped or has been reset shows "This invite link no
+longer works" and nothing about any team. An invite link to a team that has all 500 of its
+places taken shows the team's name and that it is full, and nothing else about the team. A
+person who is already a teammate of the team on this device is taken to the Globe screen
+instead, and no second pin is made.
 
 The person opening the link has no session, so the endpoint behind this feature is one of the
-three that are open to anyone who holds an invite link. It answers with the least a stranger to
+endpoints that are open to anyone, here to anyone who holds an invite link. It answers with the least a stranger to
 the team may learn: a name, a count, positions and up to five teammates' initials and colours.
 Initials and a colour are the most a holder of an invite link learns of a teammate.
 
 The features `place-pin-from-postal-code` and `join-team` cover the rest of the Join screen.
-How a team and its invite link are made, and how an invite link is withdrawn, are not designed:
-`<TO SUPPLY>`.
+`make-team` covers how a team and its invite link are made, and `invite-teammates` how a
+teammate resets an invite link, after which the old link stops working.
 
 ## Description
 
@@ -36,14 +41,25 @@ source.
 **Frontend (`mondino` application, `@mondino/api`, `@mondino/components`, `@mondino/globe`)**
 
 - **`JoinPage`** — page at the lazy route `/join/:inviteToken`. It reads the invite token from
-  the route, provides `JoinStore`, and renders one of four states: loading, ready, invite link
-  cannot be used, and could not be opened. On the state `AlreadyJoined` it navigates to
-  `/globe`.
+  the route, provides `JoinStore`, and renders one of five states: loading, ready, invite link
+  no longer works, team full, and could not be opened. On the state `AlreadyJoined` it
+  navigates to `/globe`. In the last three the form's place is taken by a `Notice` (`mo-notice`,
+  block `notice`: an icon, a title, a text and its actions), and the globe has no pins ("The
+  globe, with no pins"). Every state keeps the footer (`join__footer`) "Already on Mondino?
+  Sign in", a link to `/sign-in`.
   - Loading shows the heading, skeletons for the team and the form, and a globe placeholder,
     and announces "Opening your invite link…" in a `role="status"` element.
-  - `NotFound` shows "This invite link can’t be used" and no form. `Failed` shows "We couldn’t
-    open this invite link", says the link may be fine, and offers "Try again", which calls
-    `JoinStore.open(inviteToken)` again. Both show the globe with no pins.
+  - `NotFound` shows "This invite link no longer works" and "Someone on the team reset it, so
+    it can’t be used to join. Ask whoever sent it for the new link.", with the link "Start
+    your own team", which leads to `/new` (`make-team`). The same notice serves a link that was
+    reset, withdrawn or mistyped.
+  - `Full` shows the team's name, as text, in "Northwind is full" and "The team has all 500 of
+    its places taken. Ask a teammate at Northwind to tell you when a place opens, then open
+    this link again." It offers no action. `join-team` sets the same state when a join is
+    refused with `team_full`.
+  - `Failed` shows "We couldn’t open this invite" and "Mondino didn’t answer. Check your
+    connection and try the link again — it hasn’t been used up.", with "Try again", which calls
+    `JoinStore.open(inviteToken)` again.
   - An open refused with 429 (`rate_limited`) has no state of its own: it shows the same
     `Failed` state, with "Try again".
   - Ready shows the team's name and the count as text, never as HTML, in the `join__team`
@@ -53,14 +69,15 @@ source.
   leaves the screen. It holds the `invite` signal and the `inviteState` signal. Its
   `open(inviteToken)` method calls `InviteApi.getInvite` and maps an `ApiError` to a state by
   its `code`: `invite_not_found` to `NotFound`, and `rate_limited`, any other code and no answer
-  to `Failed`. It aborts the pending request when it is destroyed.
-- **`InviteState`** — feature-local union of `Loading`, `Ready`, `AlreadyJoined`, `NotFound`
-  and `Failed`.
+  to `Failed`. An `Invite` with `full` set gives `Full`. It aborts the pending request when it
+  is destroyed.
+- **`InviteState`** — feature-local union of `Loading`, `Ready`, `AlreadyJoined`, `NotFound`,
+  `Full` and `Failed`.
 - **`InviteApi` / `INVITE_API`, `HttpInviteApi`** — contract, injection token and HTTP client.
   `getInvite(inviteToken)` sends `GET /api/invites/{inviteToken}` and returns an `Invite`. The
   Join route binds the token, so the client stays out of the initial bundle.
-- **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined` and
-  `countries`. The `countries` list serves the Join form and is described in
+- **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined`, `full`
+  and `countries`. The `countries` list serves the Join form and is described in
   `place-pin-from-postal-code`.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
   avatar.
@@ -75,18 +92,21 @@ source.
   nothing itself and sends one `GetInviteQuery`.
 - **`GetInviteQuery`** — carries the `InviteToken`.
 - **`GetInviteQueryHandler`** — loads the `Team` whose `InviteToken` equals the token, through
-  `IAppDbContext`. When no team matches, it refuses with `invite_not_found`. A withdrawn invite
-  link receives the same refusal as one that was never issued. When `ICurrentTeammate` reports a
-  session on this team, the handler returns an `InviteDto` with `AlreadyJoined` set and no
+  `IAppDbContext`. When no team matches, it refuses with `invite_not_found`. An invite link
+  that was reset (`invite-teammates`) receives the same refusal as one that was never issued.
+  When `ICurrentTeammate` reports a session on this team, the handler returns an `InviteDto`
+  with `AlreadyJoined` set and no positions or avatars. When the team has `Team.MaxTeammates`
+  (500) teammates, it returns an `InviteDto` with `Full` set, the team's name and no count,
   positions or avatars. Otherwise it builds the full `InviteDto`.
-- **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined` and
-  `Countries`. `Positions` holds one `Position` for each teammate: the position of the
+- **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined`, `Full`
+  and `Countries`. `Positions` holds one `Position` for each teammate: the position of the
   teammate's `City`. `Avatars` holds the initials and colour of at most five teammates, the
   five who joined most recently (by `Teammate.JoinedAt`), in no order that matches `Positions`. The DTO carries no teammate id,
   full name, city name, time zone or weather, and never a postal code.
-  `Avatars`, `AlreadyJoined` and `Countries` are additions this subsystem makes to the shared `InviteDto`.
+  `Avatars`, `AlreadyJoined`, `Full` and `Countries` are additions this subsystem makes to the
+  shared `InviteDto`.
 - **`ICurrentTeammate`** — the teammate the session cookie belongs to, or none. The session
-  cookie is issued by `join-team`.
+  cookie is issued by `join-team`, `make-team` and `sign-in`.
 - **`ProblemDetailsWriter`** — writes each refusal as ProblemDetails with a `code` extension:
   404 with `invite_not_found`, 429 with `rate_limited`.
 - **`MondinoTelemetry`** — records the route as its template, `/api/invites/{inviteToken}`, so
@@ -95,7 +115,7 @@ source.
 **Rules the slice applies**
 
 - The response for an unknown invite token carries no team name, no count, no positions and
-  no avatars.
+  no avatars. The response for a full team carries the team's name and nothing else about it.
 - `JoinPage` branches on the `code` of an `ApiError` and shows its own message.
 - The invite token appears in the address of the Join screen and in the API route only. The
   response header `Referrer-Policy: no-referrer` from `SecurityHeadersMiddleware` keeps it from
@@ -156,9 +176,9 @@ avatars, and `JoinPage` shows the Join screen with the globe (`L2-001`).
 ### Behaviour — open an invalid invite link
 
 An invite token that matches no team is refused with 404 and the code `invite_not_found`, and
-`JoinPage` says the invite link cannot be used, with no team name, count or pins (`L2-001`). A
-client over the limit of 30 opens a minute is refused with 429 before the handler runs. That
-refusal, and a request that gets no answer, set `Failed`, and `JoinPage` says the invite link
-could not be opened and offers "Try again" (`L2-001`).
+`JoinPage` says "This invite link no longer works", with no team name, count or pins
+(`L2-001`). A client over the limit of 30 opens a minute is refused with 429 before the handler
+runs. That refusal, and a request that gets no answer, set `Failed`, and `JoinPage` says "We
+couldn’t open this invite" and offers "Try again" (`L2-001`).
 
 ![Sequence diagram for opening an invalid invite link](diagrams/sequence-open-invalid-invite-link.png)

@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Sign in with an emailed link
+
+Person(teammate, "Teammate", "Is on a team and has come back on a new browser or device")
+System(mondino, "Mondino", "Emails a single-use sign-in link and starts the teammate's session when it is opened")
+System_Ext(email, "Email source", "Delivers the sign-in link to the address it is given; provider TO SUPPLY")
+
+Rel(teammate, mondino, "Gives a work email, then opens the emailed link")
+Rel(mondino, email, "Sends an address and a sign-in link, and no name or team", "HTTPS, timeout")
+Rel(email, teammate, "Delivers the sign-in link", "Email")
+@enduml

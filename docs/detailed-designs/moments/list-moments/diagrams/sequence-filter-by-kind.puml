@@ -36,7 +36,7 @@ page -> list : groups, filtered = true
 alt at least one sport moment
   list --> actor : Sport moments only, grouped as before (L2-030)
 else no upcoming sport moment
-  list --> actor : "Nothing of this kind coming up for your team."
+  list --> actor : "No sport moments coming up" and "Show everything"
 end
 actor -> chips : Choose "Everything"
 chips --> page : selectedChange("everything")

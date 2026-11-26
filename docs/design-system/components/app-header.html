@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>App header — Mondino design system</title>
-<meta name="description" content="The bar across the top of every screen after joining: the mark, Globe, Team and Moments, and the way to your own pin.">
+<meta name="description" content="The bar across the top of every screen after joining: the mark, Globe, Team and Moments, the button that invites a teammate, and the way to your own pin.">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../assets/components.css">
 <link rel="stylesheet" href="../assets/ds.css">
@@ -79,12 +79,12 @@
     <header class="ds-header">
       <p class="ds-kicker">Component · Navigation</p>
       <h1>App header</h1>
-      <p class="ds-lead">The bar across the top of every screen after joining: the mark, Globe, Team and Moments, and the way to your own pin.</p>
+      <p class="ds-lead">The bar across the top of every screen after joining: the mark, Globe, Team and Moments, the button that invites a teammate, and the way to your own pin.</p>
       <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span><span class="ds-pill">Since v1.0</span></div>
       <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#anatomy">Anatomy</a></li><li><a href="#variants">Variants</a></li><li><a href="#sizes">Sizes</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#theming">Theming</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#tokens">Tokens</a></li><li><a href="#code">Code</a></li><li><a href="#sources">Sources</a></li></ul>
     </header>
 <section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
-<p>The header is the whole of Mondino’s navigation. Its tabs are a <a href="segmented-control.html">segmented control</a> of links, and the avatar at the right opens Profile & Settings. Join and the pages for someone in no team use the bare header: the mark and wordmark alone.</p>
+<p>The header is the whole of Mondino’s navigation. Its tabs are a <a href="segmented-control.html">segmented control</a> of links, “Invite teammate” opens the <a href="dialog.html">invite dialog</a> on every screen, and the avatar at the right opens Profile &amp; Settings. Join, Sign In and Create Team and the pages that say one thing have no header: the mark and wordmark stand alone at the top of the page.</p>
 </section>
 
 <section class="ds-section" id="anatomy"><h2><a href="#anatomy">Anatomy</a></h2>
@@ -96,10 +96,10 @@
     <a class="segmented__option" href="../../mocks/pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <button class="btn app-header__invite" type="button" aria-label="Invite teammate" aria-haspopup="dialog"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></button>
     <a class="app-header__me" href="../../mocks/pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
-</div></figure><ol class="ds-anatomy__list"><li><div><b>Mark and wordmark</b><small>Home; the wordmark shows from 576 px</small></div></li><li><div><b>Tabs</b><small>Globe, Team, Moments</small></div></li><li><div><b>Invite teammate</b><small>From 768 px</small></div></li><li><div><b>Your avatar</b><small>Profile & Settings; ringed in pin when current</small></div></li></ol></div>
+</div></figure><ol class="ds-anatomy__list"><li><div><b>Mark and wordmark</b><small>Home; the wordmark shows from 576 px</small></div></li><li><div><b>Tabs</b><small>Globe, Team, Moments</small></div></li><li><div><b>Invite teammate</b><small>Opens the invite dialog; an icon alone under 768 px</small></div></li><li><div><b>Your avatar</b><small>Profile & Settings; ringed in pin when current</small></div></li></ol></div>
 </section>
 
 <section class="ds-section" id="variants"><h2><a href="#variants">Variants</a></h2>
@@ -111,7 +111,7 @@
     <a class="segmented__option" href="../../mocks/pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <button class="btn app-header__invite" type="button" aria-label="Invite teammate" aria-haspopup="dialog"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></button>
     <a class="app-header__me" href="../../mocks/pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
 </div></div><div class="ds-example__caption"><span>A tab current</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;div class=&quot;app-header&quot; style=&quot;width: 100%;&quot;&gt;
@@ -122,7 +122,7 @@
     &lt;a class=&quot;segmented__option&quot; href=&quot;../../mocks/pages/moments/default.html&quot;&gt;Moments&lt;/a&gt;
   &lt;/nav&gt;
   &lt;div class=&quot;app-header__actions&quot;&gt;
-    &lt;button class=&quot;btn app-header__invite&quot; type=&quot;button&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;Invite teammate&lt;/button&gt;
+    &lt;button class=&quot;btn app-header__invite&quot; type=&quot;button&quot; aria-label=&quot;Invite teammate&quot; aria-haspopup=&quot;dialog&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;span class=&quot;app-header__invite-label&quot;&gt;Invite teammate&lt;/span&gt;&lt;/button&gt;
     &lt;a class=&quot;app-header__me&quot; href=&quot;../../mocks/pages/profile/default.html&quot; aria-label=&quot;Profile &amp;amp; Settings&quot;&gt;&lt;span class=&quot;avatar avatar--sm hue-1&quot; aria-hidden=&quot;true&quot;&gt;SB&lt;/span&gt;&lt;/a&gt;
   &lt;/div&gt;
 &lt;/div&gt;</code></pre></details></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack ds-example__canvas--canvas" style="padding: 0;"><div class="app-header" style="width: 100%;">
@@ -133,7 +133,7 @@
     <a class="segmented__option" href="../../mocks/pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <button class="btn app-header__invite" type="button" aria-label="Invite teammate" aria-haspopup="dialog"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></button>
     <a class="app-header__me" href="../../mocks/pages/profile/default.html" aria-label="Profile &amp; Settings" aria-current="page"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
 </div></div><div class="ds-example__caption"><span>Profile & Settings current: the avatar is ringed</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;div class=&quot;app-header&quot; style=&quot;width: 100%;&quot;&gt;
@@ -144,10 +144,21 @@
     &lt;a class=&quot;segmented__option&quot; href=&quot;../../mocks/pages/moments/default.html&quot;&gt;Moments&lt;/a&gt;
   &lt;/nav&gt;
   &lt;div class=&quot;app-header__actions&quot;&gt;
-    &lt;button class=&quot;btn app-header__invite&quot; type=&quot;button&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;Invite teammate&lt;/button&gt;
+    &lt;button class=&quot;btn app-header__invite&quot; type=&quot;button&quot; aria-label=&quot;Invite teammate&quot; aria-haspopup=&quot;dialog&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;span class=&quot;app-header__invite-label&quot;&gt;Invite teammate&lt;/span&gt;&lt;/button&gt;
     &lt;a class=&quot;app-header__me&quot; href=&quot;../../mocks/pages/profile/default.html&quot; aria-label=&quot;Profile &amp;amp; Settings&quot; aria-current=&quot;page&quot;&gt;&lt;span class=&quot;avatar avatar--sm hue-1&quot; aria-hidden=&quot;true&quot;&gt;SB&lt;/span&gt;&lt;/a&gt;
   &lt;/div&gt;
-&lt;/div&gt;</code></pre></details></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack ds-example__canvas--canvas" style="padding: 0;"><div class="app-header app-header--bare" style="width: 100%;"><span class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark">mondino</span></span></div></div><div class="ds-example__caption"><span>Bare: before joining, and for someone in no team</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;div class=&quot;app-header app-header--bare&quot; style=&quot;width: 100%;&quot;&gt;&lt;span class=&quot;brand&quot;&gt;&lt;svg class=&quot;mark&quot; …&gt;…&lt;/svg&gt;&lt;span class=&quot;wordmark&quot;&gt;mondino&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;</code></pre></details></div>
+&lt;/div&gt;</code></pre></details></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack ds-example__canvas--canvas" style="padding: 0;"><div class="app-header" style="width: 100%; max-width: 22.5rem; gap: var(--space-2); padding: 0 var(--space-3);">
+  <a class="brand" href="../../mocks/pages/globe/default.html" aria-label="Mondino home"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark" style="display: none;">mondino</span></a>
+  <nav class="segmented" aria-label="Primary">
+    <a class="segmented__option" href="../../mocks/pages/globe/default.html" aria-current="page">Globe</a>
+    <a class="segmented__option" href="../../mocks/pages/team/default.html">Team</a>
+    <a class="segmented__option" href="../../mocks/pages/moments/default.html">Moments</a>
+  </nav>
+  <div class="app-header__actions">
+    <button class="btn btn--icon app-header__invite" style="width: var(--target-comfortable); padding: 0;" type="button" aria-label="Invite teammate" aria-haspopup="dialog"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label" style="display: none;">Invite teammate</span></button>
+    <a class="app-header__me" href="../../mocks/pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
+  </div>
+</div></div><div class="ds-example__caption"><span>On a phone, drawn at 360 px: the mark without the wordmark, and “Invite teammate” as an icon with the same accessible name</span></div></div>
 </section>
 
 <section class="ds-section" id="sizes" data-na="It has one size."><h2><a href="#sizes">Sizes</a></h2><p class="ds-na">It has one size.</p></section>
@@ -155,7 +166,8 @@
 <section class="ds-section" id="states" data-na="The header itself has no states. Its tabs, button and avatar link each have their own, on their pages."><h2><a href="#states">States</a></h2><p class="ds-na">The header itself has no states. Its tabs, button and avatar link each have their own, on their pages.</p></section>
 
 <section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
-<p>Under 576 px: the mark without the wordmark, the tabs, and the avatar. From 576 px the lowercase wordmark joins the mark. From 768 px “Invite teammate” appears. Under 360 px the gaps and the tabs’ padding tighten so it fits 320 px. It is 64 px tall at every width.</p>
+<p>Under 576 px: the mark without the wordmark, the tabs, “Invite teammate” as an icon alone, and the avatar. From 576 px the lowercase wordmark joins the mark. From 768 px “Invite teammate” shows its words. Under 416 px the header’s gaps, its side padding and the tabs’ padding tighten so the tabs, the invite button and the avatar all fit; under 360 px they tighten again, the tabs’ text steps down one size and the mark is 24 px, so it fits 320 px. It is 64 px tall at every width.</p>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Width</th><th scope="col">Mark</th><th scope="col">Invite teammate</th><th scope="col">Spacing</th></tr></thead><tbody><tr><td>Under 360 px</td><td>Mark, 24 px</td><td>Icon, 44 × 44 px</td><td>4 px gaps, 8 px side padding, tabs one size smaller</td></tr><tr><td>360 to 415 px</td><td>Mark</td><td>Icon, 44 × 44 px</td><td>8 px gaps, 12 px side padding</td></tr><tr><td>416 to 575 px</td><td>Mark</td><td>Icon, 44 × 44 px</td><td>The page margin</td></tr><tr><td>576 to 767 px</td><td>Mark and wordmark</td><td>Icon, 44 × 44 px</td><td>The page margin</td></tr><tr><td>From 768 px</td><td>Mark and wordmark</td><td>Icon and “Invite teammate”</td><td>The page margin</td></tr></tbody></table></div>
 </section>
 
 <section class="ds-section" id="theming"><h2><a href="#theming">Theming</a></h2>
@@ -164,9 +176,9 @@
 
 <section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
 <h3>Role and pattern</h3><p>A <code>&lt;header&gt;</code> holding a <code>&lt;nav aria-label="Primary"&gt;</code>. The current screen’s link has <code>aria-current="page"</code>, including the avatar link on Profile & Settings.</p>
-<h3>Keyboard</h3><div class="ds-table-wrap"><table class="ds-table ds-keys"><thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead><tbody><tr><td><kbd>Tab</kbd></td><td>Home, Globe, Team, Moments, Invite teammate, Profile & Settings, in that order</td></tr><tr><td><kbd>Enter</kbd></td><td>Follows the focused link</td></tr></tbody></table></div>
-<h3>Focus</h3><p>The shared ring on each link. The <a href="skip-link.html">skip link</a> comes before the header.</p>
-<h3>Labelling</h3><p>The mark’s link is named “Mondino home”. The avatar’s link is named “Profile & Settings”, not the teammate’s initials.</p>
+<h3>Keyboard</h3><div class="ds-table-wrap"><table class="ds-table ds-keys"><thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead><tbody><tr><td><kbd>Tab</kbd></td><td>Home, Globe, Team, Moments, Invite teammate, Profile & Settings, in that order</td></tr><tr><td><kbd>Enter</kbd></td><td>Follows the focused link; on “Invite teammate”, opens the invite dialog</td></tr></tbody></table></div>
+<h3>Focus</h3><p>The shared ring on each link and on the invite button. The <a href="skip-link.html">skip link</a> comes before the header. When the invite dialog closes, focus returns to the invite button.</p>
+<h3>Labelling</h3><p>The mark’s link is named “Mondino home”. The avatar’s link is named “Profile &amp; Settings”, not the teammate’s initials. The invite button is named “Invite teammate” at every width: under 768 px, where only its icon shows, the name comes from <code>aria-label</code>.</p>
 <h3>Contrast</h3><div class="ds-pair"><span>Current tab <code>--color-fg-on-accent</code> on <code>--color-accent</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-on-accent|--color-accent" data-min="4.5"></span></div>
 <div class="ds-pair"><span>Other tabs <code>--color-fg-muted</code> on <code>--color-bg-surface</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-muted|--color-bg-surface" data-min="4.5"></span></div>
 <div class="ds-pair"><span>Current avatar ring <code>--color-people</code> on <code>--color-bg-canvas</code></span><span class="ds-pair__ratio" data-contrast="--color-people|--color-bg-canvas" data-min="3"></span></div>
@@ -175,7 +187,7 @@
 </section>
 
 <section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
-<p>The tabs are “Globe”, “Team” and “Moments”. The wordmark is always lowercase <strong>mondino</strong>.</p>
+<p>The tabs are “Globe”, “Team” and “Moments”. The button is “Invite teammate”. The wordmark is always lowercase <strong>mondino</strong>.</p>
 </section>
 
 <section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
@@ -187,7 +199,7 @@
     <a class="segmented__option" href="../../mocks/pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <button class="btn app-header__invite" type="button" aria-label="Invite teammate" aria-haspopup="dialog"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></button>
     <a class="app-header__me" href="../../mocks/pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
 </div></div><figcaption>Keep the four destinations in reach on every screen.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><div class="app-header" style="width: 100%;"><span class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark">mondino</span></span><button class="btn btn--icon" type="button" aria-label="Menu"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button></div></div><figcaption>Hide three tabs behind a menu button.</figcaption></figure></div>
@@ -207,17 +219,17 @@
     &lt;a class=&quot;segmented__option&quot; href=&quot;../../mocks/pages/moments/default.html&quot;&gt;Moments&lt;/a&gt;
   &lt;/nav&gt;
   &lt;div class=&quot;app-header__actions&quot;&gt;
-    &lt;button class=&quot;btn app-header__invite&quot; type=&quot;button&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;Invite teammate&lt;/button&gt;
+    &lt;button class=&quot;btn app-header__invite&quot; type=&quot;button&quot; aria-label=&quot;Invite teammate&quot; aria-haspopup=&quot;dialog&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;span class=&quot;app-header__invite-label&quot;&gt;Invite teammate&lt;/span&gt;&lt;/button&gt;
     &lt;a class=&quot;app-header__me&quot; href=&quot;../../mocks/pages/profile/default.html&quot; aria-label=&quot;Profile &amp;amp; Settings&quot;&gt;&lt;span class=&quot;avatar avatar--sm hue-1&quot; aria-hidden=&quot;true&quot;&gt;SB&lt;/span&gt;&lt;/a&gt;
   &lt;/div&gt;
 &lt;/header&gt;</code></pre>
-<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Class / attribute</th><th scope="col">Effect</th></tr></thead><tbody><tr><td><code>.app-header</code></td><td>The bar.</td></tr><tr><td><code>.app-header--bare</code></td><td>Mark and wordmark only.</td></tr><tr><td><code>.brand</code></td><td>The mark and wordmark, as a link home.</td></tr><tr><td><code>.app-header__invite</code></td><td>Shown from 768 px.</td></tr><tr><td><code>.app-header__me</code></td><td>The avatar link; aria-current="page" on Profile & Settings.</td></tr></tbody></table></div>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Class / attribute</th><th scope="col">Effect</th></tr></thead><tbody><tr><td><code>.app-header</code></td><td>The bar.</td></tr><tr><td><code>.brand</code></td><td>The mark and wordmark, as a link home.</td></tr><tr><td><code>.app-header__invite</code></td><td>The invite button: 44 × 44 px with its icon alone under 768 px, a button with its label from 768 px. Always carries <code>aria-label="Invite teammate"</code>.</td></tr><tr><td><code>.app-header__invite-label</code></td><td>“Invite teammate”, shown from 768 px.</td></tr><tr><td><code>.app-header__me</code></td><td>The avatar link; aria-current="page" on Profile & Settings.</td></tr></tbody></table></div>
 </section>
 
 <section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
 <p>Extracted from these mocks:</p>
-<ul><li><a href="../../mocks/pages/globe/default.html">pages/globe/default</a></li><li><a href="../../mocks/pages/profile/default.html">pages/profile/default</a> (avatar current)</li><li><a href="../../mocks/pages/no-team/default.html">pages/no-team/default</a> (bare)</li></ul>
-<p>Drift fixed during extraction: at 320 px the prototype’s header overflowed by 25 px. Gaps and tab padding tighten under 360 px.</p>
+<ul><li><a href="../../mocks/pages/globe/default.html">pages/globe/default</a></li><li><a href="../../mocks/pages/profile/default.html">pages/profile/default</a> (avatar current)</li><li><a href="../../mocks/pages/globe/hundreds.html">pages/globe/hundreds</a> (the header at every width)</li><li><a href="../../mocks/dialogs/invite/default.html">dialogs/invite/default</a> (what “Invite teammate” opens)</li></ul>
+<p>Drift fixed during extraction: at 320 px the prototype’s header overflowed by 25 px. Gaps and tab padding tighten under 416 px, and again under 360 px. The bare header (<code>.app-header--bare</code>) is in no mock since the pages before a team and the pages that say one thing were redrawn without a header.</p>
 </section>
     <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
   </main>

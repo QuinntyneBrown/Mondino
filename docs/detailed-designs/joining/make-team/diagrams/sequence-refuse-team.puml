@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — Refuse a team that cannot be made
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person starting a team" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "CreateTeamPage" as page
+  participant "CreateTeamStore" as store
+  participant "HttpTeamCreationApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamCreationController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "CreateTeamCommandValidator" as validator
+  participant "CreateTeamCommandHandler" as handler
+end box
+actor -> page : Choose "Create team" with no team name
+page -> store : create()
+store --> page : problems: team name missing
+page --> actor : "Give your team a name — teammates see it when they join.",\nfocus on the first field that is wrong; no request is sent
+actor -> page : Type a team name, choose "Create team"
+page -> store : create()
+store -> client : createTeam(request)
+client -> controller : POST /api/teams
+alt over the limit for one client
+  controller --> client : 429 ProblemDetails, code rate_limited, Retry-After (L2-045)
+else a value the browser did not check
+  controller -> validator : CreateTeamCommand
+  validator --> controller : validation_failed
+  controller --> client : 400 ProblemDetails, code validation_failed (L2-044)
+else valid
+  controller -> handler : Send CreateTeamCommand
+  handler --> controller : postal_code_not_found or postal_code_unavailable
+  controller --> client : 422 or 503 ProblemDetails
+end
+client --> store : ApiError
+store --> page : lookupState NotFound or Unavailable, or createState Failed
+page --> actor : The postal code's own message, or "We couldn’t create Northwind.\nNothing was saved — try again." with "Try again"; what was typed is kept
+note over controller, handler
+  No refusal says whether the email is already on a team.
+end note
+@enduml

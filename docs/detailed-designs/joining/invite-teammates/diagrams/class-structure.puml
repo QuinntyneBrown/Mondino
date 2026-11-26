@@ -1,0 +1,116 @@
+@startuml
+set namespaceSeparator none
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure — Invite teammates
+
+package "mondino application" {
+  class TeamShell
+  class InviteDialogOpener {
+    +open(trigger: HTMLElement): Promise<void>
+  }
+  class InviteDialog {
+    +teamName: Signal<string>
+    +inviteLink: Signal<string>
+    +teammateCount: Signal<number>
+    +copy(): Promise<void>
+    +reset(): Promise<void>
+  }
+  class InviteLinkCopier {
+    +result: Signal<CopyResult | null>
+    +copy(): Promise<CopyResult>
+    +dismiss(): void
+  }
+  enum CopyResult {
+    Copied
+    Refused
+  }
+}
+package "@mondino/components" {
+  class AppHeader {
+    +invite: Output<HTMLElement>
+  }
+  class CopyField {
+    +value: string
+    +label: string
+    +copied: boolean
+    +copy: Output<void>
+    +select(): void
+  }
+  class Toast
+}
+package "@mondino/domain" {
+  class TeamStore {
+    +teamName: Signal<string>
+    +inviteToken: Signal<string>
+    +pins: Signal<Pin[]>
+    +replaceInviteToken(inviteToken: string): void
+  }
+}
+package "@mondino/api" {
+  interface TeamApi {
+    +resetInviteLink(teamId: string): Promise<InviteLink>
+  }
+  class InviteLink {
+    +inviteToken: string
+  }
+}
+package "Mondino.Api" {
+  class TeamsController {
+    +ResetInviteLink(teamId: Guid): Task<ActionResult<InviteLinkDto>>
+  }
+}
+package "Mondino.Application" {
+  interface ITeamScopedRequest
+  class ResetInviteLinkCommand {
+    +Guid TeamId
+  }
+  class ResetInviteLinkCommandHandler {
+    +Handle(command: ResetInviteLinkCommand): Task<InviteLinkDto>
+  }
+  class InviteLinkDto {
+    +string InviteToken
+  }
+  interface IInviteTokens {
+    +Create(): string
+  }
+  interface ICurrentTeammate
+  interface IAppDbContext
+}
+package "Mondino.Domain" {
+  class Team {
+    +Guid Id
+    +string InviteToken
+    +ResetInviteToken(inviteToken: string): void
+  }
+}
+
+AppHeader ..> TeamShell : invite
+TeamShell ..> InviteDialogOpener
+TeamShell ..> Toast : renders from InviteLinkCopier.result
+InviteDialogOpener ..> InviteDialog : imports and opens
+InviteDialog ..> CopyField
+InviteDialog ..> InviteLinkCopier
+InviteDialog ..> TeamStore
+InviteDialog ..> TeamApi : TEAM_API
+InviteLinkCopier --> CopyResult
+InviteLinkCopier ..> TeamStore : reads the invite token
+TeamApi ..> InviteLink
+TeamsController ..> ResetInviteLinkCommand : sends
+ResetInviteLinkCommand ..|> ITeamScopedRequest
+ResetInviteLinkCommandHandler ..> ResetInviteLinkCommand : handles
+ResetInviteLinkCommandHandler ..> InviteLinkDto : returns
+ResetInviteLinkCommandHandler ..> IInviteTokens
+ResetInviteLinkCommandHandler ..> ICurrentTeammate
+ResetInviteLinkCommandHandler ..> IAppDbContext
+ResetInviteLinkCommandHandler --> Team : loads / mutates
+@enduml

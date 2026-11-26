@@ -5,12 +5,12 @@
 Mondino shows a team spread around the world on a 3D globe. Each teammate appears as a pin at
 their city. This feature covers the pins: reading them from the backend, drawing each one with
 its teammate's initials, colour and label, lifting a pin out when it is pointed at, focused or
-selected, and keeping pins apart when teammates live in the same city or in cities close
-together.
+selected, and drawing pins that would cover each other, because their teammates live in the
+same city or in cities close together, as one group pin with a count.
 
 The feature exists because a pin is how one teammate finds another. A globe on a phone is
 about 320 px wide and a team can hold 500 teammates, so a pin at rest is small. Lifting makes
-one pin readable at a time, and fanning and grouping make sure no pin hides another.
+one pin readable at a time, and grouping makes sure no pin hides another.
 
 Terms used below:
 
@@ -18,9 +18,10 @@ Terms used below:
 - **label** — text beside a pin with the teammate's local time, weather and temperature, and, when the pin is lifted, their name and city
 - **lifted pin** — pin drawn larger, raised above the surface and in front of its neighbours, with its label shown
 - **hit area** — region around a pin that takes the pointer or a tap, at least 44 × 44 CSS px
-- **placement** — where one pin, or one group of pins, is drawn relative to its city's position at the globe's current size
-- **fan** — arrangement of the pins of one place around that place's position, so each stays visible
-- **group pin** — one pin with a count that stands for more pins than can be fanned at the current size
+- **place** — the pins of one city, which share one position on the globe
+- **placement** — one thing drawn over the globe: a pin alone, or a group pin, anchored to a position
+- **group pin** — one pin with a count that stands for the pins that would cover each other at the globe's current size and orientation
+- **grouping radius** — on-screen distance, in CSS px, within which places are drawn as one group pin
 - **viewer** — the teammate looking at the screen
 
 A pin is placed at its city, never at a postal code, and nothing in this feature carries a
@@ -49,7 +50,7 @@ decides how they are drawn.
   (L2-049). The weather source receives a position and nothing else.
 - **`PinDto`** — teammate id, name, colour, city name, country, position, time zone id,
   weather or null, the weather's state (`WeatherState`: `Available`, `Unavailable` or
-  `NotShared`), whether the status is shown, whether the pin is the viewer's own
+  `NotShared`), whether the status is shared (`SharesStatus`), whether the pin is the viewer's own
   (`IsViewer`), and the moments. The position is the city's. The DTO has no postal code field
   and no local time: the browser works the time out from the time zone id.
 - **`CachedWeatherSource`** — `IWeatherSource` decorator over `OpenMeteoWeatherSource`, with a
@@ -61,24 +62,38 @@ decides how they are drawn.
 **In the `api` library**
 
 - **`Pin`** — the browser's type for a `PinDto`.
-- **`PinPlacement`** — a `kind` (`'pin'` or `'group'`), the `position` it is anchored to, the
-  `pins` it stands for (one for a pin, two or more for a group), and an offset in CSS px from
-  the projected position (`offsetX`, `offsetY`).
-- **`PinSpreader`** / `PIN_SPREADER` — contract and token for the function that turns pins into
-  placements. The `globe` library depends on `api` only, so it reaches `spreadPins` through
-  this token.
+- **`PlacePoint`** — a place as it is drawn at one instant: the `position` of its city, the
+  `pins` of the teammates there, its on-screen `x` and `y` in CSS px, and its `depth`, which
+  says how near the viewer it is.
+- **`PinPlacement`** — a `kind` (`'pin'` or `'group'`), the `position` it is anchored to, and
+  the `pins` it stands for (one for a pin, two or more for a group).
+- **`GroupOptions`** — the `radiusPx` of the grouping, the `selectedId` of the selected
+  teammate or null, and `heldGroupIds`, the teammate ids of the group pin that is selected, or
+  none.
+- **`PinGrouper`** / `PIN_GROUPER` — contract and token for the function that turns place
+  points into placements: `group(points, options)`. The `globe` library depends on `api` only,
+  so it reaches `groupPins` through this token.
 - **`TeamApi`** / `TEAM_API`, **`HttpTeamApi`** — read the pins.
 
 **In the `domain` library**
 
 - **`TeamStore`** — holds the pins and the selected teammate id as signals and reads the pins
   again every 15 minutes (L2-048).
-- **`spreadPins(pins, globeSize)`** — pure function. It gathers pins whose cities are closer
-  together than one pin's width at the given globe size. A cluster that fits is fanned: each
-  pin gets its own placement, offset around the shared position. A cluster with more pins than
-  can be fanned becomes one group placement. The number of pins a fan holds at each size is
-  `<TO SUPPLY>`; the mocks settle it. The result depends only on the pins and the size, not on
-  the globe's orientation, so it is recomputed when either changes and not on each frame.
+- **`groupPins(points, options)`** — pure function in `pins/`, bound to `PIN_GROUPER`. It
+  groups greedily by on-screen distance, in four steps:
+  1. The selected teammate's pin is taken out of its place and gets a placement of its own, so
+     the selected teammate's pin always stands alone.
+  2. The pins named by `heldGroupIds` stay one group placement, so a selected group pin keeps
+     standing for the teammates its panel lists.
+  3. The remaining place points are ordered nearest the viewer first. Each point not yet in a
+     group seeds one and takes every other such point within `radiusPx` of it. The placement is
+     anchored to the seed's position.
+  4. A placement that holds one pin is a pin; one that holds two or more is a group pin with
+     their count. Two teammates in one city are therefore always one group pin.
+
+  Neighbours are found in a grid whose cells are `radiusPx` wide, so a seed looks in 9 cells
+  and the whole pass is linear in the number of place points. The function reads no clock and
+  no DOM, and the same points and options always give the same placements.
 - **`initialsOf(name)`** — the first character of up to the first two words of a name, so a
   pin is never blank.
 - **`localTime`**, **`formatTime`** — the label's local time, from the pin's time zone id and
@@ -86,10 +101,11 @@ decides how they are drawn.
 
 **In the `globe` library**
 
-- **`GlobeView`** (`mo-globe`) — takes `pins`, `descriptions`, `selectedId` and `interactive`, and emits
-  `select` with a teammate id or null and `selectGroup` with a group pin's teammate ids. It measures its own width with a `ResizeObserver`,
-  computes `placements` by calling `PIN_SPREADER` with the pins and that width, and passes
-  them to `PinLayer`. It sets `compact` when the globe is less than 400 px wide.
+- **`GlobeView`** (`mo-globe`) — takes `pins`, `descriptions`, `selectedId`,
+  `selectedGroupIds` and `interactive`, and emits `select` with a teammate id or null and
+  `selectGroup` with a group pin's teammate ids. It measures its own width with a
+  `ResizeObserver` and passes the pins, the width and the two selections to `PinLayer`. It
+  sets `compact` when the globe is less than 400 px wide.
 - **`PinLayer`** — component that draws the pins as HTML elements over the scene's canvas.
   The pins it draws are the list a keyboard and a screen reader reach (L2-040): the mocks'
   `ul.globe__pins`, with one `li.globe__pin` for each placement, holding a `button.pin`. A
@@ -97,13 +113,16 @@ decides how they are drawn.
   it carries `aria-pressed`, which is true while its pin is selected, and the visible label
   beside it is `aria-hidden`. The buttons are in a fixed order, west to east, which does not
   change as the globe turns. Each is a Tab stop; Enter or Space emits `select`.
-  On each frame in which the globe has turned it asks `GlobeScene.project` for each
-  placement's point and moves the pin's element there with a transform. A placement that does
+  It injects `PIN_GROUPER` and holds the current `placements`. On each frame in which the
+  globe has turned it asks `GlobeScene.project` for each placement's anchor and moves that
+  placement's element there with a transform. A placement that does
   not face the viewer is hidden, with its label, so it takes no focus and is not in the list
   until the globe turns it into view; its teammate is reached through the panel and the Team
   screen. A placement near the globe's edge is drawn
   fainter and without its label (`globe__pin--far`) until it is lifted; how near is
-  `<TO SUPPLY>`. `PinLayer` holds `liftedId`: the pin under
+  `<TO SUPPLY>`. `anchorOf(teammateIds)` gives the position the
+  group pin of those teammates is anchored to, which `GlobeView` turns to (`turn-globe`).
+  `PinLayer` holds `liftedId`: the pin under
   the pointer, or else the pin with keyboard focus. A pin is drawn lifted when it is the
   lifted pin or the selected pin. The canvas under the layer is hidden from the accessibility
   tree. Whether the renderer also draws a
@@ -120,16 +139,19 @@ decides how they are drawn.
 
 **In the `mondino` application and the `components` library**
 
-- **`GlobePage`** — binds `PIN_SPREADER` to `spreadPins` in its route's providers and fills
+- **`GlobePage`** — binds `PIN_GROUPER` to `groupPins` in its route's providers and fills
   the two templates. The mark template renders `Avatar` with `initialsOf(pin.name)` and the
   pin's colour. The label template renders `PinLabel` with the formatted local time and, where
   `pin.weather` is not null, `WeatherIcon` and the temperature in the viewer's unit. Names and
   cities are rendered as text. Where `pin.isViewer` is true the name is followed by "(you)"
   and the mark carries a ring, so the viewer's pin differs by more than colour. When
-  `GlobeView` emits `selectGroup` the page clears the selected teammate and shows the group in
-  the panel, as `GroupPanel` (`team/view-teammate-panel`): the heading "3 teammates close together" (with the group's count), "Choose one to
-  see where they are in their day.", a row for each teammate, west to east, which selects
-  them, and a link back to "This week around the world". On Join the
+  `GlobeView` emits `selectGroup` the page clears the selected teammate, passes the group's
+  teammate ids back as `selectedGroupIds` and shows the group in the panel, as `GroupPanel`
+  (`team/view-teammate-panel`): the heading "2 teammates close together" (with the group's
+  count), "All in Milan · pick someone to see their pin", and under each city's name and local
+  time a row for each teammate there, which selects them. The page's legend under the globe
+  names the group pin "Teammates close together", beside "Night side", "Moment this week" and
+  "Drag to spin". On Join the
   page projects no label template, so pins there carry no name, city, local time or weather
   (L2-001).
 
@@ -155,26 +177,68 @@ A newly placed pin, the viewer's own after joining (L2-005) or one in `arrivedId
 `keep-team-fresh`), carries the `pin--new` modifier and pulses once. Reduced motion removes
 the pulse.
 
-**Keeping pins apart**
+**Grouping pins that are close together**
 
-Fanned pins are drawn around their city's position and each has its own hit area, so each is
-pointed at and selected on its own. Hit areas of neighbouring pins may touch; where they
-would overlap, the lifted pin's area is in front. On a globe less than 400 px wide the marks
-are drawn smaller and a label is shown only for the lifted or selected pin. On a wider globe
-`LabelPlacer` decides which resting labels fit; a label that cannot be placed clear of other
-pins is not shown until its pin is lifted.
+Pins that would cover each other are one group pin, at every size of the globe; no pin is
+moved off its city to make room. The grouping radius is the width of a pin's mark for a small
+team, so only pins that would cover each other merge: in the cast of 13, the two teammates in
+Milan are one group pin "2", while the pins of Berlin and Stockholm beside it stand alone. For
+a large team the radius is about 40 px, and the mock of a team of 500 draws 18 group pins,
+with counts from 3 to 68, and one pin alone. Both exact radii, and the size of team from which
+the larger applies, are `<TO SUPPLY>`.
 
-A group pin (`pin--group`) shows its count and is named "3 teammates close together:" and
-their names. Selecting it emits `selectGroup`; the group pin stays lifted and pressed while
-its teammates are listed in the panel. `selectedId` stays null, so the globe does not turn.
+A pin alone keeps its label. On a globe less than 400 px wide the marks are drawn smaller and
+a label is shown only for the lifted or selected pin. On a wider globe `LabelPlacer` decides
+which resting labels fit; a label that cannot be placed clear of other pins is not shown until
+its pin is lifted. Hit areas of neighbouring placements may touch; where they would overlap,
+the lifted placement's area is in front.
 
-**Bounds and release**
+A group pin (`pin--group`) shows its count and carries no label and no moment marker. Its
+accessible name, from `describePin` (`make-accessible`), gives the count and either the names
+or the place: "2 teammates close together: Sofia Bianchi (you), Luca Ferri", "14 teammates
+close together, Mexico City", "60 teammates close together, 3 cities". The mocks name the
+teammates of a group of 2 and the place of a group of 3 or more. Selecting a group pin emits
+`selectGroup`. The globe turns to the group pin (`turn-globe`), which stays lifted and pressed
+while its teammates are listed in the panel. Choosing a teammate there selects that
+teammate's pin, which then stands alone, in front of the rest of its place.
 
-A team holds at most 500 teammates. `PinLayer` keeps elements only for placements that face
-the viewer, and grouping bounds how many pins one place can produce, so the number of
-elements does not grow with the length of a visit. `PinLayer` reads positions inside the
-scene's frame listener and adds no loop of its own. Its pointer listeners are removed when
-`GlobeView` is destroyed.
+The grouping follows the globe as it turns, because the on-screen distance between two cities
+changes with the orientation: cities that merge near the globe's edge part as they come to
+the front. `PinLayer` groups again when the pins, the globe's width, `selectedId` or
+`selectedGroupIds` change, and, while the globe turns, each time the orientation has moved
+`RegroupAfterDegrees` since the last grouping. `RegroupAfterDegrees` is `<TO SUPPLY>`. Between
+two groupings the placements stay as they are and only move.
+
+**Cost for a team of 500**
+
+A team holds at most 500 teammates, and the pins shall stay cheap at that size:
+
+- The places are worked out once for each `pins` value, not on each frame. A team of 500 has
+  at most 500 places, and as many as it has cities.
+- A grouping projects each place once, drops those on the far side, and runs `groupPins`,
+  which is linear in the places that face the viewer. It runs at most once in a frame, inside
+  the scene's frame listener. `PinLayer` has no timer and no loop of its own, and no pin has
+  either.
+- A frame between two groupings projects only the anchors of the current placements and
+  writes one transform for each.
+- `PinLayer` keeps an element only for a placement that faces the viewer. Seeds are at least
+  one grouping radius apart, so the number of elements is bounded by the globe's area and not
+  by the size of the team. Elements are keyed, a pin by its teammate id and a group pin by its
+  anchor, so a grouping reuses the elements that stay and removes the rest.
+- Each minute the labels' times change through the shared clock, for the pins alone that show
+  a label.
+- The scene does not draw while the tab is hidden (`turn-globe`), so nothing is grouped then.
+
+**On the still picture**
+
+Where the 3D globe cannot be drawn, `GlobeFallback` shows the still picture with the pins in
+place on it (`draw-globe`). It renders the same list, `ul.globe__pins`, from the placements
+`stillPlacements` works out once for each `pins` value, width and selection, with `groupPins`
+and the same grouping radius. Its pins lift and are selected as described here. Nothing
+turns, so nothing is grouped again on a frame.
+
+Nothing grows with the length of a visit. `PinLayer`'s pointer listeners are removed when
+`GlobeView` is destroyed, and its elements go with it.
 
 ## Requirements
 
@@ -185,7 +249,7 @@ requirement, cited by identifier.
 |-------|--------------|-------------|
 | `L2-011` | `L1-004` | A pin shows the teammate's initials in the teammate's own colour, and a label beside it with their local time, the weather and the temperature. The viewer's own pin is marked as theirs. |
 | `L2-012` | `L1-004` | On a small globe pins are small. A pin that the pointer is over, that has keyboard focus, or that is selected rises from the globe's surface, grows, comes in front of its neighbours and shows its label, so the teammate can be read clearly. When the pointer leaves it settles back. |
-| `L2-013` | `L1-004` | Teammates in the same city, or in cities close together at the current size of the globe, are never drawn on top of one another so that one is hidden. |
+| `L2-013` | `L1-004` | Teammates in the same city, or in cities close together at the current size of the globe, are never drawn on top of one another so that one is hidden: pins that would cover each other are drawn as one group pin with a count. |
 
 ## Diagrams
 
@@ -206,17 +270,19 @@ Open-Meteo.
 
 ### Components
 
-In the web app, `GlobePage` gives the pins from `TeamStore` to `GlobeView`, which asks
-`spreadPins` for placements and hands them to `PinLayer`, whose pin buttons take the pointer and keyboard focus. In the API, `TeamsController` sends `GetPinsQuery` to
+In the web app, `GlobePage` gives the pins from `TeamStore` to `GlobeView`, which hands them
+to `PinLayer`. `PinLayer` asks `groupPins` for placements and draws them as pin buttons that
+take the pointer and keyboard focus. In the API, `TeamsController` sends `GetPinsQuery` to
 `GetPinsQueryHandler`, which reads the database and `CachedWeatherSource`.
 
 ![C4 component view for showing pins](diagrams/c4-component.png)
 
 ### Class structure
 
-`PinDto` is serialised as `Pin`. `spreadPins` realises the `PinSpreader` contract and returns
-`PinPlacement`s, each standing for one or more pins. `GlobeView` injects the contract and owns
-`PinLayer`, which uses `LabelPlacer` and `GlobeScene.project`.
+`PinDto` is serialised as `Pin`. `groupPins` realises the `PinGrouper` contract: it reads
+`PlacePoint`s and `GroupOptions` and returns `PinPlacement`s, each standing for one or more
+pins. `GlobeView` owns `PinLayer`, which injects the contract and uses `LabelPlacer` and
+`GlobeScene.project`.
 
 ![Class diagram for showing pins](diagrams/class-structure.png)
 
@@ -237,10 +303,12 @@ and returns as an input, and the pin stays lifted until the selection is cleared
 
 ![Sequence diagram for lifting a pin on hover, focus or tap](diagrams/sequence-lift-pin.png)
 
-### Behaviour — fan and group pins
+### Behaviour — group pins that are close together
 
-`GlobeView` asks for placements when the pins or the globe's size change. `PinLayer` projects
-each placement as the globe turns, hides those on the far side and places the labels. Selecting
-a group pin lists its teammates in the panel to choose from.
+`PinLayer` groups when the pins, the globe's size or the selection change, and again each
+time the globe has turned `RegroupAfterDegrees`. Between two groupings it only moves the
+placements, hides those on the far side and places the labels of the pins that stand alone.
+Selecting a group pin turns the globe to it and lists its teammates in the panel; choosing
+one makes that teammate's pin stand alone.
 
-![Sequence diagram for fanning and grouping pins that are close together](diagrams/sequence-spread-pins.png)
+![Sequence diagram for grouping pins that are close together](diagrams/sequence-group-pins.png)

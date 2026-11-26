@@ -60,12 +60,17 @@ loop each pin
     else no key, or key not bundled
       emblem --> marker : Icon of the moment's kind
     end
-    marker --> page : MomentMarker with emblem, count,\ntoday flag and when label
+    marker --> page : MomentMarker with its moments, their count,\nthe nearest one's emblem and the today flag
   end
 end
 page -> view : pins and markers
 view -> layer : setMarkers(markers)
-layer --> actor : Marker in sun beside each marked pin,\nstronger by size and ring when today
+alt one moment this week
+  layer --> actor : Marker in sun with the emblem (L2-021)
+else two or more
+  layer --> actor : Marker in sun with the count, "2" (L2-021)
+end
+layer --> actor : Larger and ringed when the nearest moment is today
 actor -> layer : Point at, focus or select a marked pin
-layer --> actor : Pin lifts; its label gives the title\nand when label as text (L2-021)
+layer --> actor : Pin lifts; its label gives the nearest moment's title\nand when label as text (L2-021)
 @enduml

@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Sign in with an emailed link
+
+Container_Boundary(web, "Mondino web app") {
+  Component(page, "SignInPage", "Angular page, lazy route /sign-in", "The form, Check your inbox, and the opening of an emailed link")
+  Component(store, "SignInStore", "Route-scoped service", "Holds the email and the SignInState")
+  Component(client, "HttpSignInApi", "SignInApi, @mondino/api", "The only caller of the sign-in endpoints")
+  Component(membership, "TeamMembership", "@mondino/domain, storage/", "Remembers the team after signing in")
+}
+Container_Boundary(api, "Mondino API") {
+  Component(ctrl, "SignInController", "ASP.NET Core controller", "Open to anyone, rate limited")
+  Component(request, "RequestSignInLinkCommandHandler", "MediatR handler", "Stores the link's hash and expiry and sends the email, whatever the email")
+  Component(redeem, "RedeemSignInLinkCommandHandler", "MediatR handler", "Checks the link once, within 15 minutes, and finds the teammate")
+  Component(tokens, "SignInTokens", "ISignInTokens", "Makes a token and hashes one")
+  Component(sender, "SignInEmailSender", "ISignInEmailSender", "Sends the link through SourceResilience")
+  Component(session, "TeammateSessionHandler", "Cookie session authentication", "Issues the HttpOnly, Secure, SameSite cookie")
+  ComponentDb(db, "Mondino database", "EF Core, IAppDbContext", "Sign-in links and teammates")
+}
+System_Ext(email, "Email source", "Provider TO SUPPLY")
+
+Rel(page, store, "requestLink(), open(signInToken)")
+Rel(store, client, "requestLink, redeem")
+Rel(page, membership, "remember(membership)")
+Rel(client, ctrl, "POST sign-in-links, POST redemptions", "JSON/HTTPS")
+Rel(ctrl, request, "RequestSignInLinkCommand", "MediatR")
+Rel(ctrl, redeem, "RedeemSignInLinkCommand", "MediatR")
+Rel(request, tokens, "Create()")
+Rel(redeem, tokens, "Hash(token)")
+Rel(request, sender, "SendAsync(email, link)")
+Rel(sender, email, "Address and link", "HTTPS, 5 s timeout")
+Rel(request, db, "Adds the SignInLink", "EF Core")
+Rel(redeem, db, "Marks the link used; reads the teammate by email", "EF Core")
+Rel(ctrl, session, "Signs the teammate in")
+@enduml

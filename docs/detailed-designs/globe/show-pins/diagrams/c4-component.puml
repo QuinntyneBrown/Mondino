@@ -4,11 +4,11 @@ LAYOUT_WITH_LEGEND()
 title Components — Show pins
 
 Container_Boundary(spa, "Mondino web app") {
-  Component(page, "GlobePage", "Angular page, mondino application", "Supplies what a pin and its label show; binds PIN_SPREADER")
+  Component(page, "GlobePage", "Angular page, mondino application", "Supplies what a pin and its label show; binds PIN_GROUPER")
   Component(store, "TeamStore", "Signal store, domain library", "Holds the pins and the selected teammate id")
-  Component(spread, "spreadPins", "Function, domain library", "Fans and groups pins that are close together")
-  Component(view, "GlobeView", "Angular component mo-globe, globe library", "Asks for placements at the globe's size")
-  Component(layer, "PinLayer", "Angular component, globe library", "Places pins over the globe as a list of buttons, lifts them, places labels")
+  Component(grouper, "groupPins", "Function, domain library", "Groups pins that would cover each other into group pins")
+  Component(view, "GlobeView", "Angular component mo-globe, globe library", "Measures the globe and owns the pin layer")
+  Component(layer, "PinLayer", "Angular component, globe library", "Groups pins, places them over the globe as a list of buttons, lifts them, places labels")
 }
 Container_Boundary(api, "Mondino API") {
   Component(ctrl, "TeamsController", "ASP.NET Core controller", "GET /api/teams/{teamId}/pins")
@@ -18,9 +18,9 @@ Container_Boundary(api, "Mondino API") {
 }
 Rel(page, store, "Reads pins and selection from")
 Rel(store, ctrl, "Reads pins through TEAM_API", "JSON/HTTPS")
-Rel(page, view, "Gives pins, selectedId and templates to")
-Rel(view, spread, "Calls through PIN_SPREADER")
-Rel(view, layer, "Gives placements and descriptions to")
+Rel(page, view, "Gives pins, selectedId, selectedGroupIds and templates to")
+Rel(view, layer, "Gives pins, width and descriptions to")
+Rel(layer, grouper, "Calls through PIN_GROUPER")
 Rel(ctrl, handler, "Sends GetPinsQuery")
 Rel(handler, db, "Reads", "IAppDbContext")
 Rel(handler, weather, "Asks for weather at each city")
