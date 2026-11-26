@@ -142,6 +142,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .hue-10 { --teammate: var(--palette-teammate-10); }
 .hue-11 { --teammate: var(--palette-teammate-11); }
 .hue-12 { --teammate: var(--palette-teammate-12); }
+.hue-13 { --teammate: var(--palette-teammate-13); }
 
 /* ---------- Button -------------------------------------------------------- */
 .btn {
@@ -215,10 +216,17 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .app-header__actions { gap: var(--space-3); }
 }
 @media (min-width: 48rem) { .app-header__invite { display: inline-flex; } }
-/* The narrowest phones (320px): the header tightens so its tabs still fit. */
-@media (max-width: 22.49rem) {
+/* A phone under 416px: the header tightens so its tabs, the invite button and the avatar still fit. */
+@media (max-width: 25.99rem) {
   .app-header { gap: var(--space-2); padding: 0 var(--space-3); }
+  .app-header__actions { gap: 0; }
   .app-header .segmented__option { padding: 0 var(--space-2); }
+}
+/* The narrowest phones (320px): the tabs' text steps down one size. */
+@media (max-width: 22.49rem) {
+  .app-header { gap: var(--space-1); padding: 0 var(--space-2); }
+  .app-header .segmented__option { padding: 0 var(--space-1-5); font-size: var(--font-size-xs); }
+  .app-header .mark { width: var(--space-6); height: var(--space-6); }
 }
 .app-header--bare { justify-content: flex-start; }
 .app-header--bare .wordmark { display: inline; }
@@ -799,3 +807,164 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .pin.pin--static, .pin.pin--static:hover { position: relative; translate: none; cursor: default; }
 .pin-label.pin-label--static { position: static; translate: none; }
 .pin-label--selected { background: var(--palette-ink); color: var(--palette-paper); box-shadow: 0 0 0 var(--border-width-hairline) var(--palette-ink-soft); }
+
+/* ==========================================================================
+   Added when the mocks were transcribed again from the prototype's second
+   pass: the invite button and dialog, the pages before a team (Sign In,
+   Create Team), a page that says one thing, a count on a moment marker, the
+   group pin in the legend, a private note in a teammate's panel, and a team
+   of hundreds (the day ribbon as a bar chart, a search, a section per city).
+   ========================================================================== */
+
+/* ---------- App header: "Invite teammate" is an icon on a phone ---------------- */
+.app-header__invite { display: inline-flex; width: var(--target-comfortable); min-height: var(--target-comfortable); padding: 0; }
+.app-header__invite-label { display: none; }
+@media (min-width: 48rem) {
+  .app-header__invite { width: auto; min-height: var(--control-height-md); padding: 0 var(--space-4); }
+  .app-header__invite-label { display: inline; }
+}
+
+/* ---------- Auth: the pages before a team (Sign In, Create Team) ---------------- */
+.auth { display: flex; flex-direction: column; min-height: 100dvh; }
+.auth__form { display: flex; flex-direction: column; width: 100%; padding: var(--space-8) var(--space-6); }
+.auth__body { margin-top: var(--space-12); }
+.auth__kicker { font: var(--text-label-strong); }
+.auth__title { font: var(--text-h1-lg); letter-spacing: var(--letter-spacing-tight); }
+.auth__kicker + .auth__title { margin-top: var(--space-3); }
+.auth__lead { max-width: var(--layout-overlay-max); margin-top: var(--space-4); color: var(--color-fg-muted); }
+.auth__lead strong { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
+.auth__fields { display: flex; flex-direction: column; gap: var(--space-5); margin-top: var(--space-8); }
+.auth__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
+.auth__stage { width: 100%; height: var(--layout-globe-phone-height); flex: none; padding-bottom: var(--space-16); }
+/* The line under the form on Join, Sign In and Create Team: the other way in. */
+.auth__footer, .join__footer { margin-top: var(--space-10); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.auth__footer a, .join__footer a { font-weight: var(--font-weight-semibold); }
+@media (min-width: 36rem) {
+  .auth__form { padding: var(--space-8) var(--space-10); }
+  .auth__title { font: var(--text-display); letter-spacing: var(--letter-spacing-tight); }
+  .auth__stage { height: var(--layout-globe-tablet-height); }
+}
+@media (min-width: 62rem) {
+  .auth { flex-direction: row; height: 100dvh; }
+  .auth__form { width: var(--layout-join-form-width); flex: none; overflow-y: auto; padding-block: var(--space-10); }
+  .auth__body { margin-top: auto; }
+  .auth__footer, .join__footer { margin-top: auto; padding-top: var(--space-10); }
+  .auth__stage { flex: 1; min-width: 0; height: 100%; padding-bottom: 0; border-left: var(--border-width-hairline) solid var(--color-border-default); }
+}
+/* A notice that takes the form's place: an icon, a title, a line and a way on. */
+.notice__icon { display: flex; align-items: center; justify-content: center; width: var(--space-12); height: var(--space-12); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-full); background: var(--color-bg-surface); }
+.notice__title { margin-top: var(--space-6); font: var(--text-h1-lg); letter-spacing: var(--letter-spacing-tight); }
+.notice__text { max-width: var(--layout-overlay-max); margin-top: var(--space-4); color: var(--color-fg-muted); }
+.notice__text strong { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
+.notice__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
+
+/* A field with an icon at its start: the city search, the search above a large team. */
+.input-wrap { position: relative; }
+.input-wrap .icon { position: absolute; left: var(--space-3); top: 50%; translate: 0 -50%; pointer-events: none; color: var(--color-fg-muted); }
+.input-wrap .input { padding-left: var(--space-10); }
+.input--search { min-height: var(--target-comfortable); border-radius: var(--radius-full); }
+
+/* A link shown with a button to copy it: the invite dialog, Create Team. */
+.copy-field { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1-5) var(--space-1-5) var(--space-1-5) var(--space-3); border: var(--border-width-hairline) solid var(--color-border-strong); border-radius: var(--radius-xl); background: var(--color-bg-canvas); }
+.copy-field__value { flex: 1; min-width: 0; min-height: var(--target-comfortable); border: 0; background: transparent; color: var(--color-fg-default); font: var(--text-body-sm); text-overflow: ellipsis; }
+.copy-field__value:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: var(--space-0-5); border-radius: var(--radius-sm); }
+.copy-field .btn { border-radius: var(--radius-lg); }
+.auth .copy-field { margin-top: var(--space-8); background: var(--color-bg-surface); }
+
+/* ---------- A page that says one thing: a small globe, a title, a line, a way on -- */
+.notice-page { display: flex; flex-direction: column; min-height: 100dvh; padding: var(--space-8) var(--space-6); }
+.notice-page__body { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: var(--layout-container-message); margin-inline: auto; padding: var(--space-12) 0; text-align: center; }
+.notice-page__art { width: var(--layout-notice-art); height: var(--layout-notice-art); }
+.notice-page__title { margin-top: var(--space-8); font: var(--text-h1-lg); letter-spacing: var(--letter-spacing-tight); }
+.notice-page__text { max-width: var(--layout-overlay-max); margin-top: var(--space-4); color: var(--color-fg-muted); }
+.notice-page__text strong { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); overflow-wrap: anywhere; }
+.notice-page__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-8); }
+@media (min-width: 36rem) {
+  .notice-page { padding: var(--space-8) var(--space-10); }
+  .notice-page__title { font: var(--text-display); letter-spacing: var(--letter-spacing-tight); }
+}
+
+/* ---------- Dialog: a close button, and the invite dialog's foot ---------------- */
+.dialog__close { margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0 0; }
+.dialog__label { color: var(--color-fg-default); font: var(--text-label); }
+.dialog__label + .copy-field { margin-top: calc(-1 * var(--space-2)); }
+.dialog__meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); padding-top: var(--space-2); border-top: var(--border-width-hairline) solid var(--color-border-default); }
+
+/* ---------- Toast: a failure is a surface with a pin edge, not ink ---------------- */
+.toast--danger { background: var(--color-bg-surface-raised); color: var(--color-fg-default); box-shadow: 0 0 0 var(--border-width-thick) var(--color-danger-border), var(--shadow-4); }
+.toast--danger > .icon { color: var(--color-danger-icon); }
+
+/* ---------- Moment marker: a count when a pin has two or more this week ---------- */
+.moment-marker--count { width: auto; min-width: var(--moment-marker-size); padding: 0 var(--space-1); font: var(--text-pin); font-size: var(--font-size-3xs); }
+
+/* ---------- Legend: the group pin ---------------------------------------------------- */
+.legend-swatch--group { display: inline-flex; align-items: center; justify-content: center; width: auto; min-width: var(--space-4); height: var(--space-4); padding: 0 var(--space-1); background: var(--color-accent); color: var(--color-fg-on-accent); font: var(--text-pin); font-size: var(--font-size-3xs); opacity: 1; }
+.globe-screen__still { margin: var(--space-2) var(--layout-margin) var(--space-4); padding: var(--space-2) var(--space-3); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); font: var(--text-caption); color: var(--color-fg-muted); }
+@media (min-width: 36rem) { .globe-screen__still { display: none; } }
+
+/* ---------- Panel: a head with a count or a close button, a city in a group, a note -- */
+.panel__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.panel__head--close { align-items: flex-start; }
+.panel__count { font: var(--text-body-sm); color: var(--color-fg-muted); }
+.panel__city { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding-bottom: var(--space-2); border-bottom: var(--border-width-hairline) solid var(--color-border-default); }
+.panel__city h3 { font: var(--text-h3); font-size: var(--font-size-md); }
+.panel__city-time { font: var(--text-label-strong); }
+.panel__note { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg-canvas); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.panel__note .icon { flex: none; margin-top: var(--space-0-5); }
+.panel__note strong { display: block; color: var(--color-fg-default); font-weight: var(--font-weight-medium); }
+.panel__note a { display: inline-flex; align-items: center; min-height: var(--target-comfortable); font-weight: var(--font-weight-semibold); }
+.person__weather--note { font: var(--text-body-sm); color: var(--color-fg-muted); }
+
+/* ---------- Day ribbon, for a large team: how many are at each half hour ---------- */
+.day-ribbon__summary { margin-bottom: var(--space-3); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.day-ribbon__summary strong { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
+.day-ribbon__scroll { overflow-x: auto; }
+.day-ribbon__scroll > * { min-width: 45rem; }
+.day-ribbon__track--density { height: calc(var(--ribbon-density-height) + var(--space-8)); }
+.day-ribbon__bars { position: absolute; inset: auto 0 0 0; display: flex; align-items: flex-end; gap: var(--space-0-5); height: var(--ribbon-density-height); padding: 0 var(--border-width-hairline); }
+.day-ribbon__bar { position: relative; flex: 1; height: calc(var(--share) * (100% - var(--space-6))); min-height: var(--space-1); border-radius: var(--radius-sm) var(--radius-sm) 0 0; background: var(--color-fg-default); opacity: 0.75; }
+.day-ribbon__bar--none { visibility: hidden; }
+.day-ribbon__bar-count { position: absolute; left: 50%; bottom: calc(100% + var(--space-1)); translate: -50% 0; font: var(--text-caption); font-size: var(--font-size-2xs); font-weight: var(--font-weight-semibold); color: var(--color-fg-default); }
+
+/* ---------- Team, for a large team: a search and a section per city ---------------- */
+.section-head__tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.section-head__tools .input-wrap { width: 100%; }
+@media (min-width: 36rem) { .section-head__tools .input-wrap { width: var(--layout-search-width); } }
+.team-head { display: none; }
+@media (min-width: 48rem) {
+  .team-head { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr) 5.75rem 4.75rem 3.5rem minmax(0, 1.6fr); gap: var(--space-3); margin-top: var(--space-4); padding: 0 var(--space-3) var(--space-2); border-bottom: var(--border-width-hairline) solid var(--color-border-default); font: var(--text-caption); font-weight: var(--font-weight-medium); color: var(--color-fg-muted); }
+  .city-section .team-table { margin-top: 0; }
+  .city-section .team-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@media (min-width: 62rem) { .team-head { grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.6fr) 6.5rem 6.5rem 5rem minmax(0, 2fr) var(--space-5); gap: var(--space-4); } }
+.city-section { border-bottom: var(--border-width-hairline) solid var(--color-border-default); }
+.city-section__toggle { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--target-comfortable); padding: var(--space-2) var(--space-3); border: 0; background: transparent; color: var(--color-fg-default); text-align: left; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard); }
+.city-section__toggle:hover { background: var(--color-bg-surface); }
+.city-section__toggle .icon { flex: none; color: var(--color-fg-muted); transition: rotate var(--duration-fast) var(--ease-standard); }
+.city-section__toggle[aria-expanded="false"] .icon { rotate: -90deg; }
+.city-section__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--text-h3); font-size: var(--font-size-md); }
+.city-section__count { font: var(--text-body-sm); color: var(--color-fg-muted); }
+.city-section__time { min-width: var(--space-12); text-align: right; font: var(--text-figure); font-size: var(--font-size-md); }
+.city-section__more { padding: var(--space-2) var(--space-3) var(--space-3); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.team-table__none { font: var(--text-caption); color: var(--color-fg-muted); }
+
+/* ---------- Empty: a card that asks for one thing (a team of one, on Team) ---------- */
+.invite-prompt { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); margin-top: var(--space-12); padding: var(--space-6); border-radius: var(--radius-2xl); }
+.invite-prompt__title { font: var(--text-name); }
+.invite-prompt__text { margin-top: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-muted); }
+@media (min-width: 36rem) { .invite-prompt { flex-direction: row; align-items: center; } .invite-prompt > :first-child { flex: 1; min-width: 0; } }
+.list-note__title { display: block; color: var(--color-fg-default); font: var(--text-h3); }
+.list-note .btn { margin-top: var(--space-4); }
+
+
+/* ---------- Field row: with a button at its end (Profile & Settings: "Look up") ---------- */
+.field-row__action { justify-self: start; }
+@media (min-width: 36rem) {
+  .field-row:has(.field-row__action) { grid-template-columns: minmax(0, 1fr) var(--layout-field-short) auto; align-items: end; }
+  .field-row__action { min-height: var(--control-height-lg); }
+}
+.panel__city { margin-top: var(--space-5); }
+.panel__head--close > div { flex: 1; min-width: 0; }
+.section-head__tools { max-width: 100%; min-width: 0; }
+.section-head__tools .segmented { max-width: 100%; overflow-x: auto; }
+.legend-swatch { box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-strong); }

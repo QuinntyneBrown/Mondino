@@ -7,7 +7,7 @@
 <meta name="mock:kind" content="page">
 <meta name="mock:screen" content="globe">
 <meta name="mock:state" content="empty">
-<meta name="mock:requirements" content="L2-005 L2-008 L2-009 L2-010 L2-011 L2-012 L2-013 L2-014 L2-015 L2-016 L2-017 L2-018 L2-019 L2-021 L2-022 L2-023 L2-024 L2-025 L2-033 L2-034 L2-037 L2-038 L2-040 L2-049">
+<meta name="mock:requirements" content="L2-005 L2-007 L2-008 L2-009 L2-010 L2-011 L2-012 L2-013 L2-014 L2-015 L2-016 L2-017 L2-018 L2-019 L2-021 L2-022 L2-023 L2-024 L2-025 L2-033 L2-034 L2-037 L2-038 L2-040 L2-049 L2-054">
 <meta name="description" content="Globe for a team of one: “Just you, for now”, the viewer’s own pin, the team’s invite link to copy, and no panel.">
 <link rel="stylesheet" href="../../assets/tokens.css">
 <link rel="stylesheet" href="../../assets/ui.css">
@@ -23,7 +23,7 @@
     <a class="segmented__option" href="../../pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <a class="btn app-header__invite" href="../../dialogs/invite/default.html" aria-label="Invite teammate"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></a>
     <a class="app-header__me" href="../../pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
 </header>
@@ -41,10 +41,10 @@
     </ul>
   </div>
     </div></div>
-    <ul class="globe-screen__legend"><li><span class="legend-swatch"></span>Night side</li><li><span class="legend-swatch legend-swatch--moment"></span>Moment this week</li><li><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>Drag to spin</li></ul>
+    <ul class="globe-screen__legend"><li><span class="legend-swatch"></span>Night side</li><li><span class="legend-swatch legend-swatch--moment"></span>Moment this week</li><li><span class="legend-swatch legend-swatch--group" aria-hidden="true">3</span>Teammates close together</li><li><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>Drag to spin</li></ul>
     <div class="globe-screen__invite card card--raised invite-card">
       <h2 class="invite-card__title">Bring the team onto the globe</h2>
-      <p class="invite-card__text">Anyone with this invite link adds their pin with a postal code. No addresses are shown.</p>
+      <p class="invite-card__text">Anyone with this link adds their pin with a postal code. Only their city is shown.</p>
       <div class="invite-card__link"><span class="invite-card__url" id="invite-url">mondino.app/join/northwind-7Kq2</span><button class="btn btn--primary btn--sm" type="button" aria-describedby="invite-url"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>Copy</button></div>
     </div>
   </section>
@@ -63,6 +63,7 @@
     <li><a href="pin-lifted.html">pin-lifted</a></li>
     <li><a href="just-joined.html">just-joined</a></li>
     <li><a href="group.html">group</a></li>
+    <li><a href="hundreds.html">hundreds</a></li>
     <li><a href="sharing-off.html">sharing-off</a></li>
     <li><a href="quiet.html">quiet</a></li>
     <li><a href="loading.html">loading</a></li>

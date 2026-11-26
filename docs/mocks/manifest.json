@@ -16,7 +16,9 @@
         "L2-037",
         "L2-040",
         "L2-045",
-        "L2-049"
+        "L2-049",
+        "L2-052",
+        "L2-053"
       ],
       "states": [
         "default",
@@ -35,6 +37,78 @@
       ],
       "not_applicable": {
         "empty": "Join lists nothing. An invite link that leads to no team is the invite-unusable state."
+      }
+    },
+    {
+      "id": "sign-in",
+      "kind": "page",
+      "title": "Sign In",
+      "route": "/sign-in",
+      "requirements": [
+        "L2-037",
+        "L2-039",
+        "L2-041",
+        "L2-044",
+        "L2-045",
+        "L2-052"
+      ],
+      "states": [
+        "default",
+        "invalid",
+        "submitting",
+        "sent",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "Sign In reads nothing before it is shown; sending the link is the submitting state.",
+        "empty": "Sign In lists nothing."
+      }
+    },
+    {
+      "id": "create-team",
+      "kind": "page",
+      "title": "Create Team",
+      "route": "/new",
+      "requirements": [
+        "L2-003",
+        "L2-004",
+        "L2-006",
+        "L2-037",
+        "L2-039",
+        "L2-044",
+        "L2-045",
+        "L2-053"
+      ],
+      "states": [
+        "default",
+        "invalid",
+        "submitting",
+        "error",
+        "created"
+      ],
+      "not_applicable": {
+        "loading": "Create Team reads nothing before it is shown; making the team is the submitting state.",
+        "empty": "Create Team lists nothing."
+      }
+    },
+    {
+      "id": "invite-needed",
+      "kind": "page",
+      "title": "Invite Needed",
+      "route": "/globe, /team, /moments, /profile",
+      "requirements": [
+        "L2-038",
+        "L2-043",
+        "L2-052",
+        "L2-053"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "Decided in the browser before anything is read.",
+        "empty": "It lists nothing.",
+        "error": "It reads nothing that can fail."
       }
     },
     {
@@ -67,7 +141,8 @@
         "L2-037",
         "L2-038",
         "L2-040",
-        "L2-049"
+        "L2-049",
+        "L2-054"
       ],
       "states": [
         "default",
@@ -77,6 +152,7 @@
         "pin-lifted",
         "just-joined",
         "group",
+        "hundreds",
         "sharing-off",
         "quiet",
         "loading",
@@ -105,7 +181,10 @@
         "L2-037",
         "L2-038",
         "L2-044",
-        "L2-049"
+        "L2-047",
+        "L2-049",
+        "L2-054",
+        "L2-056"
       ],
       "states": [
         "default",
@@ -116,7 +195,9 @@
         "empty",
         "error",
         "weather-unavailable",
-        "edge"
+        "edge",
+        "hundreds",
+        "hundreds-no-match"
       ]
     },
     {
@@ -131,7 +212,8 @@
         "L2-030",
         "L2-037",
         "L2-038",
-        "L2-049"
+        "L2-049",
+        "L2-054"
       ],
       "states": [
         "default",
@@ -159,7 +241,8 @@
         "L2-036",
         "L2-037",
         "L2-038",
-        "L2-049"
+        "L2-049",
+        "L2-054"
       ],
       "states": [
         "default",
@@ -179,10 +262,12 @@
     {
       "id": "left-team",
       "kind": "page",
-      "title": "Left the team",
+      "title": "Left Team",
       "route": "/left",
       "requirements": [
-        "L2-036"
+        "L2-036",
+        "L2-052",
+        "L2-053"
       ],
       "states": [
         "default"
@@ -194,27 +279,9 @@
       }
     },
     {
-      "id": "no-team",
-      "kind": "page",
-      "title": "Invite link needed",
-      "route": "/globe, /team, /moments, /profile",
-      "requirements": [
-        "L2-038",
-        "L2-043"
-      ],
-      "states": [
-        "default"
-      ],
-      "not_applicable": {
-        "loading": "Decided in the browser before anything is read.",
-        "empty": "It lists nothing.",
-        "error": "It reads nothing that can fail."
-      }
-    },
-    {
       "id": "not-found",
       "kind": "page",
-      "title": "Not found",
+      "title": "Not Found",
       "route": "/**",
       "requirements": [
         "L2-038"
@@ -244,6 +311,25 @@
         "loading": "A reference sheet, not a screen of the product; it reads nothing.",
         "empty": "A reference sheet; it lists nothing that can be empty.",
         "error": "A reference sheet; it reads nothing that can fail."
+      }
+    },
+    {
+      "id": "invite",
+      "kind": "dialog",
+      "title": "Invite teammates",
+      "opens_from": "globe",
+      "requirements": [
+        "L2-039",
+        "L2-054",
+        "L2-055"
+      ],
+      "states": [
+        "default",
+        "copy-failed"
+      ],
+      "not_applicable": {
+        "busy": "Copying the link is immediate; the dialog has no busy state.",
+        "invalid": "The dialog has no input to get wrong: the link is read-only."
       }
     },
     {
@@ -302,10 +388,10 @@
     {
       "id": "invite-link",
       "kind": "notification",
-      "title": "Invite link copied",
+      "title": "Invite link toast",
       "opens_from": "globe",
       "requirements": [
-        "L2-025"
+        "L2-054"
       ],
       "states": [
         "success",

@@ -7,8 +7,8 @@
 <meta name="mock:kind" content="page">
 <meta name="mock:screen" content="join">
 <meta name="mock:state" content="invite-unusable">
-<meta name="mock:requirements" content="L2-001 L2-002 L2-003 L2-004 L2-005 L2-006 L2-037 L2-045 L2-049">
-<meta name="description" content="An invite link that does not exist or has been withdrawn: no team name, no count and no pins.">
+<meta name="mock:requirements" content="L2-001 L2-002 L2-003 L2-004 L2-005 L2-006 L2-037 L2-040 L2-045 L2-049 L2-052 L2-053">
+<meta name="description" content="Join when the invite link no longer works: a notice in place of the form, with a way to start a team, and a globe with no pins.">
 <link rel="stylesheet" href="../../assets/tokens.css">
 <link rel="stylesheet" href="../../assets/ui.css">
 <link rel="stylesheet" href="../../assets/mock.css">
@@ -18,8 +18,8 @@
 <main id="main" class="join">
   <section class="join__form">
     <span class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark">mondino</span></span>
-    <div class="join__body"><div class="empty empty--left"><span class="empty__icon"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7"/><path d="M15 7h2a5 5 0 0 1 4 8"/><line x1="8" x2="12" y1="12" y2="12"/><line x1="2" x2="22" y1="2" y2="22"/></svg></span><h1 class="empty__title">This invite link can’t be used</h1><p class="empty__text">It may have been withdrawn, or part of the link is missing. Ask your teammate to send their team’s invite link again.</p></div></div>
-    <p class="join__sources">Weather from Open-Meteo · Holidays from public calendars</p>
+    <div class="join__body"><div class="notice"><span class="notice__icon"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7"/><path d="M15 7h2a5 5 0 0 1 4 8"/><line x1="8" x2="12" y1="12" y2="12"/><line x1="2" x2="22" y1="2" y2="22"/></svg></span><h1 class="notice__title">This invite link no longer works</h1><p class="notice__text">Someone on the team reset it, so it can’t be used to join. Ask whoever sent it for the new link.</p><div class="notice__actions"><a class="btn btn--lg" href="../../pages/create-team/default.html">Start your own team</a></div></div></div>
+    <p class="join__footer">Already on Mondino? <a href="../../pages/sign-in/default.html">Sign in</a></p>
   </section>
   <section class="join__stage" aria-label="The team on the globe"><div class="globe-stage">
   <div class="globe" role="img" aria-label="The globe, with no pins">
@@ -29,6 +29,7 @@
   </div></section>
 </main>
 
+<p class="mock-note" style="top: 1rem; right: 1rem;">Shown for a link that was reset, withdrawn or mistyped alike. No team name, count or pin is shown: the link proves nothing about a team.</p>
 <nav class="mock-bar" aria-label="Mock navigation">
   <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
   <span class="mock-bar__screen">Join</span>

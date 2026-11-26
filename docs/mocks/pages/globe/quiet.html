@@ -7,7 +7,7 @@
 <meta name="mock:kind" content="page">
 <meta name="mock:screen" content="globe">
 <meta name="mock:state" content="quiet">
-<meta name="mock:requirements" content="L2-005 L2-008 L2-009 L2-010 L2-011 L2-012 L2-013 L2-014 L2-015 L2-016 L2-017 L2-018 L2-019 L2-021 L2-022 L2-023 L2-024 L2-025 L2-033 L2-034 L2-037 L2-038 L2-040 L2-049">
+<meta name="mock:requirements" content="L2-005 L2-007 L2-008 L2-009 L2-010 L2-011 L2-012 L2-013 L2-014 L2-015 L2-016 L2-017 L2-018 L2-019 L2-021 L2-022 L2-023 L2-024 L2-025 L2-033 L2-034 L2-037 L2-038 L2-040 L2-049 L2-054">
 <meta name="description" content="Globe late in the evening for a team of three with every kind of moment turned off: nothing to show this week, and nobody in working hours.">
 <link rel="stylesheet" href="../../assets/tokens.css">
 <link rel="stylesheet" href="../../assets/ui.css">
@@ -23,7 +23,7 @@
     <a class="segmented__option" href="../../pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <a class="btn app-header__invite" href="../../dialogs/invite/default.html" aria-label="Invite teammate"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></a>
     <a class="app-header__me" href="../../pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
 </header>
@@ -43,16 +43,14 @@
     </ul>
   </div>
     </div></div>
-    <ul class="globe-screen__legend"><li><span class="legend-swatch"></span>Night side</li><li><span class="legend-swatch legend-swatch--moment"></span>Moment this week</li><li><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>Drag to spin</li></ul>
+    <ul class="globe-screen__legend"><li><span class="legend-swatch"></span>Night side</li><li><span class="legend-swatch legend-swatch--group" aria-hidden="true">3</span>Teammates close together</li><li><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>Drag to spin</li></ul>
     
   </section>
   <aside class="globe-screen__panel" aria-label="This week around the world">
   <div class="panel">
     <section aria-labelledby="week-title">
       <h2 id="week-title">This week around the world</h2>
-      <p class="panel__lead">Holidays, races and local moments where your teammates live.</p>
-      <p class="panel__empty">Nothing to show: every kind of moment is turned off for your globe. <a href="../../pages/profile/default.html">Choose what shows</a></p>
-      <a class="panel__more" href="../../pages/moments/default.html">All moments <svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+      <div class="panel__note"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/></svg><div><strong>Every kind of moment is switched off</strong>Holidays, races, events and sport won’t show on pins until you turn some back on. <a href="../../pages/profile/default.html">Choose moments</a></div></div>
     </section>
     <section aria-labelledby="working-title">
       <h2 id="working-title">In working hours now</h2>
@@ -74,6 +72,7 @@
     <li><a href="pin-lifted.html">pin-lifted</a></li>
     <li><a href="just-joined.html">just-joined</a></li>
     <li><a href="group.html">group</a></li>
+    <li><a href="hundreds.html">hundreds</a></li>
     <li><a href="sharing-off.html">sharing-off</a></li>
     <li><a href="quiet.html" aria-current="page">quiet</a></li>
     <li><a href="loading.html">loading</a></li>

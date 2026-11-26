@@ -7,7 +7,7 @@
 <meta name="mock:kind" content="page">
 <meta name="mock:screen" content="profile">
 <meta name="mock:state" content="rate-limited">
-<meta name="mock:requirements" content="L2-007 L2-019 L2-022 L2-031 L2-032 L2-033 L2-034 L2-035 L2-036 L2-037 L2-038 L2-049">
+<meta name="mock:requirements" content="L2-007 L2-019 L2-022 L2-031 L2-032 L2-033 L2-034 L2-035 L2-036 L2-037 L2-038 L2-049 L2-054">
 <meta name="description" content="Profile &amp; Settings after too many postal code tries in a minute: asked to wait a moment, with what was typed kept, saving not offered, and the pin staying where it was.">
 <link rel="stylesheet" href="../../assets/tokens.css">
 <link rel="stylesheet" href="../../assets/ui.css">
@@ -23,7 +23,7 @@
     <a class="segmented__option" href="../../pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <a class="btn app-header__invite" href="../../dialogs/invite/default.html" aria-label="Invite teammate"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></a>
     <a class="app-header__me" href="../../pages/profile/default.html" aria-label="Profile &amp; Settings" aria-current="page"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
 </header>
@@ -49,11 +49,12 @@
     <div class="settings__sections">
       <section class="settings-section" aria-labelledby="s-location">
         <h2 class="settings-section__title" id="s-location">Location</h2>
-        <p class="settings-section__note">Moved? Update your postal code and your pin follows.</p>
+        <p class="settings-section__note">Moved? Look up your new postal code and your pin follows when you save.</p>
         <div class="settings-section__body">
           <div class="field-row">
             <div class="field"><label class="field__label" for="country">Country</label><div class="select-wrap"><select class="select" id="country" name="country"><option>Australia</option><option>Brazil</option><option selected>Canada</option><option>Germany</option><option>Ghana</option><option>India</option><option>Ireland</option><option>Italy</option><option>Japan</option><option>Mexico</option><option>Sweden</option><option>United Arab Emirates</option><option>United States</option></select><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div></div>
             <div class="field"><label class="field__label" for="postal">Postal code</label><input class="input tnum" id="postal" name="postal" type="text" autocomplete="postal-code" maxlength="12" value="M5V 2T6" aria-describedby="lookup"></div>
+            <button class="btn field-row__action" type="button">Look up</button>
           </div>
           <div aria-live="polite"><p class="lookup" id="lookup"></p></div>
           <div class="alert alert--warning" role="alert"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg><div class="alert__body"><p>That was a lot of tries in a short time. Wait a moment, then try again. Your pin stays in Milan.</p></div></div>
@@ -77,21 +78,21 @@
         </div>
       </section>
       <section class="settings-section" aria-labelledby="s-privacy">
-        <h2 class="settings-section__title" id="s-privacy">Privacy</h2>
+        <h2 class="settings-section__title" id="s-privacy">What teammates see</h2>
         <div class="settings-section__body">
           <button class="switch-row" type="button" role="switch" aria-checked="true"><span class="switch-row__text"><span class="switch-row__label">Share my local weather</span><span class="switch-row__hint">Shown on your pin and in your panel.</span></span><span class="switch__state" aria-hidden="true">On</span><span class="switch"></span></button>
-          <button class="switch-row" type="button" role="switch" aria-checked="true"><span class="switch-row__text"><span class="switch-row__label">Show when I’m outside working hours</span><span class="switch-row__hint">Others see “Probably asleep” from 23:00 to 07:00 your time.</span></span><span class="switch__state" aria-hidden="true">On</span><span class="switch"></span></button>
+          <button class="switch-row" type="button" role="switch" aria-checked="true"><span class="switch-row__text"><span class="switch-row__label">Share whether I’m working or asleep</span><span class="switch-row__hint">Worked out from your local time — 09:00 to 18:00 counts as working.</span></span><span class="switch__state" aria-hidden="true">On</span><span class="switch"></span></button>
         </div>
       </section>
-      <div class="settings__leave"><button type="button" class="btn btn--link">Remove my pin and leave Northwind</button></div>
+      <div class="settings__leave"><button type="button" class="btn btn--link">Leave Northwind</button></div>
     </div>
   </div>
   
 </main>
-<p class="mock-note" style="top: 5rem; right: 1rem;">The postal code has not been looked up, so there is nothing to save: no save bar. Typing again after a moment looks it up.</p>
+<p class="mock-note" style="top: 5rem; right: 1rem;">The postal code has not been looked up, so there is nothing to save: no save bar. “Look up” works again after a moment.</p>
 <nav class="mock-bar" aria-label="Mock navigation">
   <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
-  <span class="mock-bar__screen">Profile &amp; Settings</span>
+  <span class="mock-bar__screen">Profile & Settings</span>
   <ul class="mock-bar__states">
     <li><a href="default.html">default</a></li>
     <li><a href="loading.html">loading</a></li>
