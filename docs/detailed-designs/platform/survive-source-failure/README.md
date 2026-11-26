@@ -123,8 +123,8 @@ on the hosting platform and is `<TO SUPPLY>`.
 |--------|---------|
 | Postal code source | country and postal code |
 | Open-Meteo | the city's position, rounded to two decimal places |
-| Holiday calendar source | country and year |
-| Race calendar source | year |
+| Holiday calendar source | country and the year or years the window of today to 90 days ahead spans |
+| Race calendar source | the same year or years; the backend keeps the races of the country |
 | Event source | the city's place; the exact parameters depend on the provider, `<TO SUPPLY>` |
 
 Each client's method takes only those values, so a name, a team, a teammate id or a session is

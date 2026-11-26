@@ -69,7 +69,9 @@ any other origin.
   `platform/make-accessible` `label`, `team/keep-team-fresh` `arrivedIds` and `arrivedShown`,
   and `team/view-teammate-panel` `focusPin`. No input names a position to turn to: a page
   turns the globe to a place by putting a pin there in `pins` and naming it in `selectedId`
-  (`turn-globe`), which serves Join's found city and the small globe on Profile & Settings. It owns a `<canvas>` and a `state` signal of
+  (`turn-globe`), which serves Join's found city and the small globe on Profile & Settings. A pin's
+  id need not be a teammate id: Join gives its bare pins `bare-0`, `bare-1`, … and its found pin
+  `you` (`joining/open-invite-link`). It owns a `<canvas>` and a `state` signal of
   type `GlobeState` (`Loading`, `Ready`, `Fallback`). In `Loading` it renders the loading
   content projected into it, which `GlobePage` fills with a second `GlobePlaceholder`, so the
   same picture stays in the same box from the first paint to the first 3D frame. In `Fallback`
