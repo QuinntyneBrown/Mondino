@@ -14,7 +14,7 @@ The terms used below:
 - **breakpoint** — viewport width at which a layout changes: 576 px, 768 px, 992 px and 1200 px
 - **shell** — what surrounds the four teammate screens: the header with its navigation, the refresh banner and the toast
 - **teammate screen** — one of Globe, Team, Moments and Profile & Settings, shown only to a teammate
-- **membership** — record on the device that it has joined a team: the team's id, the teammate's id and the team's name
+- **membership** — record on the device that it has joined a team: the team's id, the teammate's id, the team's name, and the initials and colour of the teammate's own pin
 
 A teammate reaches Globe, Team, Moments and Profile & Settings from every screen after joining.
 A person who is not a teammate of any team on the device and opens one of those addresses is
@@ -64,9 +64,12 @@ hosting platform is `<TO SUPPLY>`.
 `Mondino API`.
 
 **`TeamMembership`** — service in `domain`'s `storage/`. It holds a `Membership` (`teamId`,
-`teammateId`, `teamName`) in the browser's local storage and exposes it as the signal
-`current`. `JoinPage` calls `remember(...)` after a successful join, and leaving the team calls
-`forget()`. It holds no postal code, no position and no session: the session is an `HttpOnly`
+`teammateId`, `teamName`, and the viewer's `initials` and `colour`) in the browser's local
+storage and exposes it as the signal `current`. `JoinPage` calls `remember(membership)` after
+a successful join, with the colour the `JoinResult` returns (`join-team`); `TeamShell` calls
+`remember(membership)` again with the initials and colour of the viewer's pin whenever the
+pins are read; and leaving the team calls `forget()`. It holds no postal code, no city, no
+position and no session: the session is an `HttpOnly`
 cookie that scripts cannot read (L2-043). How a teammate signs in again on another device is
 `<TO SUPPLY>`.
 
@@ -97,7 +100,10 @@ item into the header's `nav` slot, and
 the link to Profile & Settings, the viewer's avatar with the accessible name "Profile &
 Settings", into its `me` slot. Each link is an anchor with `routerLink` and
 `ariaCurrentWhenActive="page"`, so the current screen carries `aria-current="page"`. The
-avatar's initials and colour come from the viewer's pin in `TeamStore`. On the header's
+avatar's initials and colour come from the `Membership`, so the avatar shows while the pins
+are loading and when their read has failed, as the mocks draw. An effect on
+`TeamStore.viewerPin` keeps the membership's initials (`initialsOf(pin.name)`) and colour in
+step with the pin. On the header's
 `invite` output `TeamShell` calls `InviteLinkCopier.copy()`, which copies the team's invite
 link, and shows the toast (`view-week-around-the-world`, L2-025).
 
@@ -169,23 +175,24 @@ session only.
 
 `app.routes.ts` runs `teammateGuard` to match a teammate screen and loads the screen's chunk.
 `TeamShell` provides `TeamStore` and renders `AppHeader` with the navigation links, the
-refresh banner and the toast around the four screens. `teammateGuard` and
-`sessionExpiredInterceptor` read or clear `TeamMembership`.
+viewer's avatar from `TeamMembership`, the refresh banner and the toast around the four
+screens. `teammateGuard` and `sessionExpiredInterceptor` read or clear `TeamMembership`.
 
 ![C4 component view for adapting to every width](diagrams/c4-component.png)
 
 ### Class structure
 
 `TeamShell` composes three `NavItem`s and renders `AppHeader`, which shows `Wordmark` and is
-styled by the breakpoints. `teammateGuard` and `sessionExpiredInterceptor` depend on `TeamMembership`,
-which holds one `Membership`.
+styled by the breakpoints. `teammateGuard`, `sessionExpiredInterceptor` and `TeamShell` depend on
+`TeamMembership`, which holds one `Membership` with the viewer's initials and colour.
 
 ![Class diagram for adapting to every width](diagrams/class-structure.png)
 
 ### Behaviour — open a screen's address as a teammate
 
 The teammate opens or reloads `/team`. `teammateGuard` finds a membership, the router loads
-`TeamPage`, and the navigation marks Team with `aria-current="page"` (L2-038). The screen
+`TeamPage`, and the navigation marks Team with `aria-current="page"` beside the avatar drawn
+from the membership (L2-038). The screen
 reads its pins with the session cookie and shows them in the layout for the current width
 (L2-037).
 

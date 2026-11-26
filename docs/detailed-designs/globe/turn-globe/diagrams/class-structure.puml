@@ -63,7 +63,7 @@ class GlobeView {
   -onFrame(elapsedMs: number): void
   -onSelectedChange(): void
   -onVisibilityChange(): void
-  -onReducedMotionChange(query: MediaQueryList): void
+  -onReducedMotionChange(reduced: boolean): void
 }
 
 class GlobeScene {
@@ -72,6 +72,10 @@ class GlobeScene {
   +start(): void
   +stop(): void
   +draw(): void
+}
+
+interface MotionPreference <<api>> {
+  +reduced: Signal<boolean>
 }
 
 class Position {
@@ -88,4 +92,5 @@ GlobeMotion --> GlobeOrientation : has
 GlobeMotion ..> ArrowDirection : steps by
 GlobeMotion ..> Position : holds on
 GlobeScene ..> GlobeOrientation : drawn at
+GlobeView ..> MotionPreference : injects MOTION_PREFERENCE
 @enduml

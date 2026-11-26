@@ -63,9 +63,10 @@ API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`.
 
 **In the `mondino` application and the `domain` library**
 
-- **`GlobePage`** passes `TeamStore`'s selected teammate id to `GlobeView`'s `selectedId` input
-  and writes `GlobeView`'s `select` output back to the store.
-- **`TeamStore`** holds the selected teammate id. A refresh of the team (L2-048) leaves the
+- **`GlobePage`** passes `TeamStore`'s `selectedTeammateId` to `GlobeView`'s `selectedId`
+  input. On `GlobeView`'s `select` output it navigates to `/globe?teammate={teammateId}`, or
+  to `/globe` for null, and the store follows the address (`team/view-teammate-panel`).
+- **`TeamStore`** holds `selectedTeammateId`. A refresh of the team (L2-048) leaves the
   selection and the orientation as they are, because neither is rebuilt from the response.
 
 **The rules**
@@ -92,8 +93,9 @@ the selection calls `release()`, which moves to `Waiting`, so the globe turns on
 5 seconds later. What a drag does while a pin is selected (whether it is ignored, or turns the
 globe and returns to the pin) is `<TO SUPPLY>`; the mocks do not draw it.
 
-*Reduced motion.* `GlobeView` reads `matchMedia('(prefers-reduced-motion: reduce)')` and
-listens for its change, so the setting is followed without a reload (L2-042). With reduced
+*Reduced motion.* `GlobeView` injects `MOTION_PREFERENCE` (`platform/make-accessible`) and
+passes its `reduced` signal to `setReducedMotion` in an effect, so the setting is followed
+without a reload (L2-042). With reduced
 motion `GlobeMotion` never enters `TurningOnItsOwn`, and `hold` sets the orientation at once
 and goes straight to `Holding`. Dragging and arrow keys still work, because they are the
 teammate's own movement.
@@ -107,7 +109,7 @@ the scene should draw only when something changes (a new orientation, a new sun 
 resize) and not on every frame.
 
 *Release.* When `GlobeView` is destroyed it aborts the signal that holds the pointer, touch and
-key listeners, removes the `visibilitychange` and media query listeners, and disposes of the
+key listeners, removes the `visibilitychange` listener, and disposes of the
 scene, which ends the frame loop (L2-047).
 
 ## Requirements
@@ -138,7 +140,7 @@ the globe to a pin's position, and that position came from the API.
 
 `GlobeGestures` reports drags and steps to `GlobeMotion`. `GlobeView` advances `GlobeMotion` on
 each frame, passes the orientation to `GlobeScene`, and holds on a pin when `GlobePage` sets
-the selected teammate id from `TeamStore`.
+`selectedId` from `TeamStore`'s `selectedTeammateId`.
 
 ![C4 component view for turning the globe](diagrams/c4-component.png)
 
@@ -160,8 +162,8 @@ globe waits 5 seconds of frame time and turns on its own again.
 
 ### Behaviour — turn to a selected pin and hold
 
-A selection travels from `GlobeView` to `GlobePage` and `TeamStore` and returns as the
-`selectedId` input. `GlobeMotion` then turns to the pin within 1 second, or at once under
+A selection travels from `GlobeView` to `GlobePage`, into the address and `TeamStore`, and
+returns as the `selectedId` input. `GlobeMotion` then turns to the pin within 1 second, or at once under
 reduced motion, and holds until the selection is cleared.
 
 ![Sequence diagram for turning to a selected pin and holding](diagrams/sequence-turn-to-selected-pin.png)

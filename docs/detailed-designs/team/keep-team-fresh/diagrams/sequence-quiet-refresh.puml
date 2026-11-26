@@ -39,7 +39,7 @@ store -> store : refreshIfDue: 15 minutes since refreshedAt (L2-048)
 store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> handler : Send GetPinsQuery
-handler -> db : Load the team; the session's teammate belongs to it (L2-043)
+handler -> db : Load the team; TeamScopeBehaviour has checked that\nthe session's teammate belongs to it (L2-043)
 db --> handler : Team and teammates
 loop each distinct city
   handler -> weather : Weather at the city's position

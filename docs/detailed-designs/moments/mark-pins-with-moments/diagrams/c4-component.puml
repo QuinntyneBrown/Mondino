@@ -6,7 +6,7 @@ title Components — Mark pins with moments
 Container_Boundary(web, "Mondino web app") {
   Component(page, "GlobePage", "Angular page, mondino application", "Builds the markers for the viewer")
   Component(store, "TeamStore", "domain pins/", "Holds the pins and their moments")
-  Component(cache, "SettingsCache", "domain storage/", "Holds the viewer's chosen kinds")
+  Component(cache, "SettingsStore", "domain storage/", "Holds the viewer's chosen kinds as a signal")
   Component(marker, "markerFor", "domain moments/", "Chooses a pin's nearest moment in the next 7 days")
   Component(emblem, "emblemFor", "domain moments/", "Chooses a held emblem or the icon of the kind")
   Component(view, "GlobeView", "globe library, mo-globe", "Takes pins and markers as inputs")

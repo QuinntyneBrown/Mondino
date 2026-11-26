@@ -13,7 +13,7 @@ Container_Boundary(spa, "Mondino web app") {
   Component(scene, "GlobeScene", "Class, globe library", "Draws the globe at the orientation it is given")
 }
 Rel(teammate, gestures, "Drags and presses arrow keys")
-Rel(page, store, "Reads the selected teammate id from")
+Rel(page, store, "Reads selectedTeammateId from; selects through the address in")
 Rel(page, view, "Sets selectedId on")
 Rel(view, gestures, "Attaches to the canvas and releases")
 Rel(gestures, motion, "Reports drags and steps to")

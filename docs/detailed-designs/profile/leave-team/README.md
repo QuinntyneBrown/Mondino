@@ -87,7 +87,8 @@ exist yet; each part below is introduced by this design.
 - **`LeaveTeamCommandHandler`** — loads the `Team` with the current teammate, calls
   `Team.RemoveTeammate(teammateId)`, calls `ITeammateSessions.EndAllAsync(teammateId)`, and
   saves through `IAppDbContext` in one unit of work. A `teamId` that is not the teammate's own
-  team is refused with 404 and nothing changes. The handler reads no outside source.
+  team is refused by `TeamScopeBehaviour` with 404 and the code `team_not_found`
+  (`protect-team-data`), and nothing changes. The handler reads no outside source.
 - **`ITeammateSessions`** — interface for ending sessions: `EndAllAsync(teammateId)` deletes
   every session the teammate holds and expires the session cookie on the current response.
 
@@ -125,7 +126,7 @@ not designed.
 
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
-| `teamId` is not the teammate's own team | 404 | none | The alert in `LeaveTeamDialog` |
+| `teamId` is not the teammate's own team | 404 | `team_not_found` | The alert in `LeaveTeamDialog` |
 | No session, or the teammate has already left | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows the no-team page in place |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | The alert in `LeaveTeamDialog`, which stays open, with "Try again"; the pin stays |
 

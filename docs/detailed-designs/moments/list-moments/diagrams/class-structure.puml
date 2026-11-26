@@ -49,6 +49,7 @@ interface DatedMoment {
   +moment: Moment
   +daysAhead: number
   +when: string
+  +dateLabel: string
   +teammateFirstName: string
   +teammateInitials: string
   +teammateColour: string
@@ -62,7 +63,8 @@ interface MomentGroups {
 
 class "moments/ (domain)" as moments <<functions>> {
   +groupMoments(moments: Moment[], pins: Pin[], now: Date): MomentGroups
-  +whenLabel(daysAhead: number): string
+  +relativeLabel(daysAhead: number): string
+  +whenLabel(daysAhead: number, date: string): string
   +daysUntil(date: string, timeZoneId: string, now: Date): number
 }
 

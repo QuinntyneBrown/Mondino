@@ -24,7 +24,9 @@ box "Backend — Mondino API" #D1FADF
   participant "ProfileController" as controller
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "TeamScopeBehaviour" as scope
   participant "LookUpOwnPostalCodeQueryHandler" as handler
+  participant "PostalCodeResolver" as resolver
   participant "PostalCodeFormats" as formats
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
@@ -40,19 +42,22 @@ field --> actor : "Finding M5V 2T6…"
 store -> client : lookUpPostalCode(teamId, countryCode, postalCode, signal)
 client -> controller : POST /api/teams/{teamId}/me/postal-code-lookups (postal code in the body)
 controller -> controller : Authenticate the session; apply the lookup rate limit
-controller -> handler : Send LookUpOwnPostalCodeQuery
-handler -> handler : teamId is the current teammate's own team, or 404
-handler -> formats : TryNormalise(countryCode, postalCode)
+controller -> scope : Send LookUpOwnPostalCodeQuery
+scope -> handler : teamId is the current teammate's own team, or 404 team_not_found
+handler -> resolver : ResolveAsync(countryCode, postalCode)
+resolver -> formats : TryNormalise(countryCode, postalCode)
 alt wrong form for the country
-  formats --> handler : No match
-  handler --> controller : postal_code_not_found; the source is not called
+  formats --> resolver : No match
+  resolver --> handler : NotFound; the source is not called
+  handler --> controller : postal_code_not_found
 else right form
-  formats --> handler : PostalCode
-  handler -> lookup : FindCityAsync(postalCode)
+  formats --> resolver : PostalCode
+  resolver -> lookup : FindCityAsync(postalCode)
   lookup -> source : Country and postal code only
   alt found
     source --> lookup : City, position, time zone
-    lookup --> handler : Found, City
+    lookup --> resolver : Found, City
+    resolver --> handler : PostalCodeResolution: Found, PostalCode, City
     handler -> weather : Weather at City.Position
     weather -> meteo : Position only
     meteo --> weather : Current weather
@@ -60,10 +65,12 @@ else right form
     handler --> controller : PostalCodeResultDto
   else not known to the source
     source --> lookup : No city
-    lookup --> handler : NotFound
+    lookup --> resolver : NotFound
+    resolver --> handler : PostalCodeResolution: NotFound
     handler --> controller : postal_code_not_found
   else no answer within 5 seconds
-    lookup --> handler : Unavailable
+    lookup --> resolver : Unavailable
+    resolver --> handler : PostalCodeResolution: Unavailable
     handler --> controller : postal_code_unavailable
   end
 end
@@ -74,10 +81,10 @@ alt found
   field --> actor : City and region, "your pin moves here when you save"; the small globe shows the pin there as new; the save bar shows
 else postal_code_not_found
   store -> store : lookupState = NotFound; nothing to save
-  field --> actor : Alert of L2-004, ending "Your pin stays in Milan."; saving is not offered; the pin stays (L2-032)
+  field --> actor : Alert of L2-004, ending "Your pin stays in Milan.", aria-invalid on the input; saving is not offered; the pin stays (L2-032)
 else postal_code_unavailable
   store -> store : lookupState = Unavailable; nothing to save
-  field --> actor : Could not be checked right now, "Your pin stays in Milan."; "Try again" runs lookUp() again (L2-032)
+  field --> actor : Could not be checked right now, "Your pin stays in Milan."; "Try again" emits retry, which runs lookUp() again (L2-032)
 else rate_limited (429 from the lookup rate limit, before the handler)
   store -> store : lookupState = RateLimited; nothing to save
   field --> actor : Wait a moment, then try again, "Your pin stays in Milan."; what was typed is kept (L2-032)

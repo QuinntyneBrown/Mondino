@@ -24,8 +24,8 @@ box "Frontend — Mondino web app" #E0F2FE
 end box
 actor -> view : Select a pin
 view --> page : select(teammateId)
-page -> store : Set the selected teammate id
-store --> page : selectedId changed
+page -> store : Navigate to /globe?teammate={teammateId}; select(teammateId)
+store --> page : selectedTeammateId changed
 page -> view : selectedId input
 view -> motion : hold(pin.position)
 alt reduced motion requested (L2-009 AC5)
@@ -45,7 +45,7 @@ else motion allowed
 end
 actor -> view : Clear the selection
 view --> page : select(null)
-page -> store : Clear the selected teammate id
+page -> store : Navigate to /globe; clearSelection()
 page -> view : selectedId input = null
 view -> motion : release()
 motion -> motion : mode = Waiting, then TurningOnItsOwn after 5 s

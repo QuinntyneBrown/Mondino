@@ -39,8 +39,9 @@ not exist yet; each part below is introduced by this design.
   column on a phone, and passes values to presentation components. It holds no rule of its own.
   The "Location" section reads "Moved? Update your postal code and your pin follows." and holds
   the Country field, which lists `Profile.countries` in alphabetical order, and the postal code
-  field. The page passes `PostalCodeField` the chosen `Country` and the `LookupMessage` that
-  `profileLookupMessage` gives for the lookup state.
+  field. The page passes `PostalCodeField` the chosen `Country`, the `lookupState`, the
+  `LookupMessage` that `profileLookupMessage` gives for it, and `invalid`, which is true for
+  `NotFound`.
   While the profile is being read it shows a placeholder for the globe and for each section, and
   announces "Loading your pin and settings…". When the read fails it shows "We couldn’t load
   your pin" in place of the screen, with "Mondino didn’t answer just now. Your pin and settings
@@ -82,20 +83,22 @@ not exist yet; each part below is introduced by this design.
 - **`ApiError`** — error with a `code`. `ProfileStore` branches on `postal_code_not_found`,
   `postal_code_unavailable` and `rate_limited`; the page shows its own message for each.
 - **`PostalCodeField`** (`@mondino/components`) — the postal code field that Join also uses, in
-  the same shape: inputs `value`, `country`, `lookupState` and `message`, outputs `valueChange`,
-  `blurred` and `retry`. It injects nothing and holds no copy of its own: it renders the
-  `LookupMessage` it is given, in a polite live region for `Locating` and `Found` and in an
-  alert (`role="alert"`) for the other three, and links it to the input with `aria-describedby`.
-- **`LookupMessage`** (`@mondino/components`) — what the field shows for a lookup state: `text`
-  and, where the message offers one, `retryLabel` ("Try again").
+  the same shape: inputs `value`, `country`, `lookupState`, `message` and `invalid`, outputs
+  `valueChange`, `blurred` and `retry`. It injects nothing and holds no copy of its own: it
+  renders the `LookupMessage` it is given, in a polite live region for `Locating` and `Found`
+  and in an alert (`role="alert"`) for the other three, and links it to the input with
+  `aria-describedby`. `invalid` sets `aria-invalid` on the input.
+- **`LookupMessage`** (`@mondino/api`) — what the field shows for a lookup state: `text`
+  and, where the message offers one, `retryLabel` ("Try again"). `Country` is a type in
+  `@mondino/api` too.
 - **`profileLookupMessage(lookupState, postalCode, country, savedCity)`** — pure helper beside
-  `ProfilePage` that gives this screen's `LookupMessage`, or none for `Idle`. The states are
+  `ProfilePage` that gives this screen's `LookupMessage`, or null for `Idle`. The states are
   Join's, with this screen's own copy:
   - `Locating`: "Finding M5V 2T6…".
   - `Found`: "Toronto, Ontario — your pin moves here when you save. 9° and cloudy right now."
   - `NotFound`: the alert of L2-004, ending "Your pin stays in Milan." ("We couldn’t find
     “M5V 2T” in Canada. Canadian postal codes look like A1A 1A1. Your pin stays in Milan."),
-    with `aria-invalid` on the input.
+    with `invalid` set, so the input carries `aria-invalid`.
   - `Unavailable` (mock `profile/lookup-unavailable`): "We couldn’t check M5V 2T6 right now.
     Your postal code may be fine — nothing is wrong with what you typed. Your pin stays in
     Milan.", with "Try again", which emits `retry` and runs `lookUp()` again.
@@ -120,25 +123,27 @@ not exist yet; each part below is introduced by this design.
 
 - **`GetProfileQuery` / `GetProfileQueryHandler`** — loads the teammate that `ICurrentTeammate`
   names and returns a `ProfileDto`. A `teamId` that is not the teammate's own team is refused
-  with 404, the same answer as for a team that does not exist.
+  by `TeamScopeBehaviour` with 404 and the code `team_not_found` (`protect-team-data`), the
+  same answer as for a team that does not exist; that holds for each request of this feature.
 - **`LookUpOwnPostalCodeQuery` / `LookUpOwnPostalCodeQueryHandler`** — the lookup for a
   teammate who has already joined: `TeamId`, `CountryCode` and `PostalCode`, and no invite
   token. Join's `LookUpPostalCodeQuery` cannot serve here, because its handler first finds the
-  team by an invite token. This handler instead refuses a `teamId` that is not the current
-  teammate's own team with 404, then runs the same steps as Join's handler after that check,
-  through the same `PostalCodeFormats` and `IPostalCodeLookup`. `PostalCodeFormats.TryNormalise`
-  checks the postal code against the country's format and normalises
-  it; a postal code in the wrong form is refused without a call to the `Postal code source`.
-  `IPostalCodeLookup.FindCityAsync` answers a `PostalCodeLookupOutcome` (found with a `City`,
-  not found, or unavailable), and `IWeatherSource` gives the weather at a found city. The
-  handler returns the same `PostalCodeResultDto` as Join's and changes nothing.
+  team by an invite token. This query is team scoped instead, and its handler then runs the
+  same steps as Join's handler through the same `PostalCodeResolver`
+  ([Place a pin from a postal code](../../joining/place-pin-from-postal-code/README.md)).
+  `PostalCodeResolver.ResolveAsync` checks the postal code against the country's format with
+  `PostalCodeFormats` and normalises it; a postal code in the wrong form is not found, without
+  a call to the `Postal code source`. It then calls `IPostalCodeLookup.FindCityAsync` and
+  answers a `PostalCodeResolution` (found with the `PostalCode` and the `City`, not found, or
+  unavailable). `IWeatherSource` gives the weather at a found city. The handler returns the
+  same `PostalCodeResultDto` as Join's and changes nothing.
 - **`LookUpOwnPostalCodeQueryValidator`** — refuses a country outside the supported list and a
   postal code over 12 characters with `validation_failed`, as Join's validator does.
 - **`UpdateProfileCommand` / `UpdateProfileCommandHandler`** — carries `TeamId`, `CountryCode`,
   `PostalCode` and `Settings`. The command has no teammate id: the handler changes the teammate
   that `ICurrentTeammate` names, so a request cannot change another teammate's location
   (L2-032). When the country or postal code differs from the stored one, the handler resolves
-  the city again through `IPostalCodeLookup.FindCityAsync` and, when the outcome is found, calls
+  the city again through `PostalCodeResolver.ResolveAsync` and, when the outcome is found, calls
   `Teammate.MoveTo(postalCode, city)`. It
   saves in one unit of work through `IAppDbContext` and returns the new `ProfileDto`. A postal
   code that cannot be found or checked is refused and nothing is stored.
@@ -149,8 +154,8 @@ not exist yet; each part below is introduced by this design.
   `PostalCodeFormats` exactly as `InviteDto.Countries` is, so the Country field and the form in
   the not-found message need no second copy in the frontend. The own `PinDto` always carries
   the weather, whatever the sharing switches say.
-- **`PostalCodeResultDto`** — city name, region and weather, or weather as null when
-  `IWeatherSource` fails.
+- **`PostalCodeResultDto`** — the city (name, region, country code, position, time zone id)
+  and the weather, or null when `IWeatherSource` fails. It does not echo the postal code.
 
 ### Backend — `Mondino.Domain`
 
@@ -179,7 +184,7 @@ not exist yet; each part below is introduced by this design.
 | `Postal code source` does not answer in time | 503 | `postal_code_unavailable` | That the postal code could not be checked right now and nothing is wrong with what was typed, "Your pin stays in Milan.", and "Try again" |
 | Country unsupported or postal code over 12 characters | 400 | `validation_failed` | A generic message |
 | Too many lookups | 429 | `rate_limited` | A request to wait a moment and try again, and "Your pin stays in Milan." |
-| `teamId` is not the teammate's own team | 404 | none | The screen is not shown |
+| `teamId` is not the teammate's own team | 404 | `team_not_found` | The screen is not shown |
 
 The limit on `POST /api/teams/{teamId}/me/postal-code-lookups` for a teammate, per minute, is
 `<TO SUPPLY>`; L2-045 sets 10 per minute for the lookup made while joining.
@@ -219,15 +224,17 @@ and stores the teammate's new city in the `Mondino database`.
 
 `ProfilePage` works through `ProfileStore` and `HttpProfileApi`. In the API, `ProfileController`
 sends one request to one of three handlers; `LookUpOwnPostalCodeQueryHandler` and
-`UpdateProfileCommandHandler` resolve the city through `IPostalCodeLookup`, and the second
-moves the `Teammate`.
+`UpdateProfileCommandHandler` resolve the city through `PostalCodeResolver`, which finds it
+through `CachedPostalCodeLookup`, and the second moves the `Teammate`.
 
 ![C4 component view for changing location](diagrams/c4-component.png)
 
 ### Class structure
 
 `ProfileStore` holds a `Profile` and a `LookupState` and depends on the `ProfileApi` contract.
-On the backend, `UpdateProfileCommandHandler` moves a `Teammate`, which owns its `PostalCode`
+`ProfilePage` gives `PostalCodeField` the `LookupMessage` that `profileLookupMessage` builds.
+On the backend, both lookups' handlers resolve through `PostalCodeResolver`, and
+`UpdateProfileCommandHandler` moves a `Teammate`, which owns its `PostalCode`
 and its `City`; the `City` owns the `Position` the pin takes.
 
 ![Class diagram for changing location](diagrams/class-structure.png)
@@ -254,7 +261,7 @@ stays where it was (L2-032).
 ### Behaviour — save the new location
 
 Saving sends the country and postal code in the request body. The handler resolves the city
-again, so the stored city never depends on what the browser claims, and moves the current
+again through `PostalCodeResolver`, so the stored city never depends on what the browser claims, and moves the current
 teammate's pin in one unit of work.
 
 ![Sequence diagram for saving the new location](diagrams/sequence-save-location.png)

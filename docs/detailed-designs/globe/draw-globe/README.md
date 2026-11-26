@@ -59,9 +59,15 @@ any other origin.
 
 **In the `globe` library**
 
-- **`GlobeView`** (`mo-globe`) — the library's one public component. Inputs: `pins`,
-  `selectedId`, `interactive`. Output: `select`. (`show-pins`, `make-accessible` and
-  `keep-team-fresh` add `selectGroup`, `descriptions`, `label`, `arrivedIds` and `arrivedShown`.) It owns a `<canvas>` and a `state` signal of
+- **`GlobeView`** (`mo-globe`) — the library's one public component. Its inputs are `pins`,
+  `selectedId`, `interactive`, `descriptions`, `markers`, `label` and `arrivedIds`; its outputs
+  are `select`, `selectGroup` and `arrivedShown`; its one public method is
+  `focusPin(teammateId)`. A page projects into it the pin and label templates
+  (`PinMarkTemplate`, `PinLabelTemplate`) and the loading and fallback content. This design
+  uses `pins`, `selectedId`, `interactive` and `select`; `show-pins` designs `descriptions`,
+  `selectGroup` and the templates, `moments/mark-pins-with-moments` `markers`,
+  `platform/make-accessible` `label`, `team/keep-team-fresh` `arrivedIds` and `arrivedShown`,
+  and `team/view-teammate-panel` `focusPin`. It owns a `<canvas>` and a `state` signal of
   type `GlobeState` (`Loading`, `Ready`, `Fallback`). In `Loading` it renders the loading
   content projected into it, which `GlobePage` fills with a second `GlobePlaceholder`, so the
   same picture stays in the same box from the first paint to the first 3D frame. In `Fallback`
@@ -75,7 +81,7 @@ any other origin.
   `options.assetBaseUrl`, and resolves once the scene can draw. It rejects with a
   `GlobeUnavailableError` whose `reason` is `NoWebGL`, `AssetsFailed` or `ContextLost`. Its
   other methods are `resize`, `setSun`, `setDetail`, `setOrientation`, `project`, `onFrame`,
-  `start`, `stop` and `dispose`. Renderer: `<TO SUPPLY>`. Asset format: `<TO SUPPLY>`.
+  `start`, `stop`, `draw` and `dispose`. Renderer: `<TO SUPPLY>`. Asset format: `<TO SUPPLY>`.
 - **`GlobeSceneOptions`** — `assetBaseUrl`, the starting `DetailStep`, and an `AbortSignal`
   that cancels the import and the fetches when the teammate leaves before they finish.
 - **`SunPosition`** — pure functions. `subsolarPoint(now)` returns the `Position` where the sun
@@ -93,7 +99,7 @@ any other origin.
 
 **From the `api` and `domain` libraries**
 
-- **`Clock`** / `CLOCK` — the one injected clock: `now()` and a minute tick signal.
+- **`Clock`** / `CLOCK` — the one injected clock: `now()` and the signal `minute`.
   `BrowserClock` in `domain` implements it and rests while the tab is hidden. `GlobeView`
   injects the token; it shall not call `new Date()`.
 

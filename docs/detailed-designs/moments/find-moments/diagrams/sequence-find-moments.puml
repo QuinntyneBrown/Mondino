@@ -58,7 +58,7 @@ loop each distinct city
     events --> cache : Entries
     cache --> finder : Entries
   else 5 s timeout, failure or open circuit
-    cache --> finder : No entries
+    cache --> finder : Last cached entries of that kind,\nor none (L2-049)
   end
   finder -> finder : Keep entries that belong to the city (L2-020 table)
   finder -> emblems : KeyFor(subject)

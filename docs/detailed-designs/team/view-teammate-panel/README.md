@@ -43,7 +43,8 @@ loading and refreshing are designed in `keep-team-fresh`.
 - **`TeamStore`** — signal store in `domain`'s `pins/`. It holds `pins`,
   `viewerTeammateId` and `selectedTeammateId`, and derives `selectedPin` and `viewerPin`.
   `select(teammateId)` returns `false` and leaves the selection empty when no pin of the team has
-  that id; `GlobePage` then removes the parameter from the address. The store is provided at the
+  that id; `GlobePage` then removes the parameter from the address. `clearSelection()` empties
+  the selection. `keep-team-fresh` lists what else the store holds. The store is provided at the
   route that holds the Globe, Team, Moments and Profile & Settings screens, so the selection is
   released when the teammate leaves those screens.
 - **`teammatePanelView(pin, viewer, now, settings)`** — pure function in `pins/`. It builds a
@@ -51,7 +52,8 @@ loading and refreshing are designed in `keep-team-fresh`.
   viewer's display settings. It calls `localTime`, `formatTime`, `formatDay`, `statusFor`,
   `offsetBetween`, `formatOffset`, `workingDayOnViewerClock`, `overlapBetween` and
   `formatOverlap` from `time/`, and keeps the pin's moments that are today or later in the
-  pin's city, in date order. The offset is in the panel's form, which names the viewer: "7 h
+  pin's city, in date order, each as a `PanelMoment`: its kind, title and detail, its emblem
+  from `emblemFor` and its `when` from `whenLabel(daysAhead, date)`, both in `moments/`. The offset is in the panel's form, which names the viewer: "7 h
   behind you", "10 h ahead of you", "Same time as you". For the viewer's own pin it sets
   `isViewer` and leaves `offset`, `overlap`, `theirDay` and `overlapText` null. `status` is
   what `statusFor(pin, time)` gives: null when the pin's status visibility flag hides it.
@@ -64,9 +66,9 @@ loading and refreshing are designed in `keep-team-fresh`.
 - **`TeammatePanel`** (`mo-teammate-panel`) — presentation component. It takes `content` and
   emits `closed`. It renders the `Avatar`, the name (followed by "(you)" when `isViewer`), the
   city and country, the local time and day in tabular figures, the offset, a `StatusBadge`, a
-  `WeatherIcon` with the temperature and the weather in words, one moment card per moment (its
-  kind and when, "Holiday · In 5 days" within 7 days and the date, "Formula 1 · 12 Nov", beyond
-  them, its title and its detail) and the `OverlapBar`. In the weather's place it says
+  `WeatherIcon` with the temperature and the weather in words, one moment card per moment (its emblem, its
+  kind and `when`, "Holiday · In 5 days" within 7 days and the day and month, "Formula 1 · 12
+  Nov", beyond them, its title and its detail) and the `OverlapBar`. In the weather's place it says
   "Weather is unavailable right now." with "Tomás’s local time is still right." when
   `weatherState` is `Unavailable`, and "Ahmed doesn’t share local weather." when it is
   `NotShared` (designed in `weather/show-weather`). It omits the moments section when
@@ -93,9 +95,10 @@ loading and refreshing are designed in `keep-team-fresh`.
   emits `closed`; the group's panel has no close button, as the mock draws it. Its heading is focusable by script through
   `focusHeading()`.
 - **`GlobeView`** (`mo-globe`) — component of the `globe` library. It emits `select` with a
-  teammate id, takes `selectedId`, turns to the selected pin and lifts it. It emits `selectGroup`
+  teammate id, or null for a tap elsewhere on the globe, which closes the panel as the close
+  button does; it takes `selectedId`, turns to the selected pin and lifts it. It emits `selectGroup`
   with the teammate ids of a group pin (`globe/show-pins`). `focusPin(teammateId)` returns focus
-  to a pin; it is a method this design adds to the component.
+  to a pin; it is a method this design adds to the component (`globe/draw-globe` lists the whole of it).
 - **`Clock`** (`CLOCK`) — the one injected clock. `panel` is a computed signal that reads the
   clock's minute tick, so the local time, the status and the offset change as the minute passes,
   with no timer of the panel's own.
@@ -115,7 +118,7 @@ them from the rows; a group left with no teammate closes. Focus follows the same
 teammate's panel.
 
 The viewer's time zone is the time zone of the viewer's own pin. The viewer's display settings
-(°C or °F, 24-hour or 12-hour clock) come from `SettingsCache`.
+(°C or °F, 24-hour or 12-hour clock) come from `SettingsStore` (`profile/choose-display-and-sharing`).
 
 The name, the city and a moment's title are data: `TeammatePanel` renders each as text, never as
 HTML.
@@ -176,7 +179,8 @@ place. A panel opened from the keyboard takes focus on its heading. A group pin 
 
 ### Behaviour — close the panel
 
-The close button and Escape both remove the parameter from the address. `TeamStore` clears the
+The close button, Escape and a tap elsewhere on the globe all remove the parameter from the
+address. `TeamStore` clears the
 selection, the pin settles back, `WeekPanel` replaces `TeammatePanel`, and focus returns to the
 pin when the panel was opened from the keyboard.
 

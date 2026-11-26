@@ -46,7 +46,8 @@ loading and refreshing are designed in `keep-team-fresh`.
   from the viewer, status, weather and next moment. The status is what `statusFor(pin, time)`
   gives, so it is null, and the row shows none, for a teammate who hides their status outside
   working hours. The viewer's own row has `isViewer` set and a null offset. `nextMoment` is the pin's earliest moment dated today or later in its city, or
-  null, and `nextMomentWhen` says when it is: `whenLabel`'s words up to 7 days ahead ("Today",
+  null, and `nextMomentWhen` says when it is, from `whenLabel(daysAhead, date)` in `moments/`:
+  words up to 7 days ahead ("Today",
   "In 5 days"), and from 8 days ahead its day and month ("9 Nov"). The row carries the pin's
   `weatherState` beside its weather, so weather that is unavailable is told from weather that
   is not shared (`show-weather`). A `TeamRow` holds no postal code; the `Pin` type has none to give.
@@ -105,7 +106,7 @@ and they are listed under All only: not under Asleep, and not in its count, sinc
 and `filterByStatus` both read `statusFor` (L2-015, L2-028).
 
 The viewer's time zone is the time zone of the viewer's own pin. The viewer's display settings
-(°C or °F, 24-hour or 12-hour clock) come from `SettingsCache`. A teammate's name, a city and a
+(°C or °F, 24-hour or 12-hour clock) come from `SettingsStore` (`profile/choose-display-and-sharing`). A teammate's name, a city and a
 moment's title are rendered as text, never as HTML.
 
 ## Requirements

@@ -29,6 +29,8 @@ alt close button
 else Escape
   actor -> page : Press Escape
   page -> page : onEscape()
+else tap elsewhere on the globe
+  globe -> page : select(null)
 end
 page -> router : navigate /globe, removing the teammate parameter
 router --> page : teammate input is undefined

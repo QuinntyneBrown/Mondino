@@ -79,10 +79,24 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   `postal_code_unavailable`, and 429 `rate_limited` over the limit. A person joining looks one up
   with `POST /api/invites/{inviteToken}/postal-code-lookups`, and a teammate changing their
   location with `POST /api/teams/{teamId}/me/postal-code-lookups`.
+- `PostalCodeResolver`, an application service owned by `joining/place-pin-from-postal-code`,
+  is the one place a country and a postal code become a city. `ResolveAsync` checks the form
+  with `PostalCodeFormats`, calls `IPostalCodeLookup` and answers a `PostalCodeResolution`
+  with the normalised `PostalCode` and the `City`, which carries the time zone. Both lookups
+  (`LookUpPostalCodeQueryHandler` on Join, `LookUpOwnPostalCodeQueryHandler` on Profile &
+  Settings), `JoinTeamCommandHandler` and `UpdateProfileCommandHandler` resolve through it.
+- A request that names a team implements `ITeamScopedRequest`; for a team that is not the
+  current teammate's own, `TeamScopeBehaviour` answers 404 with the code `team_not_found`
+  before the handler runs, the same answer as for a team that does not exist.
 - `LookupState`, in `@mondino/api`, is the state of a postal code lookup on Join and on Profile
   & Settings: `Idle`, `Locating`, `Found` (with its `PostalCodeResult`), `NotFound`,
-  `Unavailable` or `RateLimited`. `PostalCodeField` takes it as `lookupState` and has one shape
-  on both screens.
+  `Unavailable` or `RateLimited`. `PostalCodeField` has one shape on both screens: inputs
+  `value`, `country` (a `Country`), `lookupState`, `message` (a `LookupMessage` or null: `text`
+  and `retryLabel`) and `invalid`, which sets `aria-invalid` and is true for an empty postal
+  code on submit and for not found only; outputs `valueChange`, `blurred` and `retry`. The
+  field holds no copy: Join builds its message with `joinLookupMessage` beside `JoinPage`, and
+  Profile & Settings with `profileLookupMessage`. `Country` and `LookupMessage` are types in
+  `@mondino/api` too.
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
   15 minutes.
@@ -97,15 +111,24 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 - `TeamShell`, in the app, is the component of the route that holds Globe, Team, Moments and
   Profile & Settings. It provides `TeamStore` and renders `AppHeader` (`mo-app-header`, block
   `app-header`), the refresh banner and the toast. The header avatar's initials and colour come
-  from the viewer's pin in `TeamStore`. `AppHeader`'s "Invite teammate" button emits `invite`;
+  from the `Membership` in `TeamMembership`, so the avatar shows in loading and error states;
+  `TeamShell` refreshes them from the viewer's pin in `TeamStore` whenever pins are read.
+  `AppHeader`'s "Invite teammate" button emits `invite`;
   `TeamShell` provides `InviteLinkCopier`, a service of the `mondino` application, and calls
   its `copy()`, as "Copy" on the invite card does, so both copy the team's invite link and
   end in the same toast; it opens nothing. There is no "Message" button: Mondino has no chat.
 - `GroupPanel` (`mo-group-panel`, `team/view-teammate-panel`) is `TeammatePanel`'s sibling.
   `GlobePage` shows it on `GlobeView`'s `selectGroup`; it lists the group's teammates west to
-  east, each a link that selects that pin, and closes as the teammate panel does.
-- The browser knows its team from `TeamMembership`, which holds ids and the team's name and
-  never a postal code. Without a membership, the four addresses show `InviteNeededPage` in
+  east, each a link that selects that pin. It has no close button: it closes by its "This week
+  around the world" link or Escape.
+- `whenLabel(daysAhead, date)`, in `domain`'s `moments/`, is the one helper that words when a
+  moment happens: "Today", "Tomorrow", "In N days" up to 7 days ahead, and the day and month
+  ("12 Nov") beyond. The teammate panel's moment cards and the Team table's "Coming up" use
+  it; the Moments screen's rows show both the relative wording and the weekday, day and month.
+- The browser knows its team from `TeamMembership`, whose `Membership` holds the team's id and
+  name, the teammate's id and the viewer's `initials` and `colour` (the colour from the
+  `JoinResult`, which returns the one the backend assigned), and never a postal code or a
+  city. Without a membership, the four addresses show `InviteNeededPage` in
   place, and any other address shows `NotFoundPage`. `LeftPage` takes the team's name from the
   navigation state; opened or reloaded without it, it reads "You’ve left the team".
 
@@ -114,14 +137,28 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 The designs mark these as `<TO SUPPLY>`:
 
 - The globe's renderer and the format its Blender-built assets are exported to; an ADR decides
-  both before the Globe is built.
-- The database engine and the hosting platform.
-- The providers of the postal code source and of the holiday, race and event calendars.
-- How a team is made, and how a teammate signs in again on another device.
+  both before the Globe is built, and with them the detail steps and whether the renderer draws
+  a 3D body under each pin.
+- The database engine and the hosting platform, and what follows from them: the guard that
+  keeps the limit of 500 teammates exact under concurrency, a cache shared between instances
+  of the API, the forwarded header the client address is read from, the CSP nonce for
+  component styles, and the header that caches the assets.
+- The product that receives the telemetry, and its sampling rate.
+- The providers of the postal code source and of the holiday, race and event calendars, and
+  what depends on each: how the city's own position is obtained, what the event source is
+  sent, and how a source's region is matched to a city's.
+- How a team and its invite link are made, how an invite link is withdrawn, how a session is
+  stored, and how a teammate signs in again on another device.
 - Which emblems Mondino holds the right to use.
 - Protection against cross-site request forgery for the join request, which is made before a
   session exists.
 - What becomes of a team when its last teammate leaves.
-- Numbers the requirements do not give: the session's lifetime, the circuit breaker's threshold,
-  the globe's turning rate and detail steps, and the rate limit on a teammate's own postal code
-  lookup.
+- What a drag does to the globe while a pin is selected, the order of two moments that
+  fall on the same day at one pin, and the day of a race weekend that a Formula 1 moment's
+  date carries.
+- Numbers the requirements do not give: the session's lifetime; the circuit breaker's
+  threshold and break, the cache lifetimes of postal codes and calendars, and how many calls
+  to one source run at once; the globe's turning rate, step, tilt limit and easing, the
+  movement that separates a tap from a drag, how near the edge a pin is drawn fainter, and how
+  many pins a fan holds; the wind threshold; the buffer of a windowed list; and the rate limit
+  on a teammate's own postal code lookup.

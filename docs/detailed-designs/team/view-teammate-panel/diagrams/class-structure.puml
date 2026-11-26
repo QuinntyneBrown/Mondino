@@ -17,7 +17,7 @@ class GlobePage <<mondino>> {
   +panel: Signal<TeammatePanelContent | null>
   +groupTeammateIds: WritableSignal<string[]>
   +group: Signal<GroupRow[]>
-  +onSelect(teammateId: string): void
+  +onSelect(teammateId: string | null): void
   +onSelectGroup(teammateIds: string[]): void
   +onClosed(): void
   +onEscape(): void
@@ -54,11 +54,19 @@ class TeammatePanelContent <<domain pins/>> {
   +status: Status | null
   +weather: Weather | null
   +weatherState: WeatherState
-  +moments: Moment[]
+  +moments: PanelMoment[]
   +overlap: Overlap | null
   +theirDay: DaySpan | null
   +overlapText: OverlapText | null
   +nowMinute: number
+}
+
+class PanelMoment <<domain pins/>> {
+  +kind: MomentKind
+  +title: string
+  +detail: string
+  +emblem: Emblem
+  +when: string
 }
 
 class Overlap <<domain time/>> {
@@ -111,7 +119,7 @@ class OverlapBar <<components, mo-overlap-bar>> {
 class GlobeView <<globe, mo-globe>> {
   +pins: InputSignal<Pin[]>
   +selectedId: InputSignal<string | null>
-  +select: OutputEmitterRef<string>
+  +select: OutputEmitterRef<string | null>
   +selectGroup: OutputEmitterRef<string[]>
   +focusPin(teammateId: string): void
 }
@@ -120,13 +128,14 @@ class Pin <<api>> {
   +teammateId: string
   +name: string
   +colour: string
-  +city: string
+  +cityName: string
   +country: string
   +position: Position
   +timeZoneId: string
   +weather: Weather | null
   +weatherState: WeatherState
   +showsStatusOutsideWorkingHours: boolean
+  +isViewer: boolean
   +moments: Moment[]
 }
 
@@ -142,6 +151,7 @@ GlobePage --> GlobeView : renders
 GlobePage ..> Clock : injects CLOCK
 view ..> TeammatePanelContent : builds
 view ..> Pin : reads
+TeammatePanelContent *-- "*" PanelMoment
 TeammatePanelContent *-- Overlap
 TeammatePanelContent *-- DaySpan
 TeammatePanelContent *-- OverlapText

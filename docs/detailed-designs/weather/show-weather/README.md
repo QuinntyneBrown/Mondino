@@ -136,7 +136,7 @@ weather is available, unavailable or not shared, so the web app can say which.
 - **`GlobePage`**, **`TeamPage`** and **`JoinPage`** — pages in the `mondino` application. Each
   derives, in a `computed`, the temperature text from `pin.weather` and the viewer's
   `TemperatureUnit`, the label, and the night flag from the pin's local hour. The viewer's
-  settings are a signal held by `SettingsCache` and updated when `ProfilePage` saves, so a saved
+  settings are a signal held by `SettingsStore` and updated when `ProfilePage` saves, so a saved
   change of unit reaches every temperature on every screen (L2-019).
 - **`WeatherIcon`** (`mo-weather-icon`) — presentation component with inputs `condition` and
   `night`. It draws one bundled SVG per condition, with a night form for `clear` and

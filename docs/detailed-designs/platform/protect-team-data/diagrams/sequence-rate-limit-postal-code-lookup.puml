@@ -25,7 +25,7 @@ box "Backend — Mondino API" #D1FADF
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "LookUpPostalCodeQueryHandler" as handler
-  participant "PostalCodeFormats" as formats
+  participant "PostalCodeResolver" as formats
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
   database "Mondino database" as db
@@ -33,7 +33,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 participant "Postal code source" as source
 actor -> page : Type a postal code
-page -> client : lookUpPostalCode(inviteToken, country, postalCode)
+page -> client : lookUpPostalCode(inviteToken, countryCode, postalCode, signal)
 client -> limits : POST /api/invites/{inviteToken}/postal-code-lookups, postal code in the body
 alt More than 10 lookups from this client in the minute (L2-045)
   limits --> client : 429 ProblemDetails, code rate_limited, Retry-After
@@ -47,15 +47,16 @@ else Within the limit
   alt No team for the token (L2-045)
     db --> handler : None
     handler --> controller : invite_not_found
-    controller --> client : 404 ProblemDetails
+    controller --> client : 404 ProblemDetails, code invite_not_found
   else Valid invite link
     db --> handler : Team
-    handler -> formats : Validate and normalise for the country (L2-044)
-    formats --> handler : PostalCode
-    handler -> lookup : FindCityAsync(postalCode)
+    handler -> formats : ResolveAsync(countryCode, postalCode)
+    formats -> formats : PostalCodeFormats validates and normalises for the country (L2-044)
+    formats -> lookup : FindCityAsync(postalCode)
     lookup -> source : Country and postal code only (L2-050)
     source --> lookup : City, position, time zone
-    lookup --> handler : City
+    lookup --> formats : Found, City
+    formats --> handler : PostalCodeResolution: Found, PostalCode, City
     handler --> controller : PostalCodeResultDto
     controller --> client : 200 with city and region
     client --> page : PostalCodeResult

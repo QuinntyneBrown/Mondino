@@ -25,10 +25,10 @@ box "Backend — Mondino API" #D1FADF
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "UpdateProfileCommandHandler" as handler
+  participant "PostalCodeResolver" as lookup
   participant "Teammate" as entity
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
-  participant "CachedPostalCodeLookup" as lookup
   database "Mondino database" as db
 end box
 actor -> page : Use "Save changes"
@@ -40,11 +40,11 @@ controller -> handler : Send UpdateProfileCommand (no teammate id)
 handler -> handler : UpdateProfileCommandValidator
 handler -> db : Load the teammate ICurrentTeammate names
 db --> handler : Teammate
-alt teamId is not the teammate's own team
-  handler --> controller : Not found; nothing changes (L2-032)
+alt teamId is not the teammate's own team (TeamScopeBehaviour, before the handler)
+  handler --> controller : 404 team_not_found; nothing changes (L2-032)
 else postal code or country differs from the stored one
-  handler -> lookup : FindCityAsync(normalised postal code)
-  lookup --> handler : PostalCodeLookupOutcome (from the cache after the lookup)
+  handler -> lookup : ResolveAsync(countryCode, postalCode)
+  lookup --> handler : PostalCodeResolution (from the cache after the lookup)
   alt city found
     handler -> entity : MoveTo(postalCode, city) (L2-032)
     entity --> handler : Pin now at City.Position; same city, same position

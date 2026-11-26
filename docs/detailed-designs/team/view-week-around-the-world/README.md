@@ -42,26 +42,29 @@ the pins: the team's invite token.
   what `statusFor(pin, time)` gives, so a teammate who hides their status outside working hours
   is not counted as asleep (L2-015). `counts` is a computed signal over `pins` and the clock's
   minute tick, so a count changes when the clock passes an hour that changes a status (L2-025).
-- **`weekMoments(pins, now, limit)`** — pure function in `moments/`. It takes each pin's
-  moments, keeps those dated from today to 7 days ahead, where today is the date in that pin's
+- **`weekMoments(pins, kinds, now, limit)`** — pure function in `moments/`. It takes each pin's
+  moments, drops those whose kind is not in `kinds`, the viewer's chosen kinds
+  (`Settings.momentKinds`, L2-022), keeps those dated from today to 7 days ahead, where today is the date in that pin's
   city, orders them by date and then west to east, and returns the first `limit` as
   `WeekMoment` values with a `more` flag. West to east is the order `orderWestToEast` gives the
   moments' teammates, the Team screen's order. `GlobePage` passes a limit of 8 (L2-024). The
-  `when` text comes from `whenLabel`, the emblem from `emblemFor` and the teammate's first name
+  `when` text comes from `whenLabel(daysAhead, date)`, the emblem from `emblemFor` and the teammate's first name
   from `firstName(name)` in `pins/`, the first word of the name.
 - **`workingNow(pins, now)`** — pure function in `pins/`. It returns one `WorkingTeammate` for
   each pin whose `statusFor(pin, time)` is Working hours, ordered by local hour and then west
   to east, with city and formatted local time. A pin whose status visibility flag hides the status is still listed, since Working hours
   is not hidden by that setting.
-- **`WeekPanel`** (`mo-week-panel`) — presentation component. It takes `moments` and
-  `working`, and emits `teammateChosen` with a teammate id and `allMoments`. Under the heading
+- **`WeekPanel`** (`mo-week-panel`) — presentation component. It takes `moments`, `working`
+  and `everyKindOff`, and emits `teammateChosen` with a teammate id, `allMoments` and
+  `chooseKinds`. Under the heading
   it reads "Holidays, races and local moments where your teammates live." Each moment is a row
-  with a `MomentIcon`, its title, its kind, the teammate's first name and city, and when it is;
+  with its emblem, its title, its kind, the teammate's first name and city, and when it is;
   each teammate in working hours is a row with an `Avatar`, name, city and local time. Choosing
   either row emits `teammateChosen`. "All moments" is always shown under the moments, and
   "Nobody — it’s quiet everywhere." when `working` is empty. With every kind of moment turned
-  off (L2-022) the list gives way to "Nothing to show: every kind of moment is turned off for
-  your globe." and "Choose what shows", which leads to Profile & Settings.
+  off (`everyKindOff`, L2-022) the list gives way to "Nothing to show: every kind of moment is turned off for
+  your globe." and "Choose what shows", which emits `chooseKinds`; `GlobePage` then navigates
+  to `/profile`.
 - **`InviteCard`** (`mo-invite-card`) — presentation component. It takes `inviteLink` and
   emits `copy`. It is headed "Bring the team onto the globe", says "Anyone with this invite link
   adds their pin with a postal code. No addresses are shown.", and shows the link as selectable
@@ -150,8 +153,8 @@ from the invite link. `TeamStore` owns the `TeamCounts` that head the globe. `Te
 
 ### Behaviour — show the week panel and choose a moment
 
-`GlobePage` asks for at most 8 moments of the next 7 days and for the teammates in working
-hours. Choosing a moment or a teammate navigates to that teammate's id, which selects the pin and turns the
+`GlobePage` asks for at most 8 moments of the next 7 days, of the kinds the viewer chose, and
+for the teammates in working hours. Choosing a moment or a teammate navigates to that teammate's id, which selects the pin and turns the
 globe to it.
 
 ![Sequence diagram for showing the week panel and choosing a moment](diagrams/sequence-choose-moment.png)

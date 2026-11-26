@@ -14,10 +14,12 @@ title Class structure — View the week around the world
 class GlobePage <<mondino>> {
   +week: Signal<WeekMoment[]>
   +working: Signal<WorkingTeammate[]>
+  +everyKindOff: Signal<boolean>
   +teamOfOne: Signal<boolean>
   +inviteLink: Signal<string | null>
   +onTeammateChosen(teammateId: string): void
   +onAllMoments(): void
+  +onChooseKinds(): void
   +onCopy(): void
 }
 
@@ -37,7 +39,7 @@ class TeamCounts <<domain pins/>> {
 }
 
 class "moments/ and pins/ functions" as fn <<function, domain>> {
-  +weekMoments(pins: Pin[], now: Date, limit: number): WeekMoments
+  +weekMoments(pins: Pin[], kinds: MomentKind[], now: Date, limit: number): WeekMoments
   +workingNow(pins: Pin[], now: Date): WorkingTeammate[]
   +teamCounts(pins: Pin[], now: Date): TeamCounts
   +inviteLinkFor(origin: string, inviteToken: string): string
@@ -55,7 +57,7 @@ class WeekMoment <<domain moments/>> {
   +kind: MomentKind
   +title: string
   +when: string
-  +emblemKey: string | null
+  +emblem: Emblem
 }
 
 class WorkingTeammate <<domain pins/>> {
@@ -70,8 +72,10 @@ class WorkingTeammate <<domain pins/>> {
 class WeekPanel <<components, mo-week-panel>> {
   +moments: InputSignal<WeekMoment[]>
   +working: InputSignal<WorkingTeammate[]>
+  +everyKindOff: InputSignal<boolean>
   +teammateChosen: OutputEmitterRef<string>
   +allMoments: OutputEmitterRef<void>
+  +chooseKinds: OutputEmitterRef<void>
 }
 
 class InviteCard <<components, mo-invite-card>> {

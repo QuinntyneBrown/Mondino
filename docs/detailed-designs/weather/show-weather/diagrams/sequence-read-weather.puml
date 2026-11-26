@@ -35,7 +35,7 @@ end box
 participant "Open-Meteo" as openmeteo
 
 actor -> store : Open a screen that shows pins
-store -> client : getPins(teamId)
+store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> handler : Send GetPinsQuery
 handler -> db : Load the team's teammates, cities and settings
@@ -72,5 +72,5 @@ loop each teammate
 end
 handler --> controller : TeamPinsDto with a PinDto per teammate
 controller --> client : 200 pins
-client --> store : Pin[] with weather or null, and its weatherState
+client --> store : TeamPins: each Pin with weather or null,\nand its weatherState
 @enduml

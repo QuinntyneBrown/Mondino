@@ -25,12 +25,18 @@ package "mondino application" {
     +lookUp(): void
     +clearFound(): void
   }
+  class JoinPage
+  class joinLookupMessage << (F,#D1E9FF) function >> {
+    +(lookupState: LookupState, postalCode: string, country: Country): LookupMessage | null
+  }
 }
 package "@mondino/components" {
-  class PostalCodeField {
+  class PostalCodeField <<mo-postal-code-field>> {
     +value: string
     +country: Country
     +lookupState: LookupState
+    +message: LookupMessage | null
+    +invalid: boolean
     +valueChange: string
     +blurred: void
     +retry: void
@@ -58,6 +64,10 @@ package "@mondino/api" {
     +postalCodeForm: string
     +postalCodeExample: string
   }
+  class LookupMessage {
+    +text: string
+    +retryLabel: string | null
+  }
 }
 package "Mondino.Application" {
   class LookUpPostalCodeQuery {
@@ -72,6 +82,14 @@ package "Mondino.Application" {
   class PostalCodeResultDto {
     +CityDto City
     +WeatherDto? Weather
+  }
+  class PostalCodeResolver {
+    +ResolveAsync(countryCode: string, postalCode: string, ct): Task<PostalCodeResolution>
+  }
+  class PostalCodeResolution {
+    +PostalCodeLookupStatus Status
+    +PostalCode? PostalCode
+    +City? City
   }
   class PostalCodeFormats {
     +IReadOnlyList<PostalCodeFormat> Supported
@@ -127,13 +145,22 @@ package "Mondino.Infrastructure" {
 
 JoinStore --> LookupState
 JoinStore ..> InviteApi : INVITE_API
+JoinPage --> JoinStore
+JoinPage --> PostalCodeField : value, country, lookupState, message, invalid
+JoinPage ..> joinLookupMessage : this screen's copy
+joinLookupMessage ..> LookupMessage : builds
+joinLookupMessage ..> Country : form and example
+PostalCodeField ..> LookupMessage : renders
 PostalCodeField ..> LookupState : shows
-PostalCodeField ..> Country : form and example
+PostalCodeField ..> Country : the chosen country
 InviteApi ..> PostalCodeResult : returns
 LookUpPostalCodeQueryValidator ..> LookUpPostalCodeQuery : validates
 LookUpPostalCodeQueryHandler ..> LookUpPostalCodeQuery : handles
-LookUpPostalCodeQueryHandler ..> PostalCodeFormats : normalises with
-LookUpPostalCodeQueryHandler ..> IPostalCodeLookup : finds the city
+LookUpPostalCodeQueryHandler ..> PostalCodeResolver : resolves the city
+PostalCodeResolver ..> PostalCodeFormats : normalises with
+PostalCodeResolver ..> IPostalCodeLookup : finds the city
+PostalCodeResolver ..> PostalCodeResolution : returns
+PostalCodeResolution --> PostalCodeLookupStatus
 LookUpPostalCodeQueryHandler ..> IWeatherSource : reads the weather
 LookUpPostalCodeQueryHandler ..> PostalCodeResultDto : builds
 PostalCodeFormats *-- PostalCodeFormat

@@ -42,7 +42,7 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
 
 ### Frontend — `domain` library
 
-- **`TeamStore`** (`pins/`) — holds the pins, the selected teammate id and `viewerPin`, the pin
+- **`TeamStore`** (`pins/`) — holds `pins`, `selectedTeammateId` and `viewerPin`, the pin
   that belongs to the viewer.
 - **`zoneOffsetMinutes(now, timeZoneId): number`** (`time/`) — pure function. It gives the
   minutes by which the time zone is ahead of UTC at the instant `now`, read from the browser's
@@ -102,8 +102,11 @@ instant comes from `CLOCK`.
 - **`GlobePage`** — holds one `computed` over the selected pin, `viewerPin`, `CLOCK`'s `minute`
   and the viewer's `ClockFormat`. When the selected pin is the viewer's own, or `viewerPin` is
   absent, it binds no offset and no overlap. Otherwise it calls `offsetBetween`, `formatOffset`,
-  `workingDayOnViewerClock`, `overlapBetween` and `formatOverlap`.
-- **`TeamPage`** — derives the offset text of each row in the same way and binds none for the
+  `workingDayOnViewerClock`, `overlapBetween` and `formatOverlap`. It makes these calls through
+  `teammatePanelView` (`team/view-teammate-panel`), which builds the panel's
+  `TeammatePanelContent`.
+- **`TeamPage`** — derives the offset text of each row in the same way, through `teamRows`
+  (`team/view-team-through-the-day`), and binds none for the
   viewer's own row.
 - **`TeammatePanel`** — presentation component. It takes the offset text, the `Overlap`, the
   teammate's `DaySpan` and the `OverlapText` in its `content` (`TeammatePanelContent`, designed
@@ -159,7 +162,7 @@ the results to `TeammatePanel`, `TeamTable` and `OverlapBar`.
 ### Class structure
 
 The functions of `time/` return an `Offset`, a `DaySpan`, an `Overlap` and an `OverlapText`, and
-read the `WorkingDay` constants. `TeammatePanel` contains an `OverlapBar` and shows the `Overlap`.
+read the `WorkingDay` constants. `TeammatePanel` contains an `OverlapBar` and presents the `TeammatePanelContent` that holds the `Overlap`.
 
 ![Class diagram for showing offset and overlap](diagrams/class-structure.png)
 

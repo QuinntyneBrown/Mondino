@@ -18,6 +18,8 @@ class TeamStore <<domain pins/>> {
   +inviteToken: Signal<string | null>
   +viewerTeammateId: Signal<string | null>
   +selectedTeammateId: Signal<string | null>
+  +viewerPin: Signal<Pin | null>
+  +selectedPin: Signal<Pin | null>
   +counts: Signal<TeamCounts>
   +arrivedTeammateIds: Signal<string[]>
   +loadState: Signal<LoadState>
@@ -26,6 +28,8 @@ class TeamStore <<domain pins/>> {
   -pending: AbortController | null
   +load(teamId: string): Promise<void>
   +refresh(): Promise<void>
+  +select(teammateId: string): boolean
+  +clearSelection(): void
   +acknowledgeArrived(): void
   -refreshIfDue(now: Date): void
   -merge(next: TeamPins): void

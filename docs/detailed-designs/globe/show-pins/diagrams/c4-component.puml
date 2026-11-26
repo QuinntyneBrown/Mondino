@@ -18,7 +18,7 @@ Container_Boundary(api, "Mondino API") {
 }
 Rel(page, store, "Reads pins and selection from")
 Rel(store, ctrl, "Reads pins through TEAM_API", "JSON/HTTPS")
-Rel(page, view, "Gives pins, selectedId and templates to")
+Rel(page, view, "Gives pins, descriptions, selectedId and templates to")
 Rel(view, spread, "Calls through PIN_SPREADER")
 Rel(view, layer, "Gives placements and descriptions to")
 Rel(ctrl, handler, "Sends GetPinsQuery")

@@ -26,35 +26,35 @@ box "Backend — Mondino API" #D1FADF
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "JoinTeamCommandHandler" as handler
+  participant "PostalCodeResolver" as lookup
   participant "Team" as team
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
-  participant "CachedPostalCodeLookup" as lookup
   database "Mondino database" as db
   participant "TeammateSessionHandler" as session
 end box
 actor -> page : Choose "Join Northwind"
 page -> store : join()
 store --> page : joinState Joining, button "Joining Northwind…" disabled
-store -> client : join(inviteToken, name, countryCode, postalCode, joinRequestId)
+store -> client : join(inviteToken, JoinRequest: name, countryCode, postalCode, joinRequestId)
 client -> controller : POST /api/invites/{inviteToken}/teammates
 controller -> controller : Apply the join rate limit policy
 controller -> handler : Send JoinTeamCommand (validated in the pipeline)
 handler -> db : Load the team by invite token, with its teammates
 db --> handler : Team
-handler -> lookup : FindCityAsync(normalised postal code)
-lookup --> handler : Found, City (from the cache after the lookup)
+handler -> lookup : ResolveAsync(countryCode, postalCode)
+lookup --> handler : PostalCodeResolution: Found, PostalCode, City (from the cache after the lookup)
 handler -> team : AddTeammate(name, postalCode, city, colour, joinRequestId, now)
 team --> handler : Teammate with a pin at the city (L2-005)
 handler -> db : Save changes in one unit of work
 db --> handler : Committed
-handler --> controller : JoinResultDto
+handler --> controller : JoinResultDto with the colour assigned
 controller -> session : Sign in the teammate
 session --> controller : Session cookie: HttpOnly, Secure, SameSite
 controller --> client : 201 JoinResultDto, Set-Cookie
 client --> store : JoinResult
-store --> page : Team id and teammate id
-page -> page : TeamMembership.remember(teamId, teammateId, teamName)
+store --> page : Team id, teammate id and colour
+page -> page : TeamMembership.remember(Membership: teamId, teammateId, teamName, initials, colour)
 page --> actor : Navigate to /globe with the new pin selected, pulsing once (L2-005)
 note over page, client
   When the request fails, JoinStore sets joinState Failed, keeps what was typed

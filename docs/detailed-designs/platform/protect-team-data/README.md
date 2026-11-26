@@ -52,15 +52,19 @@ behind them.
 **Team scope (L2-043, L2-007).**
 
 - **`ITeamScopedRequest`** — interface in `Mondino.Application` with `Guid TeamId`.
-  `GetPinsQuery`, `GetMomentsQuery`, `GetProfileQuery`, `UpdateProfileCommand` and
-  `LeaveTeamCommand` implement it.
+  `GetPinsQuery`, `GetMomentsQuery`, `GetProfileQuery`, `LookUpOwnPostalCodeQuery`,
+  `UpdateProfileCommand` and `LeaveTeamCommand` implement it.
 - **`TeamScopeBehaviour`** — MediatR pipeline behaviour. For an `ITeamScopedRequest` it
   compares the request's `TeamId` with `ICurrentTeammate.TeamId`. When they differ, it stops
   the pipeline with `team_not_found`, written as 404. A team that exists and a team that does
   not give the same answer, and the handler is not run.
 - **Own pin only.** `ProfileController`'s routes are `/api/teams/{teamId}/me`. They carry no
-  teammate id, and `GetProfileQueryHandler`, `UpdateProfileCommandHandler` and
-  `LeaveTeamCommandHandler` act on `ICurrentTeammate.TeammateId`. No route addresses another
+  teammate id, and `GetProfileQueryHandler`, `LookUpOwnPostalCodeQueryHandler`,
+  `UpdateProfileCommandHandler` and `LeaveTeamCommandHandler` act for
+  `ICurrentTeammate.TeammateId`. `LookUpOwnPostalCodeQueryHandler` serves
+  `POST /api/teams/{teamId}/me/postal-code-lookups`, the lookup a teammate makes when changing
+  their location; it needs a session and is under team scope, so it is not one of the open
+  endpoints. No route addresses another
   teammate's profile, pin or settings, so such a request is answered 404.
 - **Ids and tokens.** `Team.Id` and `Teammate.Id` are version 4 `Guid`s from a cryptographic
   random source, which carry 122 random bits. `Team.InviteToken` is at least 128 bits from
@@ -87,9 +91,12 @@ behind them.
 - **`ValidationBehaviour`** — MediatR pipeline behaviour. It runs the request's validator and
   stops the pipeline with `validation_failed`, written as 400, before anything is stored.
 - **`JoinTeamCommandValidator`** and **`UpdateProfileCommandValidator`** — a name of 1 to 60
-  characters, a country in the supported list and a postal code of at most 12 characters. The
-  country's format is checked afterwards by the handler through `PostalCodeFormats`, which
-  refuses with `postal_code_not_found` (422), not `validation_failed`.
+  characters (joining only), a country in the supported list and a postal code of at most 12
+  characters. `LookUpPostalCodeQueryValidator` and `LookUpOwnPostalCodeQueryValidator` apply
+  the same two limits to a lookup. The country's format is checked afterwards by the handler
+  through `PostalCodeResolver`, the one application service all four resolve a postal code
+  with (`place-pin-from-postal-code`); it uses `PostalCodeFormats`, and the handler refuses
+  with `postal_code_not_found` (422), not `validation_failed`.
 - **`NameNormaliser`** — service in `Mondino.Application`. It removes control characters and
   trims leading and trailing spaces before validation and storage.
 - **Narrow request bodies.** A request body binds to a record that has only the fields a
@@ -126,10 +133,10 @@ For a lookup or a join request, `JoinPage` shows "That was a lot of tries in a s
 a moment, then try again." and keeps what was typed. For an open of an invite link, nothing has
 been typed yet, and `JoinPage` shows "We couldn’t open this invite link" with "Try again"
 (L2-001). `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
-`IPostalCodeLookup`, so the lookup cannot be used without a valid invite link. Behind a proxy,
+`PostalCodeResolver`, so the lookup cannot be used without a valid invite link. Behind a proxy,
 the client address is read from the forwarded header the hosting platform sets, which is
-`<TO SUPPLY>`. The limit on `POST /api/teams/{teamId}/me/postal-code-lookups`, which needs a
-session, is `<TO SUPPLY>`.
+`<TO SUPPLY>`. `POST /api/teams/{teamId}/me/postal-code-lookups`, which needs a
+session, carries a policy of its own from `RateLimitPolicies`; its limit is `<TO SUPPLY>`.
 
 ## Requirements
 
@@ -139,7 +146,7 @@ level-1 (L1) requirement, cited by identifier.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-007` | `L1-002` | A postal code is returned only to the teammate it belongs to, on their own Join and Profile & Settings screens. Everything another teammate receives carries the city and country only. |
-| `L2-043` | `L1-014` | The backend decides what is allowed. Every request except opening an invite link, looking up a postal code while joining and joining must come from a teammate of the team it concerns. |
+| `L2-043` | `L1-014` | The backend decides what is allowed. Every request except opening an invite link, looking up a postal code while joining and joining must come from a teammate of the team it concerns. What the browser shows or hides is a convenience and never the rule. |
 | `L2-044` | `L1-014` | Every value from a browser is validated by the backend whatever the frontend checked. A teammate's name, a team's name, a city and a moment's title and detail are rendered as text, never as HTML, wherever they appear. |
 | `L2-045` | `L1-014` | Opening an invite link, looking up a postal code while joining and joining are open to anyone who holds an invite link. Each is marked as open explicitly and is rate limited. |
 
@@ -172,8 +179,8 @@ run before the handler. A refusal at any step is written by `ProblemDetailsWrite
 ### Class structure
 
 `TeammateSessionHandler` populates `CurrentTeammate`, which implements `ICurrentTeammate`.
-`TeamScopeBehaviour` compares it with each `ITeamScopedRequest`. `ValidationBehaviour` runs
-validators such as `JoinTeamCommandValidator`. `PinDto` has no postal code; `ProfileDto`
+`TeamScopeBehaviour` compares it with each `ITeamScopedRequest`, `LookUpOwnPostalCodeQuery`
+among them. `ValidationBehaviour` runs validators such as `JoinTeamCommandValidator`. `PinDto` has no postal code; `ProfileDto`
 carries the owner's.
 
 ![Class diagram for protecting team data](diagrams/class-structure.png)
@@ -193,7 +200,7 @@ carries the security headers (L2-044).
 A person on the Join screen looks up a postal code. Past 10 lookups in a minute,
 `RateLimitPolicies` answers 429 with `Retry-After` before any controller, handler or outside
 source is called, and `JoinPage` keeps what was typed (L2-045). Within the limit, the handler
-requires a valid invite token, validates the postal code (L2-044) and sends the outside source
-a country and postal code only.
+requires a valid invite token, and `PostalCodeResolver` validates the postal code (L2-044) and
+sends the outside source a country and postal code only.
 
 ![Sequence diagram for a rate-limited postal code lookup](diagrams/sequence-rate-limit-postal-code-lookup.png)

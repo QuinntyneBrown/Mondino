@@ -33,8 +33,11 @@ screen.
 **Frontend (`mondino` application, `@mondino/api`)**
 
 - **`JoinPage`** — calls `JoinStore.join()` when the person chooses the button. On success it
-  calls `TeamMembership.remember(membership)` with a `Membership`: the `teamId` and `teammateId`
-  of the `JoinResult` and the `teamName` of the `Invite`, and never the postal code. It then
+  calls `TeamMembership.remember(membership)` with a `Membership`: the `teamId`, `teammateId`
+  and `colour` of the `JoinResult`, the `teamName` of the `Invite` and the `initials` that
+  `initialsOf(name)` from `domain`'s `pins/` gives for the name typed, and never the postal
+  code or the city. The header avatar is drawn from the membership, so it shows before the
+  pins are read. It then
   navigates to `/globe` and passes the new teammate's id and a "new" flag in the navigation
   state, never in the URL. `GlobePage` selects that pin and pulses it once.
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one
@@ -52,7 +55,8 @@ screen.
   `Failed`.
 - **`InviteApi.join(inviteToken, request)`** — sends
   `POST /api/invites/{inviteToken}/teammates` with a `JoinRequest` body: `name`, `countryCode`,
-  `postalCode` and `joinRequestId`. It returns a `JoinResult`: `teamId` and `teammateId`.
+  `postalCode` and `joinRequestId`. It returns a `JoinResult`: `teamId`, `teammateId` and
+  `colour`, the colour the backend assigned to the pin.
 - The postal code is held in memory by `JoinStore` only. It is never written to browser storage
   and goes when the person leaves the Join screen.
 
@@ -74,10 +78,10 @@ screen.
      `invite_not_found` when no team matches.
   2. When a teammate of that team already has the command's `JoinRequestId`, it returns that
      teammate and adds nothing.
-  3. It normalises the postal code with `PostalCodeFormats` and resolves the city through
-     `IPostalCodeLookup`. The outcome is normally in the cache of `CachedPostalCodeLookup` from
-     the lookup on the Join screen. `NotFound` and `Unavailable` are refused with
-     `postal_code_not_found` and `postal_code_unavailable`.
+  3. It resolves the postal code and the city through `PostalCodeResolver`
+     (`place-pin-from-postal-code`), as the lookup on the Join screen did. The outcome is
+     normally in the cache of `CachedPostalCodeLookup` from that lookup. `NotFound` and
+     `Unavailable` are refused with `postal_code_not_found` and `postal_code_unavailable`.
   4. It picks the pin's colour with `PinColourPicker` and calls `Team.AddTeammate` with the
      time from `TimeProvider`.
   5. It saves through `IAppDbContext` in one unit of work.
@@ -90,8 +94,8 @@ screen.
   is never returned in any DTO.
 - **`TeamFullException`** — feature-local domain exception. `ProblemDetailsWriter` maps it to
   409 with the code `team_full`.
-- **`JoinResultDto`** — `TeamId` and `TeammateId`. The Globe screen reads the pin itself through
-  `GetPinsQuery`.
+- **`JoinResultDto`** — `TeamId`, `TeammateId` and `Colour`, the colour `PinColourPicker`
+  assigned. The Globe screen reads the pin itself through `GetPinsQuery`.
 - **`TeammateSessionHandler`** — issues the session cookie: `HttpOnly`, `Secure` and `SameSite`.
   The cookie carries the team id and teammate id; its lifetime is `<TO SUPPLY>`.
 
@@ -144,7 +148,7 @@ The Mondino API writes the teammate to the Mondino database and answers with the
 ### Components
 
 `InvitesController` sends `JoinTeamCommand` through `JoinTeamCommandValidator` to
-`JoinTeamCommandHandler`. The handler resolves the city, picks a colour, calls
+`JoinTeamCommandHandler`. The handler resolves the city through `PostalCodeResolver`, picks a colour, calls
 `Team.AddTeammate` and saves. The controller then signs the teammate in through
 `TeammateSessionHandler`. The Mondino web app is shown as one element; its parts are listed in
 the Description.
@@ -153,7 +157,8 @@ the Description.
 
 ### Class structure
 
-`JoinStore` holds a `JoinState` and a `joinRequestId` and depends on `InviteApi`.
+`JoinStore` holds a `JoinState` and a `joinRequestId` and depends on `InviteApi`. `JoinPage`
+remembers a `Membership` in `TeamMembership` from the `JoinResult`.
 `JoinTeamCommandHandler` loads and mutates `Team`, which owns up to 500 `Teammate` entities and
 throws `TeamFullException` at the limit. `Teammate` carries the `JoinRequestId` that makes a
 repeated request recognisable.
@@ -162,9 +167,10 @@ repeated request recognisable.
 
 ### Behaviour — join the team
 
-The handler loads the team, resolves the city, adds the teammate and commits in one unit of
-work. The controller issues the session cookie, and `JoinPage` opens the Globe screen with the
-new pin selected (`L2-005`). A failed request leaves the person on the Join screen with what
+The handler loads the team, resolves the city through `PostalCodeResolver`, adds the teammate
+and commits in one unit of work. The controller issues the session cookie, `JoinPage` remembers
+the membership with the pin's initials and colour, and opens the Globe screen with the new pin
+selected (`L2-005`). A failed request leaves the person on the Join screen with what
 they typed.
 
 ![Sequence diagram for joining the team](diagrams/sequence-join-team.png)

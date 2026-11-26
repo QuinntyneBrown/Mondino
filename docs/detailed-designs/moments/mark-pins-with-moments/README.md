@@ -35,9 +35,11 @@ The rule lives in `domain`'s `moments/`. The `globe` library draws the result an
 - **`EmblemCatalogue`** — backend application service. It sets `Moment.EmblemKey` where Mondino
   holds the right to use the emblem of the moment's subject, and leaves it empty otherwise. The
   emblems Mondino holds the right to use are `<TO SUPPLY>`.
-- **`Pin`** — `api` type. Each pin carries its `timeZoneId` and its teammate's `moments`.
-- **`Settings.momentKinds`** — the viewer's chosen kinds. `ProfileApi` reads and saves them, and
-  `SettingsCache` holds them in the browser for the next visit.
+- **`Pin`** — `api` type. Each pin carries its `timeZoneId` and its teammate's `moments`, each
+  a `Moment`, the `api` type for a `MomentDto` (`find-moments`).
+- **`Settings.momentKinds`** — the viewer's chosen kinds. `ProfileApi` reads and saves them,
+  `SettingsStore` holds them as a signal for every screen, and `SettingsCache` keeps them in
+  the browser for the next visit (`profile/choose-display-and-sharing`).
 - **`markerFor(pin, kinds, now)`** — pure function. It drops the moments whose kind is not in
   `kinds`. It keeps the moments dated today or 1 to 7 days ahead, counted in the pin's own time
   zone by `daysUntil`. With none left it returns nothing. Otherwise it returns a `MomentMarker`
@@ -52,25 +54,27 @@ The rule lives in `domain`'s `moments/`. The `globe` library draws the result an
 - **`Emblem`** — `api` type: whether the picture is a held emblem or a kind's icon, its key and
   the kind.
 - **`MomentMarker`** — `api` type: the chosen `moment`, its `emblem`, the `count` of the pin's
-  moments in the window, a `today` flag, and the `when` label from `whenLabel` ("Today",
-  "Tomorrow", "In 3 days"). The type sits in `api` so `globe` can read it without importing
+  moments in the window, a `today` flag, and the `when` label from
+  `whenLabel(daysAhead, date)` ("Today", "Tomorrow", "In 3 days"; a marker's moment is never
+  more than 7 days ahead, so it never reads as a date). The type sits in `api` so `globe` can read it without importing
   `domain`.
 - **`GlobePage`** — page in the `mondino` application. A computed signal maps each teammate id
   to its marker from `TeamStore`'s pins, the chosen kinds and the clock's minute tick. The page
   passes the map to `GlobeView`.
-- **`GlobeView`** — `mo-globe`. It takes the markers as an input beside the pins and hands them
-  to `PinLayer`.
+- **`GlobeView`** — `mo-globe`. It takes the map as its `markers` input, keyed by teammate
+  id, beside `pins`, and hands it to `PinLayer`'s `markers` input.
 - **`PinLayer`** — draws each marker beside its pin in the sun colour, with the emblem inside. A
   marker for a moment today is larger and carries a ring. A count badge shows when `count` is 2
   or more. A marker is at least 16 px across at every globe size and sits clear of the pin's
   initials. A marker is not a control of its own: when its pin is pointed at, focused or
-  selected and lifts, the label shows the moment's title and the `when` label as text. `dispose()` releases what the layer created.
+  selected and lifts, the label shows the moment's title and the `when` label as text. The
+  layer is a component of `GlobeView` and is released with it (`globe/show-pins`).
   The marker is in the pin's text too: the accessible name of the pin's button, built by
   `describePin` (`make-accessible`), ends with the marker's title and `when` label ("October
   Bank Holiday, today").
 
 When the viewer turns a kind off, `markerFor` no longer sees moments of that kind. A pin whose
-only moment this week is of that kind carries no marker. `WeekPanel` receives the same chosen
+only moment this week is of that kind carries no marker. `weekMoments` (`team/view-week-around-the-world`) takes the same chosen
 kinds, so the moment is absent from "This week around the world". With every kind off, no pin
 carries a marker, and the panel says "Nothing to show: every kind of moment is turned off for
 your globe."
@@ -105,7 +109,7 @@ each pin's marker and draws it.
 
 ### Components
 
-`GlobePage` reads the pins from `TeamStore` and the chosen kinds from `SettingsCache`. It calls
+`GlobePage` reads the pins from `TeamStore` and the chosen kinds from `SettingsStore`. It calls
 `markerFor`, which calls `emblemFor`, and passes the markers to `GlobeView`. `PinLayer` draws
 them, and each pin's accessible name gives its marker as text.
 

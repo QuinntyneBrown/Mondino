@@ -27,6 +27,7 @@ box "Backend — Mondino API" #D1FADF
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeResolver" as resolver
   participant "PostalCodeFormats" as formats
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
@@ -40,22 +41,24 @@ actor -> page : Leave the postal code field ("20121", Italy)
 page -> store : lookUp()
 store --> page : lookupState Locating
 page --> actor : "Finding 20121…", button "Placing your pin…" disabled (L2-003)
-store -> client : lookUpPostalCode(inviteToken, "IT", "20121")
+store -> client : lookUpPostalCode(inviteToken, "IT", "20121", signal)
 client -> controller : POST /api/invites/{inviteToken}/postal-code-lookups
 controller -> controller : Apply the lookup rate limit policy
 controller -> handler : Send LookUpPostalCodeQuery
 handler -> db : Find the team by invite token
 db --> handler : Team exists
-handler -> formats : TryNormalise("IT", "20121")
-formats --> handler : PostalCode, form matches (L2-003)
-handler -> lookup : FindCityAsync(postalCode)
+handler -> resolver : ResolveAsync("IT", "20121")
+resolver -> formats : TryNormalise("IT", "20121")
+formats --> resolver : PostalCode, form matches (L2-003)
+resolver -> lookup : FindCityAsync(postalCode)
 alt cached
-  lookup --> handler : Found, City
+  lookup --> resolver : Found, City
 else not cached
   lookup -> postal : Country and postal code only, with a timeout
   postal --> lookup : Municipality, or nearest named locality (L2-006)
-  lookup --> handler : Found, City with the city's own position (L2-006)
+  lookup --> resolver : Found, City with the city's own position (L2-006)
 end
+resolver --> handler : PostalCodeResolution: Found, PostalCode, City
 handler -> weather : GetCurrentAsync(city position)
 weather -> meteo : City position only, with a timeout
 meteo --> weather : Current weather, or no answer
@@ -64,6 +67,7 @@ handler --> controller : PostalCodeResultDto
 controller --> client : 200 PostalCodeResultDto
 client --> store : PostalCodeResult
 store --> page : lookupState Found
+page -> page : joinLookupMessage(...) gives PostalCodeField its message
 page -> globe : Turn to the city, add the pin "You" and the city, pulsing once
 page --> actor : "Milan, Lombardy", pin placed at city level, weather, button "Join Northwind" (L2-003)
 @enduml

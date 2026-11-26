@@ -26,6 +26,11 @@ interface Moment {
   +date: string
   +detail: string
   +emblemKey: string | null
+  +teammateId: string
+  +teammateName: string
+  +cityName: string
+  +countryCode: string
+  +timeZoneId: string
 }
 
 interface Pin {
@@ -56,7 +61,7 @@ class "moments/ (domain)" as moments <<functions>> {
   +markerFor(pin: Pin, kinds: MomentKind[], now: Date): MomentMarker | null
   +emblemFor(moment: Moment): Emblem
   +daysUntil(date: string, timeZoneId: string, now: Date): number
-  +whenLabel(daysAhead: number): string
+  +whenLabel(daysAhead: number, date: string): string
   +HELD_EMBLEMS: ReadonlySet<string>
 }
 
@@ -69,14 +74,13 @@ class GlobePage {
 }
 
 class GlobeView {
-  +pins: Pin[]
-  +markers: Map<string, MomentMarker>
-  +selectedId: string | null
+  +pins: InputSignal<Pin[]>
+  +markers: InputSignal<Map<string, MomentMarker>>
+  +selectedId: InputSignal<string | null>
 }
 
 class PinLayer {
-  +setMarkers(markers: Map<string, MomentMarker>): void
-  +dispose(): void
+  +markers: InputSignal<Map<string, MomentMarker>>
 }
 
 class MomentIcon {

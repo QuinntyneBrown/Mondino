@@ -18,7 +18,7 @@ actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
   participant "GlobePage" as page
   participant "TeamStore" as store
-  participant "SettingsCache" as settings
+  participant "SettingsStore" as settings
   participant "markerFor" as marker
   participant "emblemFor" as emblem
   participant "GlobeView" as view
@@ -34,7 +34,7 @@ end box
 
 actor -> page : Open the Globe screen
 page -> store : Read pins
-store -> controller : GET /api/teams/{teamId}/pins
+store -> controller : getPins(teamId, signal):\nGET /api/teams/{teamId}/pins
 controller -> handler : Send GetPinsQuery
 handler -> catalogue : KeyFor(subject) for each moment,\nthrough MomentFinder
 alt Mondino holds the right to the emblem
@@ -43,7 +43,7 @@ else right not held
   catalogue --> handler : No key
 end
 handler --> controller : TeamPinsDto, each PinDto with its moments
-controller --> store : Pins
+controller --> store : TeamPins
 store --> page : Pins signal
 page -> settings : Read the viewer's chosen kinds
 settings --> page : momentKinds (all four at first, L2-022)
@@ -64,7 +64,7 @@ loop each pin
   end
 end
 page -> view : pins and markers
-view -> layer : setMarkers(markers)
+view -> layer : markers input
 layer --> actor : Marker in sun beside each marked pin,\nstronger by size and ring when today
 actor -> layer : Point at, focus or select a marked pin
 layer --> actor : Pin lifts; its label gives the title\nand when label as text (L2-021)

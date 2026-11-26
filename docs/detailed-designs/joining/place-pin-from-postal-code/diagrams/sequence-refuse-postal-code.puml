@@ -26,6 +26,7 @@ box "Backend — Mondino API" #D1FADF
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeResolver" as resolver
   participant "PostalCodeFormats" as formats
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
@@ -34,27 +35,28 @@ end box
 participant "Postal code source" as postal
 actor -> page : Leave the postal code field
 page -> store : lookUp()
-store -> client : lookUpPostalCode(inviteToken, countryCode, postalCode)
+store -> client : lookUpPostalCode(inviteToken, countryCode, postalCode, signal)
 client -> controller : POST /api/invites/{inviteToken}/postal-code-lookups
 controller -> handler : Send LookUpPostalCodeQuery
 handler -> handler : Find the team by invite token
-handler -> formats : TryNormalise(countryCode, postalCode)
+handler -> resolver : ResolveAsync(countryCode, postalCode)
+resolver -> formats : TryNormalise(countryCode, postalCode)
 alt the postal code does not fit the country's form ("2012" in Italy)
-  formats --> handler : false
+  formats --> resolver : false
   note over lookup, postal : The postal code source is not called (L2-004)
-  handler --> controller : Refuse with postal_code_not_found
 else the form fits and the source does not know it
-  formats --> handler : PostalCode
-  handler -> lookup : FindCityAsync(postalCode)
+  formats --> resolver : PostalCode
+  resolver -> lookup : FindCityAsync(postalCode)
   lookup -> postal : Country and postal code only
   postal --> lookup : No such postal code
-  lookup --> handler : NotFound (cached)
-  handler --> controller : Refuse with postal_code_not_found
+  lookup --> resolver : NotFound (cached)
 end
+resolver --> handler : PostalCodeResolution: NotFound
+handler --> controller : Refuse with postal_code_not_found
 controller --> client : 422 ProblemDetails, code postal_code_not_found
 client --> store : ApiError postal_code_not_found
 store --> page : lookupState NotFound, nothing placed
-page --> actor : Alert naming the postal code, the country, its form and an example (L2-004)
+page --> actor : Alert naming the postal code, the country, its form and an example; aria-invalid on the input (L2-004)
 actor -> page : Edit the postal code
 page -> store : clearFound()
 store --> page : lookupState Idle

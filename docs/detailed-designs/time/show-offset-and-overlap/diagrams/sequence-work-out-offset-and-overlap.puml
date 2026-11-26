@@ -27,11 +27,12 @@ box "Frontend — Mondino web app" #E0F2FE
 end box
 
 actor -> page : Select a teammate's pin
-page -> store : Set selected teammate id
+page -> store : select(teammateId), following the address
 store --> page : Selected pin and viewer's pin
 page -> clock : Read minute through CLOCK
 clock --> page : now
 
+note over page, overlap : GlobePage makes the calls below through teammatePanelView\n(team/view-teammate-panel), which builds the panel's content
 alt the selected pin is the viewer's own
   page -> panel : Bind offset null and overlap null
   panel --> actor : Panel with no offset and no overlap (L2-016, L2-017)
@@ -55,7 +56,7 @@ else another teammate
   page -> overlap : formatOverlap(overlap, theirDay, first name, viewer's ClockFormat)
   overlap --> page : OverlapText: start, end and length, or no shared working hours\nand the teammate's working day (L2-017)
 
-  page -> panel : Bind offset text, overlap, the teammate's DaySpan and OverlapText
+  page -> panel : Bind content: offset text, overlap, the teammate's DaySpan and OverlapText
   panel -> bar : Bind overlap, theirDay, nowMinute, first name and text
   bar --> actor : Both working days on the viewer's day, with the overlap as text (L2-017)
   panel --> actor : Offset as text (L2-016)

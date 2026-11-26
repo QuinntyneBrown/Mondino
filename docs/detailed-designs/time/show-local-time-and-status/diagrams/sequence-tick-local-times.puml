@@ -36,14 +36,14 @@ end box
 
 actor -> page : Open the Globe screen
 page -> store : Read pins
-store -> client : getPins(teamId)
+store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> handler : Send GetPinsQuery
 handler -> db : Load the team's teammates and cities
 db --> handler : Teammates
 handler --> controller : PinDto per teammate: TimeZoneId, no local time (L2-014)
 controller --> client : 200 pins
-client --> store : Pin[]
+client --> store : TeamPins
 store --> page : pins signal
 page -> clock : Read minute through CLOCK
 clock -> clock : Arm one timer for the next minute boundary

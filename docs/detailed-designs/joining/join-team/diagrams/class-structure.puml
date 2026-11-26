@@ -33,6 +33,13 @@ package "@mondino/domain" {
   class TeamMembership {
     +remember(membership: Membership): void
   }
+  class Membership {
+    +teamId: string
+    +teammateId: string
+    +teamName: string
+    +initials: string
+    +colour: string
+  }
 }
 package "@mondino/api" {
   interface InviteApi {
@@ -47,6 +54,7 @@ package "@mondino/api" {
   class JoinResult {
     +teamId: string
     +teammateId: string
+    +colour: string
   }
 }
 package "Mondino.Api" {
@@ -69,9 +77,11 @@ package "Mondino.Application" {
   class JoinResultDto {
     +Guid TeamId
     +Guid TeammateId
+    +string Colour
   }
-  class PostalCodeFormats
-  interface IPostalCodeLookup
+  class PostalCodeResolver {
+    +ResolveAsync(countryCode: string, postalCode: string, ct): Task<PostalCodeResolution>
+  }
   class PinColourPicker {
     +Pick(team: Team): string
   }
@@ -109,6 +119,7 @@ package "Mondino.Infrastructure" {
 JoinPage --> JoinStore
 JoinPage ..> GlobePage : navigates to /globe
 JoinPage ..> TeamMembership : remembers the team after joining
+TeamMembership --> Membership : holds
 JoinStore --> JoinState
 JoinStore ..> InviteApi : INVITE_API
 InviteApi ..> JoinRequest
@@ -118,8 +129,7 @@ InvitesController ..> TeammateSessionHandler : signs in through
 JoinTeamCommandValidator ..> JoinTeamCommand : validates
 JoinTeamCommandHandler ..> JoinTeamCommand : handles
 JoinTeamCommandHandler ..> JoinResultDto : returns
-JoinTeamCommandHandler ..> PostalCodeFormats
-JoinTeamCommandHandler ..> IPostalCodeLookup
+JoinTeamCommandHandler ..> PostalCodeResolver : resolves the city
 JoinTeamCommandHandler ..> PinColourPicker
 JoinTeamCommandHandler ..> IAppDbContext
 JoinTeamCommandHandler --> Team : loads / mutates

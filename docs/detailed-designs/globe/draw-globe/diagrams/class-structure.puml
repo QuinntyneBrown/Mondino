@@ -27,8 +27,15 @@ class GlobeView {
   +pins: InputSignal<Pin[]>
   +selectedId: InputSignal<string | null>
   +interactive: InputSignal<boolean>
+  +descriptions: InputSignal<Map<string, string>>
+  +markers: InputSignal<Map<string, MomentMarker>>
+  +label: InputSignal<string>
+  +arrivedIds: InputSignal<string[]>
   +select: OutputEmitterRef<string | null>
+  +selectGroup: OutputEmitterRef<string[]>
+  +arrivedShown: OutputEmitterRef<void>
   +state: Signal<GlobeState>
+  +focusPin(teammateId: string): void
   -scene: GlobeScene | null
   -startScene(): Promise<void>
   -onResize(entry: ResizeObserverEntry): void
@@ -46,6 +53,7 @@ class GlobeScene {
   +onFrame(listener: (elapsedMs: number) => void): void
   +start(): void
   +stop(): void
+  +draw(): void
   +dispose(): void
 }
 
@@ -80,7 +88,7 @@ class GlobeFallback <<mo-globe-fallback, components>> {
 
 interface Clock {
   +now(): Date
-  +minute: Signal<number>
+  +minute: Signal<Date>
 }
 
 class Position {

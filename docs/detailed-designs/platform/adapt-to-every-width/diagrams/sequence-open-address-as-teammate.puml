@@ -41,7 +41,9 @@ membership --> guard : Membership for this device
 guard --> router : true
 router -> shell : Create TeamShell, which provides TeamStore
 router -> page : loadComponent, then create TeamPage
-shell --> actor : Navigation with aria-current="page" on Team
+shell -> membership : current()
+membership --> shell : Membership with initials and colour
+shell --> actor : Navigation with aria-current="page" on Team; the avatar from the membership
 page -> store : Read pins
 store -> client : getPins(teamId)
 client -> controller : GET /api/teams/{teamId}/pins with session cookie
@@ -54,6 +56,7 @@ handler --> controller : TeamPinsDto
 controller --> client : 200 with pins
 client --> store : Pin list
 store --> page : pins signal
-store --> shell : The viewer's pin: initials and colour for the avatar
+store --> shell : viewerPin
+shell -> membership : remember(membership) with the pin's initials and colour
 page --> actor : Team screen in the layout for the current width (L2-037)
 @enduml

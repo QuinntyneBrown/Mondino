@@ -79,10 +79,15 @@ class OverlapBar <<components>> {
 }
 
 class TeammatePanel <<components>> {
+  +content: TeammatePanelContent
+}
+
+class TeammatePanelContent <<domain, pins/>> {
   +offset: string | null
   +overlap: Overlap | null
   +theirDay: DaySpan | null
   +overlapText: OverlapText | null
+  +nowMinute: number
 }
 
 TimeFns ..> Offset : returns
@@ -94,7 +99,8 @@ TimeFns ..> WorkingDay : reads
 Offset --> OffsetDirection : has
 TeamStore --> "*" Pin : holds
 TeammatePanel *-- OverlapBar : contains
-TeammatePanel ..> Overlap : shows
+TeammatePanel ..> TeammatePanelContent : presents
+TeammatePanelContent ..> Overlap : holds
 TimeFns ..> Clock : takes now from
 TimeFns ..> Pin : reads timeZoneId
 @enduml

@@ -37,20 +37,21 @@ decides how they are drawn.
 
 - **`TeamsController`** — exposes `GET /api/teams/{teamId}/pins` to a teammate of the team. It
   checks nothing itself and sends one `GetPinsQuery`.
-- **`GetPinsQuery`** — carries the `TeamId`.
-- **`GetPinsQueryHandler`** — loads the team only where the teammate named by
-  `ICurrentTeammate` belongs to it, and answers 404 otherwise, the same answer as for a team
-  that does not exist (L2-043). For each distinct city it asks `IWeatherSource` for the
+- **`GetPinsQuery`** — carries the `TeamId` and is an `ITeamScopedRequest`: for a team that is
+  not the current teammate's own, `TeamScopeBehaviour` answers 404 with the code
+  `team_not_found` before the handler runs, the same answer as for a team that does not exist
+  (L2-043, `platform/protect-team-data`).
+- **`GetPinsQueryHandler`** — loads the team of the teammate named by `ICurrentTeammate`. For each distinct city it asks `IWeatherSource` for the
   weather and `MomentFinder` for the moments, then builds one `PinDto` for each teammate and
   answers them in a `TeamPinsDto` (the team's id and name, its invite token, the viewer's
   teammate id and the pins). A teammate whose `TeammateSettings.ShareWeather` is false gets a
   null weather and the `WeatherState` `NotShared`. When the weather source fails or times out
   the weather is null, the `WeatherState` is `Unavailable` and the pin is still returned
   (L2-049). The weather source receives a position and nothing else.
-- **`PinDto`** — teammate id, name, colour, city name, country, position, time zone id,
-  weather or null, the weather's state (`WeatherState`: `Available`, `Unavailable` or
-  `NotShared`), whether the status is shown, whether the pin is the viewer's own
-  (`IsViewer`), and the moments. The position is the city's. The DTO has no postal code field
+- **`PinDto`** — `TeammateId`, `Name`, `Colour`, `CityName`, `Country`, `Position`,
+  `TimeZoneId`, `Weather` or null, `WeatherState` (`Available`, `Unavailable` or
+  `NotShared`), `ShowsStatusOutsideWorkingHours`, whether the pin is the viewer's own
+  (`IsViewer`), and `Moments`, a list of `MomentDto` (`moments/find-moments`). The position is the city's. The DTO has no postal code field
   and no local time: the browser works the time out from the time zone id.
 - **`CachedWeatherSource`** — `IWeatherSource` decorator over `OpenMeteoWeatherSource`, with a
   timeout and a circuit breaker.
@@ -60,19 +61,21 @@ decides how they are drawn.
 
 **In the `api` library**
 
-- **`Pin`** — the browser's type for a `PinDto`.
+- **`Pin`** — the browser's type for a `PinDto`, with the same fields in camel case
+  (`cityName`, `weatherState`, `isViewer`, `moments` and so on).
 - **`PinPlacement`** — a `kind` (`'pin'` or `'group'`), the `position` it is anchored to, the
   `pins` it stands for (one for a pin, two or more for a group), and an offset in CSS px from
   the projected position (`offsetX`, `offsetY`).
 - **`PinSpreader`** / `PIN_SPREADER` — contract and token for the function that turns pins into
   placements. The `globe` library depends on `api` only, so it reaches `spreadPins` through
   this token.
-- **`TeamApi`** / `TEAM_API`, **`HttpTeamApi`** — read the pins.
+- **`TeamApi`** / `TEAM_API`, **`HttpTeamApi`** — `getPins(teamId, signal)` reads the pins as
+  a `TeamPins`, the browser's type for a `TeamPinsDto`.
 
 **In the `domain` library**
 
-- **`TeamStore`** — holds the pins and the selected teammate id as signals and reads the pins
-  again every 15 minutes (L2-048).
+- **`TeamStore`** (`pins/`) — holds `pins` and `selectedTeammateId` as signals and reads the pins
+  again every 15 minutes (L2-048); `team/keep-team-fresh` lists what else it holds.
 - **`spreadPins(pins, globeSize)`** — pure function. It gathers pins whose cities are closer
   together than one pin's width at the given globe size. A cluster that fits is fanned: each
   pin gets its own placement, offset around the shared position. A cluster with more pins than
@@ -87,7 +90,9 @@ decides how they are drawn.
 **In the `globe` library**
 
 - **`GlobeView`** (`mo-globe`) — takes `pins`, `descriptions`, `selectedId` and `interactive`, and emits
-  `select` with a teammate id or null and `selectGroup` with a group pin's teammate ids. It measures its own width with a `ResizeObserver`,
+  `select` with a teammate id or null and `selectGroup` with a group pin's teammate ids. Its
+  other inputs and outputs (`markers`, `label`, `arrivedIds`, `arrivedShown`) are listed in
+  `draw-globe`; it hands `markers` and `arrivedIds` on to `PinLayer`. It measures its own width with a `ResizeObserver`,
   computes `placements` by calling `PIN_SPREADER` with the pins and that width, and passes
   them to `PinLayer`. It sets `compact` when the globe is less than 400 px wide.
 - **`PinLayer`** — component that draws the pins as HTML elements over the scene's canvas.
@@ -222,7 +227,8 @@ In the web app, `GlobePage` gives the pins from `TeamStore` to `GlobeView`, whic
 
 ### Behaviour — read the team's pins
 
-The handler answers 404 to anyone who is not a teammate of the team. Otherwise it builds a
+`TeamScopeBehaviour` answers 404, `team_not_found`, to anyone who is not a teammate of the
+team. Otherwise the handler builds a
 `PinDto` for each teammate with the city's position and no postal code. A weather that is not
 shared, or that Open-Meteo did not give in time, is null, with the `WeatherState` saying
 which, and the pin is returned all the same.
@@ -232,7 +238,7 @@ which, and the pin is returned all the same.
 ### Behaviour — lift a pin
 
 The pointer lifts a pin in `PinLayer`. Keyboard focus on the pin's button lifts it the same
-way. A tap, or Enter or Space, selects it; the selection travels to `TeamStore`
+way. A tap, or Enter or Space, selects it; the selection travels through the address to `TeamStore`
 and returns as an input, and the pin stays lifted until the selection is cleared.
 
 ![Sequence diagram for lifting a pin on hover, focus or tap](diagrams/sequence-lift-pin.png)

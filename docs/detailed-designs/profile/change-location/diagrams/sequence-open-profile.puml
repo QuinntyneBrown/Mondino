@@ -40,9 +40,9 @@ controller -> controller : TeammateSessionHandler authenticates the session cook
 controller -> handler : Send GetProfileQuery
 handler -> db : Load the teammate ICurrentTeammate names
 db --> handler : Teammate with PostalCode, City, Settings
-alt teamId is not the teammate's own team
-  handler --> controller : Not found
-  controller --> client : 404 ProblemDetails
+alt teamId is not the teammate's own team (TeamScopeBehaviour, before the handler)
+  handler --> controller : team_not_found
+  controller --> client : 404 ProblemDetails, code team_not_found
 else own team
   handler -> weather : Weather at City.Position
   weather --> handler : Weather, or none when the source fails

@@ -31,8 +31,10 @@ class TeamStore {
   +selectedTeammateId: Signal<string | null>
   +counts: Signal<TeamCounts>
   -pending: AbortController | null
+  +load(teamId: string): Promise<void>
   +refresh(): Promise<void>
-  +select(teammateId: string | null): void
+  +select(teammateId: string): boolean
+  +clearSelection(): void
   +ngOnDestroy(): void
 }
 
@@ -81,7 +83,7 @@ class TeamTable <<mo-team-table>> {
 }
 
 class MomentList <<mo-moment-list>> {
-  +moments: InputSignal<Moment[]>
+  +groups: InputSignal<MomentGroups>
   rows rendered through cdkVirtualFor
 }
 

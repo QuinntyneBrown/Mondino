@@ -58,8 +58,13 @@ class PostalCodeField <<mo-postal-code-field>> {
   +value: string
   +country: Country
   +lookupState: LookupState
+  +message: LookupMessage | null
+  +invalid: boolean
   +valueChange: string
   +blurred: void
+  +retry: void
+  message in a polite live region, or role=alert
+  invalid sets aria-invalid
 }
 
 MotionPreference <|.. BrowserMotionPreference

@@ -30,9 +30,11 @@ each source is `<TO SUPPLY>`.
 
 - **`TeamsController`** — ASP.NET Core controller. `GET /api/teams/{teamId}/moments` sends one
   `GetMomentsQuery` and checks nothing itself.
-- **`GetMomentsQuery`** — request carrying the `TeamId`.
-- **`GetMomentsQueryHandler`** — MediatR handler. It loads the team through `IAppDbContext`,
-  confirms through `ICurrentTeammate` that the caller is a teammate of that team, and collects
+- **`GetMomentsQuery`** — request carrying the `TeamId`. It is an `ITeamScopedRequest`: for a
+  team that is not the current teammate's own, `TeamScopeBehaviour` answers 404 with the code
+  `team_not_found` before the handler runs (`platform/protect-team-data`).
+- **`GetMomentsQueryHandler`** — MediatR handler. It loads the team of the teammate named by
+  `ICurrentTeammate` through `IAppDbContext` and collects
   the team's distinct cities. It calls `MomentFinder` once per city, not once per teammate. It
   then emits one `MomentDto` for each teammate a moment belongs to, so two teammates in one city
   each get their own entry. The result is in date order; the browser orders the moments of one
@@ -78,8 +80,10 @@ filtering. The form in which a source names a region, and how it is matched to `
 `<TO SUPPLY>`. The day of a race weekend that a Formula 1 moment's `Date` carries is
 `<TO SUPPLY>`.
 
-A calendar that times out, fails or has an open circuit yields no entries. `MomentFinder` then
-returns the moments of the remaining calendars, and the request succeeds. A source's title and
+For a calendar that times out, fails or has an open circuit, `CachedMomentCalendars` answers
+with the last entries it cached for that place, or with none when it holds none
+(L2-049, `platform/survive-source-failure`). `MomentFinder` returns those with the moments of
+the remaining calendars, and the request succeeds. A source's title and
 detail are data: the API sends them as plain strings, and no layer treats them as markup.
 
 ## Requirements
@@ -127,7 +131,7 @@ turns them into `MomentDto` values, and `CachedMomentCalendars` implements all t
 
 The handler loads the team and asks `MomentFinder` once per distinct city. `MomentFinder` reads
 the three calendars, keeps the entries that belong to the city under `L2-020`, and creates the
-moments. A source that does not answer in time yields no entries, and the other calendars'
-moments are still returned.
+moments. For a source that does not answer in time the last cached entries stand in, and the
+other calendars' moments are still returned.
 
 ![Sequence diagram for finding the moments of a team's cities](diagrams/sequence-find-moments.png)

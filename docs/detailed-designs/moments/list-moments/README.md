@@ -47,12 +47,21 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   (0 days), `thisWeek` (1 to 7 days) and `later` (8 to 90 days), each in date order and, on one
   date, west to east by teammate: the order `orderWestToEast` (`pins/`) gives the pins of
   `TeamStore`, the Team screen's order.
-- **`DatedMoment`** — a moment with its days ahead, its `when` label, and its teammate's first
+- **`DatedMoment`** — a moment with its days ahead, its `when` label, its `dateLabel` (the
+  weekday, day and month, "Fri 31 Oct"), and its teammate's first
   name, initials and colour. The first name is `firstName(name)` from `pins/`, the first word
   of the teammate's name; the initials and colour are those of the teammate's pin in
   `TeamStore`, found by the moment's teammate id.
-- **`whenLabel(daysAhead)`** — "Today", "Tomorrow" or "In 3 days". `MomentRow` shows it after
-  the kind ("Local event · In 4 days"), beside the weekday, day and month.
+- **`relativeLabel(daysAhead)`** — pure function in `moments/`: "Today", "Tomorrow" or "In 3
+  days", at any number of days ahead. It gives a `DatedMoment` its `when` label, which
+  `MomentRow` shows after the kind ("Local event · In 4 days", "Formula 1 · In 13 days"),
+  beside the `dateLabel`.
+- **`whenLabel(daysAhead, date)`** — pure function in `moments/`, the one helper that words
+  when a moment happens where no date stands beside it: `relativeLabel`'s words up to 7 days
+  ahead and the day and month ("12 Nov") beyond. The teammate panel's moment cards, the Team
+  table's "Coming up", the week panel and the moment marker use it; the rows of this screen
+  show the date themselves, so they keep the relative wording at every distance, as the mock
+  draws.
 - **`FilterChips`** — presentation component. It renders the five filters as buttons in a group
   labelled "Filter by kind": "Everything" by its name, and each kind with its `MomentIcon` and
   its name. The chosen filter carries `aria-pressed="true"` and is
@@ -62,7 +71,7 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   of a group with no moments. With no moment at all the page shows no filter and says "Nothing is coming up
   for your team", with a link back to the globe. With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
   team." It emits a chosen moment.
-- **`MomentRow`** — presentation component for one moment (`moment-row`): the date, kind icon
+- **`MomentRow`** — presentation component for one moment (`moment-row`): the `dateLabel`, kind icon
   and `when` label, title, detail, and the teammate's `Avatar` with their first name and city
   ("Jordan · Austin"). The prominent form (`today-moment`) is used for a moment today: "Today
   in" and its city, the kind ("Today in Dublin · Holiday"), the moment's emblem, title, detail and the teammate's first name, and "On the globe". Title, detail
@@ -77,8 +86,9 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
 
 A filter choice sends no request: it narrows the moments already loaded. The filter is not kept
 between visits. The response is bounded by the 90-day window, and the page replaces its moments
-on each load. How a long list is windowed in the page for a team of up to 500 teammates is
-`<TO SUPPLY>`.
+on each load. `MomentList` renders its rows through the Angular CDK virtual scroll viewport,
+as `TeamTable` does, so the number of rows in the page stays under a fixed limit for a team of
+up to 500 teammates (L2-047, `platform/stay-fast-and-light`).
 
 While the request is pending the page is marked busy and announces "Loading moments…". When it
 fails the page says "We couldn’t load moments", with "Try again", which asks again, and "Back

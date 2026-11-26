@@ -7,7 +7,7 @@ Container_Boundary(web, "Mondino web app") {
   Component(page, "MomentsPage", "Angular page, lazy route /moments", "Loads the moments, holds the chosen filter")
   Component(client, "HttpTeamApi", "api library, bound to TEAM_API", "Calls the moments endpoint")
   Component(group, "groupMoments", "domain moments/", "Sorts moments into today, this week and later")
-  Component(when, "whenLabel", "domain moments/", "Says Today, Tomorrow or In 3 days")
+  Component(when, "relativeLabel", "domain moments/", "Says Today, Tomorrow or In 3 days; whenLabel(daysAhead, date) builds on it")
   Component(chips, "FilterChips", "components library", "Everything and the four kinds, as pressed buttons")
   Component(list, "MomentList", "components library", "Shows the groups and the empty messages")
   Component(card, "MomentRow", "components library", "Shows one moment")

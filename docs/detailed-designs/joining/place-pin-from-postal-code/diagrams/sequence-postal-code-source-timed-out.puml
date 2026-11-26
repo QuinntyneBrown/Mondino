@@ -26,6 +26,7 @@ box "Backend — Mondino API" #D1FADF
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "LookUpPostalCodeQueryHandler" as handler
+  participant "PostalCodeResolver" as resolver
   participant "PostalCodeFormats" as formats
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
@@ -35,12 +36,13 @@ end box
 participant "Postal code source" as postal
 actor -> page : Leave the postal code field
 page -> store : lookUp()
-store -> client : lookUpPostalCode(inviteToken, countryCode, postalCode)
+store -> client : lookUpPostalCode(inviteToken, countryCode, postalCode, signal)
 client -> controller : POST /api/invites/{inviteToken}/postal-code-lookups
 controller -> handler : Send LookUpPostalCodeQuery
-handler -> formats : TryNormalise(countryCode, postalCode)
-formats --> handler : PostalCode
-handler -> lookup : FindCityAsync(postalCode)
+handler -> resolver : ResolveAsync(countryCode, postalCode)
+resolver -> formats : TryNormalise(countryCode, postalCode)
+formats --> resolver : PostalCode
+resolver -> lookup : FindCityAsync(postalCode)
 alt the circuit is closed
   lookup -> lookupClient : FindCityAsync(postalCode)
   lookupClient -> postal : Country and postal code only
@@ -50,12 +52,13 @@ alt the circuit is closed
 else the circuit is open
   lookup -> lookup : Do not call the source
 end
-lookup --> handler : Unavailable
+lookup --> resolver : Unavailable
+resolver --> handler : PostalCodeResolution: Unavailable
 handler --> controller : Refuse with postal_code_unavailable
 controller --> client : 503 ProblemDetails, code postal_code_unavailable
 client --> store : ApiError postal_code_unavailable
 store --> page : lookupState Unavailable, what was typed is kept
-page --> actor : "Could not be checked right now", offer to try again; not "wrong" (L2-004)
-actor -> page : Try again
+page --> actor : "We couldn’t check 20121 right now…", "Try again"; aria-invalid is not set (L2-004)
+actor -> page : Try again (PostalCodeField emits retry)
 page -> store : lookUp()
 @enduml

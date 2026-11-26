@@ -34,7 +34,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 actor -> page : Choose "Join Northwind"
 page -> store : join()
-store -> client : join(inviteToken, name, countryCode, postalCode, joinRequestId)
+store -> client : join(inviteToken, JoinRequest: name, countryCode, postalCode, joinRequestId)
 client -> controller : POST /api/invites/{inviteToken}/teammates
 controller -> handler : Send JoinTeamCommand
 handler -> db : Load the team by invite token, with its teammates

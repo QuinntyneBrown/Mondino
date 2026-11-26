@@ -39,14 +39,14 @@ else tap on a touch device (L2-012 AC4)
   layer --> view : select(teammate id)
 end
 view --> page : select(teammate id)
-page -> store : Set the selected teammate id
-store --> page : selectedId changed
+page -> store : Navigate to /globe?teammate={teammateId}; select(teammateId)
+store --> page : selectedTeammateId changed
 page -> view : selectedId input
 view -> layer : selectedId input
 layer --> actor : Pin stays lifted while selected (L2-012 AC5)
 actor -> view : Tap elsewhere on the globe
 view --> page : select(null)
-page -> store : Clear the selected teammate id
+page -> store : Navigate to /globe; clearSelection()
 page -> view : selectedId input = null
 layer --> actor : Pin settles back
 @enduml

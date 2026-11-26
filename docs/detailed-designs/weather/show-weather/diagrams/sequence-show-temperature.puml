@@ -19,7 +19,7 @@ actor "Teammate (viewer)" as actor
 box "Frontend — Mondino web app" #E0F2FE
   participant "GlobePage" as page
   participant "TeamStore" as store
-  participant "SettingsCache" as settings
+  participant "SettingsStore" as settings
   participant "formatTemperature,\nweatherLabel" as fns
   participant "isNightSky" as night
   participant "TeammatePanel" as panel

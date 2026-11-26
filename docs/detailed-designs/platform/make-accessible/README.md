@@ -72,11 +72,12 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   close together." (`view-teammate-panel`). `TeammatePanel` is not itself a live region.
 - **A minute tick is silent.** The descriptions and the panel update in place when the clock
   ticks. Neither is inside a live region, and `GlobePage` writes to its status element only on a change of selection.
-- **The postal code lookup is announced.** `PostalCodeField` renders its result inside a
-  polite live region and its error in an element with `role="alert"`, linked to the input
-  with `aria-describedby`; the input carries `aria-invalid` when the postal code is not
-  found, and not when the lookup is unavailable or rate limited, since nothing is wrong with
-  what was typed.
+- **The postal code lookup is announced.** `PostalCodeField` renders the `LookupMessage` it
+  is given (`message`) inside a polite live region while `lookupState` is `Locating` or
+  `Found`, and otherwise in an element with `role="alert"`, linked to the input with
+  `aria-describedby`. Its input `invalid` sets `aria-invalid`: the screen sets it for an empty
+  postal code on submit and when the postal code is not found, and not when the lookup is
+  unavailable or rate limited, since nothing is wrong with what was typed.
 
 **Colour, contrast and text size (L2-041).**
 

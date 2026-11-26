@@ -82,7 +82,8 @@ class ProfileDto {
   +PinDto Pin
   +string CountryCode
   +string PostalCode
-  +TeammateSettings Settings
+  +SettingsDto Settings
+  +IReadOnlyList<CountryDto> Countries
 }
 
 class GetPinsQuery {
@@ -93,12 +94,30 @@ class GetProfileQuery {
   +Guid TeamId
 }
 
+class LookUpOwnPostalCodeQuery {
+  +Guid TeamId
+  +string CountryCode
+  +string PostalCode
+}
+
+class LookUpOwnPostalCodeQueryHandler {
+  +Handle(query: LookUpOwnPostalCodeQuery): Task<PostalCodeResultDto>
+}
+
+class PostalCodeResolver {
+  +ResolveAsync(countryCode: string, postalCode: string, ct): Task<PostalCodeResolution>
+}
+
 ICurrentTeammate <|.. CurrentTeammate
 TeammateSessionHandler ..> CurrentTeammate : populates
 TeamScopeBehaviour ..> ICurrentTeammate : compares TeamId
 TeamScopeBehaviour ..> ITeamScopedRequest : applies to
 ITeamScopedRequest <|.. GetPinsQuery
 ITeamScopedRequest <|.. GetProfileQuery
+ITeamScopedRequest <|.. LookUpOwnPostalCodeQuery
+LookUpOwnPostalCodeQueryHandler ..> LookUpOwnPostalCodeQuery : handles, under team scope
+LookUpOwnPostalCodeQueryHandler ..> ICurrentTeammate : whose team
+LookUpOwnPostalCodeQueryHandler ..> PostalCodeResolver : resolves the city
 TeamScopeBehaviour ..> ProblemDetailsWriter : team_not_found
 ValidationBehaviour ..> JoinTeamCommandValidator : runs
 ValidationBehaviour ..> ProblemDetailsWriter : validation_failed

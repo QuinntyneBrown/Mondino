@@ -33,7 +33,7 @@ page -> store : select(teammateId)
 alt the id is a pin of this team
   store --> page : selectedPin, viewerPin
   page -> view : teammatePanelView(pin, viewerPin, clock.now(), settings)
-  view -> view : localTime, statusFor, offsetBetween, overlapBetween
+  view -> view : localTime, statusFor, offsetBetween, overlapBetween,\nwhenLabel(daysAhead, date) for each moment
   view --> page : TeammatePanelContent (no offset or overlap for the viewer's own pin)
   page -> panel : content, fade of at most 200 ms (none under reduced motion)
   page -> globe : selectedId; the globe turns to the pin and holds

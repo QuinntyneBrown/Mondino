@@ -51,8 +51,12 @@ package "globe library" {
     +descriptions: InputSignal<Map<string, string>>
     +selectedId: InputSignal<string | null>
     +interactive: InputSignal<boolean>
+    +markers: InputSignal<Map<string, MomentMarker>>
+    +label: InputSignal<string>
+    +arrivedIds: InputSignal<string[]>
     +select: OutputEmitterRef<string | null>
     +selectGroup: OutputEmitterRef<string[]>
+    +arrivedShown: OutputEmitterRef<void>
     +placements: Signal<PinPlacement[]>
     +globeSize: Signal<number>
   }
@@ -60,6 +64,8 @@ package "globe library" {
     +placements: InputSignal<PinPlacement[]>
     +descriptions: InputSignal<Map<string, string>>
     +selectedId: InputSignal<string | null>
+    +markers: InputSignal<Map<string, MomentMarker>>
+    +arrivedIds: InputSignal<string[]>
     +compact: InputSignal<boolean>
     +select: OutputEmitterRef<string | null>
     +selectGroup: OutputEmitterRef<string[]>

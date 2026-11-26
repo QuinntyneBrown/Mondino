@@ -54,16 +54,25 @@ package "Frontend" {
     +value: string
     +country: Country
     +lookupState: LookupState
-    +message: LookupMessage
+    +message: LookupMessage | null
+    +invalid: boolean
     +valueChange: string
     +blurred: void
     +retry: void
   }
   class LookupMessage {
     +text: string
-    +retryLabel: string
+    +retryLabel: string | null
   }
-  class profileLookupMessage << (F,#D1E9FF) function >>
+  class Country {
+    +code: string
+    +name: string
+    +postalCodeForm: string
+    +postalCodeExample: string
+  }
+  class profileLookupMessage << (F,#D1E9FF) function >> {
+    +(lookupState: LookupState, postalCode: string, country: Country, savedCity: string): LookupMessage | null
+  }
 }
 
 package "Backend" {
@@ -104,6 +113,14 @@ package "Backend" {
     +Guid TeammateId
     +Guid TeamId
   }
+  class PostalCodeResolver {
+    +ResolveAsync(countryCode: string, postalCode: string, ct): Task<PostalCodeResolution>
+  }
+  class PostalCodeResolution {
+    +PostalCodeLookupStatus Status
+    +PostalCode? PostalCode
+    +City? City
+  }
   interface IPostalCodeLookup {
     +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
   }
@@ -117,7 +134,7 @@ package "Backend" {
     Unavailable
   }
   class PostalCodeFormats {
-    +Supported: IReadOnlyList<PostalCodeFormat>
+    +IReadOnlyList<PostalCodeFormat> Supported
     +TryNormalise(countryCode: string, value: string, out postalCode: PostalCode): bool
   }
   class Teammate {
@@ -151,7 +168,9 @@ ProfileApi <|.. HttpProfileApi
 ProfileStore --> Profile : saved
 ProfileStore --> ProfileUpdate : draft
 ProfileStore --> LookupState : has
-ProfilePage --> PostalCodeField : value, country, lookupState, message
+ProfilePage --> PostalCodeField : value, country, lookupState, message, invalid
+PostalCodeField ..> Country : the chosen country
+Profile --> Country : countries
 ProfilePage ..> profileLookupMessage : this screen's copy
 profileLookupMessage ..> LookupMessage : builds
 PostalCodeField ..> LookupMessage : renders
@@ -169,11 +188,13 @@ GetProfileQueryHandler ..> PostalCodeFormats : Countries
 ProfileController ..> UpdateProfileCommandHandler : UpdateProfileCommand
 UpdateProfileCommandHandler ..> UpdateProfileCommand : handles
 UpdateProfileCommandHandler ..> ICurrentTeammate : whose pin
-UpdateProfileCommandHandler ..> IPostalCodeLookup : finds the city
-UpdateProfileCommandHandler ..> PostalCodeFormats : normalises
+UpdateProfileCommandHandler ..> PostalCodeResolver : resolves the city
+PostalCodeResolver ..> PostalCodeFormats : normalises with
+PostalCodeResolver ..> IPostalCodeLookup : finds the city
+PostalCodeResolver ..> PostalCodeResolution : returns
+PostalCodeResolution --> PostalCodeLookupStatus
 UpdateProfileCommandHandler --> Teammate : loads / moves
-LookUpOwnPostalCodeQueryHandler ..> PostalCodeFormats : checks the form
-LookUpOwnPostalCodeQueryHandler ..> IPostalCodeLookup : finds the city
+LookUpOwnPostalCodeQueryHandler ..> PostalCodeResolver : resolves the city
 GetProfileQueryHandler ..> ICurrentTeammate : whose profile
 Teammate *-- PostalCode
 Teammate *-- City

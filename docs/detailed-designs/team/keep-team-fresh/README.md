@@ -27,8 +27,14 @@ The slice runs from the `TeamStore` in the browser to the Mondino database and O
 
 Frontend:
 
-- **`TeamStore`** — signal store in `domain`'s `pins/`, provided at the route that holds the
+- **`TeamStore`** — signal store in `domain`'s `pins/`, provided by `TeamShell` at the route that holds the
   Globe, Team, Moments and Profile & Settings screens. It injects `TEAM_API` and `CLOCK`.
+  Its signals are `pins`, `teamName`, `inviteToken`, `viewerTeammateId`, `selectedTeammateId`,
+  `counts`, `arrivedTeammateIds`, `loadState`, `refreshFailed` and `refreshedAt`, and the
+  derived `viewerPin` and `selectedPin`. Its methods are `load(teamId)`, `refresh()`,
+  `select(teammateId)`, `clearSelection()` and `acknowledgeArrived()`. The selection is
+  designed in `view-teammate-panel` and `counts` in `view-week-around-the-world`; the team's
+  moments are not held here but read by `MomentsPage` (`moments/list-moments`).
   `load(teamId)` reads the pins once when the route opens. An effect on the clock's minute tick
   calls `refreshIfDue(now)`, which calls `refresh()` when `RefreshIntervalMinutes` (15) or more
   have passed since `refreshedAt` and no request is pending (L2-048). The store has no
@@ -81,9 +87,10 @@ Backend:
 - **`TeamsController`** — `GET /api/teams/{teamId}/pins`. It checks nothing itself and sends one
   `GetPinsQuery`. `TeammateSessionHandler` authenticates the session cookie before the
   controller runs.
-- **`GetPinsQueryHandler`** — MediatR handler. It reads `ICurrentTeammate`, loads the `Team`
-  and its `Teammate` entities through `IAppDbContext`, and refuses when the session's teammate
-  does not belong to the team. It reads the weather once for each distinct `City` through
+- **`GetPinsQueryHandler`** — MediatR handler. It reads `ICurrentTeammate` and loads the `Team`
+  and its `Teammate` entities through `IAppDbContext`. `GetPinsQuery` is an
+  `ITeamScopedRequest`, so `TeamScopeBehaviour` has already answered 404, `team_not_found`,
+  when the session's teammate does not belong to the team (`platform/protect-team-data`). It reads the weather once for each distinct `City` through
   `IWeatherSource`, finds each city's moments through `MomentFinder`, and returns a
   `TeamPinsDto`. A `PinDto` carries a null `Weather` when the teammate does not share it or the
   source fails, and its `WeatherState` (`Available`, `Unavailable` or `NotShared`) says which;
