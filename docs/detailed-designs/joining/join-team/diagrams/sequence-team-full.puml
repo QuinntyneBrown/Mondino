@@ -46,5 +46,5 @@ controller -> problems : Write the refusal
 problems --> client : 409 ProblemDetails, code team_full
 client --> store : ApiError team_full
 store --> page : joinState TeamFull, what was typed is kept
-page --> actor : Say the team is full (L2-005)
+page --> actor : Say the team is full, button disabled (L2-005)
 @enduml

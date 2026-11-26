@@ -37,9 +37,12 @@ screen.
   state, never in the URL. `GlobePage` selects that pin and pulses it once.
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one
   `joinRequestId`, made with `crypto.randomUUID()` when the store is created.
-  - `join()` sets `Joining`, which disables the button, and calls `InviteApi.join`.
+  - `join()` sets `Joining` and calls `InviteApi.join`. While `Joining`, the button reads
+    "Joining" and the team's name with an ellipsis ("Joining Northwind…") and is disabled, the
+    name and postal code are read-only and the country cannot be changed.
   - A failure sets `TeamFull`, `RateLimited` or `Failed` by the `code` of the `ApiError`. The
     signals `name`, `countryCode` and `postalCode` and the found city are left as they are.
+    `TeamFull` keeps the button disabled; `Failed` and `RateLimited` enable it again.
   - A retry sends the same `joinRequestId`, so a join whose response was lost does not make a
     second pin.
 - **`JoinState`** — feature-local union of `Idle`, `Joining`, `TeamFull`, `RateLimited` and
@@ -93,13 +96,14 @@ screen.
 
 | Case | Status | `code` | The screen says |
 |------|--------|--------|-----------------|
-| Team has 500 teammates | 409 | `team_full` | The team is full |
+| Team has 500 teammates | 409 | `team_full` | The team is full and holds up to 500 teammates; the button is disabled |
 | Over 5 join requests a minute | 429 | `rate_limited` | Wait a moment and try again |
 | Invalid name, country or postal code | 400 | `validation_failed` | A generic message, try again |
 | Unknown invite token | 404 | `invite_not_found` | The invite link cannot be used |
 | Network failure or any other error | — | — | Joining did not work; try again |
 
-In each case the person stays on the Join screen and what they typed is kept.
+In each case the person stays on the Join screen. What they typed is kept, except for an unknown
+invite token, which replaces the form with the message.
 
 **Open points**
 
@@ -174,6 +178,7 @@ one pin (`L2-005`).
 ### Behaviour — joining a team that is full
 
 `Team.AddTeammate` refuses when the team has 500 teammates. Nothing is saved, the Mondino API
-answers 409 with the code `team_full`, and the screen says the team is full (`L2-005`).
+answers 409 with the code `team_full`, and the screen says the team is full and disables the
+button (`L2-005`).
 
 ![Sequence diagram for joining a team that is full](diagrams/sequence-team-full.png)

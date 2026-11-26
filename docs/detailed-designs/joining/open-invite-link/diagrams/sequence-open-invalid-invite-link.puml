@@ -52,4 +52,8 @@ else within the limit
   store --> page : inviteState NotFound
   page --> actor : Say the invite link cannot be used; no team name, count or pins (L2-001)
 end
+note over page, client
+  When the request gets no answer, JoinStore sets inviteState Failed and JoinPage says
+  the invite link could not be opened and offers "Try again", which calls open() again (L2-001).
+end note
 @enduml

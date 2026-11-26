@@ -5,8 +5,8 @@ title Containers — Open an invite link
 
 Person(person, "Person with an invite link", "Not yet a teammate")
 System_Boundary(mondino, "Mondino") {
-  Container(web, "Mondino web app", "Angular", "Join screen: team name, count and a globe of bare pins")
-  Container(api, "Mondino API", "ASP.NET Core", "Answers an invite token with the team's name, count and bare positions")
+  Container(web, "Mondino web app", "Angular", "Join screen: team name, count, avatars and a globe of bare pins")
+  Container(api, "Mondino API", "ASP.NET Core", "Answers an invite token with the team's name, count, bare positions and up to five avatars")
   ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams, invite tokens and teammates")
 }
 Rel(person, web, "Opens /join/:inviteToken", "HTTPS")

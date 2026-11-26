@@ -6,7 +6,8 @@ Mondino shows a team on a 3D globe, each teammate as a pin at their city. A pers
 opened a team's invite link puts themselves on the globe through the Join form. The form has
 exactly three fields: "Your name", "Country" and "Postal code". It asks for no street address,
 e-mail address or phone number, and the text "Only your city is shown. Your postal code stays
-private." sits beside it.
+private." sits under the postal code field. Under the form the screen names its sources:
+"Weather from Open-Meteo · Holidays from public calendars".
 
 **postal code lookup** — resolution of a country and a postal code to the city that postal code lies in
 
@@ -16,8 +17,10 @@ private." sits beside it.
 
 This feature covers the form and the lookup. The postal code is looked up when the person leaves
 the field or submits the form. While the lookup runs, the screen shows "Finding 20121…" and the
-button is disabled. When the city is found, the screen names the city and region and the weather
-there, the globe turns to the city, a pin labelled "You" appears, and the button changes from
+button reads "Placing your pin…" and is disabled. When the city is found, the screen names the
+city and region and the weather there ("Milan, Lombardy — pinned at city level. 13° and foggy
+right now."), the globe turns to the city, a pin labelled "You" appears and pulses once (not
+under reduced motion), and the button changes from
 "Place my pin" to "Join" and the team's name.
 
 A postal code in the wrong form, or one the postal code source does not know, is refused with an
@@ -43,7 +46,8 @@ source and Open-Meteo. The browser calls only the Mondino API.
   a phone. It lists `Invite.countries` in the Country field in alphabetical order. It passes the
   found city to `GlobeView` as the selected pin labelled "You".
 - **`JoinStore`** — route-scoped service. It holds the writable signals `name`, `countryCode`
-  and `postalCode`, and the signals `lookupState`, `found` and `nameProblem`.
+  and `postalCode`, and the signals `lookupState`, `found`, `nameProblem` and
+  `postalCodeMissing`.
   - `lookUp()` sets `Finding`, calls `InviteApi.lookUpPostalCode`, and maps the answer or the
     `ApiError` code to a `LookupState`. One lookup runs at a time: a new lookup aborts the
     pending one through its `AbortController`.
@@ -52,13 +56,18 @@ source and Open-Meteo. The browser calls only the Mondino API.
     so the button reads "Place my pin" again.
   - `nameProblem` reports a name that is empty, only spaces, or longer than 60 characters. A
     submit with a name problem places no pin and marks the name field `aria-invalid`.
-  - A submit with no found city runs `lookUp()` first.
+  - `postalCodeMissing` reports an empty postal code. A submit with it makes no lookup, marks
+    the postal code field `aria-invalid` and shows "Enter your postal code."
+  - A submit with either problem makes `JoinPage` show a summary alert above the fields
+    ("Two things are missing") that links to each field and takes focus.
+  - A submit with no problem and no found city runs `lookUp()` first.
 - **`LookupState`** — feature-local union of `Idle`, `Finding`, `Found`, `NotFound`,
   `Unavailable` and `RateLimited`.
 - **`PostalCodeField`** — presentation component. It takes the value, the `LookupState` and the
   chosen `Country`, and emits `valueChange`, `left` and `retry`. It shows "Finding 20121…" in a
-  status region, the not-found message in an alert region with `aria-invalid` on the input, and
-  the "try again" action for `Unavailable`. It renders the postal code and the country's form as
+  status region, the found city, region and weather in the same region, the not-found message
+  in an alert region with `aria-invalid` on the input, and the "Try again" action for
+  `Unavailable`. It renders the postal code and the country's form as
   text.
 - **`InviteApi.lookUpPostalCode(inviteToken, countryCode, postalCode, signal)`** — sends
   `POST /api/invites/{inviteToken}/postal-code-lookups` with the country and postal code in the
@@ -100,9 +109,9 @@ source and Open-Meteo. The browser calls only the Mondino API.
   belongs to no city. The `City.Position` is the city's own position, the same for every postal
   code in that city, and never the position of the postal code.
 - **`CachedPostalCodeLookup`** — decorator over `PostalCodeLookupClient`. It caches `Found` and
-  `NotFound` outcomes by normalised postal code, applies a timeout, and opens a circuit breaker
-  after repeated failures. It does not cache `Unavailable`. The timeout, the cache lifetimes and
-  the breaker thresholds are `<TO SUPPLY>`.
+  `NotFound` outcomes by normalised postal code, applies the 5 s timeout of L2-049, and opens a
+  circuit breaker after repeated failures. It does not cache `Unavailable`. The cache lifetimes
+  and the breaker thresholds are `<TO SUPPLY>`.
 - **`PostalCodeLookupClient`** — calls the Postal code source and maps its answer to a `City`
   with its IANA `TimeZoneId`. The provider is `<TO SUPPLY>`, and so is the means by which the
   city's own position is obtained from that provider.
@@ -121,7 +130,8 @@ source and Open-Meteo. The browser calls only the Mondino API.
 | Unsupported country or over 12 characters | 400 | `validation_failed` | A generic message |
 | Unknown invite token | 404 | `invite_not_found` | The invite link cannot be used |
 
-In each case what the person typed is kept.
+In each case but the last, what the person typed is kept; an unknown invite token replaces the
+form with the message.
 
 **What leaves the backend.** The Postal code source receives a country and a postal code.
 Open-Meteo receives a position. Neither receives a name, a team or an invite token. No log,

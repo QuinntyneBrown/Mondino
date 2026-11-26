@@ -21,6 +21,7 @@ package "mondino application" {
     +lookupState: Signal<LookupState>
     +found: Signal<PostalCodeResult | null>
     +nameProblem: Signal<NameProblem | null>
+    +postalCodeMissing: Signal<boolean>
     +lookUp(): void
     +clearFound(): void
   }

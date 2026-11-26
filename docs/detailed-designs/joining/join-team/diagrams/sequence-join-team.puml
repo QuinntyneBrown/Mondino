@@ -35,7 +35,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 actor -> page : Choose "Join Northwind"
 page -> store : join()
-store --> page : joinState Joining, button disabled
+store --> page : joinState Joining, button "Joining Northwind…" disabled
 store -> client : join(inviteToken, name, countryCode, postalCode, joinRequestId)
 client -> controller : POST /api/invites/{inviteToken}/teammates
 controller -> controller : Apply the join rate limit policy
