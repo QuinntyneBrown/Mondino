@@ -17,7 +17,7 @@
    ========================================================================== */
 
 /* ---------- Component tokens: scoped to one component, always an alias ------ */
-:root {
+:root, [data-theme] {
   --btn-bg: transparent;
   --btn-fg: var(--color-fg-default);
   --btn-border: var(--color-border-strong);
