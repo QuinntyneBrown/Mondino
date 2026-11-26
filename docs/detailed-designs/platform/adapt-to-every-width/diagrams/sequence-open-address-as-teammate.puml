@@ -35,7 +35,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
   database "Mondino database" as db
 end box
 actor -> router : Open or reload /team (L2-038)
-router -> guard : canActivate for the guarded parent route
+router -> guard : canMatch for the guarded parent route
 guard -> membership : current()
 membership --> guard : Membership for this device
 guard --> router : true

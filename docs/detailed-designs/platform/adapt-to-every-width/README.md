@@ -18,7 +18,8 @@ The terms used below:
 
 A teammate reaches Globe, Team, Moments and Profile & Settings from every screen after joining.
 A person who is not a teammate of any team on the device and opens one of those addresses is
-shown that an invite link is needed, and no team's data. The backend, not the browser, decides
+shown, at that address, that an invite link is needed, and no team's data. An address that
+belongs to no screen says so. The backend, not the browser, decides
 who is a teammate; the browser's check is a convenience that saves a request
 (`protect-team-data`, L2-043).
 
@@ -42,19 +43,22 @@ with `loadComponent`, so each screen is its own chunk.
 | `/moments` | `MomentsPage` | yes |
 | `/profile` | `ProfilePage` | yes |
 | `/left` | `LeftPage` | no |
-| `/invite-needed` | `InviteNeededPage` | no |
+| `**` | `NotFoundPage` | no |
 
 The four teammate screens are children of one pathless parent route. The parent carries
-`canActivate: [teammateGuard]` and provides `TeamStore`, so the team's pins are shared by the
-four screens and released when the teammate leaves them. The empty address redirects to
-`/globe`. The router uses path addresses, so an address that is opened directly or reloaded
+`canMatch: [teammateGuard]` and provides `TeamStore`, so the team's pins are shared by the
+four screens and released when the teammate leaves them. A second pathless parent follows it
+with the same four addresses, each loading `InviteNeededPage`; the router falls through to it
+when the guard refuses the first, so the address stays as it was opened. The empty address
+redirects to `/globe`. The router uses path addresses, so an address that is opened directly or reloaded
 shows its screen and the browser's back button returns to the previous screen (L2-038). The
 host that serves the app shall answer each of these addresses with the app's `index.html`; the
 hosting platform is `<TO SUPPLY>`.
 
-**`teammateGuard`** — `CanActivateFn` in the `mondino` application. It reads
-`TeamMembership.current()`. With a membership it returns `true`. Without one it returns a
-`UrlTree` for `/invite-needed`, and no request is sent to the `Mondino API`.
+**`teammateGuard`** — `CanMatchFn` in the `mondino` application. It reads
+`TeamMembership.current()`. With a membership it returns `true`. Without one it returns
+`false`, the same address shows `InviteNeededPage`, and no request is sent to the
+`Mondino API`.
 
 **`TeamMembership`** — service in `domain`'s `storage/`. It holds a `Membership` (`teamId`,
 `teammateId`, `teamName`) in the browser's local storage and exposes it as the signal
@@ -64,31 +68,41 @@ cookie that scripts cannot read (L2-043). How a teammate signs in again on anoth
 `<TO SUPPLY>`.
 
 **`sessionExpiredInterceptor`** — `HttpInterceptorFn` bound in `app.config.ts`. When the
-`Mondino API` answers 401, it calls `TeamMembership.forget()` and navigates to
-`/invite-needed`. A membership that outlives its session therefore leads to the same screen as
-no membership.
+`Mondino API` answers 401, it calls `TeamMembership.forget()` and navigates to the current
+address again, which now shows `InviteNeededPage`. A membership that outlives its session
+therefore leads to the same screen as no membership.
 
-**`InviteNeededPage`** — lazy route component. It says that an invite link is needed to see a
-team. It reads no API and shows no team's name or data.
+**`InviteNeededPage`** — lazy route component. It says "You need an invite link" and that a
+teammate can give their team's. It reads no API and shows no team's name or data.
+
+**`NotFoundPage`** — lazy route component for an address that belongs to no screen. It says
+"This page isn’t on the map" and links back to the globe. It reads no API.
 
 **`App`** — root component of the `mondino` application. It renders `mo-app-shell` and the
-router outlet. It holds the four `NavItem`s (Globe, Team, Moments, Profile & Settings) and
-projects one link per item into the shell's `nav` slot. Each link is an anchor with
-`routerLink` and `ariaCurrentWhenActive="page"`, so the current screen carries
-`aria-current="page"`. `App` sets `showNavigation` from `TeamMembership.current()`, so the Join
-screen, `LeftPage` and `InviteNeededPage` show the header without navigation.
+router outlet. It holds the three `NavItem`s (Globe, Team, Moments) and projects one link per
+item into the shell's `nav` slot, and it projects the link to Profile & Settings, the viewer's
+avatar with the accessible name "Profile & Settings", into the shell's `me` slot. Each link is
+an anchor with `routerLink` and `ariaCurrentWhenActive="page"`, so the current screen carries
+`aria-current="page"`. `App` sets `showNavigation` from `TeamMembership.current()` and the
+route's data: `LeftPage` and `InviteNeededPage` show the header without navigation, and the
+Join screen shows no header and carries the mark and wordmark at the top of its form. Where
+`App` reads the viewer's initials and colour for the avatar is `<TO SUPPLY>`: `Membership`
+holds neither, and `TeamStore` is provided below `App`. The header's "Invite teammate" button,
+which the mocks draw from 768 px, is not built until what it leads to is designed.
 
-**`AppShell`** (`mo-app-shell`) — presentation component in `components`. It renders the
-header with `Wordmark`, the `nav` slot inside a `nav` landmark, and the default slot inside
-`main`. It injects no router and no service. Its stylesheet places the navigation by
-breakpoint: under 576 px the navigation is a bar within reach of a thumb, and each target is at
-least 44 × 44 px; from 576 px it sits in the header. The placement at each width is drawn in
-`docs/mocks/`.
+**`AppShell`** (`mo-app-shell`) — presentation component in `components`; its block is
+`app-header`. It renders the skip link, the header with `Wordmark`, the `nav` slot inside a
+`nav` landmark named "Primary", the `me` slot at the header's end, and the default slot inside
+`main`. It injects no router and no service. The navigation sits in the header at every width,
+and each target is at least 44 × 44 px; under 360 px the header's gaps and the options' padding
+tighten, so the three options and the avatar fit at 320 px. With navigation the mark and
+wordmark link to the Globe; without it they are not a link.
 
 **`Wordmark`** (`mo-wordmark`) — presentation component in `components`. It renders the mark
-and the lowercase wordmark "mondino" in Gabarito. Its own stylesheet hides the word under
-576 px, so the header on a phone shows the mark alone. The input `markOnly` shows the mark
-alone at every width.
+and the lowercase wordmark "mondino" in Gabarito. With the input `collapses` set, as in the
+header with navigation, its own stylesheet hides the word under 576 px, so that header on a
+phone shows the mark alone. Without it, as in the header without navigation and on the Join
+screen, the word shows at every width.
 
 **Layouts.** Each screen's layout is decided by CSS in that component's own stylesheet, written
 for one column first and extended with `min-width` media queries at the breakpoints. The
@@ -99,9 +113,9 @@ upright to sideways keeps the selected pin, any filter and anything typed (L2-03
 
 | Screen | Under the breakpoint | From the breakpoint |
 |--------|----------------------|---------------------|
-| Join | under 576 px: form above the globe, one column | 992 px: form beside the globe |
-| Globe | under 992 px: heading, globe, then panel, one scrolling column | 992 px: panel to the right of the globe, scrolling on its own |
-| Team | under 768 px: name, local time with city and offset, next moment | 768 px: `TeamTable` with all its columns |
+| Join | under 992 px: form above the globe, one column | 992 px: form beside the globe |
+| Globe | under 992 px: globe, then panel, one scrolling column; the heading is above the globe under 576 px and over its top corner from 576 px | 992 px: panel to the right of the globe, scrolling on its own |
+| Team | under 768 px: name, status, local time with city and offset, next moment | 768 px: `TeamTable` with all its columns |
 | Profile & Settings | under 992 px: the pin's card above the settings | 992 px: the pin's card beside the settings, kept in view |
 
 From 1200 px, text columns are capped in width and centred, and the Globe screen's globe grows
@@ -138,7 +152,7 @@ session only.
 
 ### Components
 
-`app.routes.ts` runs `teammateGuard` before a teammate screen and loads the screen's chunk.
+`app.routes.ts` runs `teammateGuard` to match a teammate screen and loads the screen's chunk.
 `App` renders `AppShell` with the navigation links. `teammateGuard`, `App` and
 `sessionExpiredInterceptor` all read or clear `TeamMembership`.
 
@@ -146,7 +160,7 @@ session only.
 
 ### Class structure
 
-`App` composes four `NavItem`s and renders `AppShell`, which shows `Wordmark` and is styled by
+`App` composes three `NavItem`s and renders `AppShell`, which shows `Wordmark` and is styled by
 the breakpoints. `teammateGuard` and `sessionExpiredInterceptor` depend on `TeamMembership`,
 which holds one `Membership`.
 
@@ -163,8 +177,8 @@ reads its pins with the session cookie and shows them in the layout for the curr
 
 ### Behaviour — open a screen's address as a non-teammate
 
-With no membership on the device, `teammateGuard` redirects to `InviteNeededPage` and no
-request reaches the `Mondino API` (L2-038). With a membership whose session is no longer valid,
+With no membership on the device, `teammateGuard` refuses the match, the same address shows
+`InviteNeededPage` and no request reaches the `Mondino API` (L2-038). With a membership whose session is no longer valid,
 the API answers 401 with no team data (L2-043), and `sessionExpiredInterceptor` forgets the
 membership and shows the same screen.
 
