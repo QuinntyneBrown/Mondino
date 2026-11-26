@@ -1,14 +1,15 @@
-# Feature: Stay fast and light
+# Feature: Protect team data
 
 ## Goal
 
-Mondino opens quickly on a mid-range phone on 4G and the globe turns smoothly on a laptop with integrated
-graphics. Left open all day it uses no more memory at the end than at the start, and every screen gives its
-memory back when the teammate leaves it.
+A teammate sees only the team they are in and changes only their own pin; anyone else is refused by the
+backend, whatever the browser shows. A postal code reaches only the teammate it belongs to. What a person
+types is validated and rendered as text. Someone with no team who opens a screen sees "Invite link needed" in
+place.
 
-Journey 25 of `docs/journeys.md`. Requirements: L2-046, L2-047 (`docs/specs/L2.md`).
+Journey 6 of `docs/journeys.md`. Requirements: L2-007, L2-043, L2-044, L2-045 (`docs/specs/L2.md`).
 
-Builds on: journeys 6 to 17.
+Builds on: journeys 1 to 4.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -37,19 +38,21 @@ Builds on: journeys 6 to 17.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -61,15 +64,15 @@ Builds on: journeys 6 to 17.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-046, L2-047 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
-  refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/platform/stay-fast-and-light/README.md` and its diagrams, and
+- The requirements: L2-007, L2-043, L2-044, L2-045 in `docs/specs/L2.md`, with every acceptance criterion, and
+  the L1 each refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/platform/protect-team-data/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/loading.html`,
-  `pages/globe/default.html`, `pages/team/default.html`. Read `docs/mocks/README.md` for the cast and its
-  "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
-- The design system, under `docs/design-system/components/`: `globe.html`, `skeleton.html`, and the tokens in
-  `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/invite-needed/default.html`, `pages/team/edge.html`.
+  Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures
+  use that cast and that time.
+- The design system, under `docs/design-system/components/`: `empty-state.html`, `logo.html`, `link.html`, and
+  the tokens in `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -78,23 +81,26 @@ Builds on: journeys 6 to 17.
   mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- The globe's detail steps are `<TO SUPPLY>`: take them from the renderer ADR of journey 6 and write them into
-  the design.
+- Session lifetime and CSRF for the join request (`<TO SUPPLY>`), decided with journey 4 in one ADR.
 
 ## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. Budgets: the initial bundle at most 150 kB compressed without the renderer or assets; tighten
-     `angular.json` to what the build measures.
-  2. Loading: the heading, counts and panel usable before the globe; assets cached with long-lived, content-
-     hashed addresses; compressed API responses.
-  3. The low-power step-down: a sustained frame rate under 30 lowers the level of detail and resolution until
-     it recovers, the look unchanged.
-  4. Bounded rows on Team and Moments for a team of 500; the backend's read of a team of 500 under 300 ms at
-     the 95th percentile.
-  5. Release: one shared clock, requests cancelled on leaving a screen, nothing left from an earlier visit to
-     the Globe; nothing drawn while the tab is hidden.
-  6. Keep the heap checks current (8 simulated hours; 20 enters and leaves) (written, not run).
+  1. Backend: `ICurrentTeammate` and the team-scoped authorisation: no session 401, another team 404 (the same
+     as a team that does not exist), another teammate's pin or settings refused; a left teammate's session
+     401.
+  2. Backend: `GET /api/teams/{teamId}/pins` answering `TeamPinsDto` with no postal code, nor part or hash of
+     one; unexpected fields ignored (L2-044 AC6).
+  3. Backend: input validation and sanitising of names (control characters, trimming); CSRF protection on
+     state-changing requests.
+  4. Backend: security headers on every response (CSP own-origin only, `nosniff`, `Referrer-Policy: no-
+     referrer`, HSTS); every endpoint refused without a session unless marked open; the three rate limits
+     verified together.
+  5. Frontend: `teammateGuard` (`CanMatchFn`) showing `InviteNeededPage` in place at the opened address; `ApiError`
+     branching on `code` with the screen's own message; a name typed as markup renders as its literal
+     characters.
+  6. E2E: a full visit records every request and none leaves the app's own origin; storage and the address bar
+     hold no postal code.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -107,16 +113,17 @@ Builds on: journeys 6 to 17.
 ## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 25 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 6 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Running the heap and performance checks: only when a person asks.
+- Telemetry redaction (journey 30).
+- The own-profile endpoint's contents (journey 22).
 
 ## Done means
-- The criteria of L2-046 and L2-047 that a behaviour spec or a backend test can prove have one, and pass; the
-  rest are in the heap and performance checks, ready to run.
-- No budget was raised without a reason in the change.
+- Every criterion of L2-007 and L2-043 to L2-045 has an acceptance test through the API or in Playwright, and
+  passes.
+- No endpoint is open by omission.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

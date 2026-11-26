@@ -1,15 +1,14 @@
-# Feature: Mark pins with moments
+# Feature: Stay fast and light
 
 ## Goal
 
-A pin whose teammate has a moment today or in the next 7 days carries a moment marker in sun with the kind's
-emblem; today's is stronger by a ring and size. Lifting the pin shows the moment's title and when. Only the
-kinds the viewer chose mark pins, for that viewer alone.
+Mondino opens quickly on a mid-range phone on 4G and the globe turns smoothly on a laptop with integrated
+graphics. Left open all day it uses no more memory at the end than at the start, and every screen gives its
+memory back when the teammate leaves it.
 
-Journey 16 of `docs/journeys.md`. Requirements: L2-021, L2-022 (`docs/specs/L2.md`).
+Journey 29 of `docs/journeys.md`. Requirements: L2-046, L2-047 (`docs/specs/L2.md`).
 
-Builds on: journeys 8, 13 and 15. The switches that change the kinds are on Profile & Settings (journey 19);
-until then all four are on.
+Builds on: journeys 8 to 21.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -38,19 +37,21 @@ until then all four are on.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -62,16 +63,15 @@ until then all four are on.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-021, L2-022 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
+- The requirements: L2-046, L2-047 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
   refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/moments/mark-pins-with-moments/README.md` and its diagrams, and
+- The detailed design: `docs/detailed-designs/platform/stay-fast-and-light/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/globe/pin-
-  lifted.html`, `pages/globe/quiet.html`, `pages/profile/default.html`. Read `docs/mocks/README.md` for the
-  cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
-- The design system, under `docs/design-system/components/`: `moment-marker.html`, `emblem.html`, `pin-
-  label.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
-  mocks' BEM classes.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/loading.html`,
+  `pages/globe/default.html`, `pages/team/default.html`. Read `docs/mocks/README.md` for the cast and its
+  "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
+- The design system, under `docs/design-system/components/`: `globe.html`, `skeleton.html`, and the tokens in
+  `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -79,16 +79,24 @@ until then all four are on.
   docs/detailed-designs`). If a state this journey must build has no mock, draw it first with `writing-html-
   mocks`, then `extracting-design-systems` if it adds a component.
 
-## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
+## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
+- The globe's detail steps are `<TO SUPPLY>`: take them from the renderer ADR of journey 8 and write them into
+  the design.
+
+## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. `markerFor(pin, moments, kinds, today)` in `domain`'s `moments/`: within 7 days, the nearer of two with a
-     count, none at 8 days; direct tests.
-  2. `MomentMarker` and `Emblem` beside the pin: the kind's icon, today's ring, at least 16 px and clear of
-     the initials under 400 px.
-  3. The lifted label's moment line and the pin's accessible name ending with the title and when.
-  4. The viewer's chosen kinds (all four on to begin with) read from their settings: markers and "This week
-     around the world" follow them; the Moments screen does not.
+  1. Budgets: the initial bundle at most 150 kB compressed without the renderer or assets; tighten
+     `angular.json` to what the build measures.
+  2. Loading: the heading, counts and panel usable before the globe; assets cached with long-lived, content-
+     hashed addresses; compressed API responses.
+  3. The low-power step-down: a sustained frame rate under 30 lowers the level of detail and resolution until
+     it recovers, the look unchanged.
+  4. Bounded rows on Team and Moments for a team of 500; the backend's read of a team of 500 under 300 ms at
+     the 95th percentile.
+  5. Release: one shared clock, requests cancelled on leaving a screen, nothing left from an earlier visit to
+     the Globe; nothing drawn while the tab is hidden.
+  6. Keep the heap checks current (8 simulated hours; 20 enters and leaves) (written, not run).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -98,19 +106,19 @@ until then all four are on.
   - Run the regression checks (`node tools/verify/verify.mjs`), then commit the slice.
 - When all slices are green, keep the requirement, design, mock, tests and code aligned with what was built.
 
-## Phase 3: Lessons and progress
+## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 16 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 29 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- A count on a marker is not drawn in the mocks (no teammate in the cast has two moments in a week): draw it
-  in a mock first, as `AGENTS.md` requires, then build it.
+- Running the heap and performance checks: only when a person asks.
 
 ## Done means
-- The cast's seven moments this week mark their pins as `pages/globe/default` draws them.
-- With every kind off, no pin is marked and the panel says so.
+- The criteria of L2-046 and L2-047 that a behaviour spec or a backend test can prove have one, and pass; the
+  rest are in the heap and performance checks, ready to run.
+- No budget was raised without a reason in the change.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

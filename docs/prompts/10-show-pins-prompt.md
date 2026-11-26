@@ -1,15 +1,16 @@
-# Feature: Observe without exposing
+# Feature: Show pins
 
 ## Goal
 
-The backend emits OpenTelemetry traces, metrics and logs, enough to see its health and each outside source's,
-and none of it carries a name, a postal code, a position, a city, a token, a query string or a body. Routes
-are recorded as templates. Liveness and readiness expose nothing. The frontend sends no telemetry to a third
-party.
+Every teammate is a pin on the globe: their initials in their own colour, with a label for their local time
+and weather. The viewer's own pin is marked "(you)". A pin that is pointed at, focused or selected lifts out,
+grows, comes in front and shows its label. Pins close together fan out or become a group pin with a count,
+whose teammates are listed in the panel. Pins on the far side are hidden; a newly placed pin pulses once.
 
-Journey 26 of `docs/journeys.md`. Requirements: L2-051 (`docs/specs/L2.md`).
+Journey 10 of `docs/journeys.md`. Requirements: L2-011, L2-012, L2-013 (`docs/specs/L2.md`).
 
-Builds on: journeys 1 to 5, 11 and 15.
+Builds on: journeys 6, 8 and 9. The label's local time and weather come from journeys 11 and 13; until then a
+label shows the name and city.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -38,19 +39,21 @@ Builds on: journeys 1 to 5, 11 and 15.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -62,11 +65,17 @@ Builds on: journeys 1 to 5, 11 and 15.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirement: L2-051 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each refines in
-  `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/platform/observe-without-exposing/README.md` and its diagrams,
-  and "Contracts the features share" in `docs/detailed-designs/README.md`.
-- There is no screen in this journey, so no mock.
+- The requirements: L2-011, L2-012, L2-013 in `docs/specs/L2.md`, with every acceptance criterion, and the L1
+  each refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/globe/show-pins/README.md` and its diagrams, and "Contracts the
+  features share" in `docs/detailed-designs/README.md`.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/globe/pin-
+  lifted.html`, `pages/globe/group.html`, `pages/globe/hundreds.html`, `pages/globe/just-joined.html`, `pages/globe/sharing-off.html`. Read
+  `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use
+  that cast and that time.
+- The design system, under `docs/design-system/components/`: `pin.html`, `pin-label.html`, `avatar.html`,
+  `globe.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
+  mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -75,18 +84,20 @@ Builds on: journeys 1 to 5, 11 and 15.
   mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
-- Invoke the `implementing-incrementally` skill.
+- Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. `MondinoTelemetry`: OpenTelemetry wired with an in-memory exporter in tests; a join with "Sofia Bianchi"
-     and "20121" leaves neither value, nor Milan, its coordinates or the invite token in any log, span or
-     metric.
-  2. Routes as templates (`/api/teams/{teamId}/pins`), with no id, query string or body.
-  3. Per-source metrics: calls, failures, time-outs and a latency histogram, labelled by source and outcome
-     only.
-  4. Readiness beside liveness, exposing no configuration, versions or teammate data.
-  5. Unhandled errors: the error's type and a correlation id that is also in the ProblemDetails; no request
-     data.
-  6. E2E: a full visit sends nothing to any third party.
+  1. `TeamStore` at the `TeamShell` route reading `TeamPinsDto`; `PinLayer` as the list of pin buttons over
+     the canvas (`ul.globe__pins`), each with its accessible name from `describePin` and `aria-pressed`.
+  2. `Pin` and `Avatar`: initials (one word, non-letters, never blank), colour from the palette assigned at
+     join, "(you)" by more than colour.
+  3. Projection: pins hidden on the far side, fainter and unlabelled near the edge.
+  4. Lift on pointer, focus and selection (`--duration-fast`, none animated under reduced motion); tap to
+     select and tap elsewhere to clear; 44 × 44 px hit areas.
+  5. `PinLabel` placement beside the pin, inside the globe, clear of other pins; under 400 px only the lifted
+     pin is labelled.
+  6. `PIN_SPREADER` in `domain`'s `pins/`: fanning and the group pin with its count; `selectGroup`. Direct
+     tests per case.
+  7. The pulse for an arrived pin (`arrivedIds`).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -99,17 +110,17 @@ Builds on: journeys 1 to 5, 11 and 15.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 26 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 10 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- The hosting platform and where telemetry is sent are `<TO SUPPLY>`: export over OTLP to a configured
-  endpoint and decide no more.
+- The teammate panel and the group panel (journey 14).
+- Moment markers (journey 20).
 
 ## Done means
-- Every criterion of L2-051 has an acceptance test through the API (or in Playwright for the frontend) and
-  passes.
-- The exporter's settings are documented for a deployed system.
+- The globe shows the cast as `pages/globe/default` draws it, and the lifted, group and just-joined states as
+  their mocks draw them.
+- Tab reaches every visible pin; Enter or Space selects it.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

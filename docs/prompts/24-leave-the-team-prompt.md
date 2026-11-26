@@ -1,14 +1,14 @@
-# Feature: Show local time and status
+# Feature: Leave the team
 
 ## Goal
 
-Wherever a teammate appears, their local time is shown, worked out in the browser from their pin's time zone
-and one shared clock, in 24-hour or 12-hour form, and their status in words: "Early morning", "Working hours",
-"Evening" or "Probably asleep". Every time on a screen ticks together on the minute.
+"Remove my pin and leave Northwind" opens a dialog that names the team and what will go. Confirming removes
+the pin for everyone at their next read, deletes everything Mondino holds about the teammate in that team,
+ends their session and shows "You've left Northwind".
 
-Journey 9 of `docs/journeys.md`. Requirements: L2-014, L2-015 (`docs/specs/L2.md`).
+Journey 24 of `docs/journeys.md`. Requirements: L2-036 (`docs/specs/L2.md`).
 
-Builds on: journeys 5 and 8.
+Builds on: journeys 6 and 22.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -37,19 +37,21 @@ Builds on: journeys 5 and 8.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -61,16 +63,17 @@ Builds on: journeys 5 and 8.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-014, L2-015 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
-  refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/time/show-local-time-and-status/README.md` and its diagrams, and
-  "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`,
-  `pages/globe/selected.html`, `pages/globe/selected-asleep.html`, `pages/globe/fahrenheit-12-hour.html`,
-  `pages/team/default.html`. Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025,
-  14:05 UTC); the e2e fixtures use that cast and that time.
-- The design system, under `docs/design-system/components/`: `status.html`, `pin-label.html`, and the tokens
-  in `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
+- The requirement: L2-036 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each refines in
+  `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/profile/leave-team/README.md` and its diagrams, and "Contracts
+  the features share" in `docs/detailed-designs/README.md`.
+- The mocks (the source of truth), under `docs/mocks/`: `dialogs/leave-team/default.html`, `dialogs/leave-
+  team/busy.html`, `dialogs/leave-team/failed.html`, `pages/left-team/default.html`, `pages/invite-
+  needed/default.html`. Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05
+  UTC); the e2e fixtures use that cast and that time.
+- The design system, under `docs/design-system/components/`: `dialog.html`, `button.html`, `alert.html`,
+  `empty-state.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep
+  the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -78,18 +81,20 @@ Builds on: journeys 5 and 8.
   docs/detailed-designs`). If a state this journey must build has no mock, draw it first with `writing-html-
   mocks`, then `extracting-design-systems` if it adds a component.
 
-## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
+## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
+- What becomes of a team when its last teammate leaves is `<TO SUPPLY>`: keep the team and its invite link,
+  record the decision in the design, and build nothing more.
+
+## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. `Clock`/`CLOCK` in `api` and the one shared, injected clock that ticks on the minute and rests while the
-     tab is hidden; the e2e fixture sets it.
-  2. `domain`'s `time/`: `localTimeAt`, `formatTime` (`h23` and 12-hour "8:05 am"), `formatDay`; direct tests
-     for Mexico City, Bengaluru, Melbourne's Tuesday and a daylight-saving change.
-  3. `statusAt` and `statusFor(pin, time)`: one test per row of L2-015's table and each boundary; a teammate
-     who hides their status outside working hours has none.
-  4. The `status` block and local times on the pin label, with tabular figures; a status changing at its hour
-     with no reload.
-  5. The backend gives a pin's IANA time zone and never a local time (acceptance test through the API).
+  1. Backend: the leave command through the API: the teammate's name, postal code, city, settings and session
+     deleted; the old session refused with 401; only one's own.
+  2. Frontend: `LeaveTeamDialog` (CDK Dialog, a sheet under 576 px): focus starts on Cancel; Escape or Cancel
+     closes with focus back on the button and nothing changed.
+  3. Busy ("Removing your pin…", both buttons disabled) and failed (an alert in the dialog with "Try again").
+  4. `LeftPage` at `/left` with the team's name from the navigation state ("You've left the team" without it);
+     `TeamMembership` cleared; opening the app again shows no team.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -99,19 +104,15 @@ Builds on: journeys 5 and 8.
   - Run the regression checks (`node tools/verify/verify.mjs`), then commit the slice.
 - When all slices are green, keep the requirement, design, mock, tests and code aligned with what was built.
 
-## Phase 3: Lessons and progress
+## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 9 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 24 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
-## Deferred (not in this journey)
-- Offset and overlap (journey 10).
-- The control that chooses the clock (journey 19); until then the default from the teammate's country applies.
-
 ## Done means
-- At the cast's now, every local time and status the mocks show is what the screen shows, on both clocks.
-- One timer drives every local time, however many pins there are.
+- The five mocks above are what the dialog and pages show.
+- Nothing of the teammate remains in the backend's store.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

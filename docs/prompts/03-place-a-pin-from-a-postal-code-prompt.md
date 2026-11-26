@@ -39,19 +39,21 @@ Builds on: journeys 1 and 2.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -121,9 +123,9 @@ Builds on: journeys 1 and 2.
 
 ## Deferred (not in this journey)
 - Joining itself (journey 4).
-- The weather in the found line uses journey 11's `IWeatherSource`; until then the found line names the city
-  and that the pin is placed at city level, and the weather clause is added by journey 11.
-- The globe turning to the city (journeys 6 and 7).
+- The weather in the found line uses journey 13's `IWeatherSource`; until then the found line names the city
+  and that the pin is placed at city level, and the weather clause is added by journey 13.
+- The globe turning to the city (journeys 8 and 9).
 
 ## Done means
 - The seven Join mocks above are what the screen shows in those states, by keyboard and by touch.

@@ -37,19 +37,21 @@ Builds on: journeys 1 to 3.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -81,7 +83,7 @@ Builds on: journeys 1 to 3.
 
 ## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
 - The session's lifetime and cross-site request forgery protection for the join request, which is made before
-  a session exists (both `<TO SUPPLY>`): decide with journey 5 in one ADR.
+  a session exists (both `<TO SUPPLY>`): decide with journey 6 in one ADR.
 
 ## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
@@ -94,7 +96,7 @@ Builds on: journeys 1 to 3.
      name, never a postal code) and navigation to `/globe`.
   4. Frontend: join failed with try again, team full, rate limited; what was typed is kept.
   5. Frontend: a minimal Globe route that greets the new teammate's pin; the pulse (`pin--new`, none under
-     reduced motion) is completed with journey 8.
+     reduced motion) is completed with journey 10.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -111,8 +113,9 @@ Builds on: journeys 1 to 3.
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Everything the Globe screen shows beyond arriving on it (journeys 6 to 13).
-- Signing in again on another device: not designed.
+- Everything the Globe screen shows beyond arriving on it (journeys 8 to 15).
+- Signing in with an emailed link (journey 7). How a teammate who joined by invite link, and so gave no
+  email, signs in again is not designed.
 
 ## Done means
 - A person joins Northwind from its invite link and lands on `/globe` as a teammate; the team has exactly one

@@ -66,8 +66,9 @@ A moment is one of four kinds: a holiday, Formula 1, a local event, or sport.
 ## What Mondino leaves out
 
 Chat, a calendar or meeting scheduler, presence or activity tracking, precise location, a social
-feed and adverts. Inviting a teammate, messaging one, sign-in and making a team are not designed
-yet, and none is built before its design exists.
+feed, adverts, and admins or roles. There is no "Message" button. Three things are not designed
+yet, and none is built before its design exists: how a teammate who joined by invite link signs
+in again, what a used or expired sign-in link shows, and what "Reset link" asks before it acts.
 
 ## Design
 

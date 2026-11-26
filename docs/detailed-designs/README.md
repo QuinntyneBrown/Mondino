@@ -45,6 +45,22 @@ python .claude/skills/writing-software-design-documents/scripts/render_puml.py d
 
 Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 
+## Designed in the mocks, not here yet
+
+The mocks' second transcription drew four features whose requirements are written and whose
+detailed designs are not. Each is written by its journey (`docs/journeys.md`) before any of its
+code, in the folder named here, and joins the table above when it is.
+
+| Subsystem | Feature | L2 requirements | Journey |
+|---|---|---|---|
+| joining | create-team | L2-053 | 5 |
+| joining | sign-in | L2-052 | 7 |
+| team | invite-teammates | L2-054, L2-055 | 16 |
+| team | find-teammate-in-large-team | L2-056 | 18 |
+
+Until then the designs above still describe "Invite teammate" as copying the link; the mocks and
+L2-054 are right, and journey 16 brings them in line.
+
 ## The system in brief
 
 - **Mondino web app** is an Angular single-page application in the browser: the libraries `api`,
@@ -97,10 +113,11 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 - `TeamShell`, in the app, is the component of the route that holds Globe, Team, Moments and
   Profile & Settings. It provides `TeamStore` and renders `AppHeader` (`mo-app-header`, block
   `app-header`), the refresh banner and the toast. The header avatar's initials and colour come
-  from the viewer's pin in `TeamStore`. `AppHeader`'s "Invite teammate" button emits `invite`;
-  `TeamShell` provides `InviteLinkCopier`, a service of the `mondino` application, and calls
-  its `copy()`, as "Copy" on the invite card does, so both copy the team's invite link and
-  end in the same toast; it opens nothing. There is no "Message" button: Mondino has no chat.
+  from the viewer's pin in `TeamStore`. `AppHeader`'s "Invite teammate" button emits `invite`,
+  and `TeamShell` opens the invite dialog, a CDK Dialog (L2-054; its design is journey 16's).
+  "Copy" on the invite card of a team of one copies the link through `InviteLinkCopier`, a
+  service of the `mondino` application, and ends in the same toast. There is no "Message"
+  button: Mondino has no chat.
 - `GroupPanel` (`mo-group-panel`, `team/view-teammate-panel`) is `TeammatePanel`'s sibling.
   `GlobePage` shows it on `GlobeView`'s `selectGroup`; it lists the group's teammates west to
   east, each a link that selects that pin, and closes as the teammate panel does.
@@ -117,7 +134,9 @@ The designs mark these as `<TO SUPPLY>`:
   both before the Globe is built.
 - The database engine and the hosting platform.
 - The providers of the postal code source and of the holiday, race and event calendars.
-- How a team is made, and how a teammate signs in again on another device.
+- How a teammate who joined by invite link, and so gave no email, signs in again; what a sign-in
+  link shows once it has expired or been used; and what "Reset link" asks before it acts.
+- The sender of sign-in emails.
 - Which emblems Mondino holds the right to use.
 - Protection against cross-site request forgery for the join request, which is made before a
   session exists.

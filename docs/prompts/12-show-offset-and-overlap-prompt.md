@@ -1,17 +1,14 @@
-# Feature: Adapt to every width
+# Feature: Show offset and overlap
 
 ## Goal
 
-Every screen works from a 320 px phone to a 1920 px display with nothing cut off and no sideways scroll: one
-column on a phone, the form beside the globe on Join and the panel beside the globe from 992 px, the Team
-table from 768 px, the pin's card beside the settings on a desktop. The header carries Globe, Team, Moments
-and the viewer's avatar for Profile & Settings, with the mark alone on a phone and the lowercase wordmark from
-576 px.
+A teammate's offset from the viewer is given in words ("7 h behind", "4 h 30 min ahead", "Same time"), and the
+overlap of both working days is given on the viewer's own clock with a bar that draws it ("16:00–18:00 your
+time", or that the two share no working hours).
 
-Journey 23 of `docs/journeys.md`. Requirements: L2-037, L2-038 (`docs/specs/L2.md`).
+Journey 12 of `docs/journeys.md`. Requirements: L2-016, L2-017 (`docs/specs/L2.md`).
 
-Builds on: journeys 2 to 20. Each of those builds its screen responsive from the start; this journey closes
-the shell and what is left.
+Builds on: journey 11.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -40,19 +37,21 @@ the shell and what is left.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -64,18 +63,16 @@ the shell and what is left.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-037, L2-038 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
+- The requirements: L2-016, L2-017 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
   refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/platform/adapt-to-every-width/README.md` and its diagrams, and
+- The detailed design: `docs/detailed-designs/time/show-offset-and-overlap/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/team/default.html`,
-  `pages/moments/default.html`, `pages/profile/default.html`, `pages/join/default.html`, `pages/not-
-  found/default.html`, `pages/no-team/default.html`. Read `docs/mocks/README.md` for the cast and its "now"
-  (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
-- The design system, under `docs/design-system/components/`: `app-header.html`, `logo.html`, `avatar.html`,
-  `link.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
-  mocks' BEM classes.
-- `docs/design-system/foundations/layout.html` and `responsive.html`.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/selected.html`, `pages/globe/selected-
+  asleep.html`, `pages/globe/selected-self.html`, `pages/globe/fahrenheit-12-hour.html`,
+  `pages/team/default.html`. Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025,
+  14:05 UTC); the e2e fixtures use that cast and that time.
+- The design system, under `docs/design-system/components/`: `overlap-bar.html`, and the tokens in
+  `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -86,14 +83,14 @@ the shell and what is left.
 ## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. `TeamShell` and `AppHeader`: three links with `aria-current="page"`, the avatar link from the viewer's
-     pin, "Invite teammate", the mark and wordmark by width, 44 × 44 px targets; deep links, reload and the
-     back button.
-  2. Each screen's layout at 320, 375, 576, 768, 992, 1200 and 1920 px against its mock: close whatever
-     earlier journeys left, in each component's own stylesheet with the breakpoint tokens.
-  3. The readable measure from 1200 px while the globe grows.
-  4. Turning a phone keeps the selection, the filter and what was typed.
-  5. Keep the responsive sweep current (written, not run).
+  1. `offsetBetween` and its words in `domain`'s `time/`: whole hours, part hours, same time, one-sided
+     daylight saving; direct tests per case.
+  2. `overlapBetween`, `workingDayOnViewerClock` and `OverlapText`: Mexico City, Melbourne (none), same zone;
+     12-hour form that drops minutes on the hour.
+  3. `OverlapBar` in `components`: the viewer's day, the teammate's day wrapping past midnight, the shared
+     part, the tick for now, the scale and legend; the track hidden from assistive technology and the sentence
+     given as text.
+  4. None of it for the viewer's own pin or row.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -106,16 +103,15 @@ the shell and what is left.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 23 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 12 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Running the responsive and visual sweeps: only when a person asks.
+- The panel that hosts the bar (journey 14) and the Team table's "vs you" column (journey 17).
 
 ## Done means
-- Every criterion of L2-037 and L2-038 passes in behaviour specs at the widths named.
-- No screen was built for one form factor and patched: the layouts come from the design system's layout
-  tokens.
+- The offsets and overlaps of the cast match the mocks on both clocks.
+- A screen reader hears the overlap's start, end and length.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

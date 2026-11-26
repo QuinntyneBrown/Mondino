@@ -1,15 +1,15 @@
-# Feature: View a teammate's panel
+# Feature: Change location
 
 ## Goal
 
-Selecting a pin opens that teammate in the panel beside the globe (under it on a phone): name, city and
-country, local time and day, offset, status, weather, upcoming moments and the overlap with the viewer. The
-viewer's own panel says "(you)" and has no offset or overlap. A group pin opens the group panel listing its
-teammates. The selection survives a reload and is shareable inside the team.
+Profile & Settings, "Your pin", shows the viewer's own pin on a small still globe with their city, country,
+local time and time zone, and "Teammates see your city, never your postal code." A teammate who has moved
+changes their country and postal code; it is looked up as on Join, previewed on the small globe, and on saving
+the pin moves to the new city.
 
-Journey 12 of `docs/journeys.md`. Requirements: L2-023 (`docs/specs/L2.md`).
+Journey 22 of `docs/journeys.md`. Requirements: L2-031, L2-032 (`docs/specs/L2.md`).
 
-Builds on: journeys 8 to 11.
+Builds on: journeys 3, 6 and 8.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -38,19 +38,21 @@ Builds on: journeys 8 to 11.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -62,16 +64,17 @@ Builds on: journeys 8 to 11.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirement: L2-023 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each refines in
-  `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/team/view-teammate-panel/README.md` and its diagrams, and
+- The requirements: L2-031, L2-032 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
+  refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/profile/change-location/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/selected.html`, `pages/globe/selected-
-  self.html`, `pages/globe/selected-asleep.html`, `pages/globe/group.html`, `pages/globe/sharing-off.html`,
-  `pages/globe/weather-unavailable.html`. Read `docs/mocks/README.md` for the cast and its "now" (Monday 27
-  October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
-- The design system, under `docs/design-system/components/`: `person-panel.html`, `panel-row.html`, `overlap-
-  bar.html`, `moment-card.html`, `status.html`, `avatar.html`, `button.html`, and the tokens in `docs/design-
+- The mocks (the source of truth), under `docs/mocks/`: `pages/profile/default.html`,
+  `pages/profile/loading.html`, `pages/profile/error.html`, `pages/profile/locating.html`,
+  `pages/profile/location-found.html`, `pages/profile/invalid.html`, `pages/profile/lookup-unavailable.html`,
+  `pages/profile/rate-limited.html`. Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October
+  2025, 14:05 UTC); the e2e fixtures use that cast and that time.
+- The design system, under `docs/design-system/components/`: `card.html`, `text-field.html`, `select.html`,
+  `form-field.html`, `lookup-message.html`, `globe.html`, `pin.html`, and the tokens in `docs/design-
   system/tokens/`. Components are named as there and keep the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
@@ -80,17 +83,23 @@ Builds on: journeys 8 to 11.
   docs/detailed-designs`). If a state this journey must build has no mock, draw it first with `writing-html-
   mocks`, then `extracting-design-systems` if it adds a component.
 
-## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
+## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
+- The rate limit on a teammate's own postal code lookup is `<TO SUPPLY>`: choose it and write it into the
+  design and L2-032.
+
+## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. `GlobePage` selection held in the address as an opaque teammate id; reload and a shared address select
-     the same teammate.
-  2. `TeammatePanel` (`person-panel`) with `PanelRow`s for time, offset, status and weather, and `OverlapBar`;
-     the viewer's own variant.
-  3. Close button and Escape clear the selection; the fade (none under reduced motion); focus to the heading
-     on open and back to the pin on close; one polite announcement.
-  4. `GroupPanel` for a group pin, its teammates west to east, each selecting its pin.
-  5. The moments section as moment cards (filled by journey 15's data; absent when a teammate has none).
+  1. Backend: `GET /api/teams/{teamId}/me` answering `ProfileDto` with the teammate's own postal code and no
+     one else's; another teammate's profile refused.
+  2. Frontend: `ProfilePage` (lazy) and `ProfileStore` at its route: the pin's card with the small globe (not
+     turning, not draggable), loading and error.
+  3. The Location section with `PostalCodeField` and the same `LookupState` as Join: locating, found ("…your
+     pin moves here when you save.", previewed as "New · Toronto"), not found ("Your pin stays in Milan."),
+     unavailable, rate limited.
+  4. Backend: the change through the API: looked up again, the pin at the new city with its time zone; within
+     the same city the pin does not move; another teammate's location refused.
+  5. Saving through the save bar (journey 23 owns the bar; here the minimum that saves a location).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -100,20 +109,19 @@ Builds on: journeys 8 to 11.
   - Run the regression checks (`node tools/verify/verify.mjs`), then commit the slice.
 - When all slices are green, keep the requirement, design, mock, tests and code aligned with what was built.
 
-## Phase 3: Lessons and progress
+## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 12 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 22 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- The week's view with no selection (journey 13).
-- Moments data (journey 15).
+- Display, sharing and the save bar's full behaviour (journey 23).
+- Leaving the team (journey 24).
 
 ## Done means
-- The six mocks above are what the panel shows for those selections.
-- The address carries no name, city or postal code.
-- There is no "Message" button.
+- The eight Profile mocks above are what the screen shows.
+- The postal code appears only here and on Join, and is in no storage or URL.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

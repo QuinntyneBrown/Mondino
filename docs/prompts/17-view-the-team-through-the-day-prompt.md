@@ -1,16 +1,15 @@
-# Feature: Survive a source failure
+# Feature: View the team through the day
 
 ## Goal
 
-When the postal code lookup, the weather or a calendar fails or is slow, everything that does not depend on it
-is still shown: every pin keeps its city, position, time zone, local time and status, weather says it is
-unavailable, and moments of the other kinds are still given. Each outside source is called only by the
-backend, with a 5 second timeout, a cache and a pause after repeated failures, and learns a place and nothing
-else. Each screen's first read has a loading state and an error state with "Try again".
+The Team screen, "Where everyone is in their day", places each teammate on a 24-hour day ribbon at the hour
+they are living through, then lists everyone from west to east with their status, location, local time,
+offset, weather and next moment: a table from 768 px, a row of name, status, local time and next moment on a
+phone. It is filtered by All, Working now or Asleep, each with its count.
 
-Journey 22 of `docs/journeys.md`. Requirements: L2-049, L2-050 (`docs/specs/L2.md`).
+Journey 17 of `docs/journeys.md`. Requirements: L2-026, L2-027, L2-028 (`docs/specs/L2.md`).
 
-Builds on: journeys 3, 11, 15 and 21.
+Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then it is a dash.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -39,19 +38,21 @@ Builds on: journeys 3, 11, 15 and 21.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -63,18 +64,18 @@ Builds on: journeys 3, 11, 15 and 21.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-049, L2-050 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
-  refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/platform/survive-source-failure/README.md` and its diagrams, and
+- The requirements: L2-026, L2-027, L2-028 in `docs/specs/L2.md`, with every acceptance criterion, and the L1
+  each refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/team/view-team-through-the-day/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/weather-unavailable.html`,
-  `pages/team/weather-unavailable.html`, `pages/globe/loading.html`, `pages/globe/error.html`,
-  `pages/team/error.html`, `pages/moments/error.html`, `pages/profile/error.html`, `pages/join/lookup-
-  unavailable.html`, `notifications/refresh-banner/warning.html`. Read `docs/mocks/README.md` for the cast and
-  its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
-- The design system, under `docs/design-system/components/`: `alert.html`, `skeleton.html`, `empty-
-  state.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
-  mocks' BEM classes.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/team/default.html`, `pages/team/working.html`,
+  `pages/team/asleep.html`, `pages/team/no-results.html`, `pages/team/loading.html`, `pages/team/empty.html`,
+  `pages/team/error.html`, `pages/team/weather-unavailable.html`, `pages/team/edge.html`. Read
+  `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use
+  that cast and that time.
+- The design system, under `docs/design-system/components/`: `team-table.html`, `day-ribbon.html`, `segmented-
+  control.html`, `status.html`, `avatar.html`, `empty-state.html`, `skeleton.html`, and the tokens in
+  `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -82,22 +83,20 @@ Builds on: journeys 3, 11, 15 and 21.
   docs/detailed-designs`). If a state this journey must build has no mock, draw it first with `writing-html-
   mocks`, then `extracting-design-systems` if it adds a component.
 
-## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- The circuit breaker's threshold and pause are `<TO SUPPLY>`: choose them and write them into the design as
-  named settings, documented for a deployed system.
-
-## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
+## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. Backend: weather failing: the team read succeeds with `WeatherState` `Unavailable`, never zero; a cached
-     answer under 3 hours old is given instead (`FakeTimeProvider`).
-  2. Backend: a calendar failing: the other kinds are given, with the last cached moments of the failing kind.
-  3. Backend: the shared resilience around every source: 5 s timeout, no response waiting more than 6 s on a
-     source, a circuit breaker, no unbounded queue.
-  4. Backend: what each source receives, inspected in the fakes: no name, team, teammate id, session or client
-     address; one weather call per city.
-  5. Frontend: any gaps left in the loading and error states of Globe, Team, Moments and Profile & Settings,
-     and the weather-unavailable wording, each against its mock.
+  1. The west-to-east order in `domain` (current UTC offset, then longitude), with direct tests.
+  2. `TeamPage` (lazy) with the heading and `TeamTable`: the columns Person, Location, Local time, vs you,
+     Weather and Coming up; the viewer's row; a row is a link to the Globe with that pin selected.
+  3. The phone layout under 768 px.
+  4. `DayRibbon`: markers at their hour, working hours and night labelled in words, two teammates at one hour
+     both reachable, markers as links, 12-hour ticks hour-only.
+  5. The `Segmented` tab list with counts; the two no-results messages; counts and list changing on the hour;
+     a teammate who hides their status is under All only.
+  6. Loading, error, the team of one and the edge cases (a very long name, a one-word name, a name typed as
+     markup).
+  7. A bounded number of rows in the page for a team of 500 (windowing).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -107,16 +106,20 @@ Builds on: journeys 3, 11, 15 and 21.
   - Run the regression checks (`node tools/verify/verify.mjs`), then commit the slice.
 - When all slices are green, keep the requirement, design, mock, tests and code aligned with what was built.
 
-## Phase 4: Lessons and progress
+## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 22 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 17 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
+## Deferred (not in this journey)
+- Past 40 teammates the day ribbon counts teammates at each half hour, and the list gains a search and a
+  section per city (L2-056, journey 18). This journey builds the team of 40 or fewer, with rows bounded.
+- "Invite teammates" on the team of one opens journey 16's invite dialog.
+
 ## Done means
-- Every criterion of L2-049 and L2-050 has an acceptance test and passes, with fakes told to fail and to
-  stall.
-- No screen is blank or broken when any one source is down.
+- The nine Team mocks are what the screen shows in those states.
+- No postal code appears; arrow keys move between the filters.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

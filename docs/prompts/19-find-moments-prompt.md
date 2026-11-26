@@ -7,9 +7,9 @@ race weekend (or a dated happening in its calendar) in their country, a local ev
 100 km of their city. Each moment has a kind, a title, a date local to its place and one line of detail, and
 belongs to each teammate it happens for.
 
-Journey 15 of `docs/journeys.md`. Requirements: L2-020 (`docs/specs/L2.md`).
+Journey 19 of `docs/journeys.md`. Requirements: L2-020 (`docs/specs/L2.md`).
 
-Builds on: journeys 5 and 12.
+Builds on: journeys 6 and 14.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -38,19 +38,21 @@ Builds on: journeys 5 and 12.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -110,15 +112,15 @@ Builds on: journeys 5 and 12.
 ## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 15 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 19 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Markers on pins (journey 16) and the Moments screen (journey 17).
+- Markers on pins (journey 20) and the Moments screen (journey 21).
 
 ## Done means
 - The seeded Northwind team's moments are the cast's, each naming its teammate.
-- A failing calendar never fails the read (the cache fallback itself is journey 22).
+- A failing calendar never fails the read (the cache fallback itself is journey 26).
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

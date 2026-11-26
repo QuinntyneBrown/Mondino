@@ -1,14 +1,15 @@
-# Feature: Show weather
+# Feature: Choose display and sharing
 
 ## Goal
 
-Each pin carries the current temperature and one of eight conditions for its city, from Open-Meteo by way of
-the backend, as an icon with its word (night icons at night), in °C or °F as whole degrees. A teammate who
-does not share their weather shows none.
+In Profile & Settings the viewer chooses °C or °F, a 24-hour or 12-hour clock, which kinds of moment show on
+their globe, and what teammates see of them: "Share my local weather" and "Show when I'm outside working
+hours". Nothing applies until saved: a bar says "You have unsaved changes", then "Saved — your pin is up to
+date". Leaving with unsaved changes asks first.
 
-Journey 11 of `docs/journeys.md`. Requirements: L2-018, L2-019 (`docs/specs/L2.md`).
+Journey 23 of `docs/journeys.md`. Requirements: L2-033, L2-034, L2-035 (`docs/specs/L2.md`).
 
-Builds on: journeys 5 and 8.
+Builds on: journeys 11, 13, 20 and 22.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -37,19 +38,21 @@ Builds on: journeys 5 and 8.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -61,17 +64,19 @@ Builds on: journeys 5 and 8.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-018, L2-019 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
-  refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/weather/show-weather/README.md` and its diagrams, and "Contracts
-  the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`,
-  `pages/globe/selected.html`, `pages/globe/fahrenheit-12-hour.html`, `pages/globe/weather-unavailable.html`,
-  `pages/globe/sharing-off.html`, `pages/team/weather-unavailable.html`, `pages/join/found.html`. Read
+- The requirements: L2-033, L2-034, L2-035 in `docs/specs/L2.md`, with every acceptance criterion, and the L1
+  each refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/profile/choose-display-and-sharing/README.md` and its diagrams,
+  and "Contracts the features share" in `docs/detailed-designs/README.md`.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/profile/default.html`, `pages/profile/sharing-
+  off.html`, `notifications/settings-bar/info.html`, `notifications/settings-bar/saving.html`,
+  `notifications/settings-bar/success.html`, `notifications/settings-bar/danger.html`, `dialogs/unsaved-
+  changes/default.html`, `pages/globe/sharing-off.html`, `pages/globe/fahrenheit-12-hour.html`. Read
   `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use
   that cast and that time.
-- The design system, under `docs/design-system/components/`: `pin-label.html`, `panel-row.html`, and the
-  tokens in `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
+- The design system, under `docs/design-system/components/`: `segmented-control.html`, `switch.html`, `save-
+  bar.html`, `dialog.html`, `button.html`, `card.html`, and the tokens in `docs/design-system/tokens/`.
+  Components are named as there and keep the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -79,22 +84,20 @@ Builds on: journeys 5 and 8.
   docs/detailed-designs`). If a state this journey must build has no mock, draw it first with `writing-html-
   mocks`, then `extracting-design-systems` if it adds a component.
 
-## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- The wind threshold that turns a reading into "Windy" is `<TO SUPPLY>`: choose it and write it into the
-  design.
-
-## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
+## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. Backend: `IWeatherSource.GetCurrentAsync(position)` with its fake; `PinDto.Weather` and `WeatherState`
-     (`Available`, `Unavailable`, `NotShared`); one call per city, fresh for 15 minutes.
-  2. Backend: the Open-Meteo adapter with a 5 s timeout: position rounded to two decimals and nothing else;
-     the source's codes mapped to the eight conditions (one test per mapping).
-  3. Frontend: `formatTemperature` and `formatDegrees` in `domain` (°F conversion, never "−0"), the unit
-     defaulting from the teammate's country.
-  4. Frontend: the weather icon with its word and the night form; on the pin label, the panel line ("Foggy in
-     Milan") and the found line on Join.
-  5. Frontend: unavailable and not shared, each with the mock's words; nothing blank or zero.
+  1. Backend: the teammate's settings (unit, clock, kinds, the two sharing switches) saved through the API,
+     defaults from the country at join; the backend applies sharing: no weather for a teammate who does not
+     share it, `ShowsStatusOutsideWorkingHours` false.
+  2. Frontend: Display, `Segmented` as radio groups for Temperature and Clock; every screen follows the saved
+     choice, on a later day too.
+  3. The moment-kind switches and the Privacy switches (`role="switch"`), with the own-pin note when one is
+     off.
+  4. `SaveBar`: unsaved, saving, saved (announced, gone after 4 seconds on a fake clock), failed with try
+     again; removed when nothing differs.
+  5. `DiscardChangesDialog` (CDK Dialog) on leaving with unsaved changes, and the browser's own prompt on
+     closing the tab.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -104,19 +107,20 @@ Builds on: journeys 5 and 8.
   - Run the regression checks (`node tools/verify/verify.mjs`), then commit the slice.
 - When all slices are green, keep the requirement, design, mock, tests and code aligned with what was built.
 
-## Phase 4: Lessons and progress
+## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 11 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 23 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Behaviour when the source keeps failing: cache fallback and the circuit breaker (journey 22).
-- The °C/°F control (journey 19).
+- What a save or a leave shows when the session has ended (401) is `<TO SUPPLY>`: show "You need an invite link", and
+  record it in the design.
 
 ## Done means
-- The cast's weather shows as the mocks draw it in °C and °F.
-- The browser calls only the backend; Open-Meteo learns a rounded position and nothing else.
+- The nine mocks above are what the screen, bar and dialog show.
+- Another teammate's read carries no weather, and shows no status outside working hours, for a teammate who
+  turned them off.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

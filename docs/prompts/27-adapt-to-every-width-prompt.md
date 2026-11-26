@@ -1,16 +1,17 @@
-# Feature: Show pins
+# Feature: Adapt to every width
 
 ## Goal
 
-Every teammate is a pin on the globe: their initials in their own colour, with a label for their local time
-and weather. The viewer's own pin is marked "(you)". A pin that is pointed at, focused or selected lifts out,
-grows, comes in front and shows its label. Pins close together fan out or become a group pin with a count,
-whose teammates are listed in the panel. Pins on the far side are hidden; a newly placed pin pulses once.
+Every screen works from a 320 px phone to a 1920 px display with nothing cut off and no sideways scroll: one
+column on a phone, the form beside the globe on Join and the panel beside the globe from 992 px, the Team
+table from 768 px, the pin's card beside the settings on a desktop. The header carries Globe, Team, Moments
+and the viewer's avatar for Profile & Settings, with the mark alone on a phone and the lowercase wordmark from
+576 px.
 
-Journey 8 of `docs/journeys.md`. Requirements: L2-011, L2-012, L2-013 (`docs/specs/L2.md`).
+Journey 27 of `docs/journeys.md`. Requirements: L2-037, L2-038 (`docs/specs/L2.md`).
 
-Builds on: journeys 5, 6 and 7. The label's local time and weather come from journeys 9 and 11; until then a
-label shows the name and city.
+Builds on: journeys 2 to 24. Each of those builds its screen responsive from the start; this journey closes
+the shell and what is left.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -39,19 +40,21 @@ label shows the name and city.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -63,17 +66,18 @@ label shows the name and city.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-011, L2-012, L2-013 in `docs/specs/L2.md`, with every acceptance criterion, and the L1
-  each refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/globe/show-pins/README.md` and its diagrams, and "Contracts the
-  features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/globe/pin-
-  lifted.html`, `pages/globe/group.html`, `pages/globe/just-joined.html`, `pages/globe/sharing-off.html`. Read
-  `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use
-  that cast and that time.
-- The design system, under `docs/design-system/components/`: `pin.html`, `pin-label.html`, `avatar.html`,
-  `globe.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
+- The requirements: L2-037, L2-038 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
+  refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/platform/adapt-to-every-width/README.md` and its diagrams, and
+  "Contracts the features share" in `docs/detailed-designs/README.md`.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/team/default.html`,
+  `pages/moments/default.html`, `pages/profile/default.html`, `pages/join/default.html`, `pages/not-
+  found/default.html`, `pages/invite-needed/default.html`. Read `docs/mocks/README.md` for the cast and its "now"
+  (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
+- The design system, under `docs/design-system/components/`: `app-header.html`, `logo.html`, `avatar.html`,
+  `link.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
   mocks' BEM classes.
+- `docs/design-system/foundations/layout.html` and `responsive.html`.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -84,18 +88,14 @@ label shows the name and city.
 ## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. `TeamStore` at the `TeamShell` route reading `TeamPinsDto`; `PinLayer` as the list of pin buttons over
-     the canvas (`ul.globe__pins`), each with its accessible name from `describePin` and `aria-pressed`.
-  2. `Pin` and `Avatar`: initials (one word, non-letters, never blank), colour from the palette assigned at
-     join, "(you)" by more than colour.
-  3. Projection: pins hidden on the far side, fainter and unlabelled near the edge.
-  4. Lift on pointer, focus and selection (`--duration-fast`, none animated under reduced motion); tap to
-     select and tap elsewhere to clear; 44 × 44 px hit areas.
-  5. `PinLabel` placement beside the pin, inside the globe, clear of other pins; under 400 px only the lifted
-     pin is labelled.
-  6. `PIN_SPREADER` in `domain`'s `pins/`: fanning and the group pin with its count; `selectGroup`. Direct
-     tests per case.
-  7. The pulse for an arrived pin (`arrivedIds`).
+  1. `TeamShell` and `AppHeader`: three links with `aria-current="page"`, the avatar link from the viewer's
+     pin, "Invite teammate", the mark and wordmark by width, 44 × 44 px targets; deep links, reload and the
+     back button.
+  2. Each screen's layout at 320, 375, 576, 768, 992, 1200 and 1920 px against its mock: close whatever
+     earlier journeys left, in each component's own stylesheet with the breakpoint tokens.
+  3. The readable measure from 1200 px while the globe grows.
+  4. Turning a phone keeps the selection, the filter and what was typed.
+  5. Keep the responsive sweep current (written, not run).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -108,17 +108,16 @@ label shows the name and city.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 8 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 27 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- The teammate panel and the group panel (journey 12).
-- Moment markers (journey 16).
+- Running the responsive and visual sweeps: only when a person asks.
 
 ## Done means
-- The globe shows the cast as `pages/globe/default` draws it, and the lifted, group and just-joined states as
-  their mocks draw them.
-- Tab reaches every visible pin; Enter or Space selects it.
+- Every criterion of L2-037 and L2-038 passes in behaviour specs at the widths named.
+- No screen was built for one form factor and patched: the layouts come from the design system's layout
+  tokens.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

@@ -1,15 +1,17 @@
-# Feature: View the team through the day
+# Feature: Make accessible
 
 ## Goal
 
-The Team screen, "Where everyone is in their day", places each teammate on a 24-hour day ribbon at the hour
-they are living through, then lists everyone from west to east with their status, location, local time,
-offset, weather and next moment: a table from 768 px, a row of name, status, local time and next moment on a
-phone. It is filtered by All, Working now or Asleep, each with its count.
+Everything works by keyboard alone and by touch alone, with visible focus and a "Skip to content" link first.
+The globe has a text equivalent: one labelled group holding the list of pins, each announced with name, city,
+local time, status, weather and any moment this week, with the canvas hidden; a selection is announced once
+and the ticking clocks never interrupt. Text meets WCAG 2.2 AA contrast, colour is never the only carrier,
+text scales to 200%, and reduced motion removes the turn, the fades, the pulse and the lift animation.
 
-Journey 14 of `docs/journeys.md`. Requirements: L2-026, L2-027, L2-028 (`docs/specs/L2.md`).
+Journey 28 of `docs/journeys.md`. Requirements: L2-039, L2-040, L2-041, L2-042 (`docs/specs/L2.md`).
 
-Builds on: journeys 9, 10 and 11. "Coming up" fills with journey 15; until then it is a dash.
+Builds on: journeys 2 to 24. Each builds its screen accessible from the start; this journey proves it and
+closes what is left.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -38,19 +40,21 @@ Builds on: journeys 9, 10 and 11. "Coming up" fills with journey 15; until then 
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -62,18 +66,19 @@ Builds on: journeys 9, 10 and 11. "Coming up" fills with journey 15; until then 
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-026, L2-027, L2-028 in `docs/specs/L2.md`, with every acceptance criterion, and the L1
-  each refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/team/view-team-through-the-day/README.md` and its diagrams, and
+- The requirements: L2-039, L2-040, L2-041, L2-042 in `docs/specs/L2.md`, with every acceptance criterion, and
+  the L1 each refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/platform/make-accessible/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/team/default.html`, `pages/team/working.html`,
-  `pages/team/asleep.html`, `pages/team/no-results.html`, `pages/team/loading.html`, `pages/team/empty.html`,
-  `pages/team/error.html`, `pages/team/weather-unavailable.html`, `pages/team/edge.html`. Read
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`,
+  `pages/globe/selected.html`, `pages/globe/pin-lifted.html`, `pages/team/default.html`,
+  `pages/profile/default.html`, `dialogs/leave-team/default.html`, `pages/join/invalid.html`. Read
   `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use
   that cast and that time.
-- The design system, under `docs/design-system/components/`: `team-table.html`, `day-ribbon.html`, `segmented-
-  control.html`, `status.html`, `avatar.html`, `empty-state.html`, `skeleton.html`, and the tokens in
-  `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
+- The design system, under `docs/design-system/components/`: `skip-link.html`, `pin.html`, `dialog.html`,
+  `segmented-control.html`, `switch.html`, `chip.html`, and the tokens in `docs/design-system/tokens/`.
+  Components are named as there and keep the mocks' BEM classes.
+- `docs/design-system/foundations/accessibility.html`, `motion.html` and `tokens/contrast-pairs.json`.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -84,17 +89,16 @@ Builds on: journeys 9, 10 and 11. "Coming up" fills with journey 15; until then 
 ## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. The west-to-east order in `domain` (current UTC offset, then longitude), with direct tests.
-  2. `TeamPage` (lazy) with the heading and `TeamTable`: the columns Person, Location, Local time, vs you,
-     Weather and Coming up; the viewer's row; a row is a link to the Globe with that pin selected.
-  3. The phone layout under 768 px.
-  4. `DayRibbon`: markers at their hour, working hours and night labelled in words, two teammates at one hour
-     both reachable, markers as links, 12-hour ticks hour-only.
-  5. The `Segmented` tab list with counts; the two no-results messages; counts and list changing on the hour;
-     a teammate who hides their status is under All only.
-  6. Loading, error, the team of one and the edge cases (a very long name, a one-word name, a name typed as
-     markup).
-  7. A bounded number of rows in the page for a team of 500 (windowing).
+  1. Keyboard: tab order follows each screen, focus is visible and never trapped outside a dialog; `SkipLink`
+     first; dialogs trap focus and close on Escape.
+  2. The globe's text equivalent: the labelled group, `describePin` for every pin, the polite live region for
+     a selection, silence on the minute tick.
+  3. Touch: one finger spins, one tap selects; every target 44 × 44 px.
+  4. Words, icons or attributes beside every colour: status, the chosen filter, a moment's kind, an invalid
+     field; tabular figures.
+  5. 200% text at 1280 px with nothing lost.
+  6. Reduced motion across the app, followed live; nothing flashes more than three times a second.
+  7. Keep the axe sweep current for every screen in every state (written, not run).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -107,16 +111,15 @@ Builds on: journeys 9, 10 and 11. "Coming up" fills with journey 15; until then 
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 14 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 28 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- How the day ribbon draws hundreds of teammates is not designed (mocks README, open questions): keep markers
-  reachable and record what was done in the design.
+- Running the accessibility sweep: only when a person asks.
 
 ## Done means
-- The nine Team mocks are what the screen shows in those states.
-- No postal code appears; arrow keys move between the filters.
+- Every criterion of L2-039 to L2-042 that a behaviour spec can prove has one, and passes.
+- A person can join, read the team and leave using the keyboard alone.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

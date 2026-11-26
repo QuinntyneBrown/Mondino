@@ -1,14 +1,15 @@
-# Feature: Show offset and overlap
+# Feature: Mark pins with moments
 
 ## Goal
 
-A teammate's offset from the viewer is given in words ("7 h behind", "4 h 30 min ahead", "Same time"), and the
-overlap of both working days is given on the viewer's own clock with a bar that draws it ("16:00–18:00 your
-time", or that the two share no working hours).
+A pin whose teammate has a moment today or in the next 7 days carries a moment marker in sun with the kind's
+emblem; today's is stronger by a ring and size. Lifting the pin shows the moment's title and when. Only the
+kinds the viewer chose mark pins, for that viewer alone.
 
-Journey 10 of `docs/journeys.md`. Requirements: L2-016, L2-017 (`docs/specs/L2.md`).
+Journey 20 of `docs/journeys.md`. Requirements: L2-021, L2-022 (`docs/specs/L2.md`).
 
-Builds on: journey 9.
+Builds on: journeys 10, 15 and 19. The switches that change the kinds are on Profile & Settings (journey 23);
+until then all four are on.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -37,19 +38,21 @@ Builds on: journey 9.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -61,16 +64,16 @@ Builds on: journey 9.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-016, L2-017 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
+- The requirements: L2-021, L2-022 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
   refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/time/show-offset-and-overlap/README.md` and its diagrams, and
+- The detailed design: `docs/detailed-designs/moments/mark-pins-with-moments/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/selected.html`, `pages/globe/selected-
-  asleep.html`, `pages/globe/selected-self.html`, `pages/globe/fahrenheit-12-hour.html`,
-  `pages/team/default.html`. Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025,
-  14:05 UTC); the e2e fixtures use that cast and that time.
-- The design system, under `docs/design-system/components/`: `overlap-bar.html`, and the tokens in
-  `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/globe/pin-
+  lifted.html`, `pages/globe/quiet.html`, `pages/profile/default.html`. Read `docs/mocks/README.md` for the
+  cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
+- The design system, under `docs/design-system/components/`: `moment-marker.html`, `emblem.html`, `pin-
+  label.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
+  mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -81,14 +84,13 @@ Builds on: journey 9.
 ## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. `offsetBetween` and its words in `domain`'s `time/`: whole hours, part hours, same time, one-sided
-     daylight saving; direct tests per case.
-  2. `overlapBetween`, `workingDayOnViewerClock` and `OverlapText`: Mexico City, Melbourne (none), same zone;
-     12-hour form that drops minutes on the hour.
-  3. `OverlapBar` in `components`: the viewer's day, the teammate's day wrapping past midnight, the shared
-     part, the tick for now, the scale and legend; the track hidden from assistive technology and the sentence
-     given as text.
-  4. None of it for the viewer's own pin or row.
+  1. `markerFor(pin, moments, kinds, today)` in `domain`'s `moments/`: within 7 days, the nearer of two with a
+     count, none at 8 days; direct tests.
+  2. `MomentMarker` and `Emblem` beside the pin: the kind's icon, today's ring, at least 16 px and clear of
+     the initials under 400 px.
+  3. The lifted label's moment line and the pin's accessible name ending with the title and when.
+  4. The viewer's chosen kinds (all four on to begin with) read from their settings: markers and "This week
+     around the world" follow them; the Moments screen does not.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -101,15 +103,16 @@ Builds on: journey 9.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 10 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 20 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- The panel that hosts the bar (journey 12) and the Team table's "vs you" column (journey 14).
+- A count on a marker is not drawn in the mocks (no teammate in the cast has two moments in a week): draw it
+  in a mock first, as `AGENTS.md` requires, then build it.
 
 ## Done means
-- The offsets and overlaps of the cast match the mocks on both clocks.
-- A screen reader hears the overlap's start, end and length.
+- The cast's seven moments this week mark their pins as `pages/globe/default` draws them.
+- With every kind off, no pin is marked and the panel says so.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

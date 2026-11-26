@@ -1,15 +1,15 @@
-# Feature: Protect team data
+# Feature: Draw the globe
 
 ## Goal
 
-A teammate sees only the team they are in and changes only their own pin; anyone else is refused by the
-backend, whatever the browser shows. A postal code reaches only the teammate it belongs to. What a person
-types is validated and rendered as text. Someone with no team who opens a screen sees "Invite link needed" in
-place.
+The Globe screen shows a lit, shaded 3D globe built from Blender-modelled assets in the cartoon look the mocks
+draw: a bright blue ocean with a deeper rim, green land with sand and forest, white ice and cloud, an ink
+outline, and the night side shaded in dusk from the sun's real position. A placeholder holds its place until
+it is ready; where it cannot be drawn a still picture stands in, with a notice and a link to Team.
 
-Journey 5 of `docs/journeys.md`. Requirements: L2-007, L2-043, L2-044, L2-045 (`docs/specs/L2.md`).
+Journey 8 of `docs/journeys.md`. Requirements: L2-008, L2-010 (`docs/specs/L2.md`).
 
-Builds on: journeys 1 to 4.
+Builds on: journeys 1 and 6 (the Globe route and the team's pins).
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -38,19 +38,21 @@ Builds on: journeys 1 to 4.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -62,15 +64,17 @@ Builds on: journeys 1 to 4.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-007, L2-043, L2-044, L2-045 in `docs/specs/L2.md`, with every acceptance criterion, and
-  the L1 each refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/platform/protect-team-data/README.md` and its diagrams, and
-  "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/no-team/default.html`, `pages/team/edge.html`.
-  Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures
-  use that cast and that time.
-- The design system, under `docs/design-system/components/`: `empty-state.html`, `logo.html`, `link.html`, and
-  the tokens in `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
+- The requirements: L2-008, L2-010 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
+  refines in `docs/specs/L1.md`.
+- The detailed design: `docs/detailed-designs/globe/draw-globe/README.md` and its diagrams, and "Contracts the
+  features share" in `docs/detailed-designs/README.md`.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`,
+  `pages/globe/loading.html`, `pages/globe/globe-unavailable.html`, `pages/brand/default.html`. Read
+  `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use
+  that cast and that time.
+- The design system, under `docs/design-system/components/`: `globe.html`, `skeleton.html`, `alert.html`,
+  `link.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and keep the
+  mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -79,26 +83,29 @@ Builds on: journeys 1 to 4.
   mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- Session lifetime and CSRF for the join request (`<TO SUPPLY>`), decided with journey 4 in one ADR.
+- Required by `AGENTS.md` before the Globe is built: which renderer draws the globe, the format its Blender-
+  built assets are exported to, and how they are scaled back for a low-power device. Write the ADR first, then
+  replace every `<TO SUPPLY>` about the renderer in `docs/detailed-designs/globe/` and `docs/detailed-
+  designs/README.md`.
 
 ## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. Backend: `ICurrentTeammate` and the team-scoped authorisation: no session 401, another team 404 (the same
-     as a team that does not exist), another teammate's pin or settings refused; a left teammate's session
-     401.
-  2. Backend: `GET /api/teams/{teamId}/pins` answering `TeamPinsDto` with no postal code, nor part or hash of
-     one; unexpected fields ignored (L2-044 AC6).
-  3. Backend: input validation and sanitising of names (control characters, trimming); CSRF protection on
-     state-changing requests.
-  4. Backend: security headers on every response (CSP own-origin only, `nosniff`, `Referrer-Policy: no-
-     referrer`, HSTS); every endpoint refused without a session unless marked open; the three rate limits
-     verified together.
-  5. Frontend: `teammateGuard` (`CanMatchFn`) showing `NoTeamPage` in place at the opened address; `ApiError`
-     branching on `code` with the screen's own message; a name typed as markup renders as its literal
-     characters.
-  6. E2E: a full visit records every request and none leaves the app's own origin; storage and the address bar
-     hold no postal code.
+  1. The `globe` library, imported dynamically; `GlobeView` (`mo-globe`) behind `@defer` with the placeholder
+     from `components`, no layout shift.
+  2. The assets: modelled and textured in Blender (scripted, headless, so the build is repeatable), exported
+     to the format the ADR chooses, bundled and served from the app's own origin with content-hashed
+     addresses.
+  3. The renderer: perspective, lighting, the globe's own colour tokens, continents recognisable; everything
+     it holds released on destroy (context, loop, listeners, observers).
+  4. The night side: the sun's position from the injected clock, shading that moves as time passes (direct
+     unit tests for 12:00 UTC on 21 March and an hour's movement).
+  5. The still picture (`GlobeFallback` in `components`) where WebGL is missing or the assets or the chunk
+     fail to load, with the mock's notice in place of the legend.
+  6. The legend at 576 px and wider; the lower level of detail a low-power device steps down to (the stepping
+     itself is journey 29).
+  7. Join's stage uses the same `GlobeView`, not interactive, with the bare pins as plain markers until
+     journey 10.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -111,17 +118,20 @@ Builds on: journeys 1 to 4.
 ## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
-- Set journey 5 to 100 in the **% complete** column of `docs/journeys.md` (and in
+- Set journey 8 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Telemetry redaction (journey 26).
-- The own-profile endpoint's contents (journey 18).
+- Turning and dragging (journey 9).
+- Pins, labels and moment markers (journeys 10 and 20).
+- Frame-rate detection and heap checks (journey 29).
 
 ## Done means
-- Every criterion of L2-007 and L2-043 to L2-045 has an acceptance test through the API or in Playwright, and
-  passes.
-- No endpoint is open by omission.
+- The Globe screen draws the 3D globe on a device with WebGL and the still picture without it, as the mocks
+  draw both.
+- The initial bundle holds neither the renderer nor the assets, and the browser asks no other origin for
+  anything.
+- Entering and leaving the Globe leaves no WebGL context, loop, timer or listener behind.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

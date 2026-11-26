@@ -1,16 +1,14 @@
-# Feature: View the week around the world
+# Feature: Show weather
 
 ## Goal
 
-With no pin selected, the Globe screen's panel shows "This week around the world" (the team's moments from
-today to 7 days ahead) and "In working hours now". The heading gives the team's counts ("12 teammates", "12
-time zones · 7 working · 2 asleep"). A team of one shows "Just you, for now" and the invite link to copy;
-"Invite teammate" in the header copies it too.
+Each pin carries the current temperature and one of eight conditions for its city, from Open-Meteo by way of
+the backend, as an icon with its word (night icons at night), in °C or °F as whole degrees. A teammate who
+does not share their weather shows none.
 
-Journey 13 of `docs/journeys.md`. Requirements: L2-024, L2-025 (`docs/specs/L2.md`).
+Journey 13 of `docs/journeys.md`. Requirements: L2-018, L2-019 (`docs/specs/L2.md`).
 
-Builds on: journeys 8, 9 and 12. The moments list fills with journey 15; until then it shows its empty
-wording.
+Builds on: journeys 6 and 10.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -39,19 +37,21 @@ wording.
     with a mock, the mock is right. A mock changes first, then `docs/design-system/`, `docs/specs/`, the ADR
     and `docs/detailed-designs/`, in that order, before any code.
   - Build nothing that has no requirement, detailed design and mock. Mondino has no chat, scheduler, presence
-    tracking, precise location, feed or adverts. "Invite teammate" copies the invite link and opens nothing
-    else; there is no "Message" button; sign-in and making a team are not designed and are not built.
+    tracking, precise location, feed, adverts, admins or roles. "Invite teammate" opens the invite dialog
+    (the link, "Copy link" and "Reset link", nothing else); there is no "Message" button. Three things are
+    not designed and are not built: how a teammate who joined by invite link signs in again, what a used or
+    expired sign-in link shows, and what "Reset link" asks before it acts (`docs/mocks/README.md`).
   - Use the specs' words in code, docs and UI: teammate, team, invite link, pin, postal code, city, local
     time, weather, status, offset, overlap, moment, kind.
   - Frontend (`frontend/`, Angular): libraries `api`, `domain`, `components`, `globe` and the app `mondino`,
     in the dependency direction ESLint enforces; standalone, signals, `OnPush`, zoneless; `mo-*` selectors;
     one `name.ts` + `name.html` + `name.scss` per component with the mocks' BEM classes; tokens by role;
     every route lazy; everything acquired is released; state scoped to its route; one shared, injected
-    clock; the browser calls only the backend; a postal code is never stored, never in a URL.
+    clock; the browser calls only the backend; a postal code and an email are never stored, never in a URL.
   - Backend (`backend/`, .NET): `Mondino.Domain` ← `Mondino.Application` ← `Mondino.Infrastructure` ←
     `Mondino.Api`; a controller sends one MediatR request; errors are ProblemDetails with a `code`; outside
     sources sit behind interfaces with a timeout and a cache; time comes from `TimeProvider`; telemetry
-    carries no name, postal code, position, token, query string or body.
+    carries no name, email, postal code, position, token, query string or body.
   - Tests: backend on EF Core InMemory with fakes and `FakeTimeProvider`, never a sleep; e2e in Playwright,
     Chromium only, page objects own selectors, fixtures answer the API and set the clock, nothing leaves
     localhost. Each acceptance test names its requirements (`// Traces to: L2-0xx`). No architecture tests.
@@ -63,17 +63,17 @@ wording.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-024, L2-025 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
+- The requirements: L2-018, L2-019 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each
   refines in `docs/specs/L1.md`.
-- The detailed design: `docs/detailed-designs/team/view-week-around-the-world/README.md` and its diagrams, and
-  "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/globe/quiet.html`,
-  `pages/globe/empty.html`, `notifications/invite-link/success.html`, `notifications/invite-link/danger.html`.
-  Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures
-  use that cast and that time.
-- The design system, under `docs/design-system/components/`: `moment-row.html`, `panel-row.html`, `card.html`,
-  `toast.html`, `button.html`, `app-header.html`, and the tokens in `docs/design-system/tokens/`. Components
-  are named as there and keep the mocks' BEM classes.
+- The detailed design: `docs/detailed-designs/weather/show-weather/README.md` and its diagrams, and "Contracts
+  the features share" in `docs/detailed-designs/README.md`.
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`,
+  `pages/globe/selected.html`, `pages/globe/fahrenheit-12-hour.html`, `pages/globe/weather-unavailable.html`,
+  `pages/globe/sharing-off.html`, `pages/team/weather-unavailable.html`, `pages/join/found.html`. Read
+  `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use
+  that cast and that time.
+- The design system, under `docs/design-system/components/`: `pin-label.html`, `panel-row.html`, and the
+  tokens in `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock, the requirement and the design disagree anywhere in this scope, the mock is right: bring the
   others in line first (use `engineering-requirements` and `writing-software-design-documents`; re-render
@@ -81,18 +81,22 @@ wording.
   docs/detailed-designs`). If a state this journey must build has no mock, draw it first with `writing-html-
   mocks`, then `extracting-design-systems` if it adds a component.
 
-## Phase 2: Incremental implementation (`implementing-incrementally`, test-first)
+## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
+- The wind threshold that turns a reading into "Windy" is `<TO SUPPLY>`: choose it and write it into the
+  design.
+
+## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. The counts in `domain` (teammates, distinct time zones, working, asleep, through `statusFor`), changing
-     on the hour with no reload.
-  2. "In working hours now": by local hour then west to east, each row selecting its pin; "Nobody — it's quiet
-     everywhere."
-  3. "This week around the world": the first 8 moments in date order then west to east, each selecting its
-     teammate's pin; "All moments" always under it; the every-kind-off copy with "Choose what shows".
-  4. The team of one: `InviteCard` with the invite link and "Copy"; no panel.
-  5. Copying, from the card and from "Invite teammate" in `AppHeader`: `Toast` hosted by `TeamShell`, success
-     announced for 4 seconds, refusal as an alert.
+  1. Backend: `IWeatherSource.GetCurrentAsync(position)` with its fake; `PinDto.Weather` and `WeatherState`
+     (`Available`, `Unavailable`, `NotShared`); one call per city, fresh for 15 minutes.
+  2. Backend: the Open-Meteo adapter with a 5 s timeout: position rounded to two decimals and nothing else;
+     the source's codes mapped to the eight conditions (one test per mapping).
+  3. Frontend: `formatTemperature` and `formatDegrees` in `domain` (°F conversion, never "−0"), the unit
+     defaulting from the teammate's country.
+  4. Frontend: the weather icon with its word and the night form; on the pin label, the panel line ("Foggy in
+     Milan") and the found line on Join.
+  5. Frontend: unavailable and not shared, each with the mock's words; nothing blank or zero.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -102,18 +106,19 @@ wording.
   - Run the regression checks (`node tools/verify/verify.mjs`), then commit the slice.
 - When all slices are green, keep the requirement, design, mock, tests and code aligned with what was built.
 
-## Phase 3: Lessons and progress
+## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
 - Set journey 13 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Moments data (journey 15) and the viewer's chosen kinds (journeys 16 and 19).
+- Behaviour when the source keeps failing: cache fallback and the circuit breaker (journey 26).
+- The °C/°F control (journey 23).
 
 ## Done means
-- The Globe screen with no selection matches `default`, `quiet` and `empty`, and the two notifications.
-- "Invite teammate" opens nothing; it copies the invite link.
+- The cast's weather shows as the mocks draw it in °C and °F.
+- The browser calls only the backend; Open-Meteo learns a rounded position and nothing else.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.
