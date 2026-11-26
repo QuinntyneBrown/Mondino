@@ -61,7 +61,10 @@ not exist yet; each part below is introduced by this design.
   maps `postal_code_not_found`, `postal_code_unavailable` and `rate_limited` to the last three.
 - **The small globe** — `ProfilePage` imports `GlobeView` from `@mondino/globe` dynamically and
   renders `mo-globe` with one pin, the viewer's own, and `interactive` set to `false`. A globe
-  that is not interactive does not turn on its own and cannot be dragged (L2-031). While the
+  that is not interactive does not turn on its own and cannot be dragged (L2-031). `GlobeView`
+  has no input that takes a position: `ProfilePage` puts its one pin in `pins` (the saved pin,
+  or the draft's "New · Toronto" pin) and names it in `selectedId`, so the globe turns to it
+  and holds there (`globe/turn-globe`). While the
   draft holds a found city that is not saved, the globe shows the pin there, marked as new
   ("New · Toronto"); the city and local time beside it stay the saved ones until the save.
   The globe's accessible name is "A small globe with your pin at Milan", or "A small globe with
@@ -85,8 +88,8 @@ not exist yet; each part below is introduced by this design.
 - **`PostalCodeField`** (`@mondino/components`) — the postal code field that Join also uses, in
   the same shape: inputs `value`, `country`, `lookupState`, `message` and `invalid`, outputs
   `valueChange`, `blurred` and `retry`. It injects nothing and holds no copy of its own: it
-  renders the `LookupMessage` it is given, in a polite live region for `Locating` and `Found`
-  and in an alert (`role="alert"`) for the other three, and links it to the input with
+  renders the `LookupMessage` it is given, in a polite live region for `Idle`, `Locating` and
+  `Found` and in an alert (`role="alert"`) for the other three, and links it to the input with
   `aria-describedby`. `invalid` sets `aria-invalid` on the input.
 - **`LookupMessage`** (`@mondino/api`) — what the field shows for a lookup state: `text`
   and, where the message offers one, `retryLabel` ("Try again"). `Country` is a type in
@@ -110,6 +113,8 @@ not exist yet; each part below is introduced by this design.
   the pin stays where it was.
 - **`localTime` and `formatTime`** (`@mondino/domain`, `time/`) — work out the viewer's local
   time from the pin's time zone id and the injected `CLOCK`, in the clock format the viewer chose.
+  `timeZoneName(timeZoneId, now)`, beside them, gives the name of the time zone ("Central
+  European Time") from `Intl.DateTimeFormat` with `timeZoneName: 'longGeneric'` (L2-031).
 
 ### Backend — `Mondino.Api`
 

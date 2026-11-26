@@ -52,7 +52,7 @@ end
 client --> store : Profile, or ApiError when the read fails
 note over page : When the read fails: "We couldn’t load your pin", "Try again" and "Back to the globe".
 store --> page : saved and draft signals
-page -> globe : Import @mondino/globe dynamically; one pin, interactive = false
+page -> globe : Import @mondino/globe dynamically; one pin in pins, named in selectedId, interactive = false
 globe --> page : Small globe that does not turn and cannot be dragged (L2-031)
 page --> actor : "Your pin": city, country, local time, time zone, the privacy reminder
 @enduml

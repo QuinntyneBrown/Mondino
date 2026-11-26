@@ -76,7 +76,7 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 - **A minute tick is silent.** The descriptions and the panel update in place when the clock
   ticks. Neither is inside a live region, and `GlobePage` writes to its status element only on a change of selection.
 - **The postal code lookup is announced.** `PostalCodeField` renders the `LookupMessage` it
-  is given (`message`) inside a polite live region while `lookupState` is `Locating` or
+  is given (`message`) inside a polite live region while `lookupState` is `Idle`, `Locating` or
   `Found`, and otherwise in an element with `role="alert"`, linked to the input with
   `aria-describedby`. Its input `invalid` sets `aria-invalid`: the screen sets it for an empty
   postal code on submit and when the postal code is not found, and not when the lookup is

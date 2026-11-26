@@ -65,9 +65,12 @@ source.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
   avatar.
 - **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block. `JoinPage` passes
-  it the bare pins and sets it not interactive. A globe that is not interactive cannot be
-  dragged and does not turn on its own (`globe/turn-globe`); on Join it turns only to the
-  found city (`place-pin-from-postal-code`). The globe's renderer is `<TO SUPPLY>`.
+  it the bare pins in `pins` and sets it not interactive. A bare pin comes from a position
+  alone, so `JoinPage` gives each a local id from its place in `Invite.positions` (`bare-0`,
+  `bare-1`, …), never a teammate id, and projects no label for it. A globe that is not
+  interactive cannot be dragged and does not turn on its own (`globe/turn-globe`); on Join it
+  turns only to the found city, which `place-pin-from-postal-code` adds to `pins` with the id
+  `you`, names in `selectedId` and `arrivedIds`, and labels ("You · Milan"). The globe's renderer is `<TO SUPPLY>`.
 
 **Backend**
 

@@ -45,7 +45,13 @@ source and Open-Meteo. The browser calls only the Mondino API.
 
 - **`JoinPage`** — renders the form beside the globe on a tablet and wider, and in one column on
   a phone. It lists `Invite.countries` in the Country field in alphabetical order. It passes the
-  found city to `GlobeView` as the selected pin labelled "You". The Join globe is not
+  found city to `GlobeView` as the selected pin labelled "You". `GlobeView` has no input that
+  takes a position, so `JoinPage` adds the found city to `pins` as one more pin with the id
+  `you`, beside the bare pins (`bare-0`, `bare-1`, … `open-invite-link`), names it in
+  `selectedId` and in `arrivedIds`, so it pulses once (not under reduced motion), and projects
+  a label template that draws a label for that pin only ("You · Milan"). The id `you` is local
+  to the screen and is never a teammate id. `clearFound()` takes the pin out of `pins` and
+  empties `selectedId`. The Join globe is not
   interactive, so it cannot be dragged and does not turn on its own (`globe/turn-globe`); it
   turns only to the found city, the pin `selectedId` names, and holds there. It passes `PostalCodeField` the
   chosen `Country`, the `lookupState`, the `LookupMessage` that `joinLookupMessage` gives for
@@ -75,8 +81,8 @@ source and Open-Meteo. The browser calls only the Mondino API.
   component, the same on Join and on Profile & Settings. Its inputs are `value`, `country` (the
   chosen `Country`), `lookupState` (a `LookupState`), `message` (a `LookupMessage` or null) and
   `invalid`, and it emits `valueChange`, `blurred` and `retry`. It injects nothing and holds no
-  copy of its own: it renders the `message` it is given, in a polite live region for `Locating`
-  and `Found` and in an alert (`role="alert"`) otherwise, linked to the input with
+  copy of its own: it renders the `message` it is given, in a polite live region for `Idle`,
+  `Locating` and `Found` and in an alert (`role="alert"`) otherwise, linked to the input with
   `aria-describedby`, with a button that emits `retry` when the message has a `retryLabel`.
   `invalid` sets `aria-invalid` on the input; it is true for an empty postal code on submit and
   for `NotFound` only, since nothing is wrong with what was typed when the lookup is
@@ -84,7 +90,9 @@ source and Open-Meteo. The browser calls only the Mondino API.
 - **`LookupMessage`** — type in `@mondino/api`: what the field shows for a lookup state, the
   `text` and, where the message offers one, the `retryLabel` ("Try again").
 - **`joinLookupMessage(lookupState, postalCode, country)`** — pure helper beside `JoinPage`
-  that gives this screen's `LookupMessage`, or null for `Idle`:
+  that gives this screen's `LookupMessage`:
+  - `Idle`: "Only your city is shown. Your postal code stays private." (L2-002), which gives
+    way to "Enter your postal code." when the form is submitted with the postal code empty.
   - `Locating`: "Finding 20121…".
   - `Found`: "Milan, Lombardy — pinned at city level. 13° and foggy right now."
   - `NotFound`: "We couldn’t find “2012” in Italy. Italian postal codes have five digits, like

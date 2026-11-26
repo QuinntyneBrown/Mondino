@@ -68,6 +68,6 @@ controller --> client : 200 PostalCodeResultDto
 client --> store : PostalCodeResult
 store --> page : lookupState Found
 page -> page : joinLookupMessage(...) gives PostalCodeField its message
-page -> globe : Turn to the city, add the pin "You" and the city, pulsing once
+page -> globe : pins + the found pin (id "you"), selectedId and arrivedIds = "you":\nturn to the city, label "You · Milan", pulse once
 page --> actor : "Milan, Lombardy", pin placed at city level, weather, button "Join Northwind" (L2-003)
 @enduml
