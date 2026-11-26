@@ -99,5 +99,5 @@ Moment --> MomentKind
 EmblemCatalogue ..> Moment : sets emblemKey
 GlobeView --> PinLayer
 PinLayer ..> MomentMarker : draws
-PinLayer ..> MomentIcon : draws a kind's icon with
+GlobePage ..> MomentIcon : draws a kind's icon with, in its mark template
 @enduml
