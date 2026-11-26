@@ -63,7 +63,7 @@ hosting platform is `<TO SUPPLY>`.
 `false`, the same address shows `InviteNeededPage`, and no request is sent to the
 `Mondino API`.
 
-**`TeamMembership`** — service in `domain`'s `storage/`. It holds a `Membership` (`teamId`,
+**`TeamMembership`** — service in `domain`'s `storage/`. It holds a `Membership`, a type in `@mondino/api` (`teamId`,
 `teammateId`, `teamName`, and the viewer's `initials` and `colour`) in the browser's local
 storage and exposes it as the signal `current`. `JoinPage` calls `remember(membership)` after
 a successful join, with the colour the `JoinResult` returns (`join-team`), and when an

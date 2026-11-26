@@ -47,13 +47,13 @@ class Wordmark <<mo-wordmark>> {
   +collapses: InputSignal<boolean>
 }
 
-class TeamMembership {
+class TeamMembership <<domain, storage/>> {
   +current: Signal<Membership | null>
   +remember(membership: Membership): void
   +forget(): void
 }
 
-class Membership {
+class Membership <<type in @mondino/api>> {
   +teamId: string
   +teammateId: string
   +teamName: string
@@ -90,4 +90,5 @@ teammateGuard ..> TeamMembership : reads
 teammateGuard ..> InviteNeededPage : shown when it refuses
 sessionExpiredInterceptor ..> TeamMembership : forgets
 TeamMembership --> Membership : holds
+note right of TeamMembership : JoinPage calls remember after a join and\nwhen an invite link answers AlreadyJoined
 @enduml

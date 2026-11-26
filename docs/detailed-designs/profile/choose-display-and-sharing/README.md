@@ -167,7 +167,9 @@ exist yet; each part below is introduced by this design.
   `ShareWeather`, `ShowOutsideWorkingHours`. `DefaultsFor(countryCode)` gives a new teammate's
   settings: Fahrenheit for the United States and Celsius elsewhere (L2-019), the 12-hour clock
   for the United States and Canada and the 24-hour clock otherwise (L2-033), all four kinds of
-  moment, and both sharing switches on (L2-034). `JoinTeamCommandHandler` calls it.
+  moment, and both sharing switches on (L2-034). `JoinTeamCommandHandler` calls it, passes
+  the result to `Team.AddTeammate` as its `settings`, and returns the teammate's settings as
+  `JoinResultDto.Settings` (`joining/join-team`), the `settings` of the browser's `JoinResult`.
 - **`Teammate`** — `ChangeSettings(settings)` replaces the value object whole.
 
 ### Errors
