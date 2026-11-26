@@ -15,34 +15,43 @@ more. It is a responsive web application, used on a phone, a tablet, a desktop a
 screen.
 
 **Direction.** One question decides everything: what is it like where my teammate is, right
-now? The whole app is five screens, and it stays that small:
+now? The whole app is three ways in and four screens, and it stays that small:
 
 1. **Join**: "Put yourself on the map." A name, a country and a postal code, beside the globe
    with the team already on it. The postal code is looked up ("Finding 20121…"), the pin is
    placed at city level with the weather there, and the button changes from "Place my pin" to
    "Join" and the team's name. A postal code that cannot be found says so, with the form that
-   country's postal codes take.
-2. **Globe**: the home screen. The globe with every teammate's pin, its night side shaded, and
+   country's postal codes take; when the lookup is down, the teammate picks their city instead.
+2. **Create Team**: "Start a team." A team name, a name, a work email, a country and a postal
+   code. The team is made with its maker's pin on it, and the screen gives the invite link:
+   "Now bring everyone in."
+3. **Sign In**: "Welcome back." A work email and no password: Mondino emails a link that signs
+   the teammate in, once, within 15 minutes.
+4. **Globe**: the home screen. The globe with every teammate's pin, its night side shaded, and
    a count of teammates, time zones, and who is working and who is asleep. Beside it is a panel:
-   with no pin selected, "This week around the world" and "In working hours now"; with a pin
-   selected, that teammate's city, local time, how far ahead or behind they are, their status,
-   their weather, their moments and the working-hours overlap with you. A team of one shows
-   "Just you, for now" and the invite link.
-3. **Team**: "Where everyone is in their day." A day ribbon that places each teammate at the
+   with no pin selected, "This week around the world" and "In working hours now", six of each;
+   with a pin selected, that teammate's city, local time, how far ahead or behind they are,
+   their status, their weather, their moments and the working-hours overlap with you. Teammates
+   whose pins would cover each other are one group pin with a count, which is how a team of
+   hundreds is drawn; selecting it lists them by city. A team of one shows "Just you, for now"
+   and the invite link.
+5. **Team**: "Where everyone is in their day." A day ribbon that places each teammate at the
    hour they are living through, then everyone from west to east with their location, local
-   time, offset, weather and next moment, filtered by All, Working now or Asleep.
-4. **Moments**: the holidays, races and local happenings where teammates live, filtered by
+   time, offset, weather and next moment, filtered by All, Working now or Asleep. Past 40
+   teammates the ribbon counts them at each half hour, and the list is searched and split into
+   a section per city.
+6. **Moments**: the holidays, races and local happenings where teammates live, filtered by
    kind, with today's moment at the top, then This week and Later.
-5. **Profile & Settings**: "Your pin." The teammate's own pin on a small globe, their location,
+7. **Profile & Settings**: "Your pin." The teammate's own pin on a small globe, their location,
    temperature in °C or °F, a 24-hour or 12-hour clock, which kinds of moment show on the globe,
-   what they share (their weather, and when they are outside working hours), and leaving the
+   what teammates see (their weather, and whether they are working or asleep), and leaving the
    team.
 
 - **A pin is a person, their clock and their sky.** It shows the teammate's initials in their
   own colour, their local time, the weather and the temperature. A pin that is pointed at,
   focused or selected lifts out from the globe, so teammates stay clear on a small globe. A
-  moment marker beside a pin, in sun, means there is a moment there this week, and its emblem
-  says what it is.
+  moment marker beside a pin, in sun, means there is a moment there this week: its emblem says
+  what it is, or a number says how many there are.
 - **Only the city is shown.** A postal code places a pin at city level, enough to tell
   Mississauga from Toronto and no more, and stays private: a teammate sees another's city and
   country, never their postal code or an address.
@@ -56,10 +65,13 @@ now? The whole app is five screens, and it stays that small:
   use it, and otherwise the marker shows Mondino's own icon for the kind.
 
 Mondino has no chat, no calendar or meeting scheduler, no presence or activity tracking, no
-precise location, no social feed and no adverts. "Invite teammate" copies the team's
-invite link and opens nothing else. The prototype's "Message" button on a teammate's panel is
-not in the mocks and is not built. Sign-in and making a team are not designed yet; neither is
-built before its design exists. Before adding or
+precise location, no social feed, no adverts, and no admins or roles: whoever makes a team is
+a teammate like any other. "Invite teammate" opens a dialog with the team's invite link, a
+button to copy it and a way to reset it, and nothing else. There is no "Message" button:
+Mondino has no chat. Three things are not designed yet, and none is built before its design
+exists: how a teammate who joined by invite link, and so gave no email, signs in again; what a
+sign-in link shows once it has expired or been used; and what "Reset link" asks before it acts
+(`docs/mocks/README.md` lists them). Before adding or
 changing anything, ask how it serves seeing where a teammate is and what it is like there right
 now; if it does not, do not build it, and if a request works against it, say so.
 
@@ -77,7 +89,8 @@ Do not invent a mission in its place.
 ## Design
 
 The design is the **Mondino App** prototype in Magic Patterns (the *Global Teammate Globe* OS):
-the frames Join, Globe, Team, Moments and Profile & Settings. Beside it is the *Mondino Brand*
+the frames Join, Sign In, Create Team, Invite Needed, Globe, Team, Moments, Profile & Settings,
+Left Team and Not Found. Beside it is the *Mondino Brand*
 prototype (the frame *Logo & Wordmark*): the mark and wordmark on paper, ink and pin, the mark at
 sizes down to 16 px, the app icon, the colours, the type and the pins. The OS's own design
 thread holds the decisions behind it.
@@ -99,8 +112,8 @@ detailed design are brought in line with it in that order, before any code.
 - **Colour:** paper and ink carry the interface: a cool paper canvas, white surfaces and
   hairlines, and deep navy ink for text and navigation. Pin (orange-red) marks people and sun
   (yellow) marks moments; leaf (green) marks working hours and sea is the brand's navy. The
-  globe has colours of its own. Nothing else competes. The mocks are drawn in light and in
-  dark; the prototype is light only.
+  globe has colours of its own. Nothing else competes. The prototype and the mocks are drawn
+  in light and in dark.
 - **Type:** Gabarito for the wordmark, names and clocks, and Inter for everything that is read.
   Times and temperatures use tabular figures.
 - **The globe** is three-dimensional and beautiful: modelled in Blender, lit and shaded, with
@@ -112,26 +125,29 @@ detailed design are brought in line with it in that order, before any code.
   the mocks draw the globe as a cartoon in two dimensions; that is the look the 3D globe
   aims for.
 - **Phone:** one column. Globe puts the globe on top and the panel under it, and the header
-  shows the mark without the wordmark. Team shows each teammate's name, status, local time and next
-  moment.
-- **Tablet and desktop:** Join puts the form beside the globe, Globe puts the panel to the
-  right of the globe, Team is a table, and Profile & Settings keeps the teammate's pin beside
-  the settings.
-- **Motion.** A panel changes with a short fade, and a newly placed pin pulses. Reduced motion
-  removes both, and stops the globe turning on its own.
+  shows the mark without the wordmark and "Invite teammate" as an icon. Team shows each
+  teammate's name, status, local time and next moment. A dialog is a sheet from the bottom.
+- **Tablet and desktop:** Join, Sign In and Create Team put the form beside the globe, Globe
+  puts the panel to the right of the globe, Team is a table, and Profile & Settings keeps the
+  teammate's pin beside the settings.
+- **Motion.** A panel changes with a short fade, a dialog and a toast come in the same way, and
+  a newly placed pin pulses. Reduced motion removes them all, and stops the globe turning on
+  its own.
 
 Before a screen is built or changed, its states are drawn in `docs/mocks/`. The prototype's
-sample team (Northwind, its twelve teammates, their cities, postal codes, weather and moments,
-and its "today") is the cast, not rules. In the prototype a teammate's panel and the Team table
-show a postal code, which the design's own privacy copy rules out; the mocks show the city and
-country only, and `docs/mocks/README.md` records it, with every other place they depart.
+sample team (Northwind, its thirteen teammates, their cities, postal codes, weather and moments,
+and its "today") is the cast, not rules. Where the prototype works against a rule here (it tells
+a stranger whether an email is known, it speaks of plans and admins, it shows a status by colour
+alone), the mocks follow the rule, and `docs/mocks/README.md` records each place they depart,
+and why.
 
 ## Where things are
 
 - **The frontend is what people use.** `frontend/` is an Angular workspace and holds every
-  screen: Join, Globe, Team, Moments and Profile & Settings, and the globe itself.
+  screen: Join, Sign In, Create Team, Globe, Team, Moments and Profile & Settings, and the
+  globe itself.
 - **The backend holds the team.** `backend/` is a .NET service: teams and their invite links,
-  teammates and their pins, the lookup that turns a postal code into a city, a position and a
+  teammates and their pins, sign-in links, the lookup that turns a postal code into a city, a position and a
   time zone, the weather at each pin, and the moments where teammates live. It is the only
   thing that calls the weather, postal code and calendar sources.
 - Before building a feature, read its requirement (`docs/specs/`, `docs/journeys.md`), its
@@ -146,7 +162,7 @@ country only, and `docs/mocks/README.md` records it, with every other place they
   pushing.
 
 Use the words the specs use in code, docs and UI; no synonyms. Someone who uses Mondino is a
-"teammate", and teammates belong to a "team", joined through its "invite link". A teammate's
+"teammate", and teammates belong to a "team", joined through its "invite link" or made on Create Team. A teammate's
 place on the "globe" is their "pin", placed from their "postal code" at their "city". A pin
 shows the teammate's "local time", their "weather" and their "status": "Working hours", "Early
 morning", "Evening" or "Probably asleep". How far a teammate is ahead or behind is their
@@ -222,16 +238,20 @@ better than one that keeps growing. A further application needs its own ADR.
   its unit tests, never in a component.
 - Each service has a contract and an injection token in `api`; components depend on the token.
 - **No inline forms.** Button-triggered editing opens a CDK Dialog or navigates to a screen.
-  Never hand-roll modals.
+  Never hand-roll modals. The invite dialog, "Leave Northwind?" and "Leave without saving?" are
+  CDK Dialogs.
 - A contract refuses with an error whose `code` a screen branches on; the teammate sees a generic
   message. Names and error strings from the backend or from storage are data, rendered as text,
   never as HTML.
 - **What a teammate writes is data.** A teammate's name and role, a team's name, and a city or
   a moment's title from an outside source are rendered as text, never as HTML, wherever they
   appear.
-- **A postal code is the teammate's own.** It appears only on that teammate's own Join and
-  Profile & Settings screens. It is never kept in browser storage, never in a URL, and never in
-  what the frontend receives about another teammate.
+- **A postal code is the teammate's own.** It appears only on that teammate's own Join, Create
+  Team and Profile & Settings screens. It is never kept in browser storage, never in a URL, and
+  never in what the frontend receives about another teammate.
+- **So is an email.** It appears only on that teammate's own Sign In and Create Team screens and
+  on "You need an invite link". It is never shown to another teammate, never kept in browser
+  storage and never in a URL, and Sign In answers the same way whether or not Mondino knows it.
 - Every interaction works by touch on a phone and by keyboard on a desktop; touch targets are
   at least 44 × 44 px; colour is never the only carrier of a state.
 
@@ -245,20 +265,22 @@ Clean architecture, strict dependency direction: `Mondino.Domain` (entities, zer
   itself and sends one MediatR request.
 - The API does not apply migrations on startup; a CLI command does. Seed data is idempotent.
 - Endpoints accept only what a team's own teammate may do; anything open to anyone (opening an
-  invite link, looking up a postal code while joining) is marked so explicitly and is rate
-  limited.
+  invite link, looking up a postal code while joining, asking for a sign-in link, making a
+  team) is marked so explicitly and is rate limited.
 - Errors are ProblemDetails with a `code` extension where a client branches on them.
-- Telemetry is OpenTelemetry. No log, metric or span carries a name, a postal code, a
+- Telemetry is OpenTelemetry. No log, metric or span carries a name, an email, a postal code, a
   position, a token, a query string or a body; a route is recorded as its template.
 - A teammate sees only the team they are in, and changes or removes only their own pin.
 - **A postal code never leaves the backend for another teammate.** It is used to find the
   city, the position and the time zone, and is returned only to the teammate it belongs to. A
-  pin is placed at the city, never at the postal code's own position.
+  pin is placed at the city, never at the postal code's own position. An email never leaves it
+  for another teammate either.
 - **Outside sources sit behind interfaces in `Mondino.Application`.** The postal code lookup,
   the weather (Open-Meteo) and the holiday and race calendars are called only by the backend,
   with a timeout, and their answers are cached. When one fails, a pin still shows its local
   time; nothing fails because the weather is missing. An outside source receives a place,
-  never a teammate's name or their team.
+  never a teammate's name or their team. The sender of sign-in emails sits behind an interface
+  too, and receives an address and a link and nothing else.
 - Local time is not stored or sent: the backend gives a pin's time zone, and the browser works
   out the time. Anything on the backend that depends on the time reads `TimeProvider`.
 - A setting a deployed system needs is documented in the same change.
@@ -287,8 +309,8 @@ Clean architecture, strict dependency direction: `Mondino.Domain` (entities, zer
   unprompted. Update baselines only for intentional design changes, after changing the mock.
 - Chromium only; never configure or run another browser.
 - In unit tests, time-driven rules (the clocks ticking over, a status changing at its hour, the
-  postal code lookup after typing stops, a confirmation that dismisses itself) advance a fake
-  clock; never sleep.
+  postal code lookup after typing stops, a toast that dismisses itself, the countdown after too
+  many tries) advance a fake clock; never sleep.
 
 ## CI (GitHub Actions)
 

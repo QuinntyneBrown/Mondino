@@ -7,7 +7,7 @@
 <meta name="mock:kind" content="page">
 <meta name="mock:screen" content="team">
 <meta name="mock:state" content="no-results">
-<meta name="mock:requirements" content="L2-007 L2-014 L2-015 L2-016 L2-018 L2-019 L2-026 L2-027 L2-028 L2-037 L2-038 L2-044 L2-049">
+<meta name="mock:requirements" content="L2-007 L2-014 L2-015 L2-016 L2-018 L2-019 L2-026 L2-027 L2-028 L2-037 L2-038 L2-044 L2-047 L2-049 L2-054 L2-056">
 <meta name="description" content="Team filtered to “Asleep” when no one is asleep: “Everyone is awake right now.”, with the filter still in view.">
 <link rel="stylesheet" href="../../assets/tokens.css">
 <link rel="stylesheet" href="../../assets/ui.css">
@@ -23,7 +23,7 @@
     <a class="segmented__option" href="../../pages/moments/default.html">Moments</a>
   </nav>
   <div class="app-header__actions">
-    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <a class="btn app-header__invite" href="../../dialogs/invite/default.html" aria-label="Invite teammate"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg><span class="app-header__invite-label">Invite teammate</span></a>
     <a class="app-header__me" href="../../pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
   </div>
 </header>
@@ -52,11 +52,11 @@
     </div>
   </div>
   <div id="team-list" role="tabpanel" aria-labelledby="tab-asleep">
-      <p class="list-note">Everyone is awake right now.</p>
+      <div class="list-note" role="status"><strong class="list-note__title">No one is asleep right now</strong>Try another filter.<br><button class="btn btn--sm" type="button">Show everyone</button></div>
       
   </div>
 </main>
-<p class="mock-note" style="top: 5rem; right: 1rem;">Shown for a smaller team, Sofia, Mara and Liam, mid-afternoon in Europe. “Working now” with no one working says “Nobody is in working hours right now.”</p>
+<p class="mock-note" style="top: 5rem; right: 1rem;">Shown for a smaller team, Sofia, Mara and Liam, mid-afternoon in Europe. “Working now” with no one working reads “No one is in working hours right now” and “It’s the quiet gap between time zones. Check back in an hour.” “Show everyone” returns to All.</p>
 <nav class="mock-bar" aria-label="Mock navigation">
   <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
   <span class="mock-bar__screen">Team</span>
@@ -70,6 +70,8 @@
     <li><a href="error.html">error</a></li>
     <li><a href="weather-unavailable.html">weather-unavailable</a></li>
     <li><a href="edge.html">edge</a></li>
+    <li><a href="hundreds.html">hundreds</a></li>
+    <li><a href="hundreds-no-match.html">hundreds-no-match</a></li>
   </ul>
   <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
   <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>

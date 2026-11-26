@@ -68,21 +68,23 @@
   --palette-pin-soft: #fbe2d8;
   --palette-pin-strong: #b34024;  /* pin as text, 4.5:1 on paper, white and pin-soft */
   --palette-pin-solid: #cc4929;   /* pin behind white text */
-  --palette-pin-light: #ff8f6e;   /* pin as text on night */
-  --palette-pin-deep: #3d1a10;
+  --palette-pin-light: #ff9475;   /* pin as text on night: the prototype's dark pin-ink */
+  --palette-pin-deep: #3b211b;     /* the prototype's dark pin-soft */
+  --palette-pin-dark: #ff6a45;     /* the pin itself, in dark */
 
   --palette-sun: #f2b43c;         /* moments */
   --palette-sun-soft: #fcefd2;
   --palette-sun-strong: #7a5200;  /* sun as text on sun-soft */
-  --palette-sun-deep: #3b2f12;
+  --palette-sun-deep: #3a3118;     /* the prototype's dark sun-soft */
+  --palette-sun-dark: #f5c04f;     /* sun, in dark */
 
   --palette-leaf: #2f7d57;        /* working hours */
   --palette-leaf-soft: #dcefe3;
   --palette-leaf-strong: #2c7451; /* leaf as text on leaf-soft */
-  --palette-leaf-light: #7fd6a8;
-  --palette-leaf-deep: #143524;
+  --palette-leaf-light: #5cc48c;   /* leaf, in dark */
+  --palette-leaf-deep: #16352a;    /* the prototype's dark leaf-soft */
 
-  /* The cartoon globe. The same in both themes: it is a picture of a place. */
+  /* The cartoon globe, in light. */
   --palette-ocean: #38a8f2;
   --palette-ocean-deep: #1f7fd0;
   --palette-grass: #5cc85a;
@@ -91,6 +93,16 @@
   --palette-ice: #ffffff;
   --palette-cloud: #ffffff;
   --palette-dusk: #2b2170;
+
+  /* The cartoon globe, in dark: the same picture, a little deeper. */
+  --palette-ocean-dark: #2a7fc4;
+  --palette-ocean-deep-dark: #17558f;
+  --palette-grass-dark: #49a84a;
+  --palette-grass-deep-dark: #23702f;
+  --palette-sand-dark: #d9b24e;
+  --palette-ice-dark: #dfe8f5;
+  --palette-cloud-dark: #dfe8f5;
+  --palette-dusk-dark: #070b2a;
 
   /* A teammate's own colour. The prototype's twelve, darkened where white
      initials on them fell under 4.5:1. */
@@ -106,14 +118,16 @@
   --palette-teammate-10: #388449;
   --palette-teammate-11: #b15f25;
   --palette-teammate-12: #6a5acd;
+  --palette-teammate-13: #5a7d3a;
 
-  /* Night theme surfaces, stepped up from night. */
-  --palette-night-surface: #121c31;
-  --palette-night-raised: #1a2742;
-  --palette-night-line: #27344f;
-  --palette-night-line-strong: #7f8ca6;
-  --palette-night-muted: #a7b3c8;
-  --palette-night-fg: #eef3fb;
+  /* Dark theme surfaces, from the prototype's dark theme. */
+  --palette-night-canvas: #0d1422;      /* paper, in dark */
+  --palette-night-surface: #151e31;     /* surface, in dark */
+  --palette-night-raised: #1c2740;      /* one step up from the surface; the mocks' own */
+  --palette-night-line: #26324a;        /* hairlines */
+  --palette-night-line-strong: #6f7d96; /* control edges, 3:1 on the canvas and the surface */
+  --palette-night-muted: #9ba7bb;       /* secondary text */
+  --palette-night-fg: #eef2f8;          /* ink, in dark */
 
   /* ---------- Primitives: typography ------------------------------------ */
   --font-family-display: "Gabarito", ui-sans-serif, system-ui, sans-serif; /* wordmark, names, clocks */
@@ -394,6 +408,9 @@
   --overlap-bar-height: 1.75rem;
   --ribbon-row-height: 2.5rem;
   --ribbon-top: 1.875rem;
+  --ribbon-density-height: 8.75rem; /* the day ribbon as a bar chart, for a large team */
+  --layout-notice-art: 12.5rem;     /* the small globe on a page that says one thing */
+  --layout-search-width: 14rem;     /* the search field above a large team */
 
   color-scheme: light;
 }
@@ -417,14 +434,14 @@
 }
 
 /* ---------- Dark theme ------------------------------------------------------
-   The prototype is drawn in light only. Dark is the same roles turned over:
-   night becomes the canvas and paper becomes the ink. Pin, sun and leaf keep
-   their hue, and the globe keeps its colours. */
+   The prototype's dark theme: the same roles re-pointed. The canvas, surface,
+   hairline, edge, ink and muted values are the prototype's; pin, sun and leaf
+   are a step brighter, and the globe is the same picture a little deeper. */
 [data-theme="dark"] {
-  --color-bg-canvas: var(--palette-night);
+  --color-bg-canvas: var(--palette-night-canvas);
   --color-bg-surface: var(--palette-night-surface);
   --color-bg-surface-raised: var(--palette-night-raised);
-  --color-bg-surface-sunken: var(--palette-night);
+  --color-bg-surface-sunken: var(--palette-night-canvas);
   --color-bg-subtle: var(--palette-night-raised);
   --color-bg-subtle-hover: var(--palette-night-line);
   --color-bg-inverse: var(--palette-paper);
@@ -458,7 +475,7 @@
   --color-moment-hover: var(--palette-sun-deep);
   --color-moment-subtle: var(--palette-sun-deep);
   --color-fg-moment-muted: var(--palette-ink-soft);
-  --color-working: var(--palette-leaf);
+  --color-working: var(--palette-leaf-light);
   --color-working-subtle: var(--palette-leaf-deep);
   --color-fg-working: var(--palette-leaf-light);
   --color-night-band: rgb(0 0 0 / 0.3);
@@ -491,8 +508,18 @@
   --color-danger-solid-hover: var(--palette-pin-soft);
   --color-fg-on-danger: var(--palette-pin-deep);
 
-  --color-globe-outline: var(--palette-night);
-  --color-globe-shadow: rgb(0 0 0 / 0.4);
+  --color-people: var(--palette-pin-dark);
+  --color-moment: var(--palette-sun-dark);
+  --color-globe-ocean: var(--palette-ocean-dark);
+  --color-globe-ocean-deep: var(--palette-ocean-deep-dark);
+  --color-globe-land: var(--palette-grass-dark);
+  --color-globe-land-deep: var(--palette-grass-deep-dark);
+  --color-globe-sand: var(--palette-sand-dark);
+  --color-globe-ice: var(--palette-ice-dark);
+  --color-globe-cloud: var(--palette-cloud-dark);
+  --color-globe-night: var(--palette-dusk-dark);
+  --color-globe-outline: var(--palette-night-fg);
+  --color-globe-shadow: rgb(0 0 0 / 0.14);
 
   --shadow-color: 0 0 0;
   --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.4);
@@ -507,10 +534,10 @@
 /* Follow the OS preference unless the page has explicitly chosen light. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-bg-canvas: var(--palette-night);
+    --color-bg-canvas: var(--palette-night-canvas);
     --color-bg-surface: var(--palette-night-surface);
     --color-bg-surface-raised: var(--palette-night-raised);
-    --color-bg-surface-sunken: var(--palette-night);
+    --color-bg-surface-sunken: var(--palette-night-canvas);
     --color-bg-subtle: var(--palette-night-raised);
     --color-bg-subtle-hover: var(--palette-night-line);
     --color-bg-inverse: var(--palette-paper);
@@ -539,7 +566,7 @@
     --color-moment-hover: var(--palette-sun-deep);
     --color-moment-subtle: var(--palette-sun-deep);
     --color-fg-moment-muted: var(--palette-ink-soft);
-    --color-working: var(--palette-leaf);
+    --color-working: var(--palette-leaf-light);
     --color-working-subtle: var(--palette-leaf-deep);
     --color-fg-working: var(--palette-leaf-light);
     --color-night-band: rgb(0 0 0 / 0.3);
@@ -567,8 +594,18 @@
     --color-danger-solid: var(--palette-pin-light);
     --color-danger-solid-hover: var(--palette-pin-soft);
     --color-fg-on-danger: var(--palette-pin-deep);
-    --color-globe-outline: var(--palette-night);
-    --color-globe-shadow: rgb(0 0 0 / 0.4);
+    --color-people: var(--palette-pin-dark);
+    --color-moment: var(--palette-sun-dark);
+    --color-globe-ocean: var(--palette-ocean-dark);
+    --color-globe-ocean-deep: var(--palette-ocean-deep-dark);
+    --color-globe-land: var(--palette-grass-dark);
+    --color-globe-land-deep: var(--palette-grass-deep-dark);
+    --color-globe-sand: var(--palette-sand-dark);
+    --color-globe-ice: var(--palette-ice-dark);
+    --color-globe-cloud: var(--palette-cloud-dark);
+    --color-globe-night: var(--palette-dusk-dark);
+    --color-globe-outline: var(--palette-night-fg);
+    --color-globe-shadow: rgb(0 0 0 / 0.14);
     --shadow-color: 0 0 0;
     --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.4);
     --shadow-2: 0 2px 6px rgb(var(--shadow-color) / 0.45), 0 1px 2px rgb(var(--shadow-color) / 0.3);
