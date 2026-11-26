@@ -35,7 +35,9 @@ behind them.
   `Secure` and `SameSite=Lax`. The cookie's protected payload names the teammate id and the
   team id and nothing else. On each request the handler reads the cookie and confirms through
   `IAppDbContext` that the teammate still exists in that team. A teammate who has left no
-  longer exists, so an old session is refused with 401. The session's lifetime is `<TO SUPPLY>`.
+  longer exists, so an old session is refused with 401. Leaving ends the teammate's sessions
+  through `ITeammateSessions.EndAllAsync(teammateId)`, which `TeammateSessions` implements
+  beside this handler (`leave-team`). The session's lifetime is `<TO SUPPLY>`.
 - **`ICurrentTeammate`** — interface in `Mondino.Application` with `TeammateId`, `TeamId` and
   `IsAuthenticated`. **`CurrentTeammate`** in `Mondino.Infrastructure` implements it from the
   authenticated principal. Handlers read the current teammate from it and never from a
@@ -178,9 +180,11 @@ run before the handler. A refusal at any step is written by `ProblemDetailsWrite
 
 ### Class structure
 
-`TeammateSessionHandler` populates `CurrentTeammate`, which implements `ICurrentTeammate`.
-`TeamScopeBehaviour` compares it with each `ITeamScopedRequest`, `LookUpOwnPostalCodeQuery`
-among them. `ValidationBehaviour` runs validators such as `JoinTeamCommandValidator`. `PinDto` has no postal code; `ProfileDto`
+`TeammateSessionHandler` populates `CurrentTeammate`, which implements `ICurrentTeammate`;
+`TeammateSessions` implements `ITeammateSessions`, which ends the sessions of a teammate who leaves.
+`TeamScopeBehaviour` compares it with each `ITeamScopedRequest`: `GetPinsQuery`,
+`GetMomentsQuery`, `GetProfileQuery`, `LookUpOwnPostalCodeQuery`, `UpdateProfileCommand` and
+`LeaveTeamCommand`. `ValidationBehaviour` runs validators such as `JoinTeamCommandValidator`. `PinDto` has no postal code; `ProfileDto`
 carries the owner's.
 
 ![Class diagram for protecting team data](diagrams/class-structure.png)

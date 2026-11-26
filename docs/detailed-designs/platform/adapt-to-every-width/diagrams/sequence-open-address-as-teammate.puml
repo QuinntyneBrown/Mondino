@@ -45,7 +45,7 @@ shell -> membership : current()
 membership --> shell : Membership with initials and colour
 shell --> actor : Navigation with aria-current="page" on Team; the avatar from the membership
 page -> store : Read pins
-store -> client : getPins(teamId)
+store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins with session cookie
 controller -> session : Authenticate the session cookie
 session --> controller : Teammate of the team

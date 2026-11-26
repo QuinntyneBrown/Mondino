@@ -61,8 +61,7 @@ package "@mondino/api" {
   class Country {
     +code: string
     +name: string
-    +postalCodeForm: string
-    +postalCodeExample: string
+    +postalCodeHint: string
   }
   class LookupMessage {
     +text: string
@@ -99,8 +98,7 @@ package "Mondino.Application" {
     +string CountryCode
     +string CountryName
     +Regex Pattern
-    +string Form
-    +string Example
+    +string Hint
   }
   interface IPostalCodeLookup {
     +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
@@ -149,7 +147,7 @@ JoinPage --> JoinStore
 JoinPage --> PostalCodeField : value, country, lookupState, message, invalid
 JoinPage ..> joinLookupMessage : this screen's copy
 joinLookupMessage ..> LookupMessage : builds
-joinLookupMessage ..> Country : form and example
+joinLookupMessage ..> Country : postalCodeHint
 PostalCodeField ..> LookupMessage : renders
 PostalCodeField ..> LookupState : shows
 PostalCodeField ..> Country : the chosen country

@@ -61,7 +61,10 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   sentence: the teammate's name, city, local time, status, weather and any moment this week,
   as in "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°, Día de Muertos,
   in 5 days". It calls `localTime`, `formatTime` and `statusFor` from `time/`. It leaves the
-  status out when `statusFor` gives none, and the weather out when the pin has none. `globe` depends on `api` only, so `GlobePage` computes
+  status out when `statusFor` gives none, and the weather out when the pin has none. The
+  moment is the one the pin's marker shows (`markerFor`, `moments/mark-pins-with-moments`), so
+  it is a moment only of a kind the viewer chose in `settings.momentKinds` (L2-022); a pin
+  with no marker has no moment in its description. `globe` depends on `api` only, so `GlobePage` computes
   the descriptions and passes them to `GlobeView` as the input `descriptions`, keyed by
   teammate id.
 - **Selection is announced once.** `GlobePage` holds one visually hidden element with

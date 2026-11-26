@@ -135,8 +135,8 @@ decides how they are drawn.
   the panel, as `GroupPanel` (`team/view-teammate-panel`): the heading "3 teammates close together" (with the group's count), "Choose one to
   see where they are in their day.", a row for each teammate, west to east, which selects
   them, and a link back to "This week around the world". On Join the
-  page projects no label template, so pins there carry no name, city, local time or weather
-  (L2-001).
+  teammates' pins carry no label, so no name, city, local time or weather (L2-001); only the
+  found pin has one, "You" and its city.
 
 **Lifting**
 

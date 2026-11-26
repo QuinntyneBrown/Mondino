@@ -56,7 +56,7 @@ handler --> controller : Refuse with postal_code_not_found
 controller --> client : 422 ProblemDetails, code postal_code_not_found
 client --> store : ApiError postal_code_not_found
 store --> page : lookupState NotFound, nothing placed
-page --> actor : Alert naming the postal code, the country, its form and an example; aria-invalid on the input (L2-004)
+page --> actor : Alert naming the postal code and the country, then the country's postalCodeHint; aria-invalid on the input (L2-004)
 actor -> page : Edit the postal code
 page -> store : clearFound()
 store --> page : lookupState Idle

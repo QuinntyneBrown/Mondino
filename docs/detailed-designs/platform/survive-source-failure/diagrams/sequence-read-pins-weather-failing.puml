@@ -35,7 +35,7 @@ end box
 participant "Open-Meteo" as source
 actor -> page : Open the Globe screen
 page -> store : refresh()
-store -> client : getPins(teamId)
+store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> handler : Send GetPinsQuery
 handler -> db : Load teammates with city, position, time zone

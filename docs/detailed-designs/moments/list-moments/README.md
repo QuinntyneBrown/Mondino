@@ -84,7 +84,10 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   endpoint and handler, described in `find-moments`. The handler returns the moments of the next
   90 days only for a teammate of the team.
 
-A filter choice sends no request: it narrows the moments already loaded. The filter is not kept
+A filter choice sends no request: it narrows the moments already loaded. While the screen
+stays open the page asks for the moments again each time `TeamStore.refreshedAt` changes, that
+is after each refresh of the team (`team/keep-team-fresh`), so it has no timer of its own; a
+read that fails then keeps the moments it shows (L2-048). The filter is not kept
 between visits. The response is bounded by the 90-day window, and the page replaces its moments
 on each load. `MomentList` renders its rows through the Angular CDK virtual scroll viewport,
 as `TeamTable` does, so the number of rows in the page stays under a fixed limit for a team of

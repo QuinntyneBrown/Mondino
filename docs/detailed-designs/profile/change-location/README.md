@@ -98,7 +98,8 @@ not exist yet; each part below is introduced by this design.
   - `Found`: "Toronto, Ontario — your pin moves here when you save. 9° and cloudy right now."
   - `NotFound`: the alert of L2-004, ending "Your pin stays in Milan." ("We couldn’t find
     “M5V 2T” in Canada. Canadian postal codes look like A1A 1A1. Your pin stays in Milan."),
-    with `invalid` set, so the input carries `aria-invalid`.
+    with `invalid` set, so the input carries `aria-invalid`. Its middle sentence is the
+    country's `postalCodeHint`, as it stands, as on Join.
   - `Unavailable` (mock `profile/lookup-unavailable`): "We couldn’t check M5V 2T6 right now.
     Your postal code may be fine — nothing is wrong with what you typed. Your pin stays in
     Milan.", with "Try again", which emits `retry` and runs `lookUp()` again.
@@ -150,8 +151,9 @@ not exist yet; each part below is introduced by this design.
 - **`UpdateProfileCommandValidator`** — refuses a country outside the supported list and a
   postal code over 12 characters with `validation_failed`.
 - **`ProfileDto`** — `TeamName`, the teammate's own `PinDto`, `CountryCode`, `PostalCode`,
-  `Settings` and `Countries`. `Countries` is the supported list as `CountryDto`, projected from
-  `PostalCodeFormats` exactly as `InviteDto.Countries` is, so the Country field and the form in
+  `Settings` and `Countries`. `Countries` is the supported list as `CountryDto` (`Code`, `Name`,
+  `PostalCodeHint`), projected from
+  `PostalCodeFormats` exactly as `InviteDto.Countries` is, so the Country field and the hint in
   the not-found message need no second copy in the frontend. The own `PinDto` always carries
   the weather, whatever the sharing switches say.
 - **`PostalCodeResultDto`** — the city (name, region, country code, position, time zone id)
@@ -180,7 +182,7 @@ not exist yet; each part below is introduced by this design.
 
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
-| Postal code in the wrong form, or not known to the source | 422 | `postal_code_not_found` | The alert of L2-004, naming the postal code, the country and the form its postal codes take |
+| Postal code in the wrong form, or not known to the source | 422 | `postal_code_not_found` | The alert of L2-004, naming the postal code and the country, then the country's `postalCodeHint`, and "Your pin stays in Milan." |
 | `Postal code source` does not answer in time | 503 | `postal_code_unavailable` | That the postal code could not be checked right now and nothing is wrong with what was typed, "Your pin stays in Milan.", and "Try again" |
 | Country unsupported or postal code over 12 characters | 400 | `validation_failed` | A generic message |
 | Too many lookups | 429 | `rate_limited` | A request to wait a moment and try again, and "Your pin stays in Milan." |

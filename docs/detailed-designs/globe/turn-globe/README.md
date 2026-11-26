@@ -89,8 +89,11 @@ the event and the globe takes the drag. The globe therefore never traps the page
 right turn the longitude by one step and up and down turn the tilt by one step, within the
 limit.
 
-*Selecting.* An effect on `selectedId` looks up the pin's position and calls
-`motion.hold(position)`. The globe turns to face the pin within 1 second and holds. Clearing
+*Selecting.* An effect on `selectedId` looks up the pin's position in `pins` and calls
+`motion.hold(position)`. `selectedId` is the only way a page turns the globe to a place;
+`GlobeView` has no input that takes a position. `JoinPage` adds the found city to `pins` as
+the new pin and names it in `selectedId`, and `ProfilePage` names its one pin, so each globe
+turns there and holds, though neither is interactive. The globe turns to face the pin within 1 second and holds. Clearing
 the selection calls `release()`, which moves to `Waiting`, so the globe turns on its own again
 5 seconds later. What a drag does while a pin is selected (whether it is ignored, or turns the
 globe and returns to the pin) is `<TO SUPPLY>`; the mocks do not draw it.

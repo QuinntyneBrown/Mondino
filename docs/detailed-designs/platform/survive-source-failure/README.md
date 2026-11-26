@@ -46,8 +46,9 @@ wraps the client. Handlers see the interface only.
   for a long interval, which is `<TO SUPPLY>`. When the source fails and no entry exists, the
   handler answers `postal_code_unavailable`, which is distinct from `postal_code_not_found`.
 - **`CachedMomentCalendars`** — decorates `IHolidayCalendar`, `IRaceCalendar` and
-  `IEventCalendar`. Each kind is fetched and cached on its own, keyed by its place (a country
-  and year, a year, or a city). When one calendar fails, the decorator returns the last cached
+  `IEventCalendar`. Each kind is fetched and cached on its own, under its place and window, as
+  `moments/find-moments` asks for it: a country for holidays and for races, and the city's
+  position and radius for events, each with the window of dates asked for. When one calendar fails, the decorator returns the last cached
   moments of that kind, and moments of the other kinds are unaffected.
 
 **`SourceResilience`** — one resilience pipeline per source, built with

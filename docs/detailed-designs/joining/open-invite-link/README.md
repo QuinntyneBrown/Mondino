@@ -65,7 +65,9 @@ source.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
   avatar.
 - **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block. `JoinPage` passes
-  it the bare pins and sets it not interactive. The globe's renderer is `<TO SUPPLY>`.
+  it the bare pins and sets it not interactive. A globe that is not interactive cannot be
+  dragged and does not turn on its own (`globe/turn-globe`); on Join it turns only to the
+  found city (`place-pin-from-postal-code`). The globe's renderer is `<TO SUPPLY>`.
 
 **Backend**
 

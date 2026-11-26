@@ -34,7 +34,7 @@ participant "Open-Meteo" as meteo
 note over actor, db : A teammate has saved "Share my local weather" off and "Show when I’m outside working hours" off.
 actor -> page : Open the Globe, or the 15 minute refresh arrives
 page -> store : refresh()
-store -> client : getPins(teamId)
+store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
 controller -> controller : Authenticate the session
 controller -> handler : Send GetPinsQuery

@@ -67,8 +67,7 @@ package "Frontend" {
   class Country {
     +code: string
     +name: string
-    +postalCodeForm: string
-    +postalCodeExample: string
+    +postalCodeHint: string
   }
   class profileLookupMessage << (F,#D1E9FF) function >> {
     +(lookupState: LookupState, postalCode: string, country: Country, savedCity: string): LookupMessage | null

@@ -34,7 +34,8 @@ Frontend:
   derived `viewerPin` and `selectedPin`. Its methods are `load(teamId)`, `refresh()`,
   `select(teammateId)`, `clearSelection()` and `acknowledgeArrived()`. The selection is
   designed in `view-teammate-panel` and `counts` in `view-week-around-the-world`; the team's
-  moments are not held here but read by `MomentsPage` (`moments/list-moments`).
+  moments are not held here but read by `MomentsPage` (`moments/list-moments`), again after
+  each refresh.
   `load(teamId)` reads the pins once when the route opens. An effect on the clock's minute tick
   calls `refreshIfDue(now)`, which calls `refresh()` when `RefreshIntervalMinutes` (15) or more
   have passed since `refreshedAt` and no request is pending (L2-048). The store has no

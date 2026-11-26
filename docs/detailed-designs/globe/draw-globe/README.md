@@ -67,7 +67,9 @@ any other origin.
   uses `pins`, `selectedId`, `interactive` and `select`; `show-pins` designs `descriptions`,
   `selectGroup` and the templates, `moments/mark-pins-with-moments` `markers`,
   `platform/make-accessible` `label`, `team/keep-team-fresh` `arrivedIds` and `arrivedShown`,
-  and `team/view-teammate-panel` `focusPin`. It owns a `<canvas>` and a `state` signal of
+  and `team/view-teammate-panel` `focusPin`. No input names a position to turn to: a page
+  turns the globe to a place by putting a pin there in `pins` and naming it in `selectedId`
+  (`turn-globe`), which serves Join's found city and the small globe on Profile & Settings. It owns a `<canvas>` and a `state` signal of
   type `GlobeState` (`Loading`, `Ready`, `Fallback`). In `Loading` it renders the loading
   content projected into it, which `GlobePage` fills with a second `GlobePlaceholder`, so the
   same picture stays in the same box from the first paint to the first 3D frame. In `Fallback`
@@ -88,9 +90,11 @@ any other origin.
   is overhead: its latitude is the sun's declination for the date and its longitude follows
   from the time in UTC. `isNight(position, now)` reports whether a position is in the shaded
   half. Neither reads the system time; the time is passed in.
-- **`DetailLevel`** — class that holds an ordered list of `DetailStep`s and the current one.
-  `record(elapsedMs)` takes each frame's duration. When the rate stays under 30 frames a second
-  it moves to the next lower step and stays there. The length of the window that counts as
+- **`DetailLevel`** — class, owned by `GlobeView`, that holds an ordered list of `DetailStep`s
+  and the current one. `GlobeView` passes it each frame's duration, which `GlobeScene.onFrame`
+  reports, through `record(elapsedMs)`. When the rate stays under 30 frames a second it moves
+  to the next lower step and `GlobeView` calls `GlobeScene.setDetail(step)`; this repeats
+  until the rate recovers, and it stays at the step it reached. The length of the window that counts as
   sustained is `<TO SUPPLY>`. The number of steps and the value of each are `<TO SUPPLY>`,
   because they depend on the renderer.
 - **`DetailStep`** — `pixelRatio` (the resolution the canvas is drawn at) and `modelDetail`
@@ -122,7 +126,8 @@ The scene lights the model from that direction, so the shaded half is always the
 away from the sun. The subsolar point moves 0.25° west each minute, which is 15° in an hour.
 The shading is a darkening of the surface, not a change to the pins: pins and labels are drawn
 over the scene by `PinLayer` and keep their own contrast on both sides (L2-041). The legend
-that names "Night side" at 576 px and wider is part of `GlobePage`'s template.
+that names "Night side", "Moment this week" and "Drag to spin" at 576 px and wider is part of
+`GlobePage`'s template.
 
 The assets are part of the build. The model, its textures and the still picture are emitted
 with content-hashed file names and served from the web app's own origin, so a repeat visit

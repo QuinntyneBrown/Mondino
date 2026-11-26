@@ -24,7 +24,8 @@ under reduced motion), and the button changes from
 "Place my pin" to "Join" and the team's name.
 
 A postal code in the wrong form, or one the postal code source does not know, is refused with an
-alert that names the postal code, the country and the form with an example. A postal code source
+alert that names the postal code and the country and gives the form that country's postal
+codes take ("Italian postal codes have five digits, like 20121."). A postal code source
 that does not answer in time produces a different message: the postal code could not be checked
 right now. Nothing is placed in either case.
 
@@ -44,7 +45,9 @@ source and Open-Meteo. The browser calls only the Mondino API.
 
 - **`JoinPage`** — renders the form beside the globe on a tablet and wider, and in one column on
   a phone. It lists `Invite.countries` in the Country field in alphabetical order. It passes the
-  found city to `GlobeView` as the selected pin labelled "You". It passes `PostalCodeField` the
+  found city to `GlobeView` as the selected pin labelled "You". The Join globe is not
+  interactive, so it cannot be dragged and does not turn on its own (`globe/turn-globe`); it
+  turns only to the found city, the pin `selectedId` names, and holds there. It passes `PostalCodeField` the
   chosen `Country`, the `lookupState`, the `LookupMessage` that `joinLookupMessage` gives for
   it, and `invalid`.
 - **`JoinStore`** — route-scoped service. It holds the writable signals `name`, `countryCode`
@@ -85,8 +88,9 @@ source and Open-Meteo. The browser calls only the Mondino API.
   - `Locating`: "Finding 20121…".
   - `Found`: "Milan, Lombardy — pinned at city level. 13° and foggy right now."
   - `NotFound`: "We couldn’t find “2012” in Italy. Italian postal codes have five digits, like
-    20121.", made of the postal code and the country's `name`, `postalCodeForm` and
-    `postalCodeExample`.
+    20121.", made of the postal code, the country's `name` and its `postalCodeHint`, which
+    is a whole sentence and is appended as it stands (for Canada, "Canadian postal codes look
+    like A1A 1A1.").
   - `Unavailable`: "We couldn’t check 20121 right now. Your postal code may be fine — nothing is
     wrong with what you typed.", with the `retryLabel` "Try again"; `retry` runs `lookUp()`
     again.
@@ -96,10 +100,12 @@ source and Open-Meteo. The browser calls only the Mondino API.
   body. A postal code never travels in a URL and is never written to browser storage.
 - **`PostalCodeResult`** — the `city` (name, region, country code, position, time zone id) and
   the `weather`, or null.
-- **`Country`** — type in `@mondino/api`: `code`, `name`, `postalCodeForm` ("Italian postal
-  codes have five digits") and `postalCodeExample` ("20121"). The list arrives on the `Invite`
-  (and, for Profile & Settings, on the `Profile`), so the frontend holds no second copy of the
-  formats.
+- **`Country`** — type in `@mondino/api`: `code`, `name` and `postalCodeHint`, one whole
+  sentence that gives the form the country's postal codes take ("Italian postal codes have
+  five digits, like 20121.", "Canadian postal codes look like A1A 1A1."). The backend's
+  `PostalCodeFormats` supplies it. The list arrives on the `Invite` (and, for Profile &
+  Settings, on the `Profile`), so the frontend holds no second copy of the formats and
+  composes no sentence about a form itself.
 
 **Backend**
 
@@ -132,8 +138,9 @@ source and Open-Meteo. The browser calls only the Mondino API.
   Japan, Mexico, Sweden, United Arab Emirates and United States. `TryNormalise` trims the value, removes spaces and
   hyphens, upper-cases it, tests it against the country's pattern, and returns a `PostalCode` in
   the country's canonical spelling. "l5b3c1" and "L5B 3C1" normalise to the same `PostalCode`.
-- **`PostalCodeFormat`** — feature-local type: `CountryCode`, `CountryName`, `Pattern`, `Form`
-  and `Example`. `GetInviteQueryHandler` projects the list to `CountryDto` on the `InviteDto`.
+- **`PostalCodeFormat`** — feature-local type: `CountryCode`, `CountryName`, `Pattern` and
+  `Hint`, the whole sentence that gives the country's form. `GetInviteQueryHandler` projects
+  the list to `CountryDto` (`Code`, `Name`, `PostalCodeHint`) on the `InviteDto`.
 - **`IPostalCodeLookup`** — `FindCityAsync(postalCode, ct)` returns a
   `PostalCodeLookupOutcome`: a `PostalCodeLookupStatus` of `Found`, `NotFound` or `Unavailable`,
   and the `City` when found. The contract fixes two rules. The `City` is the municipality the
@@ -157,7 +164,7 @@ source and Open-Meteo. The browser calls only the Mondino API.
 
 | Case | Status | `code` | The screen says |
 |------|--------|--------|-----------------|
-| Wrong form, or unknown to the source | 422 | `postal_code_not_found` | The postal code could not be found in the country, with the form and an example |
+| Wrong form, or unknown to the source | 422 | `postal_code_not_found` | The postal code could not be found in the country, then the country's `postalCodeHint` |
 | Source timed out or circuit open | 503 | `postal_code_unavailable` | The postal code could not be checked right now and nothing is wrong with what was typed; "Try again" |
 | Over 10 lookups a minute | 429 | `rate_limited` | That was a lot of tries in a short time; wait a moment, then try again |
 | Unsupported country or over 12 characters | 400 | `validation_failed` | A generic message |

@@ -97,12 +97,26 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   field holds no copy: Join builds its message with `joinLookupMessage` beside `JoinPage`, and
   Profile & Settings with `profileLookupMessage`. `Country` and `LookupMessage` are types in
   `@mondino/api` too.
+- `Country` is `code`, `name` and `postalCodeHint`: one whole sentence that gives the form
+  that country's postal codes take ("Italian postal codes have five digits, like 20121.",
+  "Canadian postal codes look like A1A 1A1."). The backend's `PostalCodeFormats` holds the
+  sentence for each supported country (`PostalCodeFormat.Hint`) and supplies it as
+  `CountryDto.PostalCodeHint` on the `InviteDto` and the `ProfileDto`; the not-found message
+  on Join and on Profile & Settings ends with it as it stands, and the frontend composes no
+  sentence about a form of its own.
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
   15 minutes.
 - The `globe` library depends on `api` only. `GlobePage` hands `GlobeView` what `domain` works
   out: the pin and label templates, the moment markers, the pin descriptions and, through
   `PIN_SPREADER`, the placement of pins that are close together.
+- `GlobeView` (`mo-globe`) has one list of inputs and outputs, given in `globe/draw-globe`:
+  the inputs `pins`, `selectedId`, `interactive`, `descriptions`, `markers`, `label` and
+  `arrivedIds`, the outputs `select`, `selectGroup` and `arrivedShown`, and the one public
+  method `focusPin(teammateId)`. No input names a position to turn to: a page turns the globe
+  to a place by putting a pin there in `pins` and naming it in `selectedId`. A globe whose
+  `interactive` is false (Join, and the small globe on Profile & Settings) cannot be dragged
+  and does not turn on its own; it still turns to the pin `selectedId` names and holds there.
 - The pins on the globe are the accessible list. `PinLayer` renders them as the mocks'
   `ul.globe__pins > li.globe__pin > button.pin`; each button is named by `describePin` and
   carries `aria-pressed`, and the visible label is `aria-hidden`. There is no separate hidden
@@ -121,10 +135,25 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
   `GlobePage` shows it on `GlobeView`'s `selectGroup`; it lists the group's teammates west to
   east, each a link that selects that pin. It has no close button: it closes by its "This week
   around the world" link or Escape.
-- `whenLabel(daysAhead, date)`, in `domain`'s `moments/`, is the one helper that words when a
-  moment happens: "Today", "Tomorrow", "In N days" up to 7 days ahead, and the day and month
-  ("12 Nov") beyond. The teammate panel's moment cards and the Team table's "Coming up" use
-  it; the Moments screen's rows show both the relative wording and the weekday, day and month.
+- `relativeLabel(daysAhead)`, in `domain`'s `moments/`, gives "Today", "Tomorrow" or "In N
+  days" at any number of days ahead. `whenLabel(daysAhead, date)`, beside it, is the one
+  helper that words when a moment happens where no date stands beside it: `relativeLabel`'s
+  words up to 7 days ahead, and the day and month ("12 Nov") beyond. The teammate panel's
+  moment cards, the Team table's "Coming up", the week panel and the moment marker use
+  `whenLabel`; the Moments screen's rows show the weekday, day and month themselves, so they
+  keep `relativeLabel`'s wording at every distance.
+- `TeamStore`, in `domain`'s `pins/`, has one list, given in `team/keep-team-fresh`: the
+  signals `pins`, `teamName`, `inviteToken`, `viewerTeammateId`, `selectedTeammateId`,
+  `counts`, `arrivedTeammateIds`, `loadState`, `refreshFailed` and `refreshedAt`, the derived
+  `viewerPin` and `selectedPin`, and the methods `load(teamId)`, `refresh()`,
+  `select(teammateId)`, `clearSelection()` and `acknowledgeArrived()`. It reads the pins with
+  `TeamApi.getPins(teamId, signal)`, which returns a `TeamPins`; the team's moments are not
+  held in it but read by `MomentsPage` with `TeamApi.getMoments(teamId, signal)`.
+- `SettingsStore`, in `domain`'s `storage/`, holds the viewer's `Settings` (the temperature
+  unit, the clock format, the kinds of moment shown on the globe and the two sharing
+  switches) as a signal. It is provided in `root`, because every screen reads it, starts from
+  `SettingsCache` and is replaced when a profile is read or saved
+  (`profile/choose-display-and-sharing`); leaving the team clears both.
 - The browser knows its team from `TeamMembership`, whose `Membership` holds the team's id and
   name, the teammate's id and the viewer's `initials` and `colour` (the colour from the
   `JoinResult`, which returns the one the backend assigned), and never a postal code or a

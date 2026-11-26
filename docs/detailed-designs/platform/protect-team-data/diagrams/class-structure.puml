@@ -27,8 +27,13 @@ class CurrentTeammate {
 class TeammateSessionHandler {
   +HandleAuthenticateAsync(): Task<AuthenticateResult>
   +SignInAsync(teammate: Teammate): Task
-  +SignOutAsync(): Task
 }
+
+interface ITeammateSessions {
+  +EndAllAsync(teammateId: Guid): Task
+}
+
+class TeammateSessions
 
 interface ITeamScopedRequest {
   +Guid TeamId
@@ -90,7 +95,19 @@ class GetPinsQuery {
   +Guid TeamId
 }
 
+class GetMomentsQuery {
+  +Guid TeamId
+}
+
 class GetProfileQuery {
+  +Guid TeamId
+}
+
+class UpdateProfileCommand {
+  +Guid TeamId
+}
+
+class LeaveTeamCommand {
   +Guid TeamId
 }
 
@@ -110,10 +127,15 @@ class PostalCodeResolver {
 
 ICurrentTeammate <|.. CurrentTeammate
 TeammateSessionHandler ..> CurrentTeammate : populates
+ITeammateSessions <|.. TeammateSessions
+TeammateSessions ..> TeammateSessionHandler : ends the sessions it issued
 TeamScopeBehaviour ..> ICurrentTeammate : compares TeamId
 TeamScopeBehaviour ..> ITeamScopedRequest : applies to
 ITeamScopedRequest <|.. GetPinsQuery
+ITeamScopedRequest <|.. GetMomentsQuery
 ITeamScopedRequest <|.. GetProfileQuery
+ITeamScopedRequest <|.. UpdateProfileCommand
+ITeamScopedRequest <|.. LeaveTeamCommand
 ITeamScopedRequest <|.. LookUpOwnPostalCodeQuery
 LookUpOwnPostalCodeQueryHandler ..> LookUpOwnPostalCodeQuery : handles, under team scope
 LookUpOwnPostalCodeQueryHandler ..> ICurrentTeammate : whose team

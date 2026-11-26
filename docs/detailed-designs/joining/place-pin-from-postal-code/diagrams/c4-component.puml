@@ -8,7 +8,7 @@ Container_Boundary(api, "Mondino API") {
   Component(ctrl, "InvitesController", "ASP.NET Core controller", "Open to an invite link's holder, rate limited")
   Component(handler, "LookUpPostalCodeQueryHandler", "MediatR handler", "Checks the invite token, resolves the city, reads the weather")
   Component(resolver, "PostalCodeResolver", "Application service", "Checks the form, finds the city and its time zone")
-  Component(formats, "PostalCodeFormats", "Application service", "Per-country form, normalising and example")
+  Component(formats, "PostalCodeFormats", "Application service", "Per-country form, normalising and hint")
   Component(lookup, "CachedPostalCodeLookup", "IPostalCodeLookup decorator", "Cache, timeout and circuit breaker")
   Component(lookupClient, "PostalCodeLookupClient", "HTTP client", "Maps the source's answer to a City")
   Component(weather, "CachedWeatherSource", "IWeatherSource decorator", "Cache, timeout and circuit breaker over OpenMeteoWeatherSource")
