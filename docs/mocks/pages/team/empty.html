@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team · empty — Mondino mocks</title>
+<meta name="mock:kind" content="page">
+<meta name="mock:screen" content="team">
+<meta name="mock:state" content="empty">
+<meta name="mock:requirements" content="L2-007 L2-014 L2-015 L2-016 L2-018 L2-019 L2-026 L2-027 L2-028 L2-037 L2-044 L2-049">
+<meta name="description" content="Team for a team of one: the viewer’s own row and marker, and the way to bring teammates in.">
+<link rel="stylesheet" href="../../assets/tokens.css">
+<link rel="stylesheet" href="../../assets/ui.css">
+<link rel="stylesheet" href="../../assets/mock.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="app-header">
+  <a class="brand" href="../../pages/globe/default.html" aria-label="Mondino home"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark">mondino</span></a>
+  <nav class="segmented" aria-label="Primary">
+    <a class="segmented__option" href="../../pages/globe/default.html">Globe</a>
+    <a class="segmented__option" href="../../pages/team/default.html" aria-current="page">Team</a>
+    <a class="segmented__option" href="../../pages/moments/default.html">Moments</a>
+  </nav>
+  <div class="app-header__actions">
+    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <a class="app-header__me" href="../../pages/profile/default.html" aria-label="Profile &amp; Settings"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
+  </div>
+</header>
+<main id="main" class="page">
+  <h1>Where everyone is in their day</h1>
+  <p class="page__lead tnum">Just you · 1 time zone · live</p>
+  
+  <section class="day-ribbon" aria-labelledby="ribbon-title">
+    <h2 class="visually-hidden" id="ribbon-title">The day, hour by hour</h2>
+    <div class="day-ribbon__track" style="--rows: 1">
+      <span class="day-ribbon__band day-ribbon__band--night" style="--from: 0.00%; --span: 29.17%"><span>Night</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 29.17%; --span: 8.33%"><span>Morning</span></span><span class="day-ribbon__band day-ribbon__band--working" style="--from: 37.50%; --span: 37.50%"><span>Working hours</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 75.00%; --span: 20.83%"><span>Evening</span></span><span class="day-ribbon__band day-ribbon__band--night" style="--from: 95.83%; --span: 4.17%"></span>
+      <ul>
+        <li><a class="day-ribbon__marker" href="../../pages/globe/selected-self.html" style="--at: 62.85%; --row: 0" title="Sofia Bianchi · Milan" aria-label="Sofia Bianchi, 15:05"><span class="avatar hue-1" aria-hidden="true">SB</span></a></li>
+      </ul>
+    </div>
+    <ul class="day-ribbon__scale tnum" aria-hidden="true"><li>00:00</li><li>03:00</li><li>06:00</li><li>09:00</li><li>12:00</li><li>15:00</li><li>18:00</li><li>21:00</li><li>00:00</li></ul>
+  </section>
+  <div class="section-head">
+    <h2>Everyone, west to east</h2>
+    <div class="segmented" role="tablist" aria-label="Filter by status">
+      <button class="segmented__option tnum" type="button" role="tab" id="tab-all" aria-controls="team-list" aria-selected="true">All <span class="segmented__count">1</span></button>
+      <button class="segmented__option tnum" type="button" role="tab" id="tab-working" aria-controls="team-list" aria-selected="false" tabindex="-1">Working now <span class="segmented__count">1</span></button>
+      <button class="segmented__option tnum" type="button" role="tab" id="tab-asleep" aria-controls="team-list" aria-selected="false" tabindex="-1">Asleep <span class="segmented__count">0</span></button>
+    </div>
+  </div>
+  <div id="team-list" role="tabpanel" aria-labelledby="tab-all">
+      <table class="team-table">
+        <caption class="visually-hidden">Everyone, west to east</caption>
+        <thead><tr><th scope="col">Person</th><th scope="col">Location</th><th scope="col">Local time</th><th scope="col">vs you</th><th scope="col">Weather</th><th scope="col">Coming up</th><td></td></tr></thead>
+        <tbody>
+          <tr class="team-table__row">
+            <th scope="row" class="team-table__person"><span class="avatar hue-1" aria-hidden="true">SB</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected-self.html">Sofia Bianchi <span class="team-table__you">(you)</span></a><span class="team-table__sub">Working hours</span></span></th>
+            <td class="team-table__location">Milan<span class="team-table__sub">Italy</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span><span class="team-table__phone tnum">Milan</span></td>
+            <td class="team-table__offset tnum"><span aria-label="You">—</span></td>
+            <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Foggy" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/></svg>13°</span></td>
+            <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Formula 1" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg><span class="moment-pill__title">Monza tickets on sale</span><span class="moment-pill__when">· 12 Nov</span></span></td>
+            <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="empty"><span class="empty__icon"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></span><h2 class="empty__title">Just you, for now</h2><p class="empty__text">When teammates join with your team’s invite link, they appear here from west to east.</p><div class="empty__actions"><a class="btn btn--primary" href="../../pages/globe/empty.html">Get the invite link</a></div></div>
+  </div>
+</main>
+
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Team</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html">default</a></li>
+    <li><a href="working.html">working</a></li>
+    <li><a href="asleep.html">asleep</a></li>
+    <li><a href="no-results.html">no-results</a></li>
+    <li><a href="loading.html">loading</a></li>
+    <li><a href="empty.html" aria-current="page">empty</a></li>
+    <li><a href="error.html">error</a></li>
+    <li><a href="weather-unavailable.html">weather-unavailable</a></li>
+    <li><a href="edge.html">edge</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join · loading — Mondino mocks</title>
+<meta name="mock:kind" content="page">
+<meta name="mock:screen" content="join">
+<meta name="mock:state" content="loading">
+<meta name="mock:requirements" content="L2-001 L2-002 L2-003 L2-004 L2-005 L2-006 L2-037 L2-045">
+<meta name="description" content="Join while the invite link is being opened: the form’s shape in skeletons and a placeholder where the globe will be.">
+<link rel="stylesheet" href="../../assets/tokens.css">
+<link rel="stylesheet" href="../../assets/ui.css">
+<link rel="stylesheet" href="../../assets/mock.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<main id="main" class="join">
+  <section class="join__form">
+    <span class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark">mondino</span></span>
+    <div class="join__body" aria-busy="true">
+      <div class="join__team"><span class="skeleton skeleton--pill"></span><span class="skeleton skeleton--short"></span></div>
+      <h1 class="join__title">Put yourself on the map.</h1>
+      <p class="join__lead">Your pin shows teammates your local time, weather and what’s happening where you are.</p>
+      <div class="join__fields"><span class="skeleton skeleton--control"></span><div class="field-row"><span class="skeleton skeleton--control"></span><span class="skeleton skeleton--control"></span></div><span class="skeleton skeleton--mid"></span><span class="skeleton skeleton--control"></span></div>
+      <p class="visually-hidden" role="status">Opening your invite link…</p>
+    </div>
+    <p class="join__sources">Weather from Open-Meteo · Holidays from public calendars</p>
+  </section>
+  <section class="join__stage" aria-label="The team on the globe"><div class="globe-stage">
+  <div class="globe globe--placeholder" role="img" aria-label="The globe is loading">
+    <svg class="globe__art" viewBox="0 0 600 600" aria-hidden="true" focusable="false"><circle class="globe__ocean" cx="300" cy="300" r="252"/><circle class="globe__outline" cx="300" cy="300" r="252" stroke-width="2"/></svg>
+    <div class="globe__pins" aria-hidden="true"></div>
+  </div>
+  </div></section>
+</main>
+
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Join</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html">default</a></li>
+    <li><a href="loading.html" aria-current="page">loading</a></li>
+    <li><a href="locating.html">locating</a></li>
+    <li><a href="found.html">found</a></li>
+    <li><a href="not-found.html">not-found</a></li>
+    <li><a href="lookup-unavailable.html">lookup-unavailable</a></li>
+    <li><a href="invalid.html">invalid</a></li>
+    <li><a href="submitting.html">submitting</a></li>
+    <li><a href="join-failed.html">join-failed</a></li>
+    <li><a href="rate-limited.html">rate-limited</a></li>
+    <li><a href="team-full.html">team-full</a></li>
+    <li><a href="invite-unusable.html">invite-unusable</a></li>
+    <li><a href="error.html">error</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

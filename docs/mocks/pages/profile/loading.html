@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile &amp; Settings · loading — Mondino mocks</title>
+<meta name="mock:kind" content="page">
+<meta name="mock:screen" content="profile">
+<meta name="mock:state" content="loading">
+<meta name="mock:requirements" content="L2-007 L2-019 L2-022 L2-031 L2-032 L2-033 L2-034 L2-035 L2-036 L2-037">
+<meta name="description" content="Profile &amp; Settings while the viewer’s pin and settings load.">
+<link rel="stylesheet" href="../../assets/tokens.css">
+<link rel="stylesheet" href="../../assets/ui.css">
+<link rel="stylesheet" href="../../assets/mock.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="app-header">
+  <a class="brand" href="../../pages/globe/default.html" aria-label="Mondino home"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="mark__body" cx="30" cy="34" r="25"/><ellipse class="mark__line" cx="30" cy="34" rx="10" ry="25"/><path class="mark__line" d="M6.5 40.5C14 45 46 45 53.5 40.5"/><circle class="mark__pin" cx="49" cy="15" r="9"/></svg><span class="wordmark">mondino</span></a>
+  <nav class="segmented" aria-label="Primary">
+    <a class="segmented__option" href="../../pages/globe/default.html">Globe</a>
+    <a class="segmented__option" href="../../pages/team/default.html">Team</a>
+    <a class="segmented__option" href="../../pages/moments/default.html">Moments</a>
+  </nav>
+  <div class="app-header__actions">
+    <button class="btn app-header__invite" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>Invite teammate</button>
+    <a class="app-header__me" href="../../pages/profile/default.html" aria-label="Profile &amp; Settings" aria-current="page"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span></a>
+  </div>
+</header>
+<main id="main" class="page page--settings"><div class="settings" aria-busy="true"><aside class="settings__pin"><h1>Your pin</h1><div class="pin-card card"><div class="pin-card__globe"><div class="globe-stage"><div class="globe globe--placeholder" role="img" aria-label="The globe is loading">
+    <svg class="globe__art" viewBox="0 0 600 600" aria-hidden="true" focusable="false"><circle class="globe__ocean" cx="300" cy="300" r="252"/><circle class="globe__outline" cx="300" cy="300" r="252" stroke-width="2"/></svg>
+    <div class="globe__pins" aria-hidden="true"></div>
+  </div></div></div><div class="pin-card__body stack"><span class="skeleton skeleton--h2"></span><span class="skeleton skeleton--mid"></span><span class="skeleton skeleton--text"></span></div></div></aside><div class="settings__sections"><section class="settings-section"><div class="stack"><span class="skeleton skeleton--short"></span><span class="skeleton skeleton--control"></span><span class="skeleton skeleton--control"></span></div></section><section class="settings-section"><div class="stack"><span class="skeleton skeleton--short"></span><span class="skeleton skeleton--control"></span><span class="skeleton skeleton--control"></span></div></section><section class="settings-section"><div class="stack"><span class="skeleton skeleton--short"></span><span class="skeleton skeleton--control"></span><span class="skeleton skeleton--control"></span></div></section></div></div><p class="visually-hidden" role="status">Loading your pin and settings…</p></main>
+
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Profile &amp; Settings</span>
+  <ul class="mock-bar__states">
+    <li><a href="default.html">default</a></li>
+    <li><a href="loading.html" aria-current="page">loading</a></li>
+    <li><a href="error.html">error</a></li>
+    <li><a href="locating.html">locating</a></li>
+    <li><a href="location-found.html">location-found</a></li>
+    <li><a href="invalid.html">invalid</a></li>
+    <li><a href="sharing-off.html">sharing-off</a></li>
+  </ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

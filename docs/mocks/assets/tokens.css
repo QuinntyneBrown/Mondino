@@ -1,0 +1,595 @@
+/* ==========================================================================
+   Mondino design tokens — the only place colours, sizes and durations live.
+
+   Transcribed from the Mondino App prototype in Magic Patterns (its @theme
+   block): a cool paper canvas, deep navy ink, an orange-red pin, a yellow sun,
+   a green leaf, and the cartoon globe's own colours.
+
+   Three tiers:
+     1. Primitives  (--palette-*, --font-*)  raw values, never used directly
+                    by components.
+     2. Semantic    (--color-*, --text-*, --space-*, --radius-*, --shadow-*,
+                    --duration-*, --ease-*, --z-*, --layout-*) aliases that
+                    components consume. Themes override these.
+     3. Component   (--pin-*, --globe-*, ...) sizes a component owns.
+
+   Themes: light is the default (:root). Dark applies with
+   [data-theme="dark"], or automatically when the OS prefers dark and the
+   page has not forced [data-theme="light"].
+   ========================================================================== */
+
+@font-face {
+  font-family: "Gabarito";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url("fonts/gabarito-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Gabarito";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url("fonts/gabarito-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("fonts/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* ---------- Primitives: brand colour (from the prototype) -------------- */
+  --palette-white: #ffffff;
+  --palette-paper: #f1f5fb;       /* canvas */
+  --palette-land: #e3eaf4;        /* quiet fills, hover on ink-on-paper */
+  --palette-line: #dce4ef;        /* hairlines */
+  --palette-line-strong: #808ca1; /* control edges, 3:1 on paper and white */
+  --palette-muted: #5b6678;       /* secondary text */
+  --palette-ink-soft: #2b3a5a;
+  --palette-ink: #17223a;         /* text, navigation, primary actions */
+  --palette-sea: #1d2d4d;         /* brand navy */
+  --palette-night: #0b1324;
+
+  --palette-pin: #e8532f;         /* people */
+  --palette-pin-soft: #fbe2d8;
+  --palette-pin-strong: #b34024;  /* pin as text, 4.5:1 on paper, white and pin-soft */
+  --palette-pin-solid: #cc4929;   /* pin behind white text */
+  --palette-pin-light: #ff8f6e;   /* pin as text on night */
+  --palette-pin-deep: #3d1a10;
+
+  --palette-sun: #f2b43c;         /* moments */
+  --palette-sun-soft: #fcefd2;
+  --palette-sun-strong: #7a5200;  /* sun as text on sun-soft */
+  --palette-sun-deep: #3b2f12;
+
+  --palette-leaf: #2f7d57;        /* working hours */
+  --palette-leaf-soft: #dcefe3;
+  --palette-leaf-strong: #2c7451; /* leaf as text on leaf-soft */
+  --palette-leaf-light: #7fd6a8;
+  --palette-leaf-deep: #143524;
+
+  /* The cartoon globe. The same in both themes: it is a picture of a place. */
+  --palette-ocean: #38a8f2;
+  --palette-ocean-deep: #1f7fd0;
+  --palette-grass: #5cc85a;
+  --palette-grass-deep: #2f8f3c;
+  --palette-sand: #f7cf5c;
+  --palette-ice: #ffffff;
+  --palette-cloud: #ffffff;
+  --palette-dusk: #2b2170;
+
+  /* A teammate's own colour. The prototype's twelve, darkened where white
+     initials on them fell under 4.5:1. */
+  --palette-teammate-1: #b75939;
+  --palette-teammate-2: #4e7998;
+  --palette-teammate-3: #3a825d;
+  --palette-teammate-4: #8a5a9a;
+  --palette-teammate-5: #9b6a27;
+  --palette-teammate-6: #a14a4a;
+  --palette-teammate-7: #2f7d7d;
+  --palette-teammate-8: #c04e6a;
+  --palette-teammate-9: #4a6fb0;
+  --palette-teammate-10: #388449;
+  --palette-teammate-11: #b15f25;
+  --palette-teammate-12: #6a5acd;
+
+  /* Night theme surfaces, stepped up from night. */
+  --palette-night-surface: #121c31;
+  --palette-night-raised: #1a2742;
+  --palette-night-line: #27344f;
+  --palette-night-line-strong: #7f8ca6;
+  --palette-night-muted: #a7b3c8;
+  --palette-night-fg: #eef3fb;
+
+  /* ---------- Primitives: typography ------------------------------------ */
+  --font-family-display: "Gabarito", ui-sans-serif, system-ui, sans-serif; /* wordmark, names, clocks */
+  --font-family-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* everything that is read */
+  --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --font-size-xs: 0.75rem;    /* 12px  captions, pin labels */
+  --font-size-sm: 0.875rem;   /* 14px  secondary text */
+  --font-size-md: 1rem;       /* 16px  body */
+  --font-size-lg: 1.125rem;   /* 18px  section titles */
+  --font-size-xl: 1.25rem;    /* 20px  panel titles */
+  --font-size-2xl: 1.5rem;    /* 24px  page title on a phone */
+  --font-size-3xl: 1.875rem;  /* 30px  page title */
+  --font-size-4xl: 2.25rem;   /* 36px  page title on a desktop */
+  --font-size-5xl: 3rem;      /* 48px  Join headline */
+  --font-size-clock: 4rem;    /* 64px  a teammate's local time */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-none: 1;
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.65;
+
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-wordmark: -0.035em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.04em;
+
+  /* ---------- Semantic: colour (light) ---------------------------------- */
+  --color-bg-canvas: var(--palette-paper);
+  --color-bg-surface: var(--palette-white);
+  --color-bg-surface-raised: var(--palette-white);
+  --color-bg-surface-sunken: var(--palette-paper);
+  --color-bg-subtle: var(--palette-land);
+  --color-bg-subtle-hover: var(--palette-line);
+  --color-bg-inverse: var(--palette-ink);
+  --color-bg-backdrop: rgb(11 19 36 / 0.55);
+
+  --color-fg-default: var(--palette-ink);
+  --color-fg-muted: var(--palette-muted);
+  --color-fg-subtle: var(--palette-muted);
+  --color-fg-disabled: var(--palette-line-strong);
+  --color-fg-inverse: var(--palette-paper);
+  --color-fg-link: var(--palette-pin-strong);
+  --color-fg-link-hover: var(--palette-ink);
+
+  --color-border-default: var(--palette-line);
+  --color-border-strong: var(--palette-line-strong);
+  --color-border-inverse: var(--palette-ink-soft);
+
+  --color-accent: var(--palette-ink);            /* primary actions, the chosen tab or filter */
+  --color-accent-hover: var(--palette-ink-soft);
+  --color-accent-active: var(--palette-sea);
+  --color-accent-subtle: var(--palette-land);
+  --color-accent-subtle-hover: var(--palette-line);
+  --color-fg-on-accent: var(--palette-paper);
+  --color-fg-accent: var(--palette-ink);
+
+  --color-focus-ring: var(--palette-ink);
+  --color-focus-ring-offset: var(--color-bg-surface);
+
+  /* Brand roles. Pin marks people, sun marks moments, leaf marks working hours. */
+  --color-people: var(--palette-pin);
+  --color-people-subtle: var(--palette-pin-soft);
+  --color-fg-people: var(--palette-pin-strong);
+  --color-moment: var(--palette-sun);
+  --color-moment-hover: var(--palette-sun-soft);
+  --color-moment-subtle: var(--palette-sun-soft);
+  --color-fg-on-moment: var(--palette-ink);
+  --color-fg-moment-muted: var(--palette-ink-soft);
+  --color-working: var(--palette-leaf);
+  --color-working-subtle: var(--palette-leaf-soft);
+  --color-fg-working: var(--palette-leaf-strong);
+  --color-night-band: rgb(23 34 58 / 0.07);
+  --color-asleep-bg: var(--palette-ink);
+  --color-fg-on-asleep: var(--palette-paper);
+  --color-brand-sea: var(--palette-sea);
+  --color-on-teammate: var(--palette-white);
+
+  --color-info-bg: var(--palette-land);
+  --color-info-fg: var(--palette-ink);
+  --color-info-border: var(--palette-line-strong);
+  --color-info-icon: var(--palette-ink-soft);
+  --color-info-solid: var(--palette-ink);
+
+  --color-success-bg: var(--palette-leaf-soft);
+  --color-success-fg: var(--palette-leaf-strong);
+  --color-success-border: var(--palette-leaf);
+  --color-success-icon: var(--palette-leaf);
+  --color-success-solid: var(--palette-leaf);
+
+  --color-warning-bg: var(--palette-sun-soft);
+  --color-warning-fg: var(--palette-sun-strong);
+  --color-warning-border: var(--palette-sun);
+  --color-warning-icon: var(--palette-sun-strong);
+  --color-warning-solid: var(--palette-sun);
+
+  --color-danger-bg: var(--palette-pin-soft);
+  --color-danger-fg: var(--palette-pin-strong);
+  --color-danger-border: var(--palette-pin);
+  --color-danger-icon: var(--palette-pin-strong);
+  --color-danger-solid: var(--palette-pin-solid);
+  --color-danger-solid-hover: var(--palette-pin-strong);
+  --color-fg-on-danger: var(--palette-white);
+
+  /* The globe. */
+  --color-globe-ocean: var(--palette-ocean);
+  --color-globe-ocean-deep: var(--palette-ocean-deep);
+  --color-globe-land: var(--palette-grass);
+  --color-globe-land-deep: var(--palette-grass-deep);
+  --color-globe-sand: var(--palette-sand);
+  --color-globe-ice: var(--palette-ice);
+  --color-globe-cloud: var(--palette-cloud);
+  --color-globe-night: var(--palette-dusk);
+  --color-globe-outline: var(--palette-ink);
+  --color-globe-shadow: rgb(23 34 58 / 0.14);
+  --color-globe-shine: rgb(255 255 255 / 0.4);
+  --color-globe-graticule: rgb(255 255 255 / 0.16);
+  --color-globe-coast: rgb(255 255 255 / 0.35);
+  --color-pin-ring: var(--palette-white);
+  --color-pin-label-bg: var(--palette-white);
+  --color-pin-label-fg: var(--palette-ink);
+
+  /* ---------- Semantic: typography roles -------------------------------- */
+  --text-display: var(--font-weight-bold) var(--font-size-5xl) / var(--line-height-tight) var(--font-family-display);
+  --text-clock: var(--font-weight-bold) var(--font-size-clock) / var(--line-height-none) var(--font-family-display);
+  --text-h1: var(--font-weight-bold) var(--font-size-3xl) / var(--line-height-tight) var(--font-family-display);
+  --text-h1-lg: var(--font-weight-bold) var(--font-size-4xl) / var(--line-height-tight) var(--font-family-display);
+  --text-h1-sm: var(--font-weight-bold) var(--font-size-2xl) / var(--line-height-tight) var(--font-family-display);
+  --text-h2: var(--font-weight-semibold) var(--font-size-xl) / var(--line-height-snug) var(--font-family-display);
+  --text-h3: var(--font-weight-semibold) var(--font-size-lg) / var(--line-height-snug) var(--font-family-display);
+  --text-h4: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug) var(--font-family-display);
+  --text-name: var(--font-weight-semibold) var(--font-size-xl) / var(--line-height-tight) var(--font-family-display);
+  --text-figure: var(--font-weight-semibold) var(--font-size-lg) / var(--line-height-snug) var(--font-family-display);
+  --text-figure-lg: var(--font-weight-semibold) var(--font-size-3xl) / var(--line-height-none) var(--font-family-display);
+  --text-wordmark: var(--font-weight-bold) 1.375rem / var(--line-height-none) var(--font-family-display);
+  --text-body-lg: var(--font-weight-regular) var(--font-size-lg) / var(--line-height-normal) var(--font-family-sans);
+  --text-body: var(--font-weight-regular) var(--font-size-md) / var(--line-height-normal) var(--font-family-sans);
+  --text-body-sm: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans);
+  --text-caption: var(--font-weight-regular) var(--font-size-xs) / var(--line-height-normal) var(--font-family-sans);
+  --text-label: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans);
+  --text-label-strong: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans);
+  --text-overline: var(--font-weight-semibold) var(--font-size-xs) / var(--line-height-normal) var(--font-family-sans);
+  --text-pin: var(--font-weight-semibold) 0.6875rem / var(--line-height-none) var(--font-family-display);
+  --text-code: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-normal) var(--font-family-mono);
+
+  /* ---------- Semantic: spacing (4px base) ------------------------------ */
+  --space-0: 0;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* ---------- Semantic: layout ------------------------------------------ */
+  /* Breakpoints, for reference; media queries repeat the values.
+     Under 36rem a phone, one column. 48rem the Team table. 62rem the panel
+     beside the globe and the form beside it. 75rem text keeps its measure. */
+  --layout-breakpoint-sm: 36rem;   /* 576px */
+  --layout-breakpoint-md: 48rem;   /* 768px */
+  --layout-breakpoint-lg: 62rem;   /* 992px */
+  --layout-breakpoint-xl: 75rem;   /* 1200px */
+
+  --layout-columns: 4;
+  --layout-gutter: var(--space-4);
+  --layout-margin: var(--space-4);
+  --layout-container-max: 72rem;     /* Team */
+  --layout-container-settings: 64rem;/* Profile & Settings */
+  --layout-container-reading: 48rem; /* Moments */
+  --layout-container-message: 32rem; /* a page that says one thing */
+  --layout-measure: 65ch;
+  --layout-header-height: 4rem;
+  --layout-panel-width: 25rem;       /* the panel beside the globe */
+  --layout-join-form-width: 32.5rem; /* the form beside the globe */
+  --layout-pin-card-width: 21.25rem; /* "Your pin" beside the settings */
+  --layout-globe-phone-height: 26.25rem;
+  --layout-globe-tablet-height: 35rem;
+  --layout-globe-card-height: 17.5rem;
+
+  /* ---------- Semantic: shape ------------------------------------------- */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;   /* inputs, rows, moment cards */
+  --radius-xl: 1rem;      /* cards */
+  --radius-2xl: 1.5rem;   /* the pin card, today's moment, sheets */
+  --radius-full: 9999px;  /* buttons, pins, chips, tabs */
+
+  --border-width-hairline: 1px;
+  --border-width-thick: 2px;
+  --border-width-pin: 3px;
+
+  /* ---------- Semantic: elevation --------------------------------------- */
+  --shadow-color: 23 34 58;
+  --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.18);
+  --shadow-2: 0 2px 6px rgb(var(--shadow-color) / 0.14), 0 1px 2px rgb(var(--shadow-color) / 0.08);
+  --shadow-3: 0 8px 30px rgb(var(--shadow-color) / 0.12), 0 2px 6px rgb(var(--shadow-color) / 0.08);
+  --shadow-4: 0 10px 30px rgb(var(--shadow-color) / 0.25), 0 4px 12px rgb(var(--shadow-color) / 0.10);
+  --shadow-lift: 0 6px 14px rgb(var(--shadow-color) / 0.35);
+  --shadow-focus: 0 0 0 2px var(--color-focus-ring-offset), 0 0 0 4px var(--color-focus-ring);
+
+  /* ---------- Semantic: motion ------------------------------------------ */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;      /* hover, colour changes, a pin lifting */
+  --duration-base: 180ms;      /* the panel's fade */
+  --duration-slow: 320ms;      /* dialogs, sheets */
+  --duration-deliberate: 1600ms; /* a new pin's pulse, skeleton shimmer */
+  --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-enter: cubic-bezier(0, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---------- Semantic: z-order ----------------------------------------- */
+  --z-base: 0;
+  --z-raised: 1;
+  --z-pin-lifted: 30;
+  --z-sticky: 100;
+  --z-dropdown: 1000;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-popover: 1400;
+  --z-toast: 1500;
+  --z-tooltip: 1600;
+
+  /* ---------- Semantic: interaction ------------------------------------- */
+  --target-min: 1.5rem;          /* 24px */
+  --target-comfortable: 2.75rem; /* 44px, every touch target */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --control-height-sm: 2.25rem;
+  --control-height-md: 2.75rem;
+  --control-height-lg: 3.25rem;
+
+  /* ---------- Component sizes ------------------------------------------- */
+  --pin-size: 1.625rem;          /* 26px at rest */
+  --pin-size-lifted: 2.125rem;   /* 34px pointed at, focused or selected */
+  --pin-size-compact: 1.125rem;  /* 18px on a globe under 400px */
+  --pin-dot-size: 0.75rem;       /* 12px, a pin with no name on Join */
+  --pin-label-height: 1.5rem;
+  --moment-marker-size: 1rem;    /* 16px, never smaller */
+  --moment-marker-size-today: 1.25rem;
+  --avatar-size-xs: 1.625rem;
+  --avatar-size-sm: 1.875rem;
+  --avatar-size-md: 2.25rem;
+  --avatar-size-lg: 2.75rem;
+  --icon-size: 1.25rem;
+  --icon-size-sm: 1rem;
+  --icon-size-lg: 2.25rem;
+  --emblem-size: 2.25rem;
+  --emblem-size-lg: 3.5rem;
+  --switch-width: 2.5rem;
+  --switch-height: 1.5rem;
+  --date-block-width: 4rem;
+  --overlap-bar-height: 1.75rem;
+  --ribbon-row-height: 2.5rem;
+  --ribbon-top: 1.875rem;
+
+  color-scheme: light;
+}
+
+@media (min-width: 36rem) {
+  :root {
+    --layout-margin: var(--space-6);
+  }
+}
+@media (min-width: 48rem) {
+  :root {
+    --layout-columns: 8;
+    --layout-gutter: var(--space-6);
+  }
+}
+@media (min-width: 62rem) {
+  :root {
+    --layout-columns: 12;
+    --layout-gutter: var(--space-8);
+  }
+}
+
+/* ---------- Dark theme ------------------------------------------------------
+   The prototype is drawn in light only. Dark is the same roles turned over:
+   night becomes the canvas and paper becomes the ink. Pin, sun and leaf keep
+   their hue, and the globe keeps its colours. */
+[data-theme="dark"] {
+  --color-bg-canvas: var(--palette-night);
+  --color-bg-surface: var(--palette-night-surface);
+  --color-bg-surface-raised: var(--palette-night-raised);
+  --color-bg-surface-sunken: var(--palette-night);
+  --color-bg-subtle: var(--palette-night-raised);
+  --color-bg-subtle-hover: var(--palette-night-line);
+  --color-bg-inverse: var(--palette-paper);
+  --color-bg-backdrop: rgb(0 0 0 / 0.65);
+
+  --color-fg-default: var(--palette-night-fg);
+  --color-fg-muted: var(--palette-night-muted);
+  --color-fg-subtle: var(--palette-night-muted);
+  --color-fg-disabled: var(--palette-night-line-strong);
+  --color-fg-inverse: var(--palette-ink);
+  --color-fg-link: var(--palette-pin-light);
+  --color-fg-link-hover: var(--palette-night-fg);
+
+  --color-border-default: var(--palette-night-line);
+  --color-border-strong: var(--palette-night-line-strong);
+  --color-border-inverse: var(--palette-line);
+
+  --color-accent: var(--palette-paper);
+  --color-accent-hover: var(--palette-white);
+  --color-accent-active: var(--palette-land);
+  --color-accent-subtle: var(--palette-night-raised);
+  --color-accent-subtle-hover: var(--palette-night-line);
+  --color-fg-on-accent: var(--palette-ink);
+  --color-fg-accent: var(--palette-night-fg);
+
+  --color-focus-ring: var(--palette-paper);
+
+  --color-people-subtle: var(--palette-pin-deep);
+  --color-fg-people: var(--palette-pin-light);
+  --color-moment-hover: var(--palette-sun-deep);
+  --color-moment-subtle: var(--palette-sun-deep);
+  --color-fg-moment-muted: var(--palette-ink-soft);
+  --color-working: var(--palette-leaf);
+  --color-working-subtle: var(--palette-leaf-deep);
+  --color-fg-working: var(--palette-leaf-light);
+  --color-night-band: rgb(0 0 0 / 0.3);
+  --color-asleep-bg: var(--palette-paper);
+  --color-fg-on-asleep: var(--palette-ink);
+
+  --color-info-bg: var(--palette-night-raised);
+  --color-info-fg: var(--palette-night-fg);
+  --color-info-border: var(--palette-night-line-strong);
+  --color-info-icon: var(--palette-night-muted);
+  --color-info-solid: var(--palette-paper);
+
+  --color-success-bg: var(--palette-leaf-deep);
+  --color-success-fg: var(--palette-leaf-light);
+  --color-success-border: var(--palette-leaf);
+  --color-success-icon: var(--palette-leaf-light);
+  --color-success-solid: var(--palette-leaf-light);
+
+  --color-warning-bg: var(--palette-sun-deep);
+  --color-warning-fg: var(--palette-sun);
+  --color-warning-border: var(--palette-sun);
+  --color-warning-icon: var(--palette-sun);
+  --color-warning-solid: var(--palette-sun);
+
+  --color-danger-bg: var(--palette-pin-deep);
+  --color-danger-fg: var(--palette-pin-light);
+  --color-danger-border: var(--palette-pin);
+  --color-danger-icon: var(--palette-pin-light);
+  --color-danger-solid: var(--palette-pin-light);
+  --color-danger-solid-hover: var(--palette-pin-soft);
+  --color-fg-on-danger: var(--palette-pin-deep);
+
+  --color-globe-outline: var(--palette-night);
+  --color-globe-shadow: rgb(0 0 0 / 0.4);
+
+  --shadow-color: 0 0 0;
+  --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.4);
+  --shadow-2: 0 2px 6px rgb(var(--shadow-color) / 0.45), 0 1px 2px rgb(var(--shadow-color) / 0.3);
+  --shadow-3: 0 8px 30px rgb(var(--shadow-color) / 0.5), 0 2px 6px rgb(var(--shadow-color) / 0.35);
+  --shadow-4: 0 10px 30px rgb(var(--shadow-color) / 0.6), 0 4px 12px rgb(var(--shadow-color) / 0.4);
+  --shadow-lift: 0 6px 14px rgb(var(--shadow-color) / 0.6);
+
+  color-scheme: dark;
+}
+
+/* Follow the OS preference unless the page has explicitly chosen light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg-canvas: var(--palette-night);
+    --color-bg-surface: var(--palette-night-surface);
+    --color-bg-surface-raised: var(--palette-night-raised);
+    --color-bg-surface-sunken: var(--palette-night);
+    --color-bg-subtle: var(--palette-night-raised);
+    --color-bg-subtle-hover: var(--palette-night-line);
+    --color-bg-inverse: var(--palette-paper);
+    --color-bg-backdrop: rgb(0 0 0 / 0.65);
+    --color-fg-default: var(--palette-night-fg);
+    --color-fg-muted: var(--palette-night-muted);
+    --color-fg-subtle: var(--palette-night-muted);
+    --color-fg-disabled: var(--palette-night-line-strong);
+    --color-fg-inverse: var(--palette-ink);
+    --color-fg-link: var(--palette-pin-light);
+    --color-fg-link-hover: var(--palette-night-fg);
+    --color-border-default: var(--palette-night-line);
+    --color-border-strong: var(--palette-night-line-strong);
+    --color-border-inverse: var(--palette-line);
+    --color-accent: var(--palette-paper);
+    --color-accent-hover: var(--palette-white);
+    --color-accent-active: var(--palette-land);
+    --color-accent-subtle: var(--palette-night-raised);
+    --color-accent-subtle-hover: var(--palette-night-line);
+    --color-fg-on-accent: var(--palette-ink);
+    --color-fg-accent: var(--palette-night-fg);
+    --color-focus-ring: var(--palette-paper);
+    --color-people-subtle: var(--palette-pin-deep);
+    --color-fg-people: var(--palette-pin-light);
+    --color-moment-hover: var(--palette-sun-deep);
+    --color-moment-subtle: var(--palette-sun-deep);
+    --color-fg-moment-muted: var(--palette-ink-soft);
+    --color-working: var(--palette-leaf);
+    --color-working-subtle: var(--palette-leaf-deep);
+    --color-fg-working: var(--palette-leaf-light);
+    --color-night-band: rgb(0 0 0 / 0.3);
+    --color-asleep-bg: var(--palette-paper);
+    --color-fg-on-asleep: var(--palette-ink);
+    --color-info-bg: var(--palette-night-raised);
+    --color-info-fg: var(--palette-night-fg);
+    --color-info-border: var(--palette-night-line-strong);
+    --color-info-icon: var(--palette-night-muted);
+    --color-info-solid: var(--palette-paper);
+    --color-success-bg: var(--palette-leaf-deep);
+    --color-success-fg: var(--palette-leaf-light);
+    --color-success-border: var(--palette-leaf);
+    --color-success-icon: var(--palette-leaf-light);
+    --color-success-solid: var(--palette-leaf-light);
+    --color-warning-bg: var(--palette-sun-deep);
+    --color-warning-fg: var(--palette-sun);
+    --color-warning-border: var(--palette-sun);
+    --color-warning-icon: var(--palette-sun);
+    --color-warning-solid: var(--palette-sun);
+    --color-danger-bg: var(--palette-pin-deep);
+    --color-danger-fg: var(--palette-pin-light);
+    --color-danger-border: var(--palette-pin);
+    --color-danger-icon: var(--palette-pin-light);
+    --color-danger-solid: var(--palette-pin-light);
+    --color-danger-solid-hover: var(--palette-pin-soft);
+    --color-fg-on-danger: var(--palette-pin-deep);
+    --color-globe-outline: var(--palette-night);
+    --color-globe-shadow: rgb(0 0 0 / 0.4);
+    --shadow-color: 0 0 0;
+    --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.4);
+    --shadow-2: 0 2px 6px rgb(var(--shadow-color) / 0.45), 0 1px 2px rgb(var(--shadow-color) / 0.3);
+    --shadow-3: 0 8px 30px rgb(var(--shadow-color) / 0.5), 0 2px 6px rgb(var(--shadow-color) / 0.35);
+    --shadow-4: 0 10px 30px rgb(var(--shadow-color) / 0.6), 0 4px 12px rgb(var(--shadow-color) / 0.4);
+    --shadow-lift: 0 6px 14px rgb(var(--shadow-color) / 0.6);
+    color-scheme: dark;
+  }
+}
+
+/* ---------- Preference overrides ------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+    --duration-deliberate: 0.01ms;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-border-default: var(--color-border-strong);
+    --color-fg-muted: var(--color-fg-default);
+    --color-fg-subtle: var(--color-fg-default);
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --color-focus-ring: Highlight;
+    --color-border-default: CanvasText;
+    --color-border-strong: CanvasText;
+  }
+}

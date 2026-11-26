@@ -1,0 +1,305 @@
+{
+  "project": "Mondino",
+  "screens": [
+    {
+      "id": "join",
+      "kind": "page",
+      "title": "Join",
+      "route": "/join/{inviteToken}",
+      "requirements": [
+        "L2-001",
+        "L2-002",
+        "L2-003",
+        "L2-004",
+        "L2-005",
+        "L2-006",
+        "L2-037",
+        "L2-045"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "locating",
+        "found",
+        "not-found",
+        "lookup-unavailable",
+        "invalid",
+        "submitting",
+        "join-failed",
+        "rate-limited",
+        "team-full",
+        "invite-unusable",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "Join lists nothing. An invite link that leads to no team is the invite-unusable state."
+      }
+    },
+    {
+      "id": "globe",
+      "kind": "page",
+      "title": "Globe",
+      "route": "/globe",
+      "requirements": [
+        "L2-008",
+        "L2-009",
+        "L2-010",
+        "L2-011",
+        "L2-012",
+        "L2-013",
+        "L2-014",
+        "L2-015",
+        "L2-016",
+        "L2-017",
+        "L2-018",
+        "L2-021",
+        "L2-022",
+        "L2-023",
+        "L2-024",
+        "L2-025",
+        "L2-037",
+        "L2-038",
+        "L2-040",
+        "L2-049"
+      ],
+      "states": [
+        "default",
+        "selected",
+        "selected-self",
+        "selected-asleep",
+        "pin-lifted",
+        "just-joined",
+        "group",
+        "sharing-off",
+        "quiet",
+        "loading",
+        "empty",
+        "error",
+        "globe-unavailable",
+        "weather-unavailable"
+      ]
+    },
+    {
+      "id": "team",
+      "kind": "page",
+      "title": "Team",
+      "route": "/team",
+      "requirements": [
+        "L2-007",
+        "L2-014",
+        "L2-015",
+        "L2-016",
+        "L2-018",
+        "L2-019",
+        "L2-026",
+        "L2-027",
+        "L2-028",
+        "L2-037",
+        "L2-044",
+        "L2-049"
+      ],
+      "states": [
+        "default",
+        "working",
+        "asleep",
+        "no-results",
+        "loading",
+        "empty",
+        "error",
+        "weather-unavailable",
+        "edge"
+      ]
+    },
+    {
+      "id": "moments",
+      "kind": "page",
+      "title": "Moments",
+      "route": "/moments",
+      "requirements": [
+        "L2-007",
+        "L2-020",
+        "L2-029",
+        "L2-030",
+        "L2-037"
+      ],
+      "states": [
+        "default",
+        "filtered",
+        "no-results",
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "id": "profile",
+      "kind": "page",
+      "title": "Profile & Settings",
+      "route": "/profile",
+      "requirements": [
+        "L2-007",
+        "L2-019",
+        "L2-022",
+        "L2-031",
+        "L2-032",
+        "L2-033",
+        "L2-034",
+        "L2-035",
+        "L2-036",
+        "L2-037"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "error",
+        "locating",
+        "location-found",
+        "invalid",
+        "sharing-off"
+      ],
+      "not_applicable": {
+        "empty": "A teammate always has a pin and settings; there is no collection that can be empty."
+      }
+    },
+    {
+      "id": "left-team",
+      "kind": "page",
+      "title": "Left the team",
+      "route": "/left",
+      "requirements": [
+        "L2-036"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "Shown at once after leaving; it reads nothing from the backend.",
+        "empty": "It lists nothing.",
+        "error": "It reads nothing that can fail; a failed leave stays in the Leave the team dialog."
+      }
+    },
+    {
+      "id": "no-team",
+      "kind": "page",
+      "title": "Invite link needed",
+      "route": "/globe, /team, /moments, /profile",
+      "requirements": [
+        "L2-038",
+        "L2-043"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "Decided in the browser before anything is read.",
+        "empty": "It lists nothing.",
+        "error": "It reads nothing that can fail."
+      }
+    },
+    {
+      "id": "not-found",
+      "kind": "page",
+      "title": "Not found",
+      "route": "/**",
+      "requirements": [
+        "L2-038"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "It reads nothing.",
+        "empty": "It lists nothing.",
+        "error": "It is itself the answer to an address that leads nowhere."
+      }
+    },
+    {
+      "id": "leave-team",
+      "kind": "dialog",
+      "title": "Leave the team",
+      "opens_from": "profile",
+      "requirements": [
+        "L2-036",
+        "L2-039"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no inputs."
+      }
+    },
+    {
+      "id": "unsaved-changes",
+      "kind": "dialog",
+      "title": "Leave without saving",
+      "opens_from": "profile",
+      "requirements": [
+        "L2-035",
+        "L2-039"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "busy": "Both choices take effect at once in the browser; nothing is sent.",
+        "invalid": "The dialog has no inputs."
+      }
+    },
+    {
+      "id": "settings-bar",
+      "kind": "notification",
+      "title": "Save bar",
+      "opens_from": "profile",
+      "requirements": [
+        "L2-035"
+      ],
+      "states": [
+        "info",
+        "saving",
+        "success",
+        "danger"
+      ],
+      "not_applicable": {
+        "warning": "The bar has no cautionary state: a change is unsaved, being saved, saved or not saved."
+      }
+    },
+    {
+      "id": "invite-link",
+      "kind": "notification",
+      "title": "Invite link copied",
+      "opens_from": "globe",
+      "requirements": [
+        "L2-025"
+      ],
+      "states": [
+        "success",
+        "danger"
+      ],
+      "not_applicable": {
+        "info": "Copying either works or does not; there is nothing neutral to say.",
+        "warning": "Copying either works or does not."
+      }
+    },
+    {
+      "id": "refresh-banner",
+      "kind": "notification",
+      "title": "Could not refresh",
+      "opens_from": "globe",
+      "requirements": [
+        "L2-048",
+        "L2-049"
+      ],
+      "states": [
+        "warning"
+      ],
+      "not_applicable": {
+        "info": "A refresh that works is quiet: the screen simply updates.",
+        "success": "When refreshing works again the banner goes; nothing is announced.",
+        "danger": "Nothing has failed for the teammate: the screen keeps its last data and its clocks keep ticking."
+      }
+    }
+  ]
+}
