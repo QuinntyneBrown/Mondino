@@ -46,7 +46,7 @@ alt teamId is not the teammate's own team
 else own team
   handler -> weather : Weather at City.Position
   weather --> handler : Weather, or none when the source fails
-  handler --> controller : ProfileDto with own postal code only (L2-031)
+  handler --> controller : ProfileDto with own postal code only (L2-031) and the supported Countries
   controller --> client : 200 ProfileDto
 end
 client --> store : Profile, or ApiError when the read fails

@@ -45,12 +45,17 @@ exist yet; each part below is introduced by this design.
 - **`ProfilePage`** — lazy route `/profile`. It binds the draft's settings to two `Segmented`
   controls and two `Switch` controls, and binds the save state to `SaveBar`. A change is an
   output from a presentation component that the page passes to `ProfileStore`. Each switch
-  carries a line under its label that says what its state means for teammates. While either
+  carries a line under its label that says what its state means for teammates: "Shown on your
+  pin and in your panel." or, off, "Teammates see your local time and no weather."; and "Others
+  see “Probably asleep” from 23:00 to 07:00 your time." or, off, "Teammates see no status for
+  you outside 09:00 to 18:00." While either
   switch is off in the saved profile, the card of the viewer's own pin adds the note "You still
   see your own weather and status. Teammates don’t." (L2-034).
 - **`ProfileStore`** — store provided at the `/profile` route. It holds the saved `Profile` and
   the draft as signals. `hasUnsavedChanges` is computed by comparing the draft with the saved
   profile field by field, so a setting changed back to what was saved removes the bar (L2-035).
+  A new postal code enters the draft only once it is found
+  ([Change location](../change-location/README.md)), so one that is not found shows no bar.
   `save()` calls `ProfileApi.updateProfile` and moves `saveState` through `SaveState`. On
   success it replaces the saved profile with the response and writes the display settings to
   `SettingsStore`. On failure it keeps the draft as it is. The 4 second dismissal of the
@@ -75,7 +80,8 @@ exist yet; each part below is introduced by this design.
   each option is a `radio`, and the chosen one is exposed through `aria-checked` and carries a
   mark besides its colour (L2-033).
 - **`Switch`** (`@mondino/components`) — a button with `role="switch"` and `aria-checked`,
-  operated by Space and Enter, at least 44 × 44 px (L2-034).
+  operated by Space and Enter, at least 44 × 44 px (L2-034). It reads "On" or "Off" beside the
+  control, so its state is not carried by colour alone.
 - **`SaveBar`** (`@mondino/components`) — takes a `state` input and emits `save` and `retry`.
   It renders nothing when the state is `hidden`. Its text sits in a live region (`role="status"`)
   so "Saved — your pin is up to date" is announced; in `failed` it is an alert (`role="alert"`).
@@ -94,8 +100,9 @@ exist yet; each part below is introduced by this design.
   (L2-033).
 - **`statusFor(pin, time)`** (`@mondino/domain`, `time/`) — returns the status to show
   for a pin, or none. When the pin's status visibility flag is false, it returns a status only
-  for "Working hours". The pin, the panel, the Team row and the day ribbon call it instead of
-  showing `statusAt` directly (L2-034).
+  for "Working hours". Everything that shows, counts or filters by status calls it: the pin,
+  the panel, the Team row, the day ribbon, the Team filter and the Globe's counts (L2-034).
+  While a teammate's status is hidden they are listed under All only, not under Asleep.
 
 | `SaveBar` state | When | Text | Action |
 |-----------------|------|------|--------|

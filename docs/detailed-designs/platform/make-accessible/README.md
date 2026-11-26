@@ -64,13 +64,14 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   status out when `statusFor` gives none, and the weather out when the pin has none. `globe` depends on `api` only, so `GlobePage` computes
   the descriptions and passes them to `GlobeView` as the input `descriptions`, keyed by
   teammate id.
-- **Selection is announced once.** `GlobePage` calls the CDK `LiveAnnouncer` with politeness
-  `polite` when the selected teammate id changes, whether the selection came from a tap, a
-  click or the keyboard. The message is the selected teammate's name and city and the word
-  "selected", as in "Tomás Herrera, Mexico City, selected.".
-  `TeammatePanel` is not itself a live region.
+- **Selection is announced once.** `GlobePage` holds one visually hidden element with
+  `role="status"` and `aria-live="polite"`, as the mocks draw it, and sets its text when the
+  selected teammate id changes, whether the selection came from a tap, a click or the
+  keyboard. The message is the selected teammate's name and city and the word "selected", as
+  in "Tomás Herrera, Mexico City, selected."; for a group pin it is the count, "3 teammates
+  close together." (`view-teammate-panel`). `TeammatePanel` is not itself a live region.
 - **A minute tick is silent.** The descriptions and the panel update in place when the clock
-  ticks. Neither is inside a live region, and `GlobePage` announces only a change of selection.
+  ticks. Neither is inside a live region, and `GlobePage` writes to its status element only on a change of selection.
 - **The postal code lookup is announced.** `PostalCodeField` renders its result inside a
   polite live region and its error in an element with `role="alert"`, linked to the input
   with `aria-describedby`; the input carries `aria-invalid` when the postal code is not
@@ -146,7 +147,7 @@ data the text equivalent reads.
 
 `GlobeView` renders `PinLayer`'s list of pin buttons over the canvas, which it hides from the
 accessibility tree. `GlobePage` builds each description with `describePin`, announces a selection
-through `LiveAnnouncer` and shows the teammate in `TeammatePanel`. `GlobeView` reads
+through its status element and shows the teammate in `TeammatePanel`. `GlobeView` reads
 `MotionPreference` before it turns or animates.
 
 ![C4 component view for making Mondino accessible](diagrams/c4-component.png)
@@ -155,7 +156,7 @@ through `LiveAnnouncer` and shows the teammate in `TeammatePanel`. `GlobeView` r
 
 `GlobeView` composes `PinLayer` and depends on `MotionPreference`, which
 `BrowserMotionPreference` implements. `PinLayer` renders one button per pin. `GlobePage`
-depends on `describePin` and on the CDK `LiveAnnouncer`.
+depends on `describePin` and holds the status element that announces a selection.
 
 ![Class diagram for making Mondino accessible](diagrams/class-structure.png)
 

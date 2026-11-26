@@ -14,7 +14,7 @@ title Class structure — Change location
 package "Frontend" {
   interface ProfileApi {
     +getProfile(teamId: string): Promise<Profile>
-    +lookUpPostalCode(teamId: string, countryCode: string, postalCode: string): Promise<PostalCodeResult>
+    +lookUpPostalCode(teamId: string, countryCode: string, postalCode: string, signal: AbortSignal): Promise<PostalCodeResult>
     +updateProfile(teamId: string, update: ProfileUpdate): Promise<Profile>
   }
   class HttpProfileApi
@@ -22,7 +22,6 @@ package "Frontend" {
     +saved: Signal<Profile>
     +draft: Signal<ProfileUpdate>
     +lookupState: Signal<LookupState>
-    +canSave: Signal<boolean>
     +load(): void
     +changeCountry(countryCode: string): void
     +changePostalCode(value: string): void
@@ -36,6 +35,7 @@ package "Frontend" {
     +countryCode: string
     +postalCode: string
     +settings: Settings
+    +countries: Country[]
   }
   class ProfileUpdate {
     +countryCode: string
@@ -54,10 +54,16 @@ package "Frontend" {
     +value: string
     +country: Country
     +lookupState: LookupState
+    +message: LookupMessage
     +valueChange: string
     +blurred: void
     +retry: void
   }
+  class LookupMessage {
+    +text: string
+    +retryLabel: string
+  }
+  class profileLookupMessage << (F,#D1E9FF) function >>
 }
 
 package "Backend" {
@@ -75,8 +81,21 @@ package "Backend" {
   class UpdateProfileCommandHandler {
     +Handle(command: UpdateProfileCommand): Task<ProfileDto>
   }
-  class LookUpPostalCodeQueryHandler {
-    +Handle(query: LookUpPostalCodeQuery): Task<PostalCodeResultDto>
+  class LookUpOwnPostalCodeQuery {
+    +Guid TeamId
+    +string CountryCode
+    +string PostalCode
+  }
+  class LookUpOwnPostalCodeQueryHandler {
+    +Handle(query: LookUpOwnPostalCodeQuery): Task<PostalCodeResultDto>
+  }
+  class ProfileDto {
+    +string TeamName
+    +PinDto Pin
+    +string CountryCode
+    +string PostalCode
+    +SettingsDto Settings
+    +IReadOnlyList<CountryDto> Countries
   }
   class GetProfileQueryHandler {
     +Handle(query: GetProfileQuery): Task<ProfileDto>
@@ -132,22 +151,29 @@ ProfileApi <|.. HttpProfileApi
 ProfileStore --> Profile : saved
 ProfileStore --> ProfileUpdate : draft
 ProfileStore --> LookupState : has
-ProfilePage --> PostalCodeField : value, country, lookupState
+ProfilePage --> PostalCodeField : value, country, lookupState, message
+ProfilePage ..> profileLookupMessage : this screen's copy
+profileLookupMessage ..> LookupMessage : builds
+PostalCodeField ..> LookupMessage : renders
 PostalCodeField ..> LookupState : shows
 IPostalCodeLookup ..> PostalCodeLookupOutcome : returns
 PostalCodeLookupOutcome --> PostalCodeLookupStatus
 PostalCodeLookupOutcome --> City
 HttpProfileApi ..> ProfileController : JSON/HTTPS
 ProfileController ..> GetProfileQueryHandler : GetProfileQuery
-ProfileController ..> LookUpPostalCodeQueryHandler : LookUpPostalCodeQuery
+ProfileController ..> LookUpOwnPostalCodeQueryHandler : LookUpOwnPostalCodeQuery
+LookUpOwnPostalCodeQueryHandler ..> LookUpOwnPostalCodeQuery : handles
+LookUpOwnPostalCodeQueryHandler ..> ICurrentTeammate : whose team
+GetProfileQueryHandler ..> ProfileDto : builds
+GetProfileQueryHandler ..> PostalCodeFormats : Countries
 ProfileController ..> UpdateProfileCommandHandler : UpdateProfileCommand
 UpdateProfileCommandHandler ..> UpdateProfileCommand : handles
 UpdateProfileCommandHandler ..> ICurrentTeammate : whose pin
 UpdateProfileCommandHandler ..> IPostalCodeLookup : finds the city
 UpdateProfileCommandHandler ..> PostalCodeFormats : normalises
 UpdateProfileCommandHandler --> Teammate : loads / moves
-LookUpPostalCodeQueryHandler ..> PostalCodeFormats : checks the form
-LookUpPostalCodeQueryHandler ..> IPostalCodeLookup : finds the city
+LookUpOwnPostalCodeQueryHandler ..> PostalCodeFormats : checks the form
+LookUpOwnPostalCodeQueryHandler ..> IPostalCodeLookup : finds the city
 GetProfileQueryHandler ..> ICurrentTeammate : whose profile
 Teammate *-- PostalCode
 Teammate *-- City

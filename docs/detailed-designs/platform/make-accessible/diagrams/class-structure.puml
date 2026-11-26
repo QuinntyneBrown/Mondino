@@ -46,11 +46,8 @@ class describePin <<function>> {
 
 class GlobePage {
   +onSelect(teammateId: string): void
+  +announcement: Signal<string>
   -announceSelection(pin: Pin): void
-}
-
-class LiveAnnouncer <<Angular CDK>> {
-  +announce(message: string, politeness: "polite"): Promise<void>
 }
 
 class App {
@@ -70,5 +67,4 @@ GlobeView *-- PinLayer
 GlobeView ..> MotionPreference : reads
 GlobePage --> GlobeView : renders
 GlobePage ..> describePin : calls
-GlobePage ..> LiveAnnouncer : announces through
 @enduml

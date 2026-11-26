@@ -23,7 +23,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "GlobePage" as page
   participant "TeamStore" as store
   participant "TeammatePanel" as panel
-  participant "LiveAnnouncer" as announcer
+  participant "Status element" as announcer
 end box
 actor -> shell : Tab: "Skip to content" is the first stop (L2-039)
 shell --> actor : Focus moves to the main content
@@ -47,10 +47,10 @@ else Reduced motion requested (L2-042)
 end
 page -> panel : Selected teammate's city, local time, offset, status, weather
 panel --> actor : Panel shows the teammate
-page -> announcer : announce("<name>, <city>, selected.", "polite") once (L2-040)
+page -> announcer : Set its text to "<name>, <city>, selected." once (L2-040)
 announcer --> actor : Screen reader speaks the change
 note over layer, announcer
   A minute tick updates the descriptions in place.
-  Nothing is sent to LiveAnnouncer for it (L2-040).
+  Nothing is written to the status element for it (L2-040).
 end note
 @enduml

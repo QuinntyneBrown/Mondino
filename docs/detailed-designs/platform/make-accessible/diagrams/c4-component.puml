@@ -11,7 +11,7 @@ Container_Boundary(spa, "Mondino web app") {
   Component(layer, "PinLayer", "Component in globe", "The list of pins: one button per pin, named by its description; lifts the focused or selected pin")
   Component(describe, "describePin", "Function in domain pins/", "Name, city, local time, status, weather and moment as one sentence")
   Component(motion, "MotionPreference", "Contract in api, BrowserMotionPreference in domain", "Signal of the system's reduced motion setting")
-  Component(announcer, "LiveAnnouncer", "Angular CDK a11y", "Polite live region")
+  Component(announcer, "Status element", "Visually hidden role=status in GlobePage's template", "Polite live region")
   Component(panel, "TeammatePanel", "Presentation component", "The selected teammate as text")
 }
 Rel(teammate, shell, "Tabs from the skip link")
