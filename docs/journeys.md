@@ -14,7 +14,7 @@ Effort is days for one intermediate developer.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
-| 1 | [Scaffold the workspace](prompts/01-scaffold-the-workspace-prompt.md) | Angular workspace, .NET solution, test harnesses, verify script and CI. | L2-038 | 5 | 0 |
+| 1 | [Scaffold the workspace](prompts/01-scaffold-the-workspace-prompt.md) | Angular workspace, .NET solution, test harnesses, verify script and CI. | L2-038 | 5 | 100 |
 | 2 | [Open an invite link](prompts/02-open-an-invite-link-prompt.md) | See the team's name, count and pins before joining. | L2-001 | 3 | 0 |
 | 3 | [Place a pin from a postal code](prompts/03-place-a-pin-from-a-postal-code-prompt.md) | Give name, country and postal code; the city is found. | L2-002, L2-003, L2-004, L2-006 | 5 | 0 |
 | 4 | [Join the team](prompts/04-join-the-team-prompt.md) | Join and land on the Globe with your new pin. | L2-005 | 4 | 0 |
@@ -44,4 +44,4 @@ Effort is days for one intermediate developer.
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **0** |
+| | **Total** | | | **147** | **3** |

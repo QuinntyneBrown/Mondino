@@ -80,9 +80,15 @@ teammate can give their team's. It reads no API and shows no team's name or data
 `mo-app-header` without navigation.
 
 **`NotFoundPage`** — lazy route component for an address that belongs to no screen. It says
-"This page isn’t on the map" and links back to the globe. It reads no API. Inside `TeamShell`
-it sits under the shell's header; for a person with no membership it renders `mo-app-header`
-without navigation itself.
+"This page fell off the map", shows the address (the host and the path, as text, without its
+query string or fragment, from `shownAddress`) and links "Back to the globe". It reads no API.
+It is a `NoticePage`.
+
+**`NoticePage`** (`mo-notice-page`, block `notice-page`) — presentation component in
+`components` for a page that says one thing: the `Wordmark`, a small globe (`GlobeFallback`,
+named "A small globe"), a title, a line and a way on. The line is the inputs `lead`, `emphasis`
+(in strong) and `rest`, all rendered as text; the way on is the `actions` slot. It renders the
+screen's `main`. Not Found, "You need an invite link" and "You’ve left" are built from it.
 
 **`App`** — root component of the `mondino` application. It renders the "Skip to content"
 link, which is the first focusable element of every screen, and the router outlet, and nothing
