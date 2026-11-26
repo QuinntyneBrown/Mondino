@@ -92,9 +92,11 @@ Builds on: journeys 3, 5 and 6.
      one else's; another teammate's profile refused.
   2. Frontend: `ProfilePage` (lazy) and `ProfileStore` at its route: the pin's card with the small globe (not
      turning, not draggable), loading and error.
-  3. The Location section with `PostalCodeField` and the same `LookupState` as Join: locating, found ("…your
-     pin moves here when you save.", previewed as "New · Toronto"), not found ("Your pin stays in Milan."),
-     unavailable, rate limited.
+  3. Backend: `POST /api/teams/{teamId}/me/postal-code-lookups` (`LookUpOwnPostalCodeQuery`, no invite token,
+     the same `PostalCodeResolver`). Frontend: the Location section with `PostalCodeField`,
+     `profileLookupMessage` and the same `LookupState` as Join: locating, found ("…your pin moves here when
+     you save.", previewed as "New · Toronto"), not found ("Your pin stays in Milan."), unavailable, rate
+     limited.
   4. Backend: the change through the API: looked up again, the pin at the new city with its time zone; within
      the same city the pin does not move; another teammate's location refused.
   5. Saving through the save bar (journey 19 owns the bar; here the minimum that saves a location).

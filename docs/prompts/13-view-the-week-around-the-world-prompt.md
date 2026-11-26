@@ -91,8 +91,8 @@ wording.
   3. "This week around the world": the first 8 moments in date order then west to east, each selecting its
      teammate's pin; "All moments" always under it; the every-kind-off copy with "Choose what shows".
   4. The team of one: `InviteCard` with the invite link and "Copy"; no panel.
-  5. Copying, from the card and from "Invite teammate" in `AppHeader`: `Toast` hosted by `TeamShell`, success
-     announced for 4 seconds, refusal as an alert.
+  5. Copying, through `InviteLinkCopier`, from the card and from "Invite teammate" in `AppHeader`: `Toast`
+     hosted by `TeamShell`, success announced for 4 seconds, refusal as an alert.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page

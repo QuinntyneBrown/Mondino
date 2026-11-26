@@ -90,7 +90,7 @@ Builds on: journeys 12 and 15.
   3. `FilterChips`: a labelled group of `aria-pressed` buttons with each kind's icon; "Nothing of this kind
      coming up for your team."
   4. Loading, error and the empty state (no filter shown).
-  5. A bounded number of rows in the page for a large team.
+  5. A bounded number of rows in the page for a large team (CDK virtual scroll, as the design says).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page

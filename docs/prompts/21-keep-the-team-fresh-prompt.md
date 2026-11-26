@@ -85,7 +85,8 @@ Builds on: journeys 8, 13 and 15.
   1. `TeamStore.refresh` driven by the shared clock (no timer of its own): every 15 minutes while visible,
      none while hidden, at once on return after more than 15 minutes; unit tests on a fake clock.
   2. Merging a refresh: selection and globe position kept, arrived pins pulse once, counts update.
-  3. Moments moving between Today, This week and Later at their place's midnight.
+  3. Moments read again with each refresh, and moving between Today, This week and Later at their place's
+     midnight.
   4. `refreshFailed`: the banner in `TeamShell` with "Try now", gone silently when a refresh works; pending
      requests cancelled on leaving.
 - For each slice:

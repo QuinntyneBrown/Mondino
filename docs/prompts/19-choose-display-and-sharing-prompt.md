@@ -111,10 +111,6 @@ Builds on: journeys 9, 11, 16 and 18.
 - Set journey 19 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
-## Deferred (not in this journey)
-- What a save or a leave shows when the session has ended (401) is `<TO SUPPLY>`: show the no-team page, and
-  record it in the design.
-
 ## Done means
 - The nine mocks above are what the screen, bar and dialog show.
 - Another teammate's read carries no weather, and shows no status outside working hours, for a teammate who

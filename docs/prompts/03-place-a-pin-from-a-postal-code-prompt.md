@@ -90,8 +90,9 @@ Builds on: journeys 1 and 2.
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
   1. Backend: `IPostalCodeLookup` in `Mondino.Application` with its fake; the lookup endpoint (postal code in
-     the request body only, needs a valid invite token, marked open, 10 a minute); per-country format check
-     before any call to the source; answers the city, region, position of the city and time zone, 422
+     the request body only, needs a valid invite token, marked open, 10 a minute); `PostalCodeResolver` with
+     `PostalCodeFormats` (the per-country format check before any call to the source, and each country's
+     `PostalCodeHint` sentence); answers the city, region, position of the city and time zone, 422
      `postal_code_not_found`, 503 `postal_code_unavailable`.
   2. Backend: the pin is at the city, never the postal code's position; two postal codes in Toronto give one
      position; a rural postal code takes the nearest named locality (L2-006). Direct tests, one per row, for
@@ -100,8 +101,9 @@ Builds on: journeys 1 and 2.
      receives a country and postal code and nothing else (L2-050 AC1).
   4. Frontend: the three fields with validation (name empty, name over 60, postal code empty), the summary
      alert that takes focus, the privacy line and the sources line.
-  5. Frontend: locating and found (`PostalCodeField`, `LookupMessage`, button copy, the "You" pin handed to
-     the globe stage); changing the postal code or country clears it.
+  5. Frontend: locating and found (`PostalCodeField`, which holds no copy, with `joinLookupMessage` and
+     `LookupMessage`; the button copy; the "You" pin handed to the globe stage); changing the postal code or
+     country clears it.
   6. Frontend: not found, lookup unavailable with try again, and rate limited; each announced (an error as an
      alert).
 - For each slice:

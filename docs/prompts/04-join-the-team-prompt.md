@@ -88,10 +88,10 @@ Builds on: journeys 1 to 3.
 - Plan thin vertical slices, for example:
   1. Backend: the join command through the API: validates name, country and postal code again, resolves the
      city, creates the teammate with a colour from the pin palette, issues the session cookie (`HttpOnly`,
-     `Secure`, `SameSite`), answers the team and teammate ids. Random ids (L2-043 AC6).
+     `Secure`, `SameSite`), answers the team and teammate ids and the colour. Random ids (L2-043 AC6).
   2. Backend: idempotent against a double submit; 409 `team_full` at 500 teammates; 5 joins a minute then 429.
-  3. Frontend: submitting ("Joining Northwind…", fields locked), then `TeamMembership` (ids and the team's
-     name, never a postal code) and navigation to `/globe`.
+  3. Frontend: submitting ("Joining Northwind…", fields locked), then `TeamMembership.remember` (ids, the
+     team's name, the viewer's initials and colour; never a postal code or a city) and navigation to `/globe`.
   4. Frontend: join failed with try again, team full, rate limited; what was typed is kept.
   5. Frontend: a minimal Globe route that greets the new teammate's pin; the pulse (`pin--new`, none under
      reduced motion) is completed with journey 8.

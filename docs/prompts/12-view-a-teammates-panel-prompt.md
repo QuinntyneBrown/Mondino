@@ -89,7 +89,8 @@ Builds on: journeys 8 to 11.
      the viewer's own variant.
   3. Close button and Escape clear the selection; the fade (none under reduced motion); focus to the heading
      on open and back to the pin on close; one polite announcement.
-  4. `GroupPanel` for a group pin, its teammates west to east, each selecting its pin.
+  4. `GroupPanel` for a group pin, its teammates west to east, each selecting its pin; it closes by its "This
+     week around the world" link or Escape.
   5. The moments section as moment cards (filled by journey 15's data; absent when a teammate has none).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
