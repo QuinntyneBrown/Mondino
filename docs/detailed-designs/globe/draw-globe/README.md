@@ -43,7 +43,9 @@ any other origin.
 **In the `components` library**
 
 - **`GlobePlaceholder`** (`mo-globe-placeholder`) — presentation component with no inputs that
-  draws a plain disc in the quiet fill (`--color-bg-subtle`), with a hairline edge and a slow pulse, inside a square box. The box takes its size from the
+  draws a plain disc in the quiet fill (`--color-bg-subtle`), with a hairline edge and a slow pulse, inside a square box.
+  Its block is the mocks' `globe globe--placeholder`, with `role="img"` and the name "The globe
+  is loading". Reduced motion removes the pulse. The box takes its size from the
   layout (`aspect-ratio: 1`), not from its content, so replacing the placeholder with the 3D
   globe moves nothing (L2-008). It is part of the page's own chunk, because it is shown before
   the globe library has arrived.
@@ -51,7 +53,8 @@ any other origin.
 **In the `globe` library**
 
 - **`GlobeView`** (`mo-globe`) — the library's one public component. Inputs: `pins`,
-  `selectedId`, `interactive`. Output: `select`. It owns a `<canvas>` and a `state` signal of
+  `selectedId`, `interactive`. Output: `select`. (`show-pins`, `make-accessible` and
+  `keep-team-fresh` add `selectGroup`, `label`, `arrivedIds` and `arrivedShown`.) It owns a `<canvas>` and a `state` signal of
   type `GlobeState` (`Loading`, `Ready`, `Fallback`). In `Loading` it renders the content
   projected into it, which `GlobePage` fills with a second `GlobePlaceholder`, so the same
   picture stays in the same box from the first paint to the first 3D frame. The canvas carries
@@ -78,7 +81,8 @@ any other origin.
   (which level of the model's detail is shown). A step shall not change the lighting, the
   colours or the pins (L2-008).
 - **`GlobeFallback`** — component that shows the still picture, an image bundled with the app,
-  in the same square box, with a text alternative. It needs neither WebGL nor the renderer.
+  in the same square box, with `role="img"` and the name "A still picture of the globe". It
+  needs neither WebGL nor the renderer. No pin is drawn on it and it is not focusable.
 
 **From the `api` and `domain` libraries**
 
@@ -93,7 +97,10 @@ any other origin.
 first frame has been drawn. On a `GlobeUnavailableError` it moves to `Fallback` and renders
 `GlobeFallback`; the teammates stay reachable through the panel and the Team screen, which do
 not depend on the scene. A WebGL context lost while the globe is running is handled the same
-way.
+way. `GlobePage` reads `GlobeView`'s `state`, and in `Fallback` it shows a notice
+(`globe-screen__notice`) in place of the legend: "This device can’t draw the 3D globe, so this
+is a still picture. Everyone is still here: in the panel, and on Team.", where "Team" links to
+the Team screen.
 
 The night side follows the clock. `GlobeView` runs one effect on the clock's minute tick that
 calls `SunPosition.subsolarPoint(clock.now())` and passes the result to `GlobeScene.setSun`.

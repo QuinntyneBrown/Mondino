@@ -21,7 +21,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "PinLayer" as layer
   participant "LabelPlacer" as labels
   participant "GlobeScene" as scene
-  participant "GroupPinMenu" as menu
+  participant "GlobePage" as page
 end box
 view -> view : pins input or globe size changed (ResizeObserver)
 view -> spread : spread(pins, globeSize)
@@ -42,9 +42,9 @@ loop each frame in which the globe has turned
 end
 layer --> actor : Every pin visible and selectable on its own
 actor -> layer : Select a group pin
-layer -> menu : Open with the group's pins
-menu --> actor : List of the group's teammates
-actor -> menu : Choose a teammate
-menu --> layer : choose(teammate id)
-layer --> view : select(teammate id)
+layer --> view : selectGroup(teammate ids)
+view --> page : selectGroup(teammate ids)
+page --> actor : The group's teammates listed in the panel (L2-013 AC3)
+actor -> page : Choose a teammate
+page -> view : selectedId input = teammate id
 @enduml

@@ -45,11 +45,13 @@ alt WebGL context available
     scene --> view : Reject with GlobeUnavailableError(AssetsFailed)
     view -> fallback : state = Fallback, show the still picture
     fallback --> actor : Still picture of the globe (L2-008 AC3)
+    page --> actor : Notice that this is a still picture, with a link to Team
   end
 else no WebGL context
   scene --> view : Reject with GlobeUnavailableError(NoWebGL)
   view -> fallback : state = Fallback, show the still picture
   fallback --> actor : Still picture of the globe (L2-008 AC3)
+  page --> actor : Notice that this is a still picture, with a link to Team
 end
 actor -> page : Leave the Globe screen
 page -> view : Destroy
