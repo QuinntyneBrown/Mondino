@@ -33,6 +33,7 @@
   
   <section class="day-ribbon" aria-labelledby="ribbon-title">
     <h2 class="visually-hidden" id="ribbon-title">The day, hour by hour</h2>
+    <div class="day-ribbon__scroll" role="region" aria-labelledby="ribbon-title" tabindex="0">
     <div class="day-ribbon__track" style="--rows: 6">
       <span class="day-ribbon__band day-ribbon__band--night" style="--from: 0.00%; --span: 29.17%"><span>Night</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 29.17%; --span: 8.33%"><span>Morning</span></span><span class="day-ribbon__band day-ribbon__band--working" style="--from: 37.50%; --span: 37.50%"><span>Working hours</span></span><span class="day-ribbon__band day-ribbon__band--edge" style="--from: 75.00%; --span: 20.83%"><span>Evening</span></span><span class="day-ribbon__band day-ribbon__band--night" style="--from: 95.83%; --span: 4.17%"></span>
       <ul>
@@ -52,6 +53,7 @@
       </ul>
     </div>
     <ul class="day-ribbon__scale tnum" aria-hidden="true"><li>00:00</li><li>03:00</li><li>06:00</li><li>09:00</li><li>12:00</li><li>15:00</li><li>18:00</li><li>21:00</li><li>00:00</li></ul>
+    </div>
   </section>
   <div class="section-head">
     <h2>Everyone, west to east</h2>
@@ -67,117 +69,117 @@
         <thead><tr><th scope="col">Person</th><th scope="col">Location</th><th scope="col">Local time</th><th scope="col">Compared to you</th><th scope="col">Weather</th><th scope="col">Coming up</th><td></td></tr></thead>
         <tbody>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-11" aria-hidden="true">TH</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Tomás Herrera</a><span class="team-table__sub">Early morning</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-11" aria-hidden="true">TH</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Tomás Herrera</a><span class="team-table__phone tnum">Mexico City · 7h behind</span><span class="team-table__sub">Early morning</span></span></th>
             <td class="team-table__location">Mexico City<span class="team-table__sub">Mexico</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--edge" aria-hidden="true"></span>08:05</span><span class="team-table__phone tnum">Mexico City · 7h behind</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--edge" aria-hidden="true"></span>08:05</span></td>
             <td class="team-table__offset tnum">7h behind</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Partly cloudy" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg>22°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Holiday" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg><span class="moment-pill__title">Día de Muertos</span><span class="moment-pill__when">· In 5 days</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-12" aria-hidden="true">JL</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Jordan Lee</a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-12" aria-hidden="true">JL</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Jordan Lee</a><span class="team-table__phone tnum">Austin · 6h behind</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">Austin<span class="team-table__sub">United States</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>09:05</span><span class="team-table__phone tnum">Austin · 6h behind</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>09:05</span></td>
             <td class="team-table__offset tnum">6h behind</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Partly cloudy" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg>24°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Local event" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg><span class="moment-pill__title">Halloween on 6th Street</span><span class="moment-pill__when">· In 4 days</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-10" aria-hidden="true">CM</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Chloé Martin</a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-10" aria-hidden="true">CM</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Chloé Martin</a><span class="team-table__phone tnum">São Paulo · 4h behind</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">São Paulo<span class="team-table__sub">Brazil</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>11:05</span><span class="team-table__phone tnum">São Paulo · 4h behind</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>11:05</span></td>
             <td class="team-table__offset tnum">4h behind</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Showers" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 19v1"/><path d="M8 14v1"/><path d="M16 19v1"/><path d="M16 14v1"/><path d="M12 21v1"/><path d="M12 16v1"/></svg>26°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Formula 1" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg><span class="moment-pill__title">São Paulo Grand Prix</span><span class="moment-pill__when">· 9 Nov</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-3" aria-hidden="true">LO</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Liam O’Connor</a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-3" aria-hidden="true">LO</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Liam O’Connor</a><span class="team-table__phone tnum">Dublin · 1h behind</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">Dublin<span class="team-table__sub">Ireland</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>14:05</span><span class="team-table__phone tnum">Dublin · 1h behind</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>14:05</span></td>
             <td class="team-table__offset tnum">1h behind</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Rainy" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>9°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Holiday" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg><span class="moment-pill__title">October Bank Holiday</span><span class="moment-pill__when">· Today</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-5" aria-hidden="true">KM</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Kwame Mensah</a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-5" aria-hidden="true">KM</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Kwame Mensah</a><span class="team-table__phone tnum">Accra · 1h behind</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">Accra<span class="team-table__sub">Ghana</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>14:05</span><span class="team-table__phone tnum">Accra · 1h behind</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>14:05</span></td>
             <td class="team-table__offset tnum">1h behind</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Clear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>30°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Holiday" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg><span class="moment-pill__title">Farmers’ Day</span><span class="moment-pill__when">· 5 Dec</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-13" aria-hidden="true">LF</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Luca Ferri</a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-13" aria-hidden="true">LF</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Luca Ferri</a><span class="team-table__phone tnum">Milan · Same time</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">Milan<span class="team-table__sub">Italy</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span><span class="team-table__phone tnum">Milan · Same time</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span></td>
             <td class="team-table__offset tnum">Same time</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Foggy" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/></svg>13°</span></td>
             <td class="team-table__moment"><span class="team-table__none" aria-label="No moment coming up">—</span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-1" aria-hidden="true">SB</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected-self.html">Sofia Bianchi <span class="team-table__you">(you)</span></a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-1" aria-hidden="true">SB</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected-self.html">Sofia Bianchi <span class="team-table__you">(you)</span></a><span class="team-table__phone tnum">Milan</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">Milan<span class="team-table__sub">Italy</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span><span class="team-table__phone tnum">Milan</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span></td>
             <td class="team-table__offset tnum"><span aria-label="You">—</span></td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Foggy" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/></svg>13°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Formula 1" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg><span class="moment-pill__title">Monza tickets on sale</span><span class="moment-pill__when">· 12 Nov</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-4" aria-hidden="true">LF</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Lena Fischer</a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-4" aria-hidden="true">LF</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Lena Fischer</a><span class="team-table__phone tnum">Berlin · Same time</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">Berlin<span class="team-table__sub">Germany</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span><span class="team-table__phone tnum">Berlin · Same time</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span></td>
             <td class="team-table__offset tnum">Same time</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Cloudy" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>8°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Local event" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg><span class="moment-pill__title">St. Martin’s lantern walk</span><span class="moment-pill__when">· 11 Nov</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-2" aria-hidden="true">ML</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Mara Lindqvist</a><span class="team-table__sub">Working hours</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-2" aria-hidden="true">ML</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Mara Lindqvist</a><span class="team-table__phone tnum">Stockholm · Same time</span><span class="team-table__sub">Working hours</span></span></th>
             <td class="team-table__location">Stockholm<span class="team-table__sub">Sweden</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span><span class="team-table__phone tnum">Stockholm · Same time</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--working" aria-hidden="true"></span>15:05</span></td>
             <td class="team-table__offset tnum">Same time</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Cloudy" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>6°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Holiday" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg><span class="moment-pill__title">Alla helgons dag</span><span class="moment-pill__when">· In 5 days</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-6" aria-hidden="true">AA</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/sharing-off.html">Ahmed Al-Sayed</a><span class="team-table__sub">Evening</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-6" aria-hidden="true">AA</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/sharing-off.html">Ahmed Al-Sayed</a><span class="team-table__phone tnum">Dubai · 3h ahead</span><span class="team-table__sub">Evening</span></span></th>
             <td class="team-table__location">Dubai<span class="team-table__sub">United Arab Emirates</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--edge" aria-hidden="true"></span>18:05</span><span class="team-table__phone tnum">Dubai · 3h ahead</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--edge" aria-hidden="true"></span>18:05</span></td>
             <td class="team-table__offset tnum">3h ahead</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Clear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>32°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Holiday" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg><span class="moment-pill__title">UAE National Day</span><span class="moment-pill__when">· 2 Dec</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-7" aria-hidden="true">PR</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Priya Raman</a><span class="team-table__sub">Evening</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-7" aria-hidden="true">PR</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Priya Raman</a><span class="team-table__phone tnum">Bengaluru · 4h 30m ahead</span><span class="team-table__sub">Evening</span></span></th>
             <td class="team-table__location">Bengaluru<span class="team-table__sub">India</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--edge" aria-hidden="true"></span>19:35</span><span class="team-table__phone tnum">Bengaluru · 4h 30m ahead</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--edge" aria-hidden="true"></span>19:35</span></td>
             <td class="team-table__offset tnum">4h 30m ahead</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Stormy" viewBox="0 0 24 24"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></svg>27°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Holiday" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg><span class="moment-pill__title">Karnataka Rajyotsava</span><span class="moment-pill__when">· In 5 days</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-8" aria-hidden="true">AT</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Aiko Tanaka</a><span class="team-table__sub">Probably asleep</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-8" aria-hidden="true">AT</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected.html">Aiko Tanaka</a><span class="team-table__phone tnum">Tokyo · 8h ahead</span><span class="team-table__sub">Probably asleep</span></span></th>
             <td class="team-table__location">Tokyo<span class="team-table__sub">Japan</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--asleep" aria-hidden="true"></span>23:05</span><span class="team-table__phone tnum">Tokyo · 8h ahead</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--asleep" aria-hidden="true"></span>23:05</span></td>
             <td class="team-table__offset tnum">8h ahead</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Clear" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>14°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Holiday" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg><span class="moment-pill__title">Culture Day</span><span class="moment-pill__when">· In 7 days</span></span></td>
             <td class="team-table__go" aria-hidden="true"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></td>
           </tr>
           <tr class="team-table__row">
-            <th scope="row" class="team-table__person"><span class="avatar hue-9" aria-hidden="true">NW</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected-asleep.html">Noah Williams</a><span class="team-table__sub">Probably asleep</span></span></th>
+            <th scope="row" class="team-table__person"><span class="avatar hue-9" aria-hidden="true">NW</span><span class="team-table__who"><a class="team-table__link" href="../../pages/globe/selected-asleep.html">Noah Williams</a><span class="team-table__phone tnum">Melbourne · 10h ahead</span><span class="team-table__sub">Probably asleep</span></span></th>
             <td class="team-table__location">Melbourne<span class="team-table__sub">Australia</span></td>
-            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--asleep" aria-hidden="true"></span>01:05</span><span class="team-table__phone tnum">Melbourne · 10h ahead</span></td>
+            <td class="team-table__time"><span class="team-table__clock tnum"><span class="dot dot--asleep" aria-hidden="true"></span>01:05</span></td>
             <td class="team-table__offset tnum">10h ahead</td>
             <td class="team-table__weather tnum"><span class="team-table__weather-in"><svg class="icon icon--sm" role="img" aria-label="Windy" viewBox="0 0 24 24"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></svg>18°</span></td>
             <td class="team-table__moment"><span class="moment-pill"><svg class="icon" role="img" aria-label="Sport" viewBox="0 0 24 24"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg><span class="moment-pill__title">Melbourne Cup Day</span><span class="moment-pill__when">· In 7 days</span></span></td>
