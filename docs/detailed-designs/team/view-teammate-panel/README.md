@@ -163,7 +163,8 @@ selection in `TeamStore`, asks `teammatePanelView` for the content and passes it
 
 `GlobePage` depends on `TeamStore`, the `CLOCK` and `teammatePanelView`, and renders `GlobeView`
 and `TeammatePanel`. `TeammatePanelContent` is the only thing `TeammatePanel` receives, and it
-owns the `Overlap`, the `DaySpan` and the `OverlapText` that `OverlapBar` draws. `GroupPanel`
+owns the `PanelMoment` values of the moment cards and the `Overlap`, the `DaySpan` and the
+`OverlapText` that `OverlapBar` draws. `GroupPanel`
 presents `GroupRow` values.
 
 ![Class diagram for viewing a teammate's panel](diagrams/class-structure.png)

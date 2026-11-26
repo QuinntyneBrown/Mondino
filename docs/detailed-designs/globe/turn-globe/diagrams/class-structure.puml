@@ -45,6 +45,7 @@ class GlobeMotion {
   +hold(position: Position): void
   +release(): void
   +setReducedMotion(reduced: boolean): void
+  +setInteractive(interactive: boolean): void
   +isMoving(): boolean
 }
 

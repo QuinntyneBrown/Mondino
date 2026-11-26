@@ -40,7 +40,7 @@ API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`.
 
   Its methods are `advance(elapsedMs)`, `dragStart()`, `dragBy(deltaLongitude, deltaTilt)`,
   `dragEnd()`, `canTurn(deltaLongitude, deltaTilt)`, `step(direction)`, `hold(position)`,
-  `release()`, `setReducedMotion(reduced)` and `isMoving()`. The tilt is limited so a pole
+  `release()`, `setReducedMotion(reduced)`, `setInteractive(interactive)` and `isMoving()`. The tilt is limited so a pole
   never passes the centre of the view; `canTurn` reports whether a turn would exceed the limit.
   The auto-turn rate, the size of a step, the tilt limit and the easing curve are
   `<TO SUPPLY>`; the mocks and the design system's motion tokens settle them.
@@ -56,8 +56,10 @@ API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`.
 - **`GlobeView`** (`mo-globe`) — joins the parts. It owns one `GlobeMotion` and one
   `GlobeGestures`, and registers a frame listener on `GlobeScene`. On each frame it calls
   `motion.advance(elapsedMs)` and passes the result to `GlobeScene.setOrientation`. It attaches
-  `GlobeGestures` only when its `interactive` input is true, so the small globe on Profile &
-  Settings is not dragged, and never over the still picture (see `draw-globe`).
+  `GlobeGestures` only when its `interactive` input is true, and never over the still picture
+  (see `draw-globe`). It passes `interactive` to `setInteractive`; while it is false `GlobeMotion` never enters
+  `TurningOnItsOwn`, so the small globe on Profile & Settings is not dragged and does not turn
+  on its own (L2-031); it still turns to the pin `selectedId` names and holds there.
 - **`GlobeScene`** — draws the globe at the orientation it is given and owns the render loop
   (`start`, `stop`, `onFrame`). It decides nothing about motion.
 
@@ -71,7 +73,7 @@ API. Drawing the globe is covered by `draw-globe` and the pins by `show-pins`.
 
 **The rules**
 
-*Turning on its own.* The globe starts in `TurningOnItsOwn` when nothing is selected. Any drag
+*Turning on its own.* An interactive globe starts in `TurningOnItsOwn` when nothing is selected. Any drag
 or step moves it to `Dragged` or `Waiting`, and it returns to turning on its own 5 seconds
 after the last interaction. The 5 seconds are counted from frame time inside `advance`, not
 from a timer, so the count stops while the tab is hidden and there is no timer to release.
@@ -146,7 +148,7 @@ each frame, passes the orientation to `GlobeScene`, and holds on a pin when `Glo
 
 ### Class structure
 
-`GlobeView` owns `GlobeMotion` and `GlobeGestures`. `GlobeMotion` has a `MotionMode` and a
+`GlobeView` owns `GlobeMotion` and `GlobeGestures` and reads `MotionPreference`. `GlobeMotion` has a `MotionMode` and a
 `GlobeOrientation`, steps by an `ArrowDirection` and holds on a `Position`. `GlobeScene` is
 drawn at a `GlobeOrientation`.
 
