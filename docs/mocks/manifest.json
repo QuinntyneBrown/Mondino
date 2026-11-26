@@ -52,11 +52,13 @@
         "L2-016",
         "L2-017",
         "L2-018",
+        "L2-019",
         "L2-021",
         "L2-022",
         "L2-023",
         "L2-024",
         "L2-025",
+        "L2-033",
         "L2-037",
         "L2-038",
         "L2-040",
@@ -76,6 +78,7 @@
         "empty",
         "error",
         "globe-unavailable",
+        "fahrenheit-12-hour",
         "weather-unavailable"
       ]
     },
@@ -211,6 +214,24 @@
         "loading": "It reads nothing.",
         "empty": "It lists nothing.",
         "error": "It is itself the answer to an address that leads nowhere."
+      }
+    },
+    {
+      "id": "brand",
+      "kind": "page",
+      "title": "Brand: Logo & Wordmark",
+      "route": "Mondino Brand prototype (not a product route)",
+      "requirements": [
+        "L2-038",
+        "L2-041"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "A reference sheet, not a screen of the product; it reads nothing.",
+        "empty": "A reference sheet; it lists nothing that can be empty.",
+        "error": "A reference sheet; it reads nothing that can fail."
       }
     },
     {
