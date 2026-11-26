@@ -73,7 +73,9 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   ticks. Neither is inside a live region, and `GlobePage` announces only a change of selection.
 - **The postal code lookup is announced.** `PostalCodeField` renders its result inside a
   polite live region and its error in an element with `role="alert"`, linked to the input
-  with `aria-describedby`; the input carries `aria-invalid` when the lookup fails.
+  with `aria-describedby`; the input carries `aria-invalid` when the postal code is not
+  found, and not when the lookup is unavailable or rate limited, since nothing is wrong with
+  what was typed.
 
 **Colour, contrast and text size (L2-041).**
 
