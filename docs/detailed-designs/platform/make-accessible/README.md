@@ -52,6 +52,19 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   it: the host has `role="img"` and the name from `label` ("A small globe with your pin at
   Milan"), and its pins and labels are not buttons, take no focus and are hidden from the
   accessibility tree; the screen beside it says in text what the picture shows.
+  The page gives `label` its words, as the mocks have them:
+
+  | Globe | `label` |
+  |-------|---------|
+  | Globe screen | "The globe, with 12 teammates’ pins. Drag to spin, or use the arrow keys." |
+  | Globe screen, team of one | "The globe, with your pin. Drag to spin, or use the arrow keys." |
+  | Join, before a city is found | "The globe, with 11 pins: one for each teammate already in Northwind" |
+  | Join, city found | "The globe, turned to Milan, with your new pin and 11 teammates’ pins" |
+  | Join, no invite read (error, invite link unusable) | "The globe, with no pins" |
+  | Profile & Settings | "A small globe with your pin at Milan", or "A small globe with your pin moved to Toronto, not saved yet" |
+
+  `GlobePlaceholder` is named "The globe is loading" and `GlobeFallback` "A still picture of
+  the globe" (`draw-globe`).
 - **`PinLayer`** — component in `globe` (`show-pins`). The pins it draws are the list: the
   mocks' `ul.globe__pins` with one `li.globe__pin` per pin, each holding a `button.pin`. A
   button's accessible name is the pin's description, and the visible label beside it is

@@ -171,8 +171,8 @@ Every L2 requirement, L2-001 to L2-051, is realised by exactly one feature.
 The designs mark these as `<TO SUPPLY>`:
 
 - The globe's renderer and the format its Blender-built assets are exported to; an ADR decides
-  both before the Globe is built, and with them the detail steps and whether the renderer draws
-  a 3D body under each pin.
+  both before the Globe is built, and with them the detail steps, how long a low frame rate
+  must last to count as sustained, and whether the renderer draws a 3D body under each pin.
 - The database engine and the hosting platform, and what follows from them: the guard that
   keeps the limit of 500 teammates exact under concurrency, a cache shared between instances
   of the API, the forwarded header the client address is read from, the CSP nonce for

@@ -82,7 +82,11 @@ on the hosting platform and is `<TO SUPPLY>`.
   the browser from the pin's time zone and the clock, so they need no outside source. Where a
   pin's `weatherState` is `Unavailable`, `PinLabel` leaves the weather out, and `TeammatePanel`
   and the Team row say in the weather's place that it is unavailable ("Weather is unavailable
-  right now."). `NotShared` has its own words (`show-weather`).
+  right now."). While any pin's weather is `Unavailable`, the Team screen also shows an
+  alert (`alert alert--warning`, `role="status"`) between its heading and the day ribbon:
+  "Weather is unavailable right now. Local times are still right."
+  (`team/view-team-through-the-day`, mock `team/weather-unavailable`). `NotShared` has its
+  own words (`show-weather`).
 - **A first read that is pending shows the screen's loading state.** Until a screen's first
   read answers, the screen shows a placeholder in the shape of its content and announces the
   mock's words once, politely, in a visually hidden `role="status"` element:
