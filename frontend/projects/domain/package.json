@@ -1,0 +1,5 @@
+{
+  "name": "@mondino/domain",
+  "private": true,
+  "sideEffects": false
+}

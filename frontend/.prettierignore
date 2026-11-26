@@ -1,0 +1,9 @@
+dist
+.angular
+node_modules
+package-lock.json
+test-results
+playwright-report
+e2e/**/*-snapshots
+# The still picture of the globe is transcribed from the mocks as it stands.
+projects/components/src/lib/globe-fallback/globe-fallback.html
