@@ -74,10 +74,13 @@ source.
 - **`InviteState`** — feature-local union of `Loading`, `Ready`, `AlreadyJoined`, `NotFound`,
   `Full` and `Failed`.
 - **`InviteApi` / `INVITE_API`, `HttpInviteApi`** — contract, injection token and HTTP client.
-  `getInvite(inviteToken)` sends `GET /api/invites/{inviteToken}` and returns an `Invite`. The
-  Join route binds the token, so the client stays out of the initial bundle.
-- **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined`, `full`
-  and `countries`. The `countries` list serves the Join form and is described in
+  `getInvite(inviteToken, signal)` sends `GET /api/invites/{inviteToken}` with the browser's
+  `fetch` ([ADR 0005](../../../adr/0005-fetch-for-the-backend.md)) and returns an `Invite`; a
+  refusal is an `ApiError` with its `code`, and no answer the code `unreachable`. The Join
+  route's lazy routes file binds the token, so the client stays out of the initial bundle.
+- **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined`
+  and `countries` (`full` joins with `join-team`). Until the postal code lookup (journey 3) a
+  `Country` is its `code` and `name`. The `countries` list serves the Join form and is described in
   `place-pin-from-postal-code`.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
   avatar (`mo-avatar`, block `avatar`). A colour is the name of a teammate colour of the
@@ -106,9 +109,10 @@ source.
   `IAppDbContext`. When no team matches, it refuses with `invite_not_found`. An invite link
   that was reset (`invite-teammates`) receives the same refusal as one that was never issued.
   When `ICurrentTeammate` reports a session on this team, the handler returns an `InviteDto`
-  with `AlreadyJoined` set and no positions or avatars. When the team has `Team.MaxTeammates`
+  with `AlreadyJoined` set and no positions or avatars. From `join-team` on, when the team has `Team.MaxTeammates`
   (500) teammates, it returns an `InviteDto` with `Full` set, the team's name and no count,
-  positions or avatars. Otherwise it builds the full `InviteDto`.
+  positions or avatars. Otherwise it builds the full `InviteDto`: the positions ordered by
+  latitude and longitude, so their order says nothing of when anyone joined.
 - **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined`, `Full`
   and `Countries`. `Positions` holds one `Position` for each teammate: the position of the
   teammate's `City`. `Avatars` holds the initials and colour of at most five teammates, the

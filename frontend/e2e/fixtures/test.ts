@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { ApiFixture } from './api';
 import { NOW } from './now';
+import { JoinPage } from '../pages/join.page';
 import { NotFoundPage } from '../pages/not-found.page';
 
 interface Fixtures {
@@ -11,6 +12,7 @@ interface Fixtures {
   /** The guard every spec runs under: fixed time, localhost only, no page error. */
   guard: void;
   notFoundPage: NotFoundPage;
+  joinPage: JoinPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -58,6 +60,10 @@ export const test = base.extend<Fixtures>({
 
   notFoundPage: async ({ page }, use) => {
     await use(new NotFoundPage(page));
+  },
+
+  joinPage: async ({ page }, use) => {
+    await use(new JoinPage(page));
   },
 });
 

@@ -1,0 +1,6 @@
+:host {
+  display: flex;
+}
+:host > * + * {
+  margin-left: calc(-1 * var(--space-2));
+}

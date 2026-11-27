@@ -1,0 +1,40 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--avatar-size-md);
+  height: var(--avatar-size-md);
+  border-radius: var(--radius-full);
+  background: var(--teammate, var(--color-accent));
+  color: var(--color-on-teammate);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-none);
+}
+:host(.avatar--xs) {
+  width: var(--avatar-size-xs);
+  height: var(--avatar-size-xs);
+  font-size: var(--font-size-2xs);
+}
+:host(.avatar--sm) {
+  width: var(--avatar-size-sm);
+  height: var(--avatar-size-sm);
+  font-size: var(--font-size-xs);
+}
+:host(.avatar--lg) {
+  width: var(--avatar-size-lg);
+  height: var(--avatar-size-lg);
+  font-size: var(--font-size-md);
+}
+:host(.avatar--ring) {
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-bg-canvas);
+}
+
+// The teammate colours of the palette.
+@for $hue from 1 through 13 {
+  :host(.hue-#{$hue}) {
+    --teammate: var(--palette-teammate-#{$hue});
+  }
+}

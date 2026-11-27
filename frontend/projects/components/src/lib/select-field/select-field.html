@@ -1,0 +1,18 @@
+<div class="field">
+  <label class="field__label" [for]="fieldId()">{{ label() }}</label>
+  <div class="select-wrap">
+    <select
+      class="select"
+      [id]="fieldId()"
+      [attr.name]="name() || null"
+      [attr.autocomplete]="autocomplete()"
+    >
+      @for (option of options(); track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+    <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  </div>
+</div>

@@ -1,2 +1,5 @@
-// The public API of @mondino/api. The first journey that needs a contract, a rule or a token adds it here.
-export {};
+// The public API of @mondino/api: contracts, types, injection tokens and the HTTP clients.
+export * from './lib/errors/api-error';
+export * from './lib/globe/position';
+export * from './lib/invites/http-invite-api';
+export * from './lib/invites/invite';

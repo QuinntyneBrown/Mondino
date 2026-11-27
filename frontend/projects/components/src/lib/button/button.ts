@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 export type ButtonVariant = 'default' | 'primary';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -18,9 +18,12 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
     '[class.btn--primary]': "variant() === 'primary'",
     '[class.btn--sm]': "size() === 'sm'",
     '[class.btn--lg]': "size() === 'lg'",
+    '[class.btn--block]': 'block()',
   },
 })
 export class Button {
   readonly variant = input<ButtonVariant>('default');
   readonly size = input<ButtonSize>('md');
+  /** Takes the whole width of its container, as a form's main action does. */
+  readonly block = input(false, { transform: booleanAttribute });
 }

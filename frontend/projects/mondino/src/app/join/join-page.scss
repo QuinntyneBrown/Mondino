@@ -1,0 +1,105 @@
+:host {
+  display: block;
+}
+.join {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.join__form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: var(--space-8) var(--space-6);
+}
+.join__body {
+  margin-top: var(--space-12);
+}
+.join__team {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--avatar-size-sm);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.join__team strong {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-semibold);
+}
+.join__title {
+  text-wrap: wrap;
+  margin-top: var(--space-6);
+  font: var(--text-h1-lg);
+  letter-spacing: var(--letter-spacing-tight);
+}
+.join__lead {
+  max-width: var(--layout-overlay-max);
+  margin-top: var(--space-4);
+  color: var(--color-fg-muted);
+}
+.join__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+}
+.join__field-row {
+  display: grid;
+  gap: var(--space-4);
+}
+.join__stage {
+  width: 100%;
+  height: var(--layout-globe-phone-height);
+  flex: none;
+  padding-bottom: var(--space-16);
+}
+.join__footer {
+  margin-top: var(--space-10);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.join__footer a {
+  font-weight: var(--font-weight-semibold);
+}
+@media (min-width: 36rem) {
+  .join__form {
+    padding: var(--space-8) var(--space-10);
+  }
+  .join__title {
+    font: var(--text-display);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+  .join__field-row {
+    grid-template-columns: minmax(0, 1fr) var(--layout-field-short);
+  }
+  .join__stage {
+    height: var(--layout-globe-tablet-height);
+  }
+}
+@media (min-width: 62rem) {
+  .join {
+    flex-direction: row;
+    height: 100dvh;
+  }
+  .join__form {
+    width: var(--layout-join-form-width);
+    flex: none;
+    overflow-y: auto;
+    padding-block: var(--space-10);
+  }
+  .join__body {
+    margin-top: auto;
+  }
+  .join__footer {
+    margin-top: auto;
+    padding-top: var(--space-10);
+  }
+  .join__stage {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding-bottom: 0;
+    border-left: var(--border-width-hairline) solid var(--color-border-default);
+  }
+}

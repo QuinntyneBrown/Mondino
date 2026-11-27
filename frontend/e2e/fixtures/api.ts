@@ -10,14 +10,27 @@ export interface Answer {
  * Answers the app's requests to the backend from fixtures. No spec reaches a real backend:
  * a request to /api that no fixture answers is recorded as a problem and fails the spec.
  */
+type Answering = Answer | ((route: Route) => Answer | Promise<Answer>);
+
 export class ApiFixture {
-  private readonly answers = new Map<string, Answer | ((route: Route) => Answer)>();
+  private readonly answers = new Map<string, Answering>();
 
   constructor(private readonly problems: string[]) {}
 
   /** Answer `method path` (for example "GET /api/teams/t1/pins") from now on. */
-  answer(method: string, path: string, answer: Answer | ((route: Route) => Answer)): void {
+  answer(method: string, path: string, answer: Answering): void {
     this.answers.set(`${method.toUpperCase()} ${path}`, answer);
+  }
+
+  /**
+   * Hold every request to `method path` unanswered until `release` is called, so a spec can see
+   * what the screen shows while it waits.
+   */
+  hold(method: string, path: string): { release(answer: Answer): void } {
+    let release!: (answer: Answer) => void;
+    const answered = new Promise<Answer>((resolve) => (release = resolve));
+    this.answer(method, path, () => answered);
+    return { release };
   }
 
   /** Refuse `method path` with ProblemDetails carrying a `code`. */
@@ -39,7 +52,7 @@ export class ApiFixture {
         await route.abort('failed');
         return;
       }
-      const answer = typeof found === 'function' ? found(route) : found;
+      const answer = typeof found === 'function' ? await found(route) : found;
       await route.fulfill({
         status: answer.status ?? 200,
         headers: { 'content-type': 'application/json', ...answer.headers },
