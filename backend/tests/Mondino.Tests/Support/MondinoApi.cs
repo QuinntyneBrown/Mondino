@@ -9,6 +9,7 @@ using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
 using Mondino.Domain.Teams;
+using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
 
 namespace Mondino.Tests.Support;
@@ -153,6 +154,16 @@ public class MondinoApi : WebApplicationFactory<Program>
             team.Add(Guid.NewGuid(), $"Teammate {i}", "teammate-1", city, Now.AddMinutes(-i));
         }
 
+        await database.SaveChangesAsync(CancellationToken.None);
+    }
+
+    /// <summary>Gives a teammate another postal code, as stored, keeping their city.</summary>
+    public async Task MoveTeammateAsync(Guid teammateId, string postalCode)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var teammate = await database.Teammates.SingleAsync(t => t.Id == teammateId);
+        database.Entry(teammate).Property(t => t.PostalCode).CurrentValue = postalCode;
         await database.SaveChangesAsync(CancellationToken.None);
     }
 

@@ -14,10 +14,11 @@ namespace Mondino.Application.Teammates;
 public sealed record GetProfileQuery(Guid TeamId) : IRequest<ProfileDto>, ITeamScopedRequest;
 
 /// <summary>
-/// What Profile &amp; Settings reads: the team's name and the teammate's own pin and country.
-/// The postal code and the settings join with journeys 22 and 23.
+/// What Profile &amp; Settings reads: the team's name, the teammate's own pin, country and postal
+/// code, which no other answer carries (L2-007); null for a pin placed through "Your city". The
+/// settings join with journeys 22 and 23.
 /// </summary>
-public sealed record ProfileDto(string TeamName, PinDto Pin, string CountryCode);
+public sealed record ProfileDto(string TeamName, PinDto Pin, string CountryCode, string? PostalCode);
 
 internal sealed class GetProfileQueryHandler(IAppDbContext database, ICurrentTeammate currentTeammate)
     : IRequestHandler<GetProfileQuery, ProfileDto>
@@ -37,6 +38,7 @@ internal sealed class GetProfileQueryHandler(IAppDbContext database, ICurrentTea
                 t.City.Latitude,
                 t.City.Longitude,
                 t.City.TimeZoneId,
+                t.PostalCode,
             })
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw RefusedException.NotFound(ErrorCodes.TeamNotFound);
@@ -52,6 +54,7 @@ internal sealed class GetProfileQueryHandler(IAppDbContext database, ICurrentTea
                 new PositionDto(own.Latitude, own.Longitude),
                 own.TimeZoneId,
                 IsViewer: true),
-            own.CountryCode);
+            own.CountryCode,
+            own.PostalCode);
     }
 }
