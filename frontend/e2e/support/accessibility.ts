@@ -382,23 +382,32 @@ export function listenForAnnouncements(page: Page): Promise<void> {
       if (node instanceof Element && node.getAttribute('aria-hidden') === 'true') return '';
       return [...node.childNodes].map(spoken).join('');
     };
-    const regions = () =>
-      [...document.querySelectorAll(live)].filter((region) => !region.parentElement?.closest(live));
+    const regions = () => [...document.querySelectorAll(live)];
+    const textOf = (region: Element) => spoken(region).replace(/\s+/g, ' ').trim();
     const heard = new WeakMap<Element, string>();
     const said: { politeness: string; text: string }[] = [];
+    // A region inside another is heard first; the outer one does not say the same thing again.
+    const depth = (element: Element) => {
+      let count = 0;
+      for (let at = element.parentElement; at; at = at.parentElement) count++;
+      return count;
+    };
     const listen = () => {
-      for (const region of regions()) {
-        const text = spoken(region).replace(/\s+/g, ' ').trim();
+      const changed: { region: Element; text: string }[] = [];
+      for (const region of regions().sort((a, b) => depth(b) - depth(a))) {
+        const text = textOf(region);
         if (text === (heard.get(region) ?? '')) continue;
         heard.set(region, text);
         if (!text) continue;
+        if (changed.some((inner) => region.contains(inner.region) && inner.text === text)) continue;
+        changed.push({ region, text });
+        const politeness = region.getAttribute('aria-live');
         const assertive =
-          region.getAttribute('aria-live') === 'assertive' ||
-          (!region.hasAttribute('aria-live') && region.getAttribute('role') === 'alert');
+          politeness === 'assertive' || (!politeness && region.getAttribute('role') === 'alert');
         said.push({ politeness: assertive ? 'assertive' : 'polite', text });
       }
     };
-    for (const region of regions()) heard.set(region, spoken(region).replace(/\s+/g, ' ').trim());
+    for (const region of regions()) heard.set(region, textOf(region));
     new MutationObserver(listen).observe(document.body, {
       subtree: true,
       childList: true,
@@ -436,4 +445,34 @@ export async function enlargeText(page: Page): Promise<string> {
   await browser.detach();
   await settled(page);
   return page.evaluate(() => getComputedStyle(document.documentElement).fontSize);
+}
+
+/**
+ * Presses Tab `presses` times inside an open dialog, and records each stop and whether it was
+ * inside `container` (L2-039): a dialog keeps focus to itself.
+ */
+export async function tabWithin(
+  container: Locator,
+  presses: number,
+): Promise<(Stop & { inside: boolean })[]> {
+  const page = container.page();
+  const stops: (Stop & { inside: boolean })[] = [];
+  for (let i = 0; i < presses; i++) {
+    await page.keyboard.press('Tab');
+    await settled(page);
+    const stop = await page.evaluate(measureFocus);
+    const inside = await container.evaluate((box) => box.contains(document.activeElement));
+    if (stop) stops.push({ ...stop, inside });
+    else
+      stops.push({
+        name: 'nothing',
+        readingIndex: -1,
+        ringContrast: 0,
+        ringWidth: 0,
+        width: 0,
+        height: 0,
+        inside: false,
+      });
+  }
+  return stops;
 }
