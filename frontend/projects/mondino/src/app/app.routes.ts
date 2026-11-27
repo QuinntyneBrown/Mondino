@@ -41,8 +41,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        title: 'Profile & Settings · Mondino',
-        loadComponent: () => import('./profile/profile-page').then((m) => m.ProfilePage),
+        loadChildren: () => import('./profile/profile.routes').then((m) => m.profileRoutes),
       },
     ],
   },

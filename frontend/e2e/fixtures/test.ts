@@ -3,6 +3,7 @@ import { ApiFixture } from './api';
 import { NO_MOMENTS, NORTHWIND_MOMENTS } from './moments';
 import { NOW } from './now';
 import { CreateTeamPage } from '../pages/create-team.page';
+import { DiscardChangesDialogPage } from '../pages/discard-changes-dialog.page';
 import { GlobePage } from '../pages/globe.page';
 import { InviteDialogPage } from '../pages/invite-dialog.page';
 import { InviteNeededPage } from '../pages/invite-needed.page';
@@ -38,6 +39,7 @@ interface Fixtures {
   teamPage: TeamPage;
   momentsPage: MomentsPage;
   profilePage: ProfilePage;
+  discardDialog: DiscardChangesDialogPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -142,6 +144,10 @@ export const test = base.extend<Options & Fixtures>({
 
   profilePage: async ({ page }, use) => {
     await use(new ProfilePage(page));
+  },
+
+  discardDialog: async ({ page }, use) => {
+    await use(new DiscardChangesDialogPage(page));
   },
 });
 

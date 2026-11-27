@@ -2,10 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  createEnvironmentInjector,
+  DestroyRef,
+  DOCUMENT,
+  effect,
+  EnvironmentInjector,
   inject,
+  Injector,
   signal,
   untracked,
 } from '@angular/core';
+import type { Dialog } from '@angular/cdk/dialog';
 import { RouterLink } from '@angular/router';
 import {
   CLOCK,
@@ -83,6 +90,13 @@ export class ProfilePage {
   protected readonly store = inject(ProfileStore);
   private readonly team = inject(TeamStore);
   private readonly clock = inject(CLOCK);
+  private readonly injector = inject(Injector);
+  private readonly environment = inject(EnvironmentInjector);
+  /** The CDK Dialog, imported when "Leave without saving?" is first asked; it goes with the screen. */
+  private dialogs: { readonly service: Dialog; readonly injector: EnvironmentInjector } | null =
+    null;
+  private asking: Promise<boolean> | null = null;
+  private destroyed = false;
 
   protected readonly countries: SelectOption[] = supportedCountries.map((country) => ({
     value: country.code,
@@ -198,6 +212,63 @@ export class ProfilePage {
 
   constructor() {
     void this.store.load();
+    inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true;
+      // Destroying the dialogs' injector closes a dialog still open.
+      this.dialogs?.injector.destroy();
+    });
+
+    // While there are unsaved changes, the browser asks before a reload or a closed tab, with its
+    // own confirmation (L2-035). The listener goes when they are saved or undone, and with the screen.
+    const window = inject(DOCUMENT).defaultView;
+    effect((onCleanup) => {
+      if (!window || !this.store.hasUnsavedChanges()) return;
+      const ask = (event: BeforeUnloadEvent): void => event.preventDefault();
+      window.addEventListener('beforeunload', ask);
+      onCleanup(() => window.removeEventListener('beforeunload', ask));
+    });
+  }
+
+  /**
+   * Whether the screen may be left (L2-035): at once with nothing unsaved; otherwise when
+   * "Leave without saving?" is answered "Discard and leave". One question at a time.
+   */
+  canLeave(): boolean | Promise<boolean> {
+    if (!this.store.hasUnsavedChanges()) return true;
+    this.asking ??= this.ask().finally(() => (this.asking = null));
+    return this.asking;
+  }
+
+  private async ask(): Promise<boolean> {
+    const [
+      { Dialog, OVERLAY_DEFAULT_CONFIG },
+      { DiscardChangesDialog, discardChangesTitleId, discardChangesDescriptionId },
+    ] = await Promise.all([
+      import('../team/invite-dialog/dialog-layers'),
+      import('./discard-changes-dialog/discard-changes-dialog'),
+    ]);
+    if (this.destroyed) return true;
+    if (!this.dialogs) {
+      const injector = createEnvironmentInjector(
+        [Dialog, { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } }],
+        this.environment,
+      );
+      this.dialogs = { service: injector.get(Dialog), injector };
+    }
+    const dialog = this.dialogs.service.open<boolean>(DiscardChangesDialog, {
+      injector: this.injector,
+      role: 'alertdialog',
+      ariaModal: true,
+      ariaLabelledBy: discardChangesTitleId,
+      ariaDescribedBy: discardChangesDescriptionId,
+      autoFocus: '.btn--primary',
+      hasBackdrop: false,
+      width: '100%',
+      height: '100%',
+      maxWidth: '100%',
+      maxHeight: '100%',
+    });
+    return new Promise((answer) => dialog.closed.subscribe((leave) => answer(leave === true)));
   }
 
   protected chooseTemperatureUnit(value: string): void {
