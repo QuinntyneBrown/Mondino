@@ -20,8 +20,8 @@ import { Toaster } from './toaster';
 /**
  * The teammate screens' shell: the header the mocks draw over Globe, Team, Moments and Profile &
  * Settings, the screen under it, and the team they share, read once and released when the
- * teammate leaves them (view-week-around-the-world). Team, Moments and Profile & Settings join its
- * children with their journeys; "Invite teammate" opens the invite dialog.
+ * teammate leaves them (view-week-around-the-world). Globe, Team, Moments and Profile & Settings
+ * are its children; "Invite teammate" opens the invite dialog.
  */
 @Component({
   selector: 'mo-team-shell',

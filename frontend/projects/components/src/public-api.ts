@@ -43,3 +43,4 @@ export * from './lib/today-moment/today-moment';
 export * from './lib/moment-row/moment-row';
 export * from './lib/moment-list/moment-list';
 export * from './lib/filter-chips/filter-chips';
+export * from './lib/save-bar/save-bar';

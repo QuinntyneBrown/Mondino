@@ -31,10 +31,15 @@ import { GlobeGestures } from '../motion/globe-gestures';
 /** Loading until the first 3D frame is drawn; Fallback where it cannot be, and the page shows the still picture. */
 export type GlobeState = 'Loading' | 'Ready' | 'Fallback';
 
-/** The teammate's own new pin: where it is and what its label says. */
+/**
+ * The teammate's own pin: where it is and what its label says ("You · Milan", "New · Toronto"), or
+ * no label for the saved pin on Profile & Settings. A pin just placed pulses once; one that is not
+ * new (`still`) does not.
+ */
 export interface NewPin {
   readonly position: Position;
-  readonly label: string;
+  readonly label: string | null;
+  readonly still?: boolean;
 }
 
 const paletteTokens: Record<keyof GlobePalette, string> = {
@@ -113,7 +118,7 @@ export class GlobeView {
     const youAt = you ? placed(you.position) : null;
     return {
       pins: pins.map(placed).filter((point): point is ProjectedPoint => point !== null),
-      you: you && youAt ? { ...youAt, label: you.label } : null,
+      you: you && youAt ? { ...youAt, label: you.label, still: you.still ?? false } : null,
     };
   });
 
