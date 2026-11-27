@@ -43,5 +43,10 @@ apply the lessons that fit.
 7. **Keep MediatR on 12.** A newer version needs a commercial licence (ADR 0003).
 8. **In this cloud container .NET 10 comes from `apt` (`dotnet-sdk-10.0`)**; Microsoft's
    download hosts are not reachable, and NuGet is.
+9. **A picture transcribed from a mock goes stale when the mock is redrawn.** The still globe was
+   transcribed (and simplified) before the mock's globe was redrawn, so Not Found drew the old
+   picture while every spec passed. Its acceptance test now reads the mock's markup and compares
+   the globe shape for shape; transcribe such a picture exactly, never simplified, so the
+   comparison holds.
 
 **Earlier lessons applied:** none; this is the first journey.
