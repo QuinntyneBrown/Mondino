@@ -9,10 +9,11 @@ namespace Mondino.Infrastructure.PostalCodes;
 /// (docs/adr/0006). <c>Found</c> is kept 30 days and <c>NotFound</c> 1 day, by country and postal
 /// code, at most 10,000 entries; <c>Unavailable</c> is never kept. After 5 failures in a row the
 /// breaker opens for 30 seconds (<c>OutsideSources:*</c>, docs/adr/0026), and the lookup is
-/// <c>Unavailable</c> without a call.
+/// <c>Unavailable</c> without a call. Each call, and each lookup left alone, is recorded by
+/// <see cref="SourceTelemetry"/> as <c>postal_code</c> (docs/adr/0031).
 /// </summary>
 internal sealed class CachedPostalCodeLookup(
-    GeoNamesPostalCodeLookup source, IOptions<OutsideSourceOptions> options, TimeProvider time) : IPostalCodeLookup
+    GeoNamesPostalCodeLookup source, IOptions<OutsideSourceOptions> options, TimeProvider time, SourceTelemetry telemetry) : IPostalCodeLookup
 {
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan FoundLifetime = TimeSpan.FromDays(30);
@@ -42,21 +43,30 @@ internal sealed class CachedPostalCodeLookup(
 
             if (breaker.IsOpen)
             {
+                telemetry.LeftAlone(SourceTelemetry.PostalCode);
                 return PostalCodeLookupOutcome.Unavailable;
             }
         }
 
         PostalCodeLookupOutcome outcome;
+        var call = telemetry.Start(SourceTelemetry.PostalCode);
         using (var timeout = new CancellationTokenSource(Timeout, time))
         using (var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token))
         {
             try
             {
                 outcome = await source.FindCityAsync(postalCode, linked.Token);
+                call.End(outcome.Status == PostalCodeLookupStatus.Unavailable ? SourceOutcome.Failure : SourceOutcome.Success);
             }
             catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
+                call.End(SourceOutcome.Timeout);
                 outcome = PostalCodeLookupOutcome.Unavailable;
+            }
+            catch
+            {
+                call.End(SourceOutcome.Failure);
+                throw;
             }
         }
 

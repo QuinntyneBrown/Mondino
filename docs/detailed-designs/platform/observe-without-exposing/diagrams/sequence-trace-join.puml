@@ -29,6 +29,7 @@ end box
 box "Backend — Mondino Infrastructure" #FFF4E5
   participant "CachedPostalCodeLookup" as lookup
   database "Mondino database" as db
+  participant "SourceTelemetry" as sources
   participant "MondinoTelemetry" as telemetry
   participant "TelemetryRedaction" as redaction
 end box
@@ -43,15 +44,15 @@ controller -> handler : Send JoinTeamCommand
 handler -> lookup : FindCityAsync(postalCode)
 lookup -> source : Country and postal code
 source --> lookup : City, position, time zone
-lookup -> telemetry : RecordSourceCall("postal_code", Success, duration) (L2-051)
+lookup -> sources : Start("postal_code"), End(success): one call and its duration (L2-051)
 lookup --> handler : City
 handler -> db : Save the teammate
 db --> handler : Saved
-handler -> telemetry : Log TeammateJoined: a fixed message with no fields
 handler --> controller : Result
 controller --> aspnet : 201, session cookie set
 aspnet -> telemetry : End the span: method, status, route template
-telemetry -> redaction : Each span and log record
+sources -> telemetry : The source span and metrics
+telemetry -> redaction : Each span, log record and metric
 redaction -> redaction : Keep http.route = /api/invites/{inviteToken}/teammates; drop path, query, client address and outgoing URL
 redaction -> backend : Export over OTLP
 note over redaction, backend

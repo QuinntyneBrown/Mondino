@@ -1948,3 +1948,80 @@ simulated hours and after 20 enters and leaves (L2-047 criteria 1 and 2; what cr
 asks of contexts, loops and listeners is proven for three visits by `globe-release`). The model
 leaves the phone's processor out; the sweep measures the largest contentful paint on a throttled
 connection. Total: 94 (94.9, rounded down).
+
+## Journey 30: Observe without exposing
+
+**What slowed it**
+
+- The design put `MondinoTelemetry`, with the source instruments, in `Mondino.Api`, and had the
+  caching decorators in `Mondino.Infrastructure` call it: a dependency the wrong way. It drew a
+  `CachedMomentCalendars` that was never built, the EF Core instrumentation, whose package is a
+  prerelease, and join and sign-in log lines the backend never had. ADR 0031 put the instruments in
+  `SourceTelemetry` beside the decorators, measured the four sources that make calls, left the
+  database to readiness, and the design and three diagrams were brought to that before any code.
+- ASP.NET Core records a route as declared, `api/teams/{teamId:guid}/pins`; L2-051 writes
+  `/api/teams/{teamId}/pins`. Spans are rewritten by `RouteTemplates`; a metric's `http.route` comes
+  from ASP.NET Core's own meter, which no view can rewrite, so it stays the declared template.
+- A span's events cannot be removed once added. The allow-list cannot reach them, so the exception
+  events stay off in both instrumentations instead.
+- The sources in the tests are fake message handlers, which the `HttpClient` instrumentation never
+  sees; `SourceTelemetry`'s own spans and metrics are what the acceptance tests read, and the
+  redaction of an outgoing call's URL is tested on its own.
+- A holiday call asks for a year's holidays and its subdivisions, two requests; one that hangs asks
+  once. The first count of time-outs waited for requests that were never sent.
+- The email test passed alone and failed in verify: the Email source's mails are a queue, and the
+  failing mail was never read, so the next wait returned it instead of the hanging one and the clock
+  moved before that call's timeout began.
+- `globe-text-equivalent` failed once in verify: the globe group is named before its pins are drawn,
+  and a snapshot read once found the name alone. It now polls the snapshot.
+
+**Lessons**
+
+1. **Keep telemetry from an allow-list, in a processor that runs before every exporter.** Name what a
+   span, a log record and a metric keep; a new instrumentation's attribute is then dropped until it is
+   named, and a test that searches the exports for the seeded values proves it.
+2. **Run telemetry tests in a collection of their own.** An `ActivitySource` and a `Meter` are seen by
+   every host in the process; counts and spans from a parallel test would join a test's own.
+3. **Capture exported telemetry as text at the moment of export.** A `LogRecord` is pooled and an
+   `Activity` keeps changing; write each down in the exporter and search the text.
+4. **Wait for a server span before searching the exports.** The response can reach the test before
+   the request's span ends; an absence found too early proves nothing.
+5. **Read every item a queue-backed fake records.** A wait for "the next one" returns the oldest
+   unread item, not the one the test means.
+6. **Count a source's calls, not its requests.** A call can be one request or two; derive the count
+   from the phase that answers.
+7. **Read an accessibility snapshot until it holds.** `ariaSnapshot()` is read once; poll it when the
+   name and the content are drawn at different times.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0031, the design, three diagrams, ADR
+  0003 and the deployment settings were one commit before any code; the route template and the
+  events were brought back into the ADR and design as the code found them.
+- *Prove a log test can fail, and check the sabotage built* (journey 7, lesson 2): an allow-list
+  that kept `url.path`, and a log processor that kept every attribute, each built and failed the join
+  test; restored, it passed.
+- *Capture logs with a provider-level filter* (journey 7, lesson 3): the OpenTelemetry logger is
+  filtered at Trace in the tests, so framework Trace and Debug lines are exported and searched.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5): the
+  route template slice was red only on the metric; the span's form had come with slice 1's
+  normalisation, seen raw before it.
+- *Search the specs by a criterion's words before writing one* (journey 26, lesson 3): L2-051
+  criterion 4 was proven by the liveness and readiness tests, and criterion 6 by `full-visit`, which
+  now traces L2-051; no frontend time was added.
+- *Release a stall to test reads that share a call* (journey 26, lesson 2): the weather and holiday
+  time-outs wait for every hanging call by count before the clock moves.
+- *Keep a wall-clock time out of the always-run suite* (journey 29, lesson 5): durations are read
+  from `FakeTimeProvider`, and no test asserts a time.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit
+  code, written to a log; it stopped two (the email race and the snapshot race).
+- *A flaky spec is fixed at its root*: the email test reads each mail; the postal code test waits by
+  count, not for "the next call"; the snapshot is polled.
+
+**Progress:** 6 of 6 criteria proven (100, from 20). L2-051: a join and a sign-in link leave no
+name, postal code, city, position, email or token in any span, log record or metric (1); a team's
+endpoint is recorded as `/api/teams/{teamId}/pins` with no id, query or body (2); each source's
+calls, failures, time-outs and latency labelled by source and outcome only (3); liveness and
+readiness, proven before (4); an unhandled error logged by its type with the ProblemDetails'
+`correlationId` and nothing of the request (5); a full visit sends nothing off the app's origin (6).
+No other journey's count changes. Total: 97 (96.5, rounded; it was 94.9, shown as 94).

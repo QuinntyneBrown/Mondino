@@ -1,6 +1,6 @@
 // Acceptance Test
-// Traces to: L2-044, L2-007, L2-043, L2-050
-// Description: Through a full visit every request goes to the app's own origin, and no postal code or email is kept in storage, cookies or the address bar; a teammate's visit to Sign In, Team, Moments and Profile & Settings calls no outside source
+// Traces to: L2-044, L2-007, L2-043, L2-050, L2-051
+// Description: Through a full visit every request goes to the app's own origin, so no analytics or telemetry reaches a third party, and no postal code or email is kept in storage, cookies or the address bar; a teammate's visit to Sign In, Team, Moments and Profile & Settings calls no outside source
 
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
@@ -73,7 +73,8 @@ test.describe('A full visit', () => {
     await expect(notFoundPage.title).toHaveText('This page fell off the map');
     kept.push(await record.everythingKept());
 
-    // Then every request went to the app's own origin, the fonts and the API included
+    // Then every request went to the app's own origin, the fonts and the API included: no analytics
+    // or telemetry went to a third party
     expect(record.requests.length).toBeGreaterThan(0);
     expect(record.origins()).toEqual([new URL(page.url()).origin]);
     expect(record.requests.some((url) => url.endsWith('.woff2'))).toBe(true);
@@ -117,7 +118,7 @@ test.describe('A full visit', () => {
     await expect(profilePage.city).toContainText('Milan');
 
     // Then every request the browser made went to the app's own origin: none to a weather,
-    // postal code, calendar or map service
+    // postal code, calendar, map, analytics or telemetry service
     expect(record.requests.some((url) => new URL(url).pathname.startsWith('/api/'))).toBe(true);
     expect(record.origins()).toEqual([new URL(page.url()).origin]);
   });

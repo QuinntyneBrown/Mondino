@@ -64,6 +64,10 @@ public static class DependencyInjection
         // The breaker every outside source has, each its own (<c>OutsideSources:*</c>, docs/adr/0026).
         services.Configure<OutsideSourceOptions>(configuration.GetSection(OutsideSourceOptions.Section));
 
+        // Each outside source's calls, counted and timed by source and outcome (docs/adr/0031).
+        services.AddMetrics();
+        services.AddSingleton<SourceTelemetry>();
+
         // The cities Mondino holds, and the postal code source behind its timeout, cache and
         // breaker (docs/adr/0006). The source's client logs nothing: its address carries the postal code.
         services.AddSingleton<ICityDirectory, BundledCityDirectory>();
