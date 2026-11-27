@@ -6,6 +6,7 @@ export * from './lib/button/button';
 export * from './lib/city-field/city-field';
 export * from './lib/copy-field/copy-field';
 export * from './lib/globe-fallback/globe-fallback';
+export * from './lib/globe-legend/globe-legend';
 export * from './lib/globe-placeholder/globe-placeholder';
 export * from './lib/lookup-message/lookup-message';
 export * from './lib/notice/notice';
