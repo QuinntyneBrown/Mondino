@@ -10,7 +10,8 @@
    in a still mock. Extend this file; never fork it per mock.
 
    Breakpoints (repeated literally, a media query cannot read a token):
-     36rem  576px  phone ends: wordmark, legend, heading over the globe
+     36rem  576px  phone ends: wordmark
+     40rem  640px  the Globe's stage: legend and heading over the globe, still line hidden
      48rem  768px  the Team table, "Invite teammate"
      62rem  992px  panel beside the globe, form beside the globe
      75rem  1200px text keeps its measure, the globe grows
