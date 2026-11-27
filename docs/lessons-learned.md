@@ -589,3 +589,54 @@ apply the lessons that fit.
   the spec's own time.
 - *List the specs that look at the screen still* (journey 9, lesson 5): the pin specs run under reduced
   motion, and those that measure the turn opt back in.
+
+## Journey 11: Show local time and status
+
+**What slowed it**
+
+- Much of the journey was already built: journey 8 made the one clock that ticks on the minute and rests
+  while the tab is hidden, and journey 10 a 24-hour local time on every pin. The design still described a
+  `Date`-based clock bound once in `app.config.ts`; it was brought in line with the clock built (numbers,
+  bound per screen) before any code, and the minute-tick spec passed on its first run and was kept as the
+  proof.
+- The Globe's first screen holds Mexico City and Austin on the far side, so L2-014's own example ("08:05"
+  in Mexico City) cannot be read off the screen without turning it. The specs read the teammates the
+  still picture shows, and find a boundary that one of them crosses: Ahmed's 08:59 to 09:00 in Dubai,
+  fifteen hours on, in one jump of the page's clock. Mexico City is proven by a direct unit test.
+- `page.clock.pauseAt` moved the clock to the next minute and fired the clock's timer, but nothing was drawn:
+  with the page's clock paused, Angular's zoneless scheduler renders nothing until the clock runs. A second
+  of `runFor` after the pause draws it, and also proves the tick lands within a second of the minute.
+- The verify script failed once on the just-joined spec under load: its toast's 4 seconds were counted after
+  steps that spend the paused clock in 16 ms frames. The toast is now proven as soon as it is seen. A commit
+  had been made with `;` after a failing verify; it was followed by the fix before any push.
+- The prototype has no status visible on the Globe outside the panel; the status there is given in words in
+  each pin's accessible name. The `status` badge waits for the panel (journey 14), the first screen that
+  draws it.
+
+**Lessons**
+
+1. **After `pauseAt`, let the clock run before reading the page.** A paused fake clock fires the timers that
+   are due but renders nothing; `runFor(1_000)` renders and bounds how late the change may be.
+2. **Pick a teammate the screen shows for a time boundary, and jump to it.** Any visible zone reaches every
+   hour within a day; `pauseAt` hours ahead costs one frame, not the hours.
+3. **Prove a timed message as soon as it is seen.** A spec that spends a paused clock in frames before it
+   measures a lifetime counts its own frames against it.
+4. **Never chain a commit after the verify script with `;`.** Read `rc` and commit only on 0.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the design's clock, `localTime`, `defaultClockFormat`,
+  the backend's `SharesStatus` and where the status badge is built were one commit before any code; the
+  show-pins design's `describePin` was aligned in the same commit.
+- *Measure the initial chunk after each template change* (journey 10, lesson 1): no template changed; the
+  initial total stayed 259.64 kB after each slice, and the Globe page's chunk took the time functions.
+- *Run the spec before the page exists* (journey 1, lesson 5): the status specs ran red on the missing status,
+  the 12-hour spec by building the Globe with the 24-hour clock in place of the viewer's default, and the
+  backend's by the missing `SharesStatus`; the minute tick passed first, as journey 8 had built it.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read each slice; it caught the just-joined
+  flake, though only after a commit chained with `;` (lesson 4 above).
+- *Pause the clock before a spec measures motion* (journey 9, lesson 1) and *let a spec jump the time*
+  (lesson 6): every time spec runs on the still picture under the page's clock, four specs in under a second.
+- *When a screen starts a request, list every spec that reaches the screen* (journey 10, lesson 3): the pins'
+  new `sharesStatus` went into the shared fixture, and the three specs that read a pin's name were brought in
+  line with the mock's names.
