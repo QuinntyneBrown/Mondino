@@ -46,6 +46,10 @@ class SpanRedaction {
   +OnEnd(activity: Activity): void
 }
 
+class RouteTemplates <<static>> {
+  +{static} Normalise(template: string): string
+}
+
 class LogRedaction {
   +OnEnd(record: LogRecord): void
 }
@@ -89,6 +93,7 @@ MondinoTelemetry ..> SourceTelemetry : subscribes to "Mondino"
 MondinoTelemetry ..> TelemetryRedaction : registers
 TelemetryRedaction *-- SpanRedaction
 TelemetryRedaction *-- LogRedaction
+SpanRedaction ..> RouteTemplates : /api/teams/{teamId}/pins
 CachedPostalCodeLookup ..> SourceTelemetry : Start("postal_code")
 CachedWeatherSource ..> SourceTelemetry : Start("weather")
 CachedOpenHolidays ..> SourceTelemetry : Start("holiday_calendar")
