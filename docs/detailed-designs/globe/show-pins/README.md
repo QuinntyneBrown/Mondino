@@ -110,9 +110,10 @@ decides how they are drawn.
   still picture is drawn with (`stillPlacements`).
 - **`pinViews(pins, now)`** — the `PinView` of each pin: **`initialsOf(name)`**, the first
   character of up to the first two words of a name, so a pin is never blank;
-  **`localTimeIn(timeZoneId, now)`** in `time/`, the 24-hour local time; and
-  **`describePin`**, the accessible name: "Tomás Herrera, Mexico City, 08:05". Journeys 11, 13
-  and 20 add the status, the weather and the moments to it. **`describeGroup`** names a group
+  the local time and the status, from **`localTime`**, **`formatTime`** and **`statusFor`** in
+  `time/` on the viewer's clock (`show-local-time-and-status`); and **`describePin`**, the
+  accessible name: "Tomás Herrera, Mexico City, 08:05, Early morning". Journeys 13 and 20 add
+  the weather and the moments to it. **`describeGroup`** names a group
   pin: "2 teammates close together: Sofia Bianchi (you), Luca Ferri", "14 teammates close
   together, Mexico City", "60 teammates close together, 3 cities".
 

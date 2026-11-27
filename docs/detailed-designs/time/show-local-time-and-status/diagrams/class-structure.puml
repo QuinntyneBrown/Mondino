@@ -14,25 +14,27 @@ title Class structure — Show local time and status
 
 
 interface Clock <<api>> {
-  +minute: Signal<Date>
-  +now(): Date
+  +minute: Signal<number>
+  +now(): number
 }
 
 class BrowserClock <<domain, time/>> {
-  -timer: number | null
-  +minute: Signal<Date>
-  +now(): Date
-  -arm(): void
+  -timer: number | undefined
+  +minute: Signal<number>
+  +now(): number
+  -tick(): void
+  -schedule(): void
   -rest(): void
-  -onVisibilityChange(): void
 }
 
 class "time/ functions" as TimeFns <<domain, time/>> {
-  +localTime(now: Date, timeZoneId: string): LocalTime
+  +localTime(now: number, timeZoneId: string): LocalTime
   +formatTime(time: LocalTime, format: ClockFormat): string
   +formatDay(time: LocalTime): string
   +statusAt(localHour: number): Status
   +statusFor(pin: Pin, time: LocalTime): Status | null
+  +statusWords(status: Status): string
+  +defaultClockFormat(country: string): ClockFormat
 }
 
 class LocalTime <<domain, time/>> {
