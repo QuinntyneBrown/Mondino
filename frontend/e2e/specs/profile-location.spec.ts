@@ -1,12 +1,17 @@
 // Acceptance Test
-// Traces to: L2-032, L2-045, L2-004, L2-007
-// Description: A teammate who has moved looks a new postal code up with "Look up": it is found and previewed as new on the small globe with the bar for unsaved changes, or it cannot be found, checked or looked up yet, and the pin stays
+// Traces to: L2-032, L2-045, L2-004, L2-007, L2-035
+// Description: A teammate who has moved looks a new postal code up with "Look up": it is found, previewed as new on the small globe with the bar for unsaved changes, and saved, moving the pin; or it cannot be found, checked or looked up yet, and the pin stays
 
 import type { Request } from '@playwright/test';
 import { expect, test } from '../fixtures/test';
 import { lookupAnswer } from '../fixtures/invites';
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
-import { NORTHWIND_ME, NORTHWIND_ME_LOOKUPS, SOFIA_PROFILE } from '../fixtures/profile';
+import {
+  NORTHWIND_ME,
+  NORTHWIND_ME_LOOKUPS,
+  SOFIA_IN_TORONTO,
+  SOFIA_PROFILE,
+} from '../fixtures/profile';
 import { mockText } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
 
@@ -19,7 +24,7 @@ test.describe('Profile & Settings: change your location', () => {
     api.answer('GET', NORTHWIND_ME, SOFIA_PROFILE);
   });
 
-  test('"Look up" finds Toronto, and the small globe shows the pin there as new until it is saved', async ({
+  test('"Look up" finds Toronto, previewed as new on the small globe, and "Save changes" moves the pin there', async ({
     api,
     page,
     profilePage,
@@ -61,6 +66,31 @@ test.describe('Profile & Settings: change your location', () => {
 
     // And nothing has moved yet: the card still names Milan
     await expect(profilePage.city).toHaveText('Milan, Italy');
+
+    // When she uses "Save changes", the bar says it is saving until the save answers
+    const saves: Request[] = [];
+    const teamReads: Request[] = [];
+    page.on('request', (request) => {
+      const path = new URL(request.url()).pathname;
+      if (path === NORTHWIND_ME && request.method() === 'PUT') saves.push(request);
+      if (path === NORTHWIND_PINS) teamReads.push(request);
+    });
+    const save = api.hold('PUT', NORTHWIND_ME);
+    await profilePage.saveChanges.click();
+    await expect(profilePage.saveBar).toContainText('Saving…');
+    await expect(profilePage.saveBarButton).toBeDisabled();
+    expect(saves[0].postDataJSON()).toEqual({ countryCode: 'CA', postalCode: 'M5V 2T6' });
+    expect(saves[0].url()).not.toContain('M5V');
+
+    // When it is saved, her pin is at Toronto, with Toronto's local time and time zone, and the
+    // team is read again so every screen shows it there
+    save.release(SOFIA_IN_TORONTO);
+    await expect(profilePage.city).toHaveText('Toronto, Canada');
+    await expect(profilePage.time).toHaveText('10:05 am local · Eastern Time');
+    await expect(profilePage.youLabel).toHaveCount(0);
+    await expect(profilePage.saveBar).toHaveCount(0);
+    await expect(profilePage.postalCode).toHaveValue('M5V 2T6');
+    await expect.poll(() => teamReads.length).toBe(1);
   });
 
   test('a postal code that cannot be found, checked or looked up yet keeps the pin in Milan and offers no save', async ({
