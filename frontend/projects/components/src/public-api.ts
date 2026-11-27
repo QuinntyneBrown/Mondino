@@ -24,3 +24,4 @@ export * from './lib/weather-icon/weather-icon';
 export * from './lib/status/status';
 export * from './lib/teammate-panel/teammate-panel';
 export * from './lib/group-panel/group-panel';
+export * from './lib/week-panel/week-panel';

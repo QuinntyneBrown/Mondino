@@ -1,0 +1,93 @@
+// The week around the world (docs/design-system/components/person-panel, docs/design-system/components/panel-row).
+section {
+  animation: fade-in var(--duration-base) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  section {
+    animation: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.panel__count {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.panel__lead {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.panel__empty {
+  padding: var(--space-3) 0;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.panel__more {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  font: var(--text-label);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+// A 44 px touch target around the line of text.
+.panel__more::after {
+  content: '';
+  position: absolute;
+  inset: -0.75rem 0;
+}
+.row-list {
+  margin-top: var(--space-3);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-comfortable);
+  margin: 0 calc(-1 * var(--space-2));
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  color: var(--color-fg-default);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.row:hover {
+  background: var(--color-bg-canvas);
+}
+.row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--text-body-sm);
+}
+.row__name strong {
+  font-weight: var(--font-weight-medium);
+}
+.row__clock {
+  flex: none;
+  font: var(--text-label-strong);
+}
+.icon {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

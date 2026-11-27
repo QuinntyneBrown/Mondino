@@ -71,6 +71,21 @@
       </div>
     </aside>
   }
+  @if (week(); as working) {
+    <aside class="globe-screen__panel" aria-label="This week around the world">
+      <div class="panel">
+        <mo-week-panel
+          [working]="working"
+          [address]="addressOf"
+          allMomentsAddress="/moments"
+          moreWorkingAddress="/team?filter=working"
+          (teammateChosen)="select($event)"
+          (allMoments)="go('/moments')"
+          (moreWorking)="go('/team?filter=working')"
+        />
+      </div>
+    </aside>
+  }
   <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
 </main>
 <div class="toast-region" role="status" aria-live="polite">

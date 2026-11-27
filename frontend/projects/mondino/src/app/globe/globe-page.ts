@@ -30,6 +30,7 @@ import {
   PinLayer,
   TeammatePanel,
   Toast,
+  WeekPanel,
 } from '@mondino/components';
 import { GlobeView, type GlobeState } from '@mondino/globe';
 import {
@@ -43,6 +44,7 @@ import {
   stillViewport,
   teammatePanelView,
   teamCounts,
+  workingNow,
 } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
 import { TeamStore } from './team-store';
@@ -68,6 +70,7 @@ export const toastLifetime = 4000;
     PinLayer,
     TeammatePanel,
     Toast,
+    WeekPanel,
   ],
   // One clock and one team for the screen, released with it.
   providers: [
@@ -219,6 +222,22 @@ export class GlobePage {
     return content.cities.reduce((total, city) => total + city.rows.length, 0) > 1 ? content : null;
   });
 
+  /**
+   * With no pin or group selected, who is in working hours now for the week's view (L2-024): six
+   * at most, with their count, worked out again as the minute changes; null while a panel is open.
+   */
+  protected readonly week = computed(() => {
+    this.clock.minute();
+    const team = this.store.team();
+    if (!team || this.store.selectedId() !== null || this.store.heldIds().length > 0) return null;
+    return workingNow(
+      team.pins,
+      untracked(() => this.clock.now()),
+      this.clockFormat(),
+      6,
+    );
+  });
+
   /** The address that selects a teammate, which a group's rows link to. */
   protected readonly addressOf = (teammateId: string): string =>
     this.router.serializeUrl(
@@ -368,6 +387,11 @@ export class GlobePage {
     this.store.selectGroup(placement.pins.map((pin) => pin.teammateId));
     void this.show(null);
     if (keyboard) afterNextRender(() => this.focusHeading(), { injector: this.injector });
+  }
+
+  /** "All moments" and "2 more on the Team page": the screens they lead to. */
+  protected go(address: string): void {
+    void this.router.navigateByUrl(address);
   }
 
   protected dismissToast(): void {
