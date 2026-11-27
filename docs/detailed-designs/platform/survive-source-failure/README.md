@@ -124,7 +124,7 @@ on the hosting platform and is `<TO SUPPLY>`.
   |--------|-------------------------|
   | Join | "Opening your invite link…" |
   | Globe | "Loading your team…" |
-  | Team | "Loading your team…" |
+  | Team | "Loading team…" |
   | Moments | "Loading moments…" |
   | Profile & Settings | "Loading your pin and settings…" |
 
