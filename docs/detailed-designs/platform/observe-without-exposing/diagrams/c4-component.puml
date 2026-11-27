@@ -4,19 +4,21 @@ LAYOUT_WITH_LEGEND()
 title Components — Observe without exposing
 
 Container_Boundary(api, "Mondino API") {
-  Component(setup, "MondinoTelemetry", "OpenTelemetry setup, ActivitySource and Meter", "Registers instrumentation and the source instruments")
-  Component(redaction, "TelemetryRedaction", "Span and log processor", "Keeps route templates; drops queries, bodies, addresses and outgoing URLs")
-  Component(decorators, "Caching decorators", "CachedWeatherSource, CachedPostalCodeLookup, CachedMomentCalendars", "Record each call by source and outcome")
+  Component(setup, "MondinoTelemetry", "OpenTelemetry setup", "Registers instrumentation, subscribes to Mondino's own instruments, exports over OTLP when an endpoint is set")
+  Component(redaction, "TelemetryRedaction", "Allow-lists for spans, logs and metrics", "Keeps route templates; drops paths, queries, addresses, outgoing URLs and exceptions' text")
+  Component(sources, "SourceTelemetry", "ActivitySource and Meter named Mondino", "Counts calls and times them by source and outcome")
+  Component(decorators, "Source decorators", "CachedPostalCodeLookup, CachedWeatherSource, CachedOpenHolidays, PostmarkSignInEmailSender", "Start one call per call to a source")
   Component(errors, "UnhandledExceptionHandler", "IExceptionHandler", "Logs the error's type and correlation id only")
-  Component(problems, "ProblemDetailsWriter", "Error writer", "Adds the correlation id to ProblemDetails")
+  Component(problems, "ProblemCodes", "ProblemDetails writer", "Adds the correlation id to ProblemDetails")
   Component(health, "Health endpoints", "/health/live and /health/ready", "Status only")
 }
 ContainerDb(db, "Mondino database", "EF Core", "Reachability checked for readiness")
 System_Ext(telemetry, "Telemetry backend", "Product TO SUPPLY")
-Rel(decorators, setup, "RecordSourceCall(source, outcome, duration)")
-Rel(setup, redaction, "Passes each span and log record through")
+Rel(decorators, sources, "Start(source), End(outcome)")
+Rel(setup, sources, "Subscribes to")
+Rel(setup, redaction, "Passes each span, log record and metric through")
 Rel(redaction, telemetry, "Exports", "OTLP")
 Rel(errors, problems, "Writes a 500 through")
-Rel(errors, setup, "Logs through")
+Rel(errors, setup, "Logs UnhandledError through")
 Rel(health, db, "Checks for readiness")
 @enduml

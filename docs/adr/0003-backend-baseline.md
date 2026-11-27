@@ -21,7 +21,8 @@ not chosen yet.
 - **Errors.** `AddProblemDetails` gives every error as ProblemDetails. Where a handler set no
   `code`, the status gives one (`invalid_request`, `unauthorized`, `forbidden`, `not_found`,
   `method_not_allowed`, `rate_limited`, `unexpected`; `ErrorCodes` in `Mondino.Application`).
-  An unexpected error carries its `traceId` and no detail, message or stack trace.
+  An unexpected error carries its `traceId` and no detail, message or stack trace (since
+  [ADR 0031](0031-telemetry-from-an-allow-list.md), every error carries `correlationId`, the trace id).
 - **Liveness** is `GET /health/live`, a health check endpoint with no checks: it says the
   process is running and never fails with a dependency. Readiness and telemetry are journey
   30's. The server sends no `Server` header.

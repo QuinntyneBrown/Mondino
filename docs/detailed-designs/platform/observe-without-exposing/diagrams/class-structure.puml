@@ -12,14 +12,21 @@ skinparam class {
 hide empty members
 title Class structure — Observe without exposing
 
-class MondinoTelemetry {
+class MondinoTelemetry <<static>> {
   +{static} string ServiceName = "mondino-api"
+  +{static} AddMondinoTelemetry(services, configuration): IServiceCollection
+}
+
+class SourceTelemetry {
+  +{static} string Name = "Mondino"
   +ActivitySource Source
-  +Meter Meter
-  -Counter<long> sourceCalls
-  -Histogram<double> sourceDuration
-  +{static} AddMondinoTelemetry(services, configuration): void
-  +RecordSourceCall(source: string, outcome: SourceOutcome, duration: TimeSpan): void
+  -Counter<long> calls
+  -Histogram<double> duration
+  +Start(source: string): SourceCall
+}
+
+class SourceCall {
+  +End(outcome: SourceOutcome): void
 }
 
 enum SourceOutcome {
@@ -29,9 +36,17 @@ enum SourceOutcome {
   CircuitOpen
 }
 
-class TelemetryRedaction {
-  +{static} string[] AllowedSpanAttributes
+class TelemetryRedaction <<static>> {
+  +{static} AllowedSpanAttributes
+  +{static} AllowedLogAttributes
+  +{static} AllowedMetricTags
+}
+
+class SpanRedaction {
   +OnEnd(activity: Activity): void
+}
+
+class LogRedaction {
   +OnEnd(record: LogRecord): void
 }
 
@@ -39,14 +54,12 @@ class UnhandledExceptionHandler {
   +TryHandleAsync(context, exception, ct): ValueTask<bool>
 }
 
-class ProblemDetailsWriter {
-  +WriteAsync(context, status: int, code: string): Task
+class ProblemCodes <<static>> {
+  +{static} Customize(context: ProblemDetailsContext): void
   -CorrelationId(context): string
 }
 
 class LogMessages <<static, source-generated>> {
-  +TeammateJoined(logger): void
-  +SourceCallFailed(logger, source: string, outcome: SourceOutcome): void
   +UnhandledError(logger, errorType: string, correlationId: string): void
 }
 
@@ -61,19 +74,26 @@ class DatabaseReadyCheck {
   +CheckHealthAsync(context, ct): Task<HealthCheckResult>
 }
 
-class CachedWeatherSource {
-}
 class CachedPostalCodeLookup {
 }
-class CachedMomentCalendars {
+class CachedWeatherSource {
+}
+class CachedOpenHolidays {
+}
+class PostmarkSignInEmailSender {
 }
 
-MondinoTelemetry ..> SourceOutcome : labels by
-MondinoTelemetry *-- TelemetryRedaction : registers
-CachedWeatherSource ..> MondinoTelemetry : RecordSourceCall
-CachedPostalCodeLookup ..> MondinoTelemetry : RecordSourceCall
-CachedMomentCalendars ..> MondinoTelemetry : RecordSourceCall
+SourceTelemetry ..> SourceCall : starts
+SourceCall ..> SourceOutcome : labels by
+MondinoTelemetry ..> SourceTelemetry : subscribes to "Mondino"
+MondinoTelemetry ..> TelemetryRedaction : registers
+TelemetryRedaction *-- SpanRedaction
+TelemetryRedaction *-- LogRedaction
+CachedPostalCodeLookup ..> SourceTelemetry : Start("postal_code")
+CachedWeatherSource ..> SourceTelemetry : Start("weather")
+CachedOpenHolidays ..> SourceTelemetry : Start("holiday_calendar")
+PostmarkSignInEmailSender ..> SourceTelemetry : Start("email")
 UnhandledExceptionHandler ..> LogMessages : UnhandledError
-UnhandledExceptionHandler ..> ProblemDetailsWriter : 500 with correlation id
+UnhandledExceptionHandler ..> ProblemCodes : 500 with correlation id
 HealthEndpoints ..> DatabaseReadyCheck : readiness
 @enduml

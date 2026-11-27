@@ -25,55 +25,66 @@ Service ([ADR 0004](../../../adr/0004-azure-hosting.md)).
 The feature lives in the `Mondino API`. The `Mondino web app` sends no analytics and no
 telemetry to anyone.
 
-**`MondinoTelemetry`** — class in `Mondino.Api` that sets up OpenTelemetry and owns the
-backend's own instruments.
+**`MondinoTelemetry`** — static class in `Mondino.Api` that sets up OpenTelemetry
+([ADR 0031](../../../adr/0031-telemetry-from-an-allow-list.md)).
 
-- `AddMondinoTelemetry(services, configuration)` registers tracing, metrics and logging with
-  the ASP.NET Core, `HttpClient` and EF Core instrumentation, and an OTLP exporter.
-- It owns one `ActivitySource` and one `Meter`, both named `Mondino`.
-- `RecordSourceCall(source, outcome, duration)` adds one to the counter
-  `mondino.source.calls` and records the duration in the histogram
-  `mondino.source.duration`. Both are labelled by `source` (`postal_code`, `weather`,
-  `holiday_calendar`, `race_calendar`, `event_calendar`, `email`) and `outcome` (a `SourceOutcome`:
-  `Success`, `Failure`, `Timeout`, `CircuitOpen`), and by nothing else. Calls, failures and
-  time-outs per source are read from the counter by outcome.
-- The caching decorators (`CachedWeatherSource`, `CachedPostalCodeLookup`,
-  `CachedMomentCalendars`) and `SignInEmailSender` call `RecordSourceCall` once per call to a
-  source (`survive-source-failure`).
+- `AddMondinoTelemetry(services, configuration)` registers tracing, metrics and logging with the
+  ASP.NET Core and `HttpClient` instrumentation, names the service `mondino-api`, and subscribes
+  to the `ActivitySource` and the `Meter` named `Mondino`. It adds the OTLP exporter only when
+  `OTEL_EXPORTER_OTLP_ENDPOINT` is set. The database is not instrumented: readiness says whether
+  it can be reached.
 
-**`TelemetryRedaction`** — span and log processor registered by `MondinoTelemetry`. It works
-from an allow-list, so an attribute that is not named is dropped, not kept.
+**`SourceTelemetry`** — class in `Mondino.Infrastructure` that owns the backend's own
+instruments, beside the decorators that record them, which may not depend on `Mondino.Api`.
 
-- **Incoming requests.** A server span keeps the method, the status code and `http.route`,
-  the route template. The span's name is the method and the template. The processor drops the
-  path, the query string, the client address, the user agent and each header. A request's
-  body is never recorded, and an email, a sign-in token, a postal code and the text of a city
-  search travel in a body only. The sign-in routes are recorded as `/api/sign-in-links` and
-  `/api/sign-in-links/redemptions`; the sign-in token is in the fragment of the emailed
-  address, which no server receives.
-- **Outgoing calls.** An outside source's URL can carry a postal code or a position, and the
-  call to the email source carries an address. A client span keeps the source's name, the
-  method and the status code; the processor drops the URL and its query string.
-- **Database calls.** The EF Core instrumentation is configured to record no statement text
-  and no parameter values.
-- **Logs.** Each log message is a source-generated `LoggerMessage` in `LogMessages`, with a
-  fixed template. A message takes only values from a closed set: a source's name, a
-  `SourceOutcome`, an error's type, a status code, a correlation id. No message takes a name,
-  an email, a postal code, a city, a position, a token or an id of a team or a teammate. That
-  a sign-in link was asked for, sent, opened or refused is logged with no field that says for
-  whom. The framework's
-  own request logging is set to a level that writes no path.
+- It owns one `ActivitySource` and one `Meter` (from `IMeterFactory`), both named `Mondino`.
+- `Start(source)` begins a `SourceCall`, and `SourceCall.End(outcome)` adds one to the counter
+  `mondino.source.calls` and, for a call that was made, records its duration in seconds (read
+  from `TimeProvider`) in the histogram `mondino.source.duration`. Both are labelled by `source`
+  (`postal_code`, `weather`, `holiday_calendar`, `email`) and `outcome` (a `SourceOutcome`:
+  `success`, `failure`, `timeout`, `circuit_open`), and by nothing else. Calls, failures and
+  time-outs per source are read from the counter by outcome. Each call made is also a span,
+  `source <name>`, with the attributes `mondino.source` and `mondino.source.outcome`.
+- `CachedPostalCodeLookup`, `CachedWeatherSource`, `CachedOpenHolidays` and
+  `PostmarkSignInEmailSender` start one call per call to a source, and one `circuit_open` call
+  when the breaker leaves the source alone (`survive-source-failure`). A cached answer is not a
+  call. Formula 1, local events and sport come from Mondino's own calendar, which makes no call
+  and is not measured.
+
+**`TelemetryRedaction`** — static class in `Mondino.Api` holding three allow-lists, so an
+attribute that is not named is dropped, not kept. `MondinoTelemetry` registers its processors
+first, before any exporter.
+
+- **Spans** (`SpanRedaction`). A span keeps `http.request.method`,
+  `http.response.status_code`, `http.route`, `error.type`, `server.address`,
+  `mondino.source` and `mondino.source.outcome`, and nothing else: the path, the query string,
+  the outgoing URL, the client address, the user agent and each header are dropped, with the
+  status description, the trace state and the baggage; no instrumentation records an exception
+  event. A server span is named by its method and route template. A request's body is never recorded, and an email, a sign-in token, a postal
+  code and the text of a city search travel in a body only. The sign-in routes are recorded as
+  `/api/sign-in-links` and `/api/sign-in-links/redemptions`; the sign-in token is in the
+  fragment of the emailed address, which no server receives. An outside source's client span
+  keeps its host, the method and the status code.
+- **Logs** (`LogRedaction`). A log record keeps its category, level, event, trace and span ids,
+  its message template and the attributes `errorType` and `correlationId`. Every other
+  attribute, the formatted message, a body that is not a template and the exception are
+  dropped; of an exception only its type is kept, as `exception.type`. Scopes are not exported.
+  Mondino's own messages are source-generated `LoggerMessage`s in `LogMessages`, with fixed
+  templates that take only values from a closed set; today there is one, `UnhandledError`.
+- **Metrics.** A view on every instrument keeps the tags `http.request.method`,
+  `http.response.status_code`, `http.route`, `error.type`, `server.address`, `source` and
+  `outcome`.
 
 **Errors and the correlation id.**
 
-- **`UnhandledExceptionHandler`** — `IExceptionHandler` in `Mondino.Api`. For an unhandled
-  error it logs `UnhandledError` with the error's type and the correlation id. It does not log
-  the error's message or the request, since either can hold what a person typed. It answers
-  500 through `ProblemDetailsWriter`.
-- **`ProblemDetailsWriter`** — adds the extension `correlationId` to each ProblemDetails it
-  writes, beside `code`. The correlation id is the request's trace id. The same id appears on
-  the request's span and logs, so an error a teammate reports is found without recording who
-  they are.
+- **`UnhandledExceptionHandler`** — `IExceptionHandler` in `Mondino.Api`, after
+  `RefusalHandler`. For an unhandled error it logs `UnhandledError` with the error's type and the
+  correlation id. It does not log the error's message or the request, since either can hold what
+  a person typed. It answers 500 with the code `unexpected`, through the ProblemDetails writer.
+- **ProblemDetails writer** (`ProblemCodes.Customize`) — adds the extension `correlationId` to
+  each ProblemDetails, beside `code`, in place of the framework's `traceId`. The correlation id
+  is the request's trace id. The same id appears on the request's span and logs, so an error a
+  teammate reports is found without recording who they are.
 
 **Health endpoints.**
 
@@ -86,21 +97,26 @@ from an allow-list, so an attribute that is not named is dropped, not kept.
   configuration, no versions of dependencies and no teammate data. A failed check reports no
   description and no error. Both are marked as open explicitly and need no session
   (`protect-team-data`).
-- The health endpoints are built (`HealthEndpoints` and `DatabaseReadyCheck`, in
+- The health endpoints were built (`HealthEndpoints` and `DatabaseReadyCheck`, in
   `Mondino.Api`'s `Health`), with the database they check, by
-  [`keep-team-data`](../keep-team-data/). The rest of this design is not built yet.
+  [`keep-team-data`](../keep-team-data/).
 
 **Settings a deployed system needs.** The exporter reads the standard
-`OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS`; the service is named
-`mondino-api`. With no endpoint set, nothing is exported and the API runs as normal. The
-sampling rate is `<TO SUPPLY>`.
+`OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS` and `OTEL_EXPORTER_OTLP_PROTOCOL`;
+the service is named `mondino-api`. With no endpoint set, nothing is exported and the API runs
+as normal. The sampler reads `OTEL_TRACES_SAMPLER` and `OTEL_TRACES_SAMPLER_ARG`; with neither,
+every trace is kept. The sampling rate is `<TO SUPPLY>` (`docs/deployment/README.md`).
 
 **How it is proved.** An acceptance test joins as "Sofia Bianchi" with postal code "20121"
-against in-memory exporters and a fake postal code lookup, then searches every exported span,
-metric and log record for the name, the postal code, the city, its coordinates and the invite
-token. It finds none. A second test makes a team with the email "sofia@northwind.co", asks
-for a sign-in link against a fake email sender and opens it, then searches the same exports
-for the email, the email's domain and the sign-in token. It finds none.
+against in-memory exporters, with logging at every level, and a fake postal code lookup, then
+searches every exported span, metric point and log record for the name, the postal code, the
+city, its coordinates and the invite token. It finds none. A second test makes a team with the
+email "sofia@northwind.co", asks for a sign-in link against a fake Email source and opens it,
+then searches the same exports for the email and the sign-in token. It finds none. Others read
+the route template of a team's endpoint, each source's calls, failures, time-outs and latency
+through the real decorators against fake HTTP sources, and an unhandled error's log beside its
+ProblemDetails. The telemetry tests run alone, since an `ActivitySource` and a `Meter` are seen
+by every host in the process.
 
 ## Requirements
 
@@ -130,19 +146,19 @@ none. The readiness endpoint checks the `Mondino database`.
 
 ### Components
 
-The caching decorators record each source call through `MondinoTelemetry`. Each span and log
-record passes `TelemetryRedaction` before export. `UnhandledExceptionHandler` logs through
-`MondinoTelemetry` and answers through `ProblemDetailsWriter`. The health endpoints check the
-database for readiness.
+The caching decorators record each source call through `SourceTelemetry`, which
+`MondinoTelemetry` subscribes to. Each span, log record and metric passes `TelemetryRedaction`'s
+allow-lists before export. `UnhandledExceptionHandler` logs through `LogMessages` and answers
+through the ProblemDetails writer. The health endpoints check the database for readiness.
 
 ![C4 component view for observing without exposing](diagrams/c4-component.png)
 
 ### Class structure
 
-`MondinoTelemetry` owns the source instruments, labels them by `SourceOutcome` and registers
-`TelemetryRedaction`. The three caching decorators depend on it. `UnhandledExceptionHandler`
-depends on `LogMessages` and `ProblemDetailsWriter`. `HealthEndpoints` depends on
-`DatabaseReadyCheck`.
+`SourceTelemetry` owns the source instruments and labels them by `SourceOutcome`; the four
+source decorators depend on it. `MondinoTelemetry` registers `TelemetryRedaction`'s processors
+and subscribes to `SourceTelemetry`'s names. `UnhandledExceptionHandler` depends on
+`LogMessages` and the ProblemDetails writer. `HealthEndpoints` depends on `DatabaseReadyCheck`.
 
 ![Class diagram for observing without exposing](diagrams/class-structure.png)
 
@@ -151,7 +167,7 @@ depends on `LogMessages` and `ProblemDetailsWriter`. `HealthEndpoints` depends o
 A person joins as "Sofia Bianchi" with postal code 20121. The name and postal code travel in
 the request's body, which is never recorded. The server span keeps the method, the status and
 the route template. The postal code lookup is recorded as a call to `postal_code` with its
-outcome and duration. The log of the join is a fixed message with no fields.
+outcome and duration. The join writes no log of its own.
 `TelemetryRedaction` drops the path, which holds the invite token, and the outgoing URL
 before export, so no name, postal code, city, position or invite token leaves the backend
 (L2-051).

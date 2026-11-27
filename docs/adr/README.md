@@ -38,5 +38,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0028](0028-an-ended-session-on-profile.md) | A store that is refused with 401 forgets the team, and its screen says an invite link is needed; there is no interceptor | Accepted; replaces the design's `sessionExpiredInterceptor` |
 | [0029](0029-accessibility-as-the-mocks-draw-it.md) | The Globe announces a selection in its own live region, motion is read where it moves, and the specs measure what a sweep would | Accepted; replaces the design's `LiveAnnouncer` and `MotionPreference` |
 | [0030](0030-fast-to-load-and-light-all-day.md) | The globe is drawn first from a light model, the API compresses and caches, detail steps down after 3 seconds under 30 frames a second, and a model of the phone's connection proves the load | Accepted; tightens 0018's budget; splits 0012's model |
+| [0031](0031-telemetry-from-an-allow-list.md) | Telemetry is kept from an allow-list, exported over OTLP only when an endpoint is set, and the outside sources measure themselves | Accepted; renames 0003's `traceId` to `correlationId` |
 
 Not decided yet: nothing a journey has reached.
