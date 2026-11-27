@@ -73,7 +73,8 @@ loading and refreshing are designed in `keep-team-fresh`.
   overlap would say when the teammate is working (L2-017). `weather` is null unless the pin's
   `weatherState` is `Available`, and `weatherState` is carried so the panel can say which of
   the two it is. `keepsPrivate` is true when the pin shares neither: `sharesStatus` is false
-  and `weatherState` is `NotShared`. `firstName` is `firstName(pin.name)`
+  and `weatherState` is `NotShared`; the content then carries the note's sentence as
+  `privateNote`, and `weatherNote` carries the unavailable weather's sentence. `firstName` is `firstName(pin.name)`
   from `pins/`, the first word of the name, by which the panel's running copy names the
   teammate.
 - **`TeammatePanelContent`** — type in `api` (`pins/panel-content`), with `GroupContent`,
@@ -93,7 +94,7 @@ loading and refreshing are designed in `keep-team-fresh`.
   naming the pin's city, when `weatherState` is `Unavailable` (designed in
   `weather/show-weather`). It omits the moments section when `moments` is empty, the offset
   when it is null, the status when it is null and the overlap when it is null.
-- **The private note** — when `keepsPrivate` is true, `TeammatePanel` shows one note
+- **The private note** — when `keepsPrivate` is true (`privateNote` is set), `TeammatePanel` shows one note
   (`panel__note`, an icon and a sentence) under the local time: "Ahmed keeps their weather and
   working hours private. You’ll still see their local time and city.", naming the teammate by
   `firstName`. With it the panel hides the status, the weather section and the working-hours
@@ -117,7 +118,7 @@ loading and refreshing are designed in `keep-team-fresh`.
   reads "None today".
 - **`groupCities(pins, teammateIds, now, settings)`** — pure function in `pins/`. It keeps the
   pins whose teammate id is in the group and gathers them by city. It returns a
-  `GroupContent`: the `count` of teammates, the `lead` line and one `GroupCity` for each city,
+  `GroupContent`: the `title` ("2 teammates close together"), the `lead` line and one `GroupCity` for each city,
   the city with the most teammates first and cities of one size west to east. A `GroupCity`
   holds the city's name, its formatted local time and one `GroupRow` for each teammate there:
   teammate id, name, initials, colour and `isViewer`. The local time is the city's, worked out

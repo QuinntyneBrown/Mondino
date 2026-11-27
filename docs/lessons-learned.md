@@ -747,3 +747,56 @@ apply the lessons that fit.
   with `&&`.
 - *Put a type where its lowest reader can import it* (journey 12, lesson 2): `PinWeather`, `FoundWeather`
   and `WeatherCondition` are in `api`, so `PinLabel`, `LookupMessage` and `WeatherIcon` read them.
+
+## Journey 14: View a teammate's panel
+
+**What slowed it**
+
+- The design was written before the Globe was: it put `TeamStore` in `domain`, the selection's events on
+  `GlobeView`, `focusPin` on the globe, a component input for the query parameter and `SettingsCache`, none of
+  which exist. It was brought in line with what journeys 10 to 13 built (the store in the app, `PinLayer`'s
+  events, the page focusing its own pins, `queryParamMap`, the viewer's country's defaults) before any code.
+- The panel's content types had to be in `api`, not `domain`'s `pins/`, for `TeammatePanel` and `GroupPanel` to
+  read them; `OverlapView` moved there from `compareWithViewer` (journey 12, lesson 2 again).
+- The address first selected the newly joined teammate too, which broke journey 4's spec that a reload greets
+  and selects no one. The new pin is the one selection kept out of the address.
+- Journey 10's Tab spec expected focus to stay on a pin after Enter; L2-023 moves it to the panel's heading.
+  The spec was brought in line with the later requirement, moving to the next pin by focusing it.
+- Angular scopes `@keyframes` names per component, so the fade's name reads `_ngcontent-…_fade-in`; and a panel
+  that only changes its inputs never replays its fade. The page draws the panel in a `@for` over a list of one,
+  tracked by teammate, and the spec proves the new teammate's panel is a new element.
+- `@for (x of [panel])` put the compiler's pure-function instruction in the initial chunk (+0.19 kB); a computed
+  list of one costs nothing there. The document's Escape listener costs 0.06 kB (259.64 to 259.70 kB).
+- Most of what the panel shows waits for other screens: its moments for journey 19, the week's view it closes to
+  for journey 15, and the Team row half of L2-016 criteria 1 to 4 and L2-019 criterion 1 for journey 17. Counted
+  strictly, the journey stands at 60 and raised journeys 11, 12 and 13 by what the panel proves.
+
+**Lessons**
+
+1. **Read a design against the code built since it was written, not only against the mock.** Names of
+   components, where a store lives and which events exist drift as earlier journeys build them.
+2. **Prove a fade by the element being new, not by its animation.** A CSS animation is set on the element
+   whether or not it replays; mark the element, change the selection and check the mark is gone.
+3. **Tell a keyboard choice by `:focus-visible` on what was chosen.** The clicked control keeps focus either
+   way; only the keyboard's makes it match, so the page moves focus to the panel only then.
+4. **Compare a panel with the mock part by part from its markup.** A helper that reads each class's text, the
+   icon's shapes and the bar's parts from the mock lets one assertion cover five mocks.
+5. **Keep a one-visit selection out of the address.** What the address holds comes back on every reload.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the design, its four diagrams and the panel types' home
+  were one commit before any code; it was touched again for the newly joined pin and the types as built.
+- *Measure the initial chunk after each template change, and bisect a rise by template feature* (journey 10,
+  lesson 1): it caught the 0.25 kB rise in slice 3 and found the array literal and the document listener.
+- *Run the spec before the page exists* (journey 1, lesson 5): each slice's spec ran red on the missing
+  address, panel, focus or group; the close button and the 3D selection passed first, built by the slice before,
+  and were kept as the proof.
+- *Put a type where its lowest reader can import it* (journey 12, lesson 2): the panel's content, the group's
+  and `OverlapView` are in `api`.
+- *Prove a drawing by the mock's own numbers* (journey 12, lesson 3) and *compare an icon with the mock's by its
+  shapes* (journey 13, lesson 1): the overlap bar's parts and the weather icon are read from the five mocks.
+- *After `pauseAt`, let the clock run before reading the page* (journey 11, lesson 1) and *pick a boundary and
+  jump to it* (lesson 2): the daylight-saving offset change is one `pauseAt` and one second of `runFor`.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit was chained on
+  `rc` with `&&`.

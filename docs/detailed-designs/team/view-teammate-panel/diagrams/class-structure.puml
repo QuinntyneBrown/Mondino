@@ -45,20 +45,26 @@ class TeammatePanelContent <<api>> {
   +initials: string
   +colour: string
   +isViewer: boolean
-  +city: string
+  +cityName: string
   +country: string
   +localTime: string
   +localDay: string
   +offset: string | null
   +status: Status | null
-  +weather: Weather | null
+  +weather: PanelWeather | null
   +weatherState: WeatherState
-  +keepsPrivate: boolean
+  +weatherNote: string | null
+  +privateNote: string | null
+  +overlap: OverlapView | null
   +moments (journey 19)
+}
+
+class OverlapView <<api>> {
   +overlap: Overlap | null
-  +theirDay: DaySpan | null
-  +overlapText: OverlapText | null
+  +theirDay: DaySpan
   +nowMinute: number
+  +firstName: string
+  +text: OverlapText
 }
 
 class Overlap <<api>> {
@@ -78,13 +84,13 @@ class OverlapText <<api>> {
 }
 
 class GroupContent <<api>> {
-  +count: number
+  +title: string
   +lead: string
   +cities: GroupCity[]
 }
 
 class GroupCity <<api>> {
-  +city: string
+  +cityName: string
   +localTime: string
   +rows: GroupRow[]
 }
@@ -156,9 +162,10 @@ GlobePage --> PinLayer : renders, selection
 GlobePage ..> Clock : injects CLOCK
 view ..> TeammatePanelContent : builds
 view ..> Pin : reads
-TeammatePanelContent *-- Overlap
-TeammatePanelContent *-- DaySpan
-TeammatePanelContent *-- OverlapText
+TeammatePanelContent *-- OverlapView
+OverlapView *-- Overlap
+OverlapView *-- DaySpan
+OverlapView *-- OverlapText
 GlobePage --> GroupPanel : renders for a group pin
 view ..> GroupContent : builds
 GroupContent "1" *-- "1..*" GroupCity

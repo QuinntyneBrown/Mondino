@@ -60,3 +60,24 @@ test.describe('Globe: the selection in the address', () => {
       await expect(button).toHaveAttribute('aria-pressed', 'false');
   });
 });
+
+test.describe('Globe: the selection in the address, on the 3D globe', () => {
+  test('a shared address turns the globe to the teammate, whose pin stays lifted beside their panel', async ({
+    api,
+    globePage,
+    page,
+  }) => {
+    // The globe faces a selected pin at once under reduced motion
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
+
+    // When Sofia opens an address with Tomás selected, Mexico City on the far side at first
+    await globePage.openAt(idOf('Tomás Herrera'));
+
+    // Then the globe has turned to him, his pin lifted and pressed, and his panel open
+    await expect(globePage.pin('Tomás Herrera')).toHaveAttribute('aria-pressed', 'true');
+    await expect(globePage.pinItem('Tomás Herrera')).toHaveClass(/globe__pin--lifted/);
+    await expect(globePage.personName).toHaveText('Tomás Herrera');
+  });
+});
