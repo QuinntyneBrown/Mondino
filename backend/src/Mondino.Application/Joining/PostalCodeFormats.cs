@@ -18,7 +18,9 @@ public sealed class PostalCodeFormat(
     Func<string, string>? canonical = null,
     Func<string, string>? forSource = null)
 {
-    private readonly Regex regex = new(pattern, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
+    // Matched in time linear in the input, so it needs no timeout; a wall-clock timeout would let a
+    // busy machine refuse a good postal code (docs/lessons-learned.md, "Fix: flaky postal code breaker test").
+    private readonly Regex regex = new(pattern, RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Regex.InfiniteMatchTimeout);
     private readonly Func<string, string> canonical = canonical ?? (value => value);
     private readonly Func<string, string> forSource = forSource ?? (value => value);
 

@@ -1410,3 +1410,9 @@ L2-054 criterion 1 on Profile & Settings, the last of the four screens (journey 
 reaching Profile & Settings (journey 20, 12 of 13: 90); L2-045 criterion 6, the 429 message on Profile &
 Settings, and the limit on its lookup (journey 6, 36 of 40, still 90); Profile & Settings joining
 `TeamShell` with its header link current. Total: 76.
+
+## Fix: flaky postal code breaker test
+
+- *Keep wall-clock timeouts out of the request path*: the postal code form's regex had a 100 ms match
+  timeout, so on a loaded machine one of the five failing lookups could be refused before the source, the
+  breaker never opened and the sixth answered 200; a linear-time (`NonBacktracking`) match needs no timeout.
