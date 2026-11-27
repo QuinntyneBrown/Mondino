@@ -110,14 +110,20 @@ In the browser:
   to 7 days ahead, then the day and month ("9 Nov").
 - **`upcomingMoments(moments, teammateId, now)`** — a teammate's moments from today on, nearest
   first, as `MomentView`s (`kind`, `kindName`, `title`, `detail`, `when`, `today`). The panel shows
-  them as `MomentCard`s ("Holiday · In 5 days"); none, and the panel shows no moments section.
+  them as `moment-card`s in `TeammatePanel`, each with its kind's `Emblem`, "Holiday · In 5 days",
+  the title and the detail; none, and the panel shows no moments section.
 - **`weekMoments(moments, pins, now)`** — the moments of today and the next 7 days, in date order
   and, on one date, west to east by `orderWestToEast`, as `WeekMoment`s with the teammate's first
-  name and city. The Globe's panel lists the first six, each selecting its teammate's pin.
+  name and city ("Liam · Dublin"). `WeekPanel` lists the first six, each selecting its teammate's
+  pin, today's `Emblem` solid; none, and it says "No moments this week."
 - **`nextMoment(moments, teammateId, now)`** — a Team row's "Coming up": the nearest moment from
-  today on, as a `moment-pill` with the kind's icon named by the kind, its title and `when`.
-- **`MomentIcon`** (`components`) — Mondino's own icon for a kind: a party popper, a flag, a
-  ticket, a trophy. No team's or series' logo is shipped (ADR 0019).
+  today on, as `TeamRow.nextMoment`. `TeamTable` shows it as a `MomentPill` with the kind's icon
+  named by the kind, its title and `when`; with none, a dash named "Nothing coming up".
+- **`MomentIcon`** (`components`, `svg[mo-moment-icon]`) — Mondino's own icon for a kind: a
+  party popper, a flag, a ticket, a trophy, named by the kind unless `decorative`. **`Emblem`**
+  (`mo-emblem`) sets it in the round sun-coloured badge. No team's or series' logo is shipped
+  (ADR 0019).
+- These rules live in `domain`'s `moments/moment-days.ts`, with their unit tests.
 
 ## Requirements
 

@@ -114,8 +114,11 @@ Builds on: journeys 14 and 19.
 - Journey 6 waits for this screen to prove L2-007 criterion 2's last part in Playwright: a moment on the
   Moments screen gives the city and country and no postal code (the panel and the Team row are proven).
   Raise journey 6's % by the criterion proven here.
-- Journey 19 built `TeamStore.moments`, `daysUntil` and `whenLabel` (`domain`'s `moments/`), `MomentIcon` and
-  the e2e fixture `northwindMoments()`; build `groupMoments` on them rather than again.
+- Journey 19 built `TeamStore.moments`, `daysUntil`, `whenLabel`, `upcomingMoments` and `KIND_NAMES`
+  (`domain`'s `moments/moment-days.ts`), `MomentIcon` and `Emblem` (`components`), and the e2e fixtures
+  `CAST_MOMENTS`, `momentOf()` and `northwindMoments()` (`e2e/fixtures/moments.ts`), which answer Northwind
+  with no moment by default; build `groupMoments` on them rather than again. The mocks' Moments list now has
+  Luca's "Monza tickets on sale" beside Sofia's (`docs/mocks/README.md`).
 - Set journey 21 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

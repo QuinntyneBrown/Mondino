@@ -112,8 +112,9 @@ until then all four are on.
 
 ## Built by journey 19
 - A pin carries no moments: they are `TeamStore.moments`, joined to pins by `teammateId` (`find-moments`).
-  `daysUntil`, `whenLabel` and `MomentIcon` exist; Mondino holds no emblem (ADR 0019), so every marker shows
-  the kind's icon.
+  `daysUntil`, `whenLabel`, `weekMoments` (`domain/moments/moment-days.ts`), `MomentIcon` and `Emblem` exist;
+  Mondino holds no emblem (ADR 0019), so every marker shows the kind's icon. Specs answer the cast's moments
+  with `northwindMoments()` (`e2e/fixtures/moments.ts`); without it Northwind has none.
 
 ## Done means
 - The cast's seven moments this week mark their pins as `pages/globe/default` draws them.
