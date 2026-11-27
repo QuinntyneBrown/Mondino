@@ -46,7 +46,8 @@ test.describe('The globe as text', () => {
     await expect(globePage.globeGroup).toHaveAccessibleName(
       'The globe, with 13 teammates’ pins. Drag to spin, or use the arrow keys.',
     );
-    expect(await globePage.globeGroup.ariaSnapshot()).toMatch(onlyAListOfPins);
+    // The name is set before the pins are drawn in it, so the snapshot is read until they are.
+    await expect.poll(() => globePage.globeGroup.ariaSnapshot()).toMatch(onlyAListOfPins);
     await expect(globePage.canvas).toHaveAttribute('aria-hidden', 'true');
 
     // And each pin is announced with the teammate's name, city, local time, status, weather and
@@ -69,7 +70,8 @@ test.describe('The globe as text', () => {
       await expect(globePage.globeGroup).toHaveAccessibleName(
         'A still picture of the globe, with 13 teammates’ pins.',
       );
-      expect(await globePage.globeGroup.ariaSnapshot()).toMatch(onlyAListOfPins);
+      // The name is set before the pins are drawn in it, so the snapshot is read until they are.
+      await expect.poll(() => globePage.globeGroup.ariaSnapshot()).toMatch(onlyAListOfPins);
       await expect(globePage.groupPinButtons.filter({ hasText: 'LO' })).toHaveAccessibleName(liam);
     });
   });
