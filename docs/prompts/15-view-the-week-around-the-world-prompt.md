@@ -106,6 +106,10 @@ wording.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 14 built the teammate's and the group's panels and waits for this screen to prove that closing
+  either, by its close button or Escape, returns the panel to the week's view (L2-023 criteria 4 and 10;
+  the selection cleared and the pin settled back are proven) in Playwright; raise journey 14's % by the
+  criteria proven here.
 - Set journey 15 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

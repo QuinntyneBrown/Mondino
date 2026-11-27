@@ -19,6 +19,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
     '[class.btn--sm]': "size() === 'sm'",
     '[class.btn--lg]': "size() === 'lg'",
     '[class.btn--block]': 'block()',
+    '[class.btn--icon]': 'icon()',
   },
 })
 export class Button {
@@ -26,4 +27,6 @@ export class Button {
   readonly size = input<ButtonSize>('md');
   /** Takes the whole width of its container, as a form's main action does. */
   readonly block = input(false, { transform: booleanAttribute });
+  /** An icon alone, square at the comfortable touch target; it is named by `aria-label`. */
+  readonly icon = input(false, { transform: booleanAttribute });
 }

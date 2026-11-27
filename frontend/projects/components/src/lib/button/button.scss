@@ -61,6 +61,17 @@
   min-height: var(--control-height-sm);
   padding: 0 var(--space-3);
 }
+:host(.btn--icon) {
+  width: var(--target-comfortable);
+  min-height: var(--target-comfortable);
+  padding: 0;
+  border-color: transparent;
+  color: var(--color-fg-muted);
+}
+:host(.btn--icon:hover) {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
 :host(:disabled),
 :host([aria-disabled='true']) {
   opacity: 0.6;

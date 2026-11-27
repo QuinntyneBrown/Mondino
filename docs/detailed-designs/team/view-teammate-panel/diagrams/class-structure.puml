@@ -12,85 +12,90 @@ skinparam class {
 title Class structure — View a teammate's panel
 
 class GlobePage <<mondino>> {
-  +teammate: InputSignal<string | undefined>
+  -requestedId: Signal<string | null>  (queryParamMap "teammate")
   -openedFromKeyboard: boolean
   +panel: Signal<TeammatePanelContent | null>
-  +groupTeammateIds: WritableSignal<string[]>
   +group: Signal<GroupContent | null>
-  +onSelect(teammateId: string): void
-  +onSelectGroup(teammateIds: string[]): void
-  +onClosed(): void
-  +onEscape(): void
+  +announcement: Signal<string>
+  +select(teammateId: string): void
+  +selectGroup(placement: PinPlacement): void
+  +close(): void
+  +focusPin(teammateId: string): void
 }
 
-class TeamStore <<domain pins/>> {
-  +pins: Signal<Pin[]>
-  +viewerTeammateId: Signal<string | null>
-  +selectedTeammateId: Signal<string | null>
-  +selectedPin: Signal<Pin | null>
-  +viewerPin: Signal<Pin | null>
+class TeamStore <<mondino globe/>> {
+  +team: Signal<TeamPins | null>
+  +selectedId: Signal<string | null>
+  +heldIds: Signal<string[]>
   +select(teammateId: string): boolean
-  +clearSelection(): void
+  +selectGroup(teammateIds: string[]): void
+  +clear(): void
 }
 
 class "teammatePanelView" as view <<function, domain pins/>> {
-  +teammatePanelView(pin: Pin, viewer: Pin, now: Date, settings: Settings): TeammatePanelContent
-  +groupCities(pins: Pin[], teammateIds: string[], now: Date, settings: Settings): GroupContent
+  +teammatePanelView(pin: Pin, viewer: Pin, now: number, format: ClockFormat, unit: TemperatureUnit): TeammatePanelContent
+  +groupCities(pins: Pin[], teammateIds: string[], now: number, format: ClockFormat): GroupContent
   +firstName(name: string): string
 }
 
-class TeammatePanelContent <<domain pins/>> {
+class TeammatePanelContent <<api>> {
   +teammateId: string
   +name: string
   +firstName: string
   +initials: string
   +colour: string
   +isViewer: boolean
-  +city: string
+  +cityName: string
   +country: string
   +localTime: string
   +localDay: string
   +offset: string | null
   +status: Status | null
-  +weather: Weather | null
+  +weather: PanelWeather | null
   +weatherState: WeatherState
-  +keepsPrivate: boolean
-  +moments: Moment[]
-  +overlap: Overlap | null
-  +theirDay: DaySpan | null
-  +overlapText: OverlapText | null
-  +nowMinute: number
+  +weatherNote: string | null
+  +privateNote: string | null
+  +overlap: OverlapView | null
+  +moments (journey 19)
 }
 
-class Overlap <<domain time/>> {
+class OverlapView <<api>> {
+  +overlap: Overlap | null
+  +theirDay: DaySpan
+  +nowMinute: number
+  +firstName: string
+  +text: OverlapText
+}
+
+class Overlap <<api>> {
   +startMinute: number
   +endMinute: number
   +lengthMinutes: number
 }
 
-class DaySpan <<domain time/>> {
+class DaySpan <<api>> {
   +startMinute: number
   +endMinute: number
 }
 
-class OverlapText <<domain time/>> {
+class OverlapText <<api>> {
   +figure: string
   +sentence: string
 }
 
-class GroupContent <<domain pins/>> {
-  +count: number
+class GroupContent <<api>> {
+  +title: string
   +lead: string
   +cities: GroupCity[]
 }
 
-class GroupCity <<domain pins/>> {
-  +city: string
+class GroupCity <<api>> {
+  +cityName: string
   +localTime: string
   +rows: GroupRow[]
 }
 
-class GroupRow <<domain pins/>> {
+class GroupRow <<api>> {
   +teammateId: string
   +name: string
   +initials: string
@@ -100,15 +105,14 @@ class GroupRow <<domain pins/>> {
 
 class GroupPanel <<components, mo-group-panel>> {
   +content: InputSignal<GroupContent>
+  +address: InputSignal<(teammateId: string) => string>
   +teammateChosen: OutputEmitterRef<string>
   +closed: OutputEmitterRef<void>
-  +focusHeading(): void
 }
 
 class TeammatePanel <<components, mo-teammate-panel>> {
   +content: InputSignal<TeammatePanelContent>
   +closed: OutputEmitterRef<void>
-  +focusHeading(): void
 }
 
 class OverlapBar <<components, mo-overlap-bar>> {
@@ -119,44 +123,49 @@ class OverlapBar <<components, mo-overlap-bar>> {
   +text: InputSignal<OverlapText>
 }
 
-class GlobeView <<globe, mo-globe>> {
-  +pins: InputSignal<Pin[]>
+class PinLayer <<components, mo-pin-layer>> {
+  +placements: InputSignal<PinPlacement[]>
   +selectedId: InputSignal<string | null>
-  +selectedGroupIds: InputSignal<string[]>
-  +select: OutputEmitterRef<string>
-  +selectGroup: OutputEmitterRef<string[]>
-  +focusPin(teammateId: string): void
+  +selectedGroupKey: InputSignal<string | null>
+  +selectPin: OutputEmitterRef<string>
+  +selectGroup: OutputEmitterRef<PinPlacement>
+}
+
+class GlobeView <<globe, mo-globe>> {
+  +facing: InputSignal<Position | null>
 }
 
 class Pin <<api>> {
   +teammateId: string
   +name: string
   +colour: string
-  +city: string
+  +cityName: string
   +country: string
   +position: Position
   +timeZoneId: string
   +weather: Weather | null
   +weatherState: WeatherState
   +sharesStatus: boolean
-  +moments: Moment[]
+  +isViewer: boolean
 }
 
 interface Clock <<api, CLOCK>> {
-  +now(): Date
-  +minute: Signal<Date>
+  +now(): number
+  +minute: Signal<number>
 }
 
 GlobePage --> TeamStore : sets selection
 GlobePage ..> view : calls
 GlobePage --> TeammatePanel : renders
-GlobePage --> GlobeView : renders
+GlobePage --> GlobeView : renders, facing
+GlobePage --> PinLayer : renders, selection
 GlobePage ..> Clock : injects CLOCK
 view ..> TeammatePanelContent : builds
 view ..> Pin : reads
-TeammatePanelContent *-- Overlap
-TeammatePanelContent *-- DaySpan
-TeammatePanelContent *-- OverlapText
+TeammatePanelContent *-- OverlapView
+OverlapView *-- Overlap
+OverlapView *-- DaySpan
+OverlapView *-- OverlapText
 GlobePage --> GroupPanel : renders for a group pin
 view ..> GroupContent : builds
 GroupContent "1" *-- "1..*" GroupCity

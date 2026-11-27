@@ -1,18 +1,8 @@
-import type { ClockFormat, DaySpan, Offset, Overlap, OverlapText, Pin } from '@mondino/api';
+import type { ClockFormat, Offset, OverlapView, Pin } from '@mondino/api';
 import { firstName } from '../pins/first-name';
 import { localTime } from './local-time';
 import { offsetBetween } from './offset';
 import { formatOverlap, overlapBetween, workingDayOnViewerClock } from './overlap';
-
-/** What `OverlapBar` draws for a teammate: the overlap, their day, now, their name and the text. */
-export interface OverlapView {
-  readonly overlap: Overlap | null;
-  readonly theirDay: DaySpan;
-  /** The viewer's minute of the day. */
-  readonly nowMinute: number;
-  readonly firstName: string;
-  readonly text: OverlapText;
-}
 
 /** A teammate's day compared with the viewer's: their offset, and the overlap if they share it. */
 export interface Comparison {

@@ -112,6 +112,11 @@ Builds on: journeys 6 and 14.
 ## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 14 built the teammate panel without its moments section and waits for this journey to prove
+  Tomás's moment cards ("Holiday · In 5 days", "Día de Muertos", and "Sport · In 6 days", "Clásico
+  Nacional") as `pages/globe/selected` draws them (L2-023 criterion 1) and Ahmed's beside the private note
+  as `pages/globe/sharing-off` draws them (L2-023 criterion 11) in Playwright; Luca's panel with no
+  moments section is proven already (criterion 3). Raise journey 14's % by the criteria proven here.
 - Set journey 19 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

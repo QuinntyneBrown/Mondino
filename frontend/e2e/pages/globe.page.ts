@@ -34,6 +34,41 @@ export class GlobePage {
   /** The new teammate's own pin, lifted, and its label. */
   readonly youPin: Locator;
   readonly youLabel: Locator;
+  /** The panel beside the globe (under it on a phone), and a selected teammate's parts in it. */
+  readonly panel: Locator;
+  readonly person: Locator;
+  readonly personName: Locator;
+  readonly personYou: Locator;
+  readonly personAvatar: Locator;
+  readonly personPlace: Locator;
+  readonly personClock: Locator;
+  readonly personDay: Locator;
+  readonly personStatus: Locator;
+  readonly personWeather: Locator;
+  readonly personWeatherIcon: Locator;
+  readonly personTemperature: Locator;
+  readonly personSky: Locator;
+  readonly personWeatherNote: Locator;
+  readonly privateNote: Locator;
+  readonly personMoments: Locator;
+  readonly overlap: Locator;
+  readonly overlapWhen: Locator;
+  readonly overlapText: Locator;
+  readonly overlapParts: Locator;
+  /** The overlap bar's shared part, and a "Message" button, which Mondino never has. */
+  readonly overlapBoth: Locator;
+  readonly messageButton: Locator;
+  readonly closePanel: Locator;
+  /** A selected group pin's panel: its heading, its lead, its cities and their times, its rows. */
+  readonly group: Locator;
+  readonly groupTitle: Locator;
+  readonly groupLead: Locator;
+  readonly groupCityNames: Locator;
+  readonly groupCityTimes: Locator;
+  /** The names in a group's rows. */
+  readonly groupRows: Locator;
+  /** The one polite announcement of what was selected. */
+  readonly announcement: Locator;
   readonly toastRegion: Locator;
   readonly toast: Locator;
   readonly dismiss: Locator;
@@ -67,9 +102,44 @@ export class GlobePage {
     this.liftedLabels = this.pinList.locator('.pin-label--lifted');
     this.youPin = this.stage.locator('.globe__pin--lifted .pin--you');
     this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');
+    this.panel = page.locator('aside.globe-screen__panel');
+    this.person = this.panel.locator('article.person');
+    this.personName = this.person.locator('.person__name');
+    this.personYou = this.personName.locator('.person__you');
+    this.personAvatar = this.person.locator('.person__head .avatar');
+    this.personPlace = this.person.locator('.person__place');
+    this.personClock = this.person.locator('.person__clock');
+    this.personDay = this.person.locator('.person__day');
+    this.personStatus = this.person.locator('.status');
+    this.personWeather = this.person.locator('.person__weather');
+    this.personWeatherIcon = this.personWeather.locator('svg').first();
+    this.personTemperature = this.person.locator('.person__temp');
+    this.personSky = this.person.locator('.person__sky');
+    this.personWeatherNote = this.person.locator('.person__weather--note');
+    this.privateNote = this.person.locator('.panel__note');
+    this.personMoments = this.person.locator('.person__moments');
+    this.overlap = this.person.locator('section.overlap');
+    this.overlapWhen = this.overlap.locator('.overlap__when');
+    this.overlapText = this.overlap.locator('.overlap__text');
+    this.overlapParts = this.overlap.locator('.overlap__track > span');
+    this.overlapBoth = this.overlap.locator('.overlap__both');
+    this.messageButton = this.panel.getByRole('button', { name: /message/i });
+    this.closePanel = this.panel.getByRole('button', { name: /^Close/ });
+    this.group = this.panel.locator('section:has(> .panel__head--close)');
+    this.groupTitle = this.group.locator('.panel__head h2');
+    this.groupLead = this.group.locator('.panel__lead');
+    this.groupCityNames = this.group.locator('.panel__city h3');
+    this.groupCityTimes = this.group.locator('.panel__city-time');
+    this.groupRows = this.group.locator('.row-list a.row .row__name');
+    this.announcement = this.main.locator('p.visually-hidden[role="status"]');
     this.toastRegion = page.locator('.toast-region');
     this.toast = this.toastRegion.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
+  }
+
+  /** A teammate's row in a group's panel, by their name. */
+  groupRow(name: string): Locator {
+    return this.group.getByRole('link', { name: named(name) });
   }
 
   /** A pin's button, by the start of its accessible name: a teammate's name, or a group's count. */
@@ -123,6 +193,56 @@ export class GlobePage {
     );
   }
 
+  /** The shapes of the panel's weather icon, each as its tag and its attributes in order of name. */
+  async panelIconShapes(): Promise<string[]> {
+    return this.personWeatherIcon.evaluate((svg) =>
+      [...svg.children].map((shape) =>
+        [
+          shape.tagName,
+          ...[...shape.attributes]
+            .filter((attribute) => !attribute.name.startsWith('_ng'))
+            .map((attribute) => `${attribute.name}=${attribute.value}`)
+            .sort(),
+        ].join(' '),
+      ),
+    );
+  }
+
+  /** The overlap bar's parts, each as its class and its --from and --span, as a mock writes them. */
+  async overlapBarParts(): Promise<string[]> {
+    return this.overlapParts.evaluateAll((parts: HTMLElement[]) =>
+      parts.map((part) => {
+        const from = part.style.getPropertyValue('--from');
+        const span = part.style.getPropertyValue('--span');
+        const style = [
+          `--from: ${parseFloat(from).toFixed(2)}%`,
+          span ? `--span: ${parseFloat(span).toFixed(2)}%` : '',
+        ]
+          .filter(Boolean)
+          .join('; ');
+        return `${part.className.split(' ')[0]} ${style}`;
+      }),
+    );
+  }
+
+  /** The panel's fade: its animation's name and duration, "none" when it has none. */
+  fade(): Promise<{ name: string; duration: string }> {
+    return this.person.evaluate((person) => {
+      const style = getComputedStyle(person);
+      return { name: style.animationName, duration: style.animationDuration };
+    });
+  }
+
+  /** Marks the panel's teammate as drawn now, to tell afterwards whether it was drawn afresh. */
+  async markPanel(): Promise<void> {
+    await this.person.evaluate((person) => person.setAttribute('data-spec-seen', ''));
+  }
+
+  /** Whether the panel's teammate is the one drawn when it was marked. */
+  panelIsMarked(): Promise<boolean> {
+    return this.person.evaluate((person) => person.hasAttribute('data-spec-seen'));
+  }
+
   /** The accessible names of the pins in the list, in its order. */
   async pinNames(): Promise<string[]> {
     return this.pinButtons.evaluateAll((buttons) =>
@@ -162,6 +282,17 @@ export class GlobePage {
 
   async open(): Promise<void> {
     await this.page.goto('/globe');
+  }
+
+  /** Opens the Globe at the address of a selected teammate, as a reload or a shared address does. */
+  async openAt(teammateId: string): Promise<void> {
+    await this.page.goto(`/globe?teammate=${encodeURIComponent(teammateId)}`);
+  }
+
+  /** The address shown, from its path on: "/globe?teammate=…". */
+  address(): string {
+    const url = new URL(this.page.url());
+    return `${url.pathname}${url.search}`;
   }
 
   /** Loses the 3D globe's WebGL context, as a browser does when the GPU is reset. */

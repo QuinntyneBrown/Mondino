@@ -19,3 +19,7 @@
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
 }
+:host(.icon--lg) {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}

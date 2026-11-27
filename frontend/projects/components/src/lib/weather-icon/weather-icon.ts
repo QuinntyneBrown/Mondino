@@ -51,14 +51,15 @@ const words: Record<WeatherCondition, string> = {
     '[attr.aria-hidden]': "decorative() ? 'true' : null",
     '[class.icon--xs]': "size() === 'xs'",
     '[class.icon--sm]': "size() === 'sm'",
+    '[class.icon--lg]': "size() === 'lg'",
   },
 })
 export class WeatherIcon {
   readonly condition = input.required<WeatherCondition>();
   readonly night = input(false, { transform: booleanAttribute });
   readonly decorative = input(false, { transform: booleanAttribute });
-  /** `xs` in a pin's label or a chip, `sm` in a Team row, the default beside text. */
-  readonly size = input<'xs' | 'sm' | 'md'>('md');
+  /** `xs` in a pin's label or a chip, `sm` in a Team row, `lg` in a panel, the default beside text. */
+  readonly size = input<'xs' | 'sm' | 'md' | 'lg'>('md');
 
   protected readonly word = computed(() => words[this.condition()] ?? words.cloudy);
 
