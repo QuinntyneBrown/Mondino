@@ -102,3 +102,63 @@ apply the lessons that fit.
 - *A picture transcribed from a mock goes stale* (lesson 9): the pins spec compares with the mock's
   markup rather than with numbers copied from it.
 - *Keep MediatR on 12* (lesson 7): held; `GetInviteQuery` is the first handler.
+
+## Journey 3: Place a pin from a postal code
+
+**What slowed it**
+
+- The prompt said a lookup that is down "says the postal code could not be checked", with "Try
+  again"; the mock, L2-004 and the design say "Your city" takes the postal code's place. The mock
+  won, and the prompt was brought in line. "Your city"'s list was drawn only closed, so
+  `pages/join/choosing-city` and the design system's listbox were drawn before any code.
+- No postal code source answers a city, a region, the city's own position and a time zone for
+  the thirteen countries, and none covers Ghana or the UAE (ADR 0006). Mondino holds GeoNames'
+  cities itself and resolves the source's place to one of them, which is also what keeps a pin
+  off the postal code's own position.
+- GeoNames' `cities15000` lists sections of a city as places of their own (Milan's Brera), so a
+  point in Milan resolved to Brera until sections (`PPLX`) were left out of the directory.
+- The API runs in invariant globalization mode, where `string.Normalize` separates no accents, so
+  "São Paulo" never folded to "sao paulo"; accents are folded from a table.
+- The form's components put Angular's runtime for `output()`, `viewChild` and render effects in
+  the initial chunk. `viewChild` alone was 7.4 kB; the error summary focuses itself instead, and
+  the warning budget moved by 5 kB with its reason (ADR 0007).
+- A `<select>`'s option written over three lines kept its spaces, and the countries spec that
+  reads the options' text failed; the option's text is bound with `[textContent]`.
+- `press('Backspace')` on a field Playwright had focused deleted nothing: focus put the caret at
+  the start. A spec changes a field with `fill`.
+
+**Lessons**
+
+1. **Read the prompt against the mock too.** A prompt is written from the docs of its day; where it
+   and a mock disagree, the mock wins and the prompt is corrected in the same change.
+2. **An outside source's coordinates choose; they are never kept.** Resolve the source's answer to
+   something Mondino holds (a city of the directory) so the source's precision never reaches a pin.
+3. **Give the source only what the answer needs.** Canada's forward sortation area and Ireland's
+   routing key name the area a city needs; the rest of the code is never sent.
+4. **Remove `IHttpClientFactory`'s loggers from a client whose address carries a teammate's data.**
+   They log every request URL at Information.
+5. **Test an outside source at its HTTP boundary as well as behind its interface.** A fake
+   `HttpMessageHandler` proved what is sent, the timeout (with `FakeTimeProvider`), the cache and
+   the breaker through the API.
+6. **Measure each new Angular feature's cost in the initial chunk.** Build with and without it;
+   a query or an effect can cost more than the component that uses it.
+7. **In a combobox, the options take no focus.** The input keeps it, Up and Down move
+   `aria-activedescendant`, and the options' click handlers need the template lint rules turned off
+   with the reason beside them.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the mock, the design system, L2-006, the
+  design, ADR 0006 and the prompt were one commit before any code; nothing was reworked after.
+- *Run the spec before the page exists* (journey 1, lesson 5): every backend and frontend slice's
+  tests were run first and failed on the missing endpoint, state or registration.
+- *Measure the initial bundle before choosing a platform service* (journey 2, lesson 1): the chunk
+  table caught the form's runtime before the first frontend commit, and a build with and without
+  each feature found `viewChild`'s 7.4 kB.
+- *Read a mock for what it leaks* (journey 2, lesson 2): the found mock names the teammate's own
+  city only; the postal code is kept in no URL, storage or log, and a spec reads everything the
+  browser keeps.
+- *Check the verify script's own exit code* (journey 2, lesson 6): every slice ran
+  `node tools/verify/verify.mjs; echo $?` before its commit.
+- *The browser logs every refused request* (journey 2, lesson 4): the 422, 503 and 429 answers the
+  specs give on purpose passed the guard, and an unanswered city search would still fail it.
