@@ -47,7 +47,7 @@ export class SignInPage {
     this.noticeTitle = this.notice.locator('.notice__title');
     this.noticeText = this.notice.locator('.notice__text');
     this.noticeEmail = this.noticeText.locator('strong');
-    this.useAnotherEmail = this.notice.getByRole('button', { name: 'Use another email' });
+    this.useAnotherEmail = this.notice.getByRole('link', { name: 'Use another email' });
     this.footer = this.main.locator('.auth__footer');
     this.startATeam = this.footer.getByRole('link', { name: 'Start a team' });
     this.stage = this.main.getByRole('region', { name: 'The globe' });

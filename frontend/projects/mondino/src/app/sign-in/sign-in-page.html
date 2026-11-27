@@ -12,9 +12,9 @@
           titleId="sent-title"
           status
         >
-          <button slot="actions" mo-button size="lg" type="button" (click)="useAnotherEmail()">
+          <a slot="actions" mo-button size="lg" routerLink="/sign-in" (click)="useAnotherEmail()">
             Use another email
-          </button>
+          </a>
         </mo-notice>
       } @else {
         <h1 class="auth__title">Welcome back.</h1>

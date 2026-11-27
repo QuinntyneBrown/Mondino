@@ -124,6 +124,31 @@ public sealed class RequestSignInLinkTests
     }
 
     [Fact]
+    public async Task Past_5_requests_from_one_client_in_15_minutes_the_next_is_refused_with_429_and_no_mail()
+    {
+        // Given two teammates' emails, and one client that has asked for 5 links for them
+        await using var api = new MondinoApi();
+        using var client = api.CreateSecureClient();
+        await api.MakeTeamAsync(client, "Northwind", "sofia@northwind.co");
+        await api.MakeTeamAsync(client, "Harbour Lights", "liam@southwind.co");
+        foreach (var email in new[] { "sofia@northwind.co", "liam@southwind.co", "sofia@northwind.co", "liam@southwind.co", "sofia@northwind.co" })
+        {
+            using var allowed = await client.PostAsJsonAsync(Path, new { email });
+            Assert.Equal(HttpStatusCode.Accepted, allowed.StatusCode);
+        }
+
+        Assert.Equal(5, api.SignInMails.Mails.Count);
+
+        // When it asks once more
+        using var refused = await client.PostAsJsonAsync(Path, new { email = "liam@southwind.co" });
+
+        // Then it is refused with 429 and a Retry-After header, and no mail is sent
+        await AssertRefusedAsync(refused, HttpStatusCode.TooManyRequests, "rate_limited");
+        Assert.True(refused.Headers.RetryAfter?.Delta > TimeSpan.FromMinutes(10));
+        Assert.Equal(5, api.SignInMails.Mails.Count);
+    }
+
+    [Fact]
     public async Task A_request_from_another_site_is_refused_and_no_mail_is_sent()
     {
         // Given Sofia's Northwind

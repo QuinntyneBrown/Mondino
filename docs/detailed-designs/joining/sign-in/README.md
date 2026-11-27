@@ -58,7 +58,8 @@ source, the Email source (Postmark, ADR 0011). The browser calls only the Mondin
   - `Sending` disables the button, marks it `aria-busy` and reads "Sending link…".
   - `Sent` replaces the form with a `Notice` in a `role="status"` element: the title "Check
     your inbox", which takes focus, the text with the email rendered as text, and "Use another
-    email", a button that calls `SignInStore.useAnotherEmail()` and shows the form again.
+    email", a link to `/sign-in`, as the mock draws it, that calls `SignInStore.useAnotherEmail()`:
+    the form is shown again, with focus on the field.
   - `Failed` shows an `Alert`, "We couldn’t send the link. Mondino didn’t answer — try again in
     a moment.", and the button reads "Try again". The email typed is kept.
   - When the address carries a fragment, the page takes it as the sign-in token, removes it
