@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-031, L2-007, L2-054, L2-025
+// Traces to: L2-031, L2-007, L2-054, L2-025, L2-049
 // Description: Profile & Settings shows the viewer's own pin on a small globe that holds still, their city, local time and time zone and their own postal code, under the header with its link current; while it loads and when it fails
 
 import { expect, test } from '../fixtures/test';

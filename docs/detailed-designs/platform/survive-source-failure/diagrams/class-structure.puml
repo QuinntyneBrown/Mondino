@@ -29,48 +29,54 @@ class OpenMeteoWeatherSource {
 }
 
 class CachedWeatherSource {
-  -inner: IWeatherSource
-  -cache: IMemoryCache
+  -source: OpenMeteoWeatherSource
+  -breaker: SourceBreaker
   -time: TimeProvider
+  +{static} TimeSpan Timeout = 5 s
   +{static} TimeSpan FreshFor = 15 minutes
-  +{static} TimeSpan MaxAge = 3 hours
+  +{static} TimeSpan ServedFor = 3 hours
   +GetCurrentAsync(position: Position, ct): Task<Weather?>
-  -Round(position: Position): Position
 }
 
-class PostalCodeLookupClient {
+class GeoNamesPostalCodeLookup {
   +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
 }
 
 class CachedPostalCodeLookup {
-  -inner: IPostalCodeLookup
+  -source: GeoNamesPostalCodeLookup
+  -breaker: SourceBreaker
   +FindCityAsync(postalCode: PostalCode, ct): Task<PostalCodeLookupOutcome>
 }
 
-class CachedMomentCalendars {
-  -holidays: IHolidayCalendar
-  -races: IRaceCalendar
-  -events: IEventCalendar
+class OpenHolidaysCalendar {
+  +YearAsync(countryCode: string, year: int, ct): Task<IReadOnlyList<CalendarEntry>?>
+}
+
+class CachedOpenHolidays {
+  -source: OpenHolidaysCalendar
+  -breaker: SourceBreaker
+  +{static} TimeSpan FreshFor = 24 hours
+  +YearAsync(countryCode: string, year: int): Task<IReadOnlyList<CalendarEntry>>
+}
+
+class HolidayCalendar {
   +HolidaysIn(...): Task<IReadOnlyList<CalendarEntry>>
 }
 
-class SourceResilience {
-  +{static} TimeSpan Timeout = 5 s
-  +TimeSpan BreakDuration
-  +int FailuresBeforeBreak
-  +ExecuteAsync<T>(source: string, call, ct): Task<SourceAnswer<T>>
+class SourceBreaker {
+  +bool IsOpen
+  +Succeeded()
+  +Failed()
 }
 
-enum SourceOutcome {
-  Success
-  Failure
-  Timeout
-  CircuitOpen
+class OutsideSourceOptions {
+  +int FailuresToOpen = 5
+  +TimeSpan BreakerOpenFor = 30 s
 }
 
-class "SourceAnswer<T>" as SourceAnswer {
-  +SourceOutcome Outcome
-  +T? Value
+class SourceDeadline {
+  +{static} TimeSpan Limit = 6 s
+  +Token: CancellationToken
 }
 
 class GetPinsQueryHandler {
@@ -99,16 +105,18 @@ class Weather {
 
 IWeatherSource <|.. OpenMeteoWeatherSource
 IWeatherSource <|.. CachedWeatherSource
-CachedWeatherSource o-- IWeatherSource : decorates
-IPostalCodeLookup <|.. PostalCodeLookupClient
+CachedWeatherSource o-- OpenMeteoWeatherSource : decorates
 IPostalCodeLookup <|.. CachedPostalCodeLookup
-CachedPostalCodeLookup o-- IPostalCodeLookup : decorates
-IHolidayCalendar <|.. CachedMomentCalendars
-CachedWeatherSource ..> SourceResilience : runs calls through
-CachedPostalCodeLookup ..> SourceResilience
-CachedMomentCalendars ..> SourceResilience
-SourceResilience ..> SourceAnswer : returns
-SourceAnswer --> SourceOutcome
+CachedPostalCodeLookup o-- GeoNamesPostalCodeLookup : decorates
+IHolidayCalendar <|.. HolidayCalendar
+HolidayCalendar --> CachedOpenHolidays
+CachedOpenHolidays o-- OpenHolidaysCalendar : decorates
+CachedWeatherSource *-- SourceBreaker
+CachedPostalCodeLookup *-- SourceBreaker
+CachedOpenHolidays *-- SourceBreaker
+SourceBreaker ..> OutsideSourceOptions : reads
+SourceDeadline ..> IPostalCodeLookup : then
+SourceDeadline ..> IWeatherSource : what is left of 6 s
 GetPinsQueryHandler ..> IWeatherSource : once per city
 GetPinsQueryHandler ..> PinDto : builds
 PinDto --> WeatherState

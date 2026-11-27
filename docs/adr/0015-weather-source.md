@@ -47,8 +47,9 @@ codes Open-Meteo reports have no code for wind.
   `SharesStatus`; off, the teammate's pin carries `WeatherState` `NotShared` and no weather for
   anyone else, and the source is not asked for their city on that teammate's account. The switch
   comes with journey 23.
-- **Not yet:** the circuit breaker and serving an answer up to 3 hours old while the source fails
-  come with journey 26 (`survive-source-failure`, L2-049).
+- **The breaker and an older answer** came with journey 26: after 5 failures in a row the source
+  is left alone for 30 seconds, and while it fails a city's answer up to 3 hours old is given
+  ([ADR 0026](0026-one-breaker-for-every-outside-source.md)).
 
 ## Settings
 

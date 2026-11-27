@@ -91,3 +91,58 @@
     padding-bottom: 0;
   }
 }
+// The first read's placeholders (pages/globe/loading) and its error (pages/globe/error).
+.globe-loading__title {
+  width: 11rem;
+  height: var(--space-8);
+}
+.globe-loading__counts {
+  width: 15rem;
+  height: var(--space-4);
+  margin-top: var(--space-1);
+}
+.globe-loading {
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+.globe-loading__heading {
+  width: min(14rem, 100%);
+  height: var(--space-6);
+}
+.globe-loading__subheading {
+  width: min(18rem, 100%);
+  height: var(--space-4);
+}
+.globe-loading__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.globe-loading__identity {
+  flex: 1;
+  display: grid;
+  gap: var(--space-1-5);
+}
+.globe-loading__name {
+  width: min(10rem, 100%);
+  height: 0.875rem;
+}
+.globe-loading__detail {
+  width: min(6rem, 100%);
+  height: var(--space-3);
+}
+.message-page {
+  display: grid;
+  place-items: center;
+  min-height: calc(100dvh - var(--layout-header-height));
+}
+.icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

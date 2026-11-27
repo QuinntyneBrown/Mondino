@@ -1639,3 +1639,68 @@ cached moments), 5 (the 6-second ceiling), 6 (a breaker on the weather, no unbou
   counted towards its 4 seconds; on a slow CI runner that was over a second and the toast was gone at the
   3 second check. The clock now stops before "Join" is pressed and the spec runs it frame by frame until the
   toast is there.
+
+## Journey 26: Survive a source failure
+
+**What slowed it**
+
+- The design drew a `SourceResilience` pipeline on `Microsoft.Extensions.Resilience` returning a
+  `SourceAnswer<T>`, and a `CachedMomentCalendars` over three calendars; neither was ever built. Four
+  hand-written breakers (postal codes, holidays, email; none on the weather) and one embedded calendar
+  were. ADR 0026 made the breaker one class, `SourceBreaker`, with the values the three already had as
+  settings (`OutsideSources:*`), and the design and three diagrams were brought to that before any code.
+- The lookup on Join and Create Team and saving a new location ask the postal code source and then the
+  weather: 5 seconds each, 10 in all, against L2-049's 6. Nothing had said so; `SourceDeadline` now
+  starts one 6-second limit before the first.
+- The first breaker test expected all twelve cities to be asked; a fake that fails at once fails
+  synchronously, so the breaker opened after five and the other seven were never asked.
+- The test of three reads sharing a stalled call hung once under the whole suite: after the timeouts,
+  a read that arrived before the fifth failure opened the breaker started a call whose 5-second timer the
+  fake clock never reached. The stall is now one the test releases.
+- With WebGL off the globe reports its still picture before the pins arrive, so the still picture with
+  no pins stood where `pages/globe/loading` draws the disc; the disc now stands in while the team loads.
+- Half the criteria still "to prove" were proven by specs that traced other requirements: the panel's
+  "Weather for Mexico City isn’t available right now", and Profile & Settings' and Moments' loading and
+  error states. Reading the specs for the mock's words found them; they now trace L2-049.
+
+**Lessons**
+
+1. **Count a breaker's calls relative to the breaker, not the team.** A source that fails at once opens
+   it mid-read; assert a range, or the difference before and after, never the team's city count.
+2. **Release a stall to test reads that share a call; time one out only to test the timeout.** Timeouts
+   open the breaker one failure at a time, and a read arriving in between starts a call the fake clock
+   never times out.
+3. **Search the specs by a criterion's words before writing one.** `Traces to:` misses a spec written for
+   another requirement that proves this one; grep for the mock's sentence, then add the trace.
+4. **A limit that spans two sources must reach a shared call's waiters.** The weather's call is shared by
+   every reader, so the deadline ends the caller's wait (`WaitAsync`) and leaves the call to the others.
+5. **Add up a request's sources one after another, not one at a time.** Each source had its 5 seconds;
+   only the request that asks two in a row broke the 6-second ceiling.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): ADR 0026, notes in ADRs 0015 and 0019, the design, three diagrams, the shared
+  contracts and the deployment settings were one commit before any code.
+- *Keep wall-clock timeouts out of the request path* (the flaky postal code breaker fix): the breaker, the
+  older answers and the 6-second deadline all read `TimeProvider`; the tests advance `FakeTimeProvider`,
+  and the delayed postal code source waits on it too.
+- *Store a shared read before starting it* (journey 13, lesson 2): the weather and holiday caches kept
+  their entry-first order through the rewrite that added the older answer.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit code,
+  written to a log.
+- *Measure the initial bundle* (journey 2, lesson 1): 274.26 kB before and after; the Globe's loading and
+  error states are in its lazy chunk.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5) and *break a
+  slice with a copy, not with git* (journey 23, lesson 1): the outside-source spec, with Profile &
+  Settings copied aside and made to call Open-Meteo, and the Team row's status, each seen to fail.
+- *Build before a Playwright run* (journey 19, lesson 5): every frontend red and green was on a fresh build.
+
+**Progress:** 15 of 15 criteria proven (100, from 40). Proven here: L2-049 criterion 1 (every pin's city,
+position and time zone, weather `null` and `Unavailable`), 2 (the Team row's status beside the panel's,
+label's and Team's words already proven), 3 (weather under 3 hours old, and none at 3 hours), 4 (the last
+holidays read, failing and stalled, beside Formula 1, local events and sport), 5 (every source's 5 seconds,
+and 6 seconds for a lookup or a saved location that asks two), 6 (the weather's breaker, its settings, and
+stalled reads sharing one call per city), 8 (the Globe's placeholders and polite "Loading your team…") and
+9 (the Globe's error with "Try again" and nothing of the team); L2-050 criterion 4 (Sign In, Team, Moments
+and Profile & Settings call no outside source). No other journey's count changes. Total: 86.

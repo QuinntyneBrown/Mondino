@@ -29,7 +29,7 @@ end box
 box "Backend — Mondino Infrastructure" #FFF4E5
   database "Mondino database" as db
   participant "CachedWeatherSource" as cached
-  participant "SourceResilience" as resilience
+  participant "SourceBreaker" as resilience
   participant "OpenMeteoWeatherSource" as openmeteo
 end box
 participant "Open-Meteo" as source
@@ -46,17 +46,16 @@ loop Each distinct city, one call per city (L2-050)
   alt Answer under 15 minutes old cached
     cached --> handler : Weather
   else Nothing fresh
-    cached -> resilience : ExecuteAsync("weather", call)
-    alt Circuit closed
-      resilience -> openmeteo : GetCurrentAsync(position), 5 s timeout (L2-049)
+    cached -> resilience : IsOpen?
+    alt Breaker closed
+      cached -> openmeteo : GetCurrentAsync(position), 5 s timeout (L2-049)
       openmeteo -> source : Position only (L2-050)
       source --> openmeteo : Error, or no answer in 5 s
-      openmeteo --> resilience : Failure or timeout
-      resilience -> resilience : Count the failure; open the circuit at the threshold
-    else Circuit open
-      note over resilience, source : Open-Meteo is not called (L2-049)
+      openmeteo --> cached : No weather
+      cached -> resilience : Failed(); opens after 5 in a row
+    else Breaker open
+      note over resilience, source : Open-Meteo is not called for 30 s (L2-049)
     end
-    resilience --> cached : No value
     alt Cached answer under 3 hours old (L2-049)
       cached --> handler : Cached Weather
     else None, or older than 3 hours

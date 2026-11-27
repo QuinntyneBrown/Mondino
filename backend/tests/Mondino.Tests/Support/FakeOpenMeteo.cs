@@ -8,8 +8,8 @@ namespace Mondino.Tests.Support;
 /// <summary>
 /// The outside weather service (Open-Meteo, docs/adr/0015) at the HTTP boundary, answering as the
 /// test tells it: a reading for a latitude and longitude as they are sent ("45.46"), one reading
-/// for everywhere else, an error, or no answer until the call is cancelled. It records every
-/// request it was sent.
+/// for everywhere else, an error, no answer until the call is cancelled, or no answer until the
+/// test releases it. It records every request it was sent.
 /// </summary>
 public sealed class FakeOpenMeteo : HttpMessageHandler
 {
@@ -18,6 +18,11 @@ public sealed class FakeOpenMeteo : HttpMessageHandler
     private (double Temperature, int Code, double Wind) everywhere = (20, 3, 5);
 
     public SourceBehaviour Behaviour { get; set; } = SourceBehaviour.Answers;
+
+    private readonly TaskCompletionSource released = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <summary>Lets every call held by <see cref="SourceBehaviour.Stalls"/> answer.</summary>
+    public void Release() => released.TrySetResult();
 
     public IReadOnlyList<HttpRequestMessage> Requests
     {
@@ -66,6 +71,9 @@ public sealed class FakeOpenMeteo : HttpMessageHandler
                 throw new OperationCanceledException(cancellationToken);
             case SourceBehaviour.Fails:
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            case SourceBehaviour.Stalls:
+                await released.Task.WaitAsync(cancellationToken);
+                break;
         }
 
         var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri!.Query);

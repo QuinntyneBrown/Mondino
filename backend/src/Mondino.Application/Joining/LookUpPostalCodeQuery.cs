@@ -49,7 +49,8 @@ internal static class LookUpPostalCodeQueryValidator
 public sealed record LookUpOwnPostalCodeQuery(Guid TeamId, string? CountryCode, string? PostalCode)
     : IRequest<PostalCodeResultDto>, ITeamScopedRequest;
 
-internal sealed class LookUpPostalCodeQueryHandler(IAppDbContext database, IPostalCodeLookup lookup, IWeatherSource weatherSource)
+internal sealed class LookUpPostalCodeQueryHandler(
+    IAppDbContext database, IPostalCodeLookup lookup, IWeatherSource weatherSource, TimeProvider time)
     : IRequestHandler<LookUpPostalCodeQuery, PostalCodeResultDto>, IRequestHandler<LookUpOwnPostalCodeQuery, PostalCodeResultDto>
 {
     public Task<PostalCodeResultDto> Handle(LookUpOwnPostalCodeQuery request, CancellationToken cancellationToken) =>
@@ -72,7 +73,9 @@ internal sealed class LookUpPostalCodeQueryHandler(IAppDbContext database, IPost
             throw new RefusedException(422, ErrorCodes.PostalCodeNotFound);
         }
 
-        // 3. The source finds the city, at the city's own position.
+        // 3. The source finds the city, at the city's own position; it and the weather after it
+        //    wait 6 seconds at most between them (docs/adr/0026).
+        using var deadline = new SourceDeadline(time, cancellationToken);
         var outcome = await lookup.FindCityAsync(postalCode, cancellationToken);
         if (outcome.Status != PostalCodeLookupStatus.Found)
         {
@@ -83,7 +86,7 @@ internal sealed class LookUpPostalCodeQueryHandler(IAppDbContext database, IPost
 
         // 4. And the weather there, which the source is asked for by the city's position alone.
         var city = outcome.City!;
-        var weather = await weatherSource.GetCurrentAsync(WeatherPlaces.Of(city.Latitude, city.Longitude), cancellationToken);
+        var weather = await deadline.WeatherAtAsync(weatherSource, WeatherPlaces.Of(city.Latitude, city.Longitude));
         return new PostalCodeResultDto(CityDto.From(city), WeatherDto.From(weather));
     }
 }

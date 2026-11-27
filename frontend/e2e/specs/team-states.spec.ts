@@ -113,10 +113,11 @@ test.describe('Team: its states', () => {
       'Weather is unavailable right now. Local times are still right.',
     );
 
-    // And each row keeps its local time, its weather a mark named "Weather unavailable"
+    // And each row keeps its local time and status, its weather a mark named "Weather unavailable"
     await expect(teamPage.rows).toHaveCount(13);
     const tomas = teamPage.cells(teamPage.row('Tomás Herrera'));
     await expect(tomas.time).toHaveText('08:05');
+    await expect(tomas.status).toHaveText('Early morning');
     await expect(tomas.weatherIcon).toHaveAccessibleName('Weather unavailable');
   });
 

@@ -69,8 +69,16 @@ export class GlobePage {
   readonly groupCityTimes: Locator;
   /** The names in a group's rows. */
   readonly groupRows: Locator;
-  /** The one polite announcement of what was selected. */
+  /** The one polite announcement of what was selected, or that the team is loading. */
   readonly announcement: Locator;
+  /** The panel's placeholder while the team is read, and the heading's. */
+  readonly loading: Locator;
+  readonly loadingTitle: Locator;
+  /** The screen when the team could not be read: its message and "Try again". */
+  readonly error: Locator;
+  readonly errorTitle: Locator;
+  readonly errorText: Locator;
+  readonly tryAgain: Locator;
   /** The week's view in the panel, with no pin selected: its two sections and their parts. */
   readonly week: Locator;
   readonly weekLead: Locator;
@@ -182,6 +190,14 @@ export class GlobePage {
     this.groupCityTimes = this.group.locator('.panel__city-time');
     this.groupRows = this.group.locator('.row-list a.row .row__name');
     this.announcement = this.main.locator('p.visually-hidden[role="status"]');
+    this.loading = this.main
+      .getByRole('complementary', { name: 'Loading' })
+      .locator('.globe-loading');
+    this.loadingTitle = this.stage.locator('.globe-screen__heading h1');
+    this.error = page.locator('main.message-page .empty--error');
+    this.errorTitle = this.error.locator('.empty__title');
+    this.errorText = this.error.locator('.empty__text');
+    this.tryAgain = this.error.getByRole('button', { name: 'Try again' });
     this.week = this.panel.locator('section:has(> h2:text-is("This week around the world"))');
     this.weekLead = this.week.locator('.panel__lead');
     this.weekEmpty = this.week.locator('.panel__empty');
