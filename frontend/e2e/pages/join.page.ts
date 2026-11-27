@@ -44,6 +44,8 @@ export class JoinPage {
   readonly stage: Locator;
   readonly globe: Locator;
   readonly pins: Locator;
+  /** Every pin on the globe, bare or the person's own. */
+  readonly allPins: Locator;
   readonly pinLayer: Locator;
   /** The error summary above the fields, after a submit with something missing. */
   readonly summary: Locator;
@@ -57,6 +59,8 @@ export class JoinPage {
   readonly cityHelp: Locator;
   readonly cityOptions: Locator;
   readonly rateLimit: Locator;
+  /** The alert after a join that failed. */
+  readonly joinFailed: Locator;
   readonly rateLimitCountdown: Locator;
   readonly youPin: Locator;
   readonly youLabel: Locator;
@@ -89,6 +93,7 @@ export class JoinPage {
     this.stage = this.main.getByRole('region', { name: 'The team on the globe' });
     this.globe = this.stage.locator('.globe');
     this.pins = this.stage.locator('.globe__pin .pin-dot');
+    this.allPins = this.stage.locator('.globe__pin');
     this.pinLayer = this.stage.locator('.globe__pins');
     this.summary = this.form.locator('.alert--danger');
     this.summaryTitle = this.summary.locator('.alert__title');
@@ -100,6 +105,7 @@ export class JoinPage {
     this.cityHelp = this.main.locator('#city-help');
     this.cityOptions = this.main.getByRole('listbox').getByRole('option');
     this.rateLimit = this.form.locator('.alert--warning');
+    this.joinFailed = this.form.locator('.alert--danger');
     this.rateLimitCountdown = this.rateLimit.locator('.tnum[aria-hidden="true"]');
     this.youPin = this.stage.locator('.globe__pin--lifted .pin-dot--you');
     this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');

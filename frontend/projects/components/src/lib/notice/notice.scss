@@ -31,6 +31,9 @@
   margin-top: var(--space-4);
   color: var(--color-fg-muted);
 }
+.notice__actions:empty {
+  display: none;
+}
 .notice__actions {
   display: flex;
   flex-wrap: wrap;

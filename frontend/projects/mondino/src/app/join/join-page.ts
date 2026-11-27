@@ -87,7 +87,7 @@ export class JoinPage {
   /** The new pin at the city found, until joining puts it on the team (journey 4). */
   protected readonly you = computed(() => {
     const lookup = this.store.lookup();
-    if (lookup.kind !== 'Found') return null;
+    if (lookup.kind !== 'Found' || this.store.inviteState() !== 'Ready') return null;
     const [placement] = stillPlacements([lookup.result.city.position]);
     return placement ? { ...placement, label: `You · ${lookup.result.city.name}` } : null;
   });

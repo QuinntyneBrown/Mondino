@@ -99,6 +99,13 @@
                   end="."
                 />
               }
+              @if (store.joinState() === 'Failed' && store.lookup().kind === 'Found') {
+                <mo-alert
+                  tone="danger"
+                  [strong]="'We couldn’t add you to ' + invite.teamName + '.'"
+                  text="Your details are still here — try joining again."
+                />
+              }
               @switch (store.lookup().kind) {
                 @case ('Locating') {
                   <button
@@ -198,6 +205,19 @@
           >
             <a slot="actions" mo-button size="lg" routerLink="/new">Start your own team</a>
           </mo-notice>
+        </div>
+      }
+      @case ('Full') {
+        <div class="join__body">
+          <mo-notice
+            icon="users"
+            [title]="(store.invite()?.teamName ?? '') + ' is full'"
+            [text]="
+              'The team has all 500 of its places taken. Ask a teammate at ' +
+              (store.invite()?.teamName ?? '') +
+              ' to tell you when a place opens, then open this link again.'
+            "
+          />
         </div>
       }
       @case ('Failed') {
