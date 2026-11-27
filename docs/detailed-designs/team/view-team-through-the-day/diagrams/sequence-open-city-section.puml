@@ -26,7 +26,7 @@ note over page : First shown: the first two cities are open,\nthe rest are close
 actor -> city : Use the button of a closed city ("San Francisco", 27, "07:05")
 city -> page : toggle(city key)
 page -> page : toggled.update: this city is open
-page -> sections : citySections(visibleRows, toggled, clock.now(), settings)
+page -> sections : citySections(visibleRows, toggled)
 sections -> sections : The opened city gets its first 50 rows;\nmore = count less 50, when above zero
 sections --> page : CitySectionContent[]
 page -> city : content, open = true
@@ -34,7 +34,7 @@ city -> city : aria-expanded="true", aria-controls the table
 city -> table : rows, caption naming the city ("Teammates in Honolulu" for Honolulu)
 table --> actor : That city's teammates, with the columns of L2-026
 opt the city has more than 50 teammates
-  city --> actor : A line under the table: how many more, and to search for them
+  city --> actor : "14 more teammates in London. Search to find them."
 end
 actor -> city : Use the button again
 city -> page : toggle(city key)

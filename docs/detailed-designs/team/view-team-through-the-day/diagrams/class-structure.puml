@@ -45,10 +45,10 @@ class "pins/ functions" as fn <<function, domain pins/>> {
   {static} +CityRowLimit: number = 50
   +filterByStatus(rows: TeamRow[], filter: StatusFilter): TeamRow[]
   +searchRows(rows: TeamRow[], query: string): TeamRow[]
-  +citySections(rows: TeamRow[], toggled: Map<string, boolean>, now: Date, settings: Settings): CitySectionContent[]
+  +citySections(rows: TeamRow[], toggled: Map<string, boolean>): CitySectionContent[]
   +ribbonMarkers(pins: Pin[], now: number, format: ClockFormat): RibbonView
   +ribbonScale(format: ClockFormat): string[]
-  +ribbonDensity(pins: Pin[], now: Date, settings: Settings): RibbonDensity
+  +ribbonDensity(pins: Pin[], now: number, format: ClockFormat): RibbonDensity
 }
 
 class "zoneOffsetMinutes" as off <<function, domain time/>> {
@@ -137,17 +137,21 @@ class TeamTable <<components, mo-team-table>> {
   +rows: InputSignal<TeamRow[]>
   +caption: InputSignal<string>
   +address: InputSignal<(teammateId: string) => string>
+  +tableId: InputSignal<string | null>
+  +sectioned: InputSignal<boolean>
   +teammateChosen: OutputEmitterRef<string>
 }
 
 class SearchField <<components, mo-search-field>> {
   +value: InputSignal<string>
   +label: InputSignal<string>
+  +controls: InputSignal<string>
   +valueChange: OutputEmitterRef<string>
 }
 
 class CitySection <<components, mo-city-section>> {
   +content: InputSignal<CitySectionContent>
+  +address: InputSignal<(teammateId: string) => string>
   +toggle: OutputEmitterRef<string>
   +teammateChosen: OutputEmitterRef<string>
 }
