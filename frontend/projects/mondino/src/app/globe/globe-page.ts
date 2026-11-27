@@ -26,6 +26,7 @@ import {
   GlobeFallback,
   GlobeLegend,
   GlobePlaceholder,
+  GroupPanel,
   PinLayer,
   TeammatePanel,
   Toast,
@@ -35,6 +36,7 @@ import {
   BrowserClock,
   defaultClockFormat,
   defaultTemperatureUnit,
+  groupCities,
   pinViews,
   placePins,
   stillViewport,
@@ -60,6 +62,7 @@ export const toastLifetime = 4000;
     GlobeLegend,
     GlobePlaceholder,
     GlobeView,
+    GroupPanel,
     PinLayer,
     TeammatePanel,
     Toast,
@@ -179,6 +182,33 @@ export class GlobePage {
       : `The globe${pins}`;
   });
 
+  /**
+   * A selected group pin's panel (L2-023): its teammates city by city, each city's local time
+   * moving with the minute; null with no group selected, or once one teammate or none is left.
+   */
+  protected readonly group = computed(() => {
+    this.clock.minute();
+    const ids = this.store.heldIds();
+    const team = this.store.team();
+    if (ids.length === 0 || !team) return null;
+    const content = groupCities(
+      team.pins,
+      ids,
+      untracked(() => this.clock.now()),
+      this.clockFormat(),
+    );
+    return content.cities.reduce((total, city) => total + city.rows.length, 0) > 1 ? content : null;
+  });
+
+  /** The address that selects a teammate, which a group's rows link to. */
+  protected readonly addressOf = (teammateId: string): string =>
+    this.router.serializeUrl(
+      this.router.createUrlTree([], {
+        relativeTo: this.route,
+        queryParams: { teammate: teammateId },
+      }),
+    );
+
   /** The panel as a list of one, so another teammate's is drawn afresh and fades in. */
   protected readonly panels = computed(() => {
     const panel = this.panel();
@@ -192,8 +222,9 @@ export class GlobePage {
   protected readonly announcement = computed(() => {
     const id = this.store.selectedId();
     const pin = this.store.team()?.pins.find((each) => each.teammateId === id);
-    if (!pin) return '';
-    return `${pin.name}${pin.isViewer ? ', you' : ''}, ${pin.cityName}, selected.`;
+    if (pin) return `${pin.name}${pin.isViewer ? ', you' : ''}, ${pin.cityName}, selected.`;
+    const group = this.group();
+    return group ? `${group.title}.` : '';
   });
 
   protected readonly toast = signal<{ strong: string; text: string } | null>(null);
@@ -313,8 +344,11 @@ export class GlobePage {
   }
 
   protected selectGroup(placement: PinPlacement): void {
+    const keyboard = this.chosenByKeyboard();
+    this.openedFromKeyboard = keyboard;
     this.store.selectGroup(placement.pins.map((pin) => pin.teammateId));
-    this.show(null);
+    void this.show(null);
+    if (keyboard) afterNextRender(() => this.focusHeading(), { injector: this.injector });
   }
 
   protected dismissToast(): void {

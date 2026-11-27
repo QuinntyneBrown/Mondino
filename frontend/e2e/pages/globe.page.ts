@@ -59,6 +59,14 @@ export class GlobePage {
   readonly overlapBoth: Locator;
   readonly messageButton: Locator;
   readonly closePanel: Locator;
+  /** A selected group pin's panel: its heading, its lead, its cities and their times, its rows. */
+  readonly group: Locator;
+  readonly groupTitle: Locator;
+  readonly groupLead: Locator;
+  readonly groupCityNames: Locator;
+  readonly groupCityTimes: Locator;
+  /** The names in a group's rows. */
+  readonly groupRows: Locator;
   /** The one polite announcement of what was selected. */
   readonly announcement: Locator;
   readonly toastRegion: Locator;
@@ -117,10 +125,21 @@ export class GlobePage {
     this.overlapBoth = this.overlap.locator('.overlap__both');
     this.messageButton = this.panel.getByRole('button', { name: /message/i });
     this.closePanel = this.panel.getByRole('button', { name: /^Close/ });
+    this.group = this.panel.locator('section:has(> .panel__head--close)');
+    this.groupTitle = this.group.locator('.panel__head h2');
+    this.groupLead = this.group.locator('.panel__lead');
+    this.groupCityNames = this.group.locator('.panel__city h3');
+    this.groupCityTimes = this.group.locator('.panel__city-time');
+    this.groupRows = this.group.locator('.row-list a.row .row__name');
     this.announcement = this.main.locator('p.visually-hidden[role="status"]');
     this.toastRegion = page.locator('.toast-region');
     this.toast = this.toastRegion.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
+  }
+
+  /** A teammate's row in a group's panel, by their name. */
+  groupRow(name: string): Locator {
+    return this.group.getByRole('link', { name: named(name) });
   }
 
   /** A pin's button, by the start of its accessible name: a teammate's name, or a group's count. */

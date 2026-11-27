@@ -53,6 +53,18 @@
       </div>
     </aside>
   }
+  @if (group(); as group) {
+    <aside class="globe-screen__panel" [attr.aria-label]="group.title">
+      <div class="panel">
+        <mo-group-panel
+          [content]="group"
+          [address]="addressOf"
+          (teammateChosen)="select($event)"
+          (closed)="close()"
+        />
+      </div>
+    </aside>
+  }
   <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
 </main>
 <div class="toast-region" role="status" aria-live="polite">

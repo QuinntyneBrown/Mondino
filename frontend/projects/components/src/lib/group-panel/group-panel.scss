@@ -1,0 +1,88 @@
+// A selected group pin (docs/design-system/components/person-panel, docs/design-system/components/panel-row).
+section {
+  animation: fade-in var(--duration-base) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  section {
+    animation: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.panel__head > div {
+  flex: 1;
+  min-width: 0;
+}
+h2:focus-visible {
+  outline: var(--border-width-thick) solid var(--color-focus-ring);
+  outline-offset: var(--space-1);
+}
+.panel__lead {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.panel__city {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+}
+.panel__city h3 {
+  font: var(--text-h3);
+  font-size: var(--font-size-md);
+}
+.panel__city-time {
+  font: var(--text-label-strong);
+}
+.row-list {
+  margin-top: var(--space-1);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-comfortable);
+  margin: 0 calc(-1 * var(--space-2));
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  color: var(--color-fg-default);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.row:hover {
+  background: var(--color-bg-canvas);
+}
+.row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--text-body-sm);
+}
+.row__name strong {
+  font-weight: var(--font-weight-medium);
+}
+.icon {
+  flex: none;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

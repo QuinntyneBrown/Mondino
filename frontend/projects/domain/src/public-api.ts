@@ -17,5 +17,6 @@ export * from './lib/time/offset';
 export * from './lib/time/overlap';
 export * from './lib/pins/first-name';
 export * from './lib/pins/teammate-panel-view';
+export * from './lib/pins/group-cities';
 export * from './lib/time/compare-with-viewer';
 export * from './lib/weather/weather';

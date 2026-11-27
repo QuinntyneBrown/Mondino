@@ -1,0 +1,39 @@
+<section aria-labelledby="mo-group-panel-title">
+  <div class="panel__head panel__head--close">
+    <div>
+      <h2 id="mo-group-panel-title" tabindex="-1">{{ content().title }}</h2>
+      <p class="panel__lead">{{ content().lead }}</p>
+    </div>
+    <button mo-button icon type="button" aria-label="Close" (click)="closed.emit()">
+      <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
+    </button>
+  </div>
+  @for (city of content().cities; track city.cityName) {
+    <div class="panel__city">
+      <h3>{{ city.cityName }}</h3>
+      <span class="panel__city-time tnum">{{ city.localTime }}</span>
+    </div>
+    <ul class="row-list">
+      @for (row of city.rows; track row.teammateId) {
+        <li>
+          <a
+            class="row"
+            [attr.href]="address()(row.teammateId)"
+            (click)="choose($event, row.teammateId)"
+          >
+            <mo-avatar size="sm" [initials]="row.initials" [colour]="row.colour" />
+            <span class="row__name">
+              <strong>{{ row.name }}</strong>
+              @if (row.isViewer) {
+                (you)
+              }
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</section>
