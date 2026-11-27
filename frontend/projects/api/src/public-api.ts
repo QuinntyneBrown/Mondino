@@ -26,3 +26,5 @@ export * from './lib/weather/weather';
 export * from './lib/pins/team-row';
 export * from './lib/pins/ribbon';
 export * from './lib/settings/settings-store';
+export * from './lib/profile/profile';
+export * from './lib/profile/http-profile-api';

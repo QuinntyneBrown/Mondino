@@ -9,7 +9,7 @@ System_Boundary(mondino, "Mondino") {
   Container(api, "Mondino API", "ASP.NET Core", "Own profile, postal code lookup, moving the pin")
   ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Teammates with their postal code and city")
 }
-System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+System_Ext(postal, "Postal code source", "GeoNames (ADR 0006)")
 System_Ext(meteo, "Open-Meteo", "Weather")
 
 Rel(teammate, spa, "Uses", "HTTPS")

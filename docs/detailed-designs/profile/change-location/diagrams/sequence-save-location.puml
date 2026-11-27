@@ -34,7 +34,7 @@ end box
 actor -> page : Use "Save changes"
 page -> store : save()
 store -> client : updateProfile(teamId, draft)
-client -> controller : PUT /api/teams/{teamId}/me (country, postal code, settings in the body)
+client -> controller : PUT /api/teams/{teamId}/me (country and postal code in the body)
 controller -> controller : Authenticate the session; check the anti-forgery token
 controller -> handler : Send UpdateProfileCommand (no teammate id)
 handler -> handler : UpdateProfileCommandValidator
@@ -55,13 +55,11 @@ else postal code or country differs from the stored one
     handler --> controller : postal_code_not_found or postal_code_unavailable; nothing stored
   end
 else location unchanged
-  handler -> entity : ChangeSettings(settings)
-  handler -> db : Save changes
-  handler --> controller : ProfileDto
+  handler --> controller : ProfileDto; nothing moves (journey 23 saves the settings here)
 end
 controller --> client : 200 ProfileDto, or ProblemDetails with a code
 client --> store : Profile or ApiError
 store --> page : saved = new profile; draft matches it
-page --> actor : Own pin at the new city with its local time and time zone
+page --> actor : Own pin at the new city with its local time and time zone; the save bar goes
 note over page, db : Other teammates see the move at their next read of the pins and moments.
 @enduml

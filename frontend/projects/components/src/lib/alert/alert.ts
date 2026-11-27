@@ -29,7 +29,7 @@ export interface AlertLink {
 })
 export class Alert {
   readonly tone = input<'danger' | 'warning'>('danger');
-  readonly icon = input<'alert' | 'clock' | 'weather-off'>('alert');
+  readonly icon = input<'alert' | 'clock' | 'weather-off' | 'hourglass'>('alert');
   /**
    * `status` for a warning that is no alarm, announced politely: Team's "Weather is unavailable
    * right now" (L2-049).
@@ -45,6 +45,8 @@ export class Alert {
   readonly figureSpoken = input<string | null>(null);
   readonly end = input<string | null>(null);
   readonly items = input<readonly AlertLink[]>([]);
+  /** Shows the buttons projected as `[actions]` under the text: "Try again". */
+  readonly withActions = input(false, { transform: booleanAttribute });
   /** Takes focus from script, as an error summary does after a submit. */
   readonly focusable = input(false, { transform: booleanAttribute });
   /** Each new value, past 0, moves focus to the alert once it is drawn: one for each submit. */

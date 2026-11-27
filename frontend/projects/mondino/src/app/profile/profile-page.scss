@@ -1,0 +1,174 @@
+// Profile & Settings (docs/design-system/components/card, form-field, select, text-field,
+// lookup-message, globe, pin, save-bar; the screen's own layout from docs/mocks/pages/profile).
+:host {
+  display: block;
+}
+.page {
+  width: 100%;
+  max-width: var(--layout-container-settings);
+  margin-inline: auto;
+  padding: var(--space-8) var(--layout-margin) var(--space-24);
+}
+.message-page {
+  display: grid;
+  place-items: center;
+  min-height: calc(100dvh - var(--layout-header-height));
+}
+.settings {
+  display: grid;
+  gap: var(--space-10);
+}
+.settings__pin h1 {
+  font: var(--text-h1);
+}
+.settings__sections > :first-child {
+  padding-top: 0;
+}
+.card {
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+}
+.pin-card {
+  margin-top: var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+}
+.pin-card__globe {
+  height: var(--layout-globe-card-height);
+}
+.pin-card__stage {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+.pin-card__body {
+  padding: var(--space-5);
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+.pin-card__city {
+  font: var(--text-name);
+}
+.pin-card__time {
+  margin-top: var(--space-0-5);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.pin-card__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font: var(--text-caption);
+  color: var(--color-fg-muted);
+}
+.pin-card__note .icon {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+  margin-top: var(--space-0-5);
+}
+// The placeholder in the shape of profile/loading.
+.pin-card__loading-disc {
+  width: min(100%, 13.75rem);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+}
+.pin-card__loading-caption {
+  display: grid;
+  gap: var(--space-2);
+}
+.pin-card__loading-city {
+  width: min(10rem, 100%);
+  height: var(--space-6);
+}
+.pin-card__loading-time {
+  width: min(14rem, 100%);
+  height: var(--space-4);
+}
+.settings__sections--loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.settings__sections--loading .settings-section {
+  padding-block: 0;
+  border: 0;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.settings-section {
+  padding: var(--space-7) 0;
+  border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+}
+.settings-section__title {
+  font: var(--text-h3);
+}
+.settings-section__note {
+  margin-top: var(--space-0-5);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.settings-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.field-row {
+  display: grid;
+  gap: var(--space-4);
+}
+.field-row__action {
+  justify-self: stretch;
+  min-height: var(--target-comfortable);
+}
+.icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (min-width: 36rem) {
+  .field-row {
+    grid-template-columns: minmax(0, 1fr) var(--layout-field-short) auto;
+    align-items: end;
+  }
+  .field-row__action {
+    justify-self: start;
+    min-height: var(--control-height-lg);
+  }
+}
+@media (min-width: 62rem) {
+  .page {
+    padding-top: var(--space-10);
+  }
+}
+@media (min-width: 40rem) {
+  .settings__pin h1 {
+    font: var(--text-h1-lg);
+  }
+}
+@media (min-width: 64rem) {
+  .settings {
+    grid-template-columns: var(--layout-pin-card-width) minmax(0, 1fr);
+  }
+  .settings__pin {
+    position: sticky;
+    top: var(--space-10);
+    align-self: start;
+  }
+  .settings__sections > :first-child {
+    padding-top: calc(var(--space-12) + var(--space-3));
+  }
+  .settings__sections--loading {
+    padding-top: 3.75rem;
+  }
+}

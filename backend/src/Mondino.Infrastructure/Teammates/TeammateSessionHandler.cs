@@ -49,6 +49,13 @@ public sealed class TeammateSessionHandler
         IssueAntiforgeryToken(http);
     }
 
+    /// <summary>The teammate a request's session names, once authentication has read it; or null.</summary>
+    public static string? TeammateIdOf(HttpContext http)
+    {
+        ArgumentNullException.ThrowIfNull(http);
+        return http.User.FindFirstValue(CurrentTeammate.TeammateIdClaim);
+    }
+
     /// <summary>Gives the signed-in browser an antiforgery request token, in a cookie scripts can read.</summary>
     public static void IssueAntiforgeryToken(HttpContext http)
     {

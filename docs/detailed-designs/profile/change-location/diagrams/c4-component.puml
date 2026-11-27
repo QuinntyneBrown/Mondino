@@ -16,7 +16,7 @@ Container_Boundary(api, "Mondino API") {
   Component(source, "CachedPostalCodeLookup", "IPostalCodeLookup", "Cache, timeout, circuit breaker")
   ComponentDb(db, "Mondino database", "EF Core", "Teammate, postal code, city")
 }
-System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+System_Ext(postal, "Postal code source", "GeoNames (ADR 0006)")
 
 Rel(page, store, "Reads signals, sends changes")
 Rel(store, client, "Calls through PROFILE_API")

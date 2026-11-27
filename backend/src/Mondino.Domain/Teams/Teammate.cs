@@ -82,6 +82,19 @@ public sealed class Teammate
     /// <summary>The id the browser gave its join request, so a repeated request makes no second pin. Never returned.</summary>
     public Guid? JoinRequestId { get; private set; }
 
+    /// <summary>
+    /// Moves the pin to the city of a new postal code (L2-032). The pin takes the city's own
+    /// position and time zone, so a new postal code in the same city leaves it where it was.
+    /// </summary>
+    public void MoveTo(string postalCode, City city)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(postalCode);
+        ArgumentNullException.ThrowIfNull(city);
+        PostalCode = postalCode;
+        City = city;
+        CityId = city.Id;
+    }
+
     /// <summary>The first character of up to the first two words of the name: "Liam O’Connor" is "LO".</summary>
     public string Initials => TeammateInitials.Of(Name);
 }

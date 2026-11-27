@@ -35,12 +35,10 @@ package "Frontend" {
     +pin: Pin
     +countryCode: string
     +postalCode: string
-    +settings: Settings
   }
   class ProfileUpdate {
     +countryCode: string
     +postalCode: string
-    +settings: Settings
   }
   enum LookupState {
     Idle
@@ -50,15 +48,15 @@ package "Frontend" {
     Unavailable
     RateLimited
   }
-  class PostalCodeField {
-    +value: string
+  class LookupMessage {
+    +state: LookupState
     +country: Country
-    +lookupState: LookupState
-    +disabled: boolean
     +mode: Join | Move
-    +valueChange: string
-    +blurred: void
-    +retry: void
+    +stays: string
+  }
+  class SaveBar {
+    +saving: boolean
+    +save: void
   }
 }
 
@@ -72,7 +70,6 @@ package "Backend" {
     +Guid TeamId
     +string CountryCode
     +string PostalCode
-    +TeammateSettings Settings
   }
   class UpdateProfileCommandHandler {
     +Handle(command: UpdateProfileCommand): Task<ProfileDto>
@@ -134,8 +131,9 @@ ProfileApi <|.. HttpProfileApi
 ProfileStore --> Profile : saved
 ProfileStore --> ProfileUpdate : draft
 ProfileStore --> LookupState : has
-ProfilePage --> PostalCodeField : value, country, lookupState
-PostalCodeField ..> LookupState : shows
+ProfilePage --> LookupMessage : state, country, Move
+ProfilePage --> SaveBar : while canSave
+LookupMessage ..> LookupState : shows
 IPostalCodeLookup ..> PostalCodeLookupOutcome : returns
 PostalCodeLookupOutcome --> PostalCodeLookupStatus
 PostalCodeLookupOutcome --> City

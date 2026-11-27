@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Mondino.Application.Cities;
 using Mondino.Application.Errors;
 using Mondino.Application.Persistence;
+using Mondino.Application.Teammates;
 using Mondino.Application.Teams;
 
 namespace Mondino.Application.Joining;
@@ -41,9 +42,19 @@ internal static class LookUpPostalCodeQueryValidator
     }
 }
 
+/// <summary>
+/// Looks a new postal code up for a teammate on Profile &amp; Settings (L2-032). It changes nothing:
+/// the pin moves only when the new location is saved. Only a teammate of the team may ask (L2-043).
+/// </summary>
+public sealed record LookUpOwnPostalCodeQuery(Guid TeamId, string? CountryCode, string? PostalCode)
+    : IRequest<PostalCodeResultDto>, ITeamScopedRequest;
+
 internal sealed class LookUpPostalCodeQueryHandler(IAppDbContext database, IPostalCodeLookup lookup, IWeatherSource weatherSource)
-    : IRequestHandler<LookUpPostalCodeQuery, PostalCodeResultDto>
+    : IRequestHandler<LookUpPostalCodeQuery, PostalCodeResultDto>, IRequestHandler<LookUpOwnPostalCodeQuery, PostalCodeResultDto>
 {
+    public Task<PostalCodeResultDto> Handle(LookUpOwnPostalCodeQuery request, CancellationToken cancellationToken) =>
+        Handle(new LookUpPostalCodeQuery(null, request.CountryCode, request.PostalCode), cancellationToken);
+
     public async Task<PostalCodeResultDto> Handle(LookUpPostalCodeQuery request, CancellationToken cancellationToken)
     {
         LookUpPostalCodeQueryValidator.Validate(request);

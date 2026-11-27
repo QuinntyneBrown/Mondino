@@ -24,10 +24,18 @@ internal sealed class GetProfileQueryHandler(
     IAppDbContext database, ICurrentTeammate currentTeammate, IWeatherSource weatherSource)
     : IRequestHandler<GetProfileQuery, ProfileDto>
 {
-    public async Task<ProfileDto> Handle(GetProfileQuery request, CancellationToken cancellationToken)
+    public Task<ProfileDto> Handle(GetProfileQuery request, CancellationToken cancellationToken) =>
+        OwnProfiles.ReadAsync(database, weatherSource, currentTeammate.TeammateId, request.TeamId, cancellationToken);
+}
+
+/// <summary>Reads a teammate's own profile, as Profile &amp; Settings reads it and as a save answers it.</summary>
+internal static class OwnProfiles
+{
+    public static async Task<ProfileDto> ReadAsync(
+        IAppDbContext database, IWeatherSource weatherSource, Guid teammateId, Guid teamId, CancellationToken cancellationToken)
     {
         var own = await database.Teammates.AsNoTracking()
-            .Where(t => t.Id == currentTeammate.TeammateId && t.TeamId == request.TeamId)
+            .Where(t => t.Id == teammateId && t.TeamId == teamId)
             .Select(t => new
             {
                 TeamName = database.Teams.Where(team => team.Id == t.TeamId).Select(team => team.Name).Single(),

@@ -1,10 +1,11 @@
 // Acceptance Test
-// Traces to: L2-022, L2-021, L2-024, L2-010
+// Traces to: L2-022, L2-021, L2-024, L2-010, L2-031
 // Description: Only the kinds of moment the viewer chose mark pins and fill "This week around the world"; with every kind off no pin is marked, the legend leaves out "Moment this week" and the panel says so; another teammate's choice changes nothing
 
 import { expect, test } from '../fixtures/test';
 import { idOf, NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { momentOf, NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
+import { NORTHWIND_ME, SOFIA_PROFILE } from '../fixtures/profile';
 import { mockMarkup } from '../support/mocks';
 import { chooseKinds, NORTHWIND_MEMBERSHIP, rememberTeam } from '../support/membership';
 
@@ -64,7 +65,9 @@ test.describe('Globe: only the kinds the viewer chose', () => {
   });
 
   test('with every kind off, no pin is marked, the legend leaves out "Moment this week", and the panel says so', async ({
+    api,
     globePage,
+    profilePage,
     page,
   }) => {
     // Given Sofia has turned every kind off
@@ -94,6 +97,12 @@ test.describe('Globe: only the kinds the viewer chose', () => {
     await expect(globePage.weekLead).toHaveCount(0);
     await expect(globePage.weekRows).toHaveCount(0);
     await expect(globePage.allMoments).toHaveCount(0);
+
+    // When "Choose moments" is used, it leads to Profile & Settings
+    api.answer('GET', NORTHWIND_ME, SOFIA_PROFILE);
+    await globePage.chooseMoments.click();
+    await expect(page).toHaveURL('/profile');
+    await expect(profilePage.title).toHaveText('Your pin');
   });
 
   test('a choice Sofia made in this browser changes nothing for Luca', async ({

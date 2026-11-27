@@ -120,6 +120,13 @@ Builds on: journeys 11, 13, 20 and 22.
   3); raise journey 13's % when it is proven. Until now the unit (`defaultTemperatureUnit`) and the clock
   are worked out from the viewer's country in the browser, and "Share my local weather" is
   `Teammate.SharesWeather` beside `SharesStatus` (ADR 0015): this journey stores them.
+- Journey 22 built `/profile` (`ProfilePage`, `ProfileStore` at its route, `PROFILE_API`) with "Your pin" and
+  the Location section only; this journey adds Display, Moments on the globe and What teammates see beside
+  it, as `pages/profile/default` draws them. `PUT /api/teams/{teamId}/me` (`UpdateProfileCommand`) and
+  `ProfileUpdate` carry the country and postal code; add the settings to both and to `ProfileDto`.
+  `SaveBar` (`@mondino/components`) draws only "You have unsaved changes" and "Saving…": add "Saved — your
+  pin is up to date" with its 4 seconds, the failure with "Try again", and "Leave without saving?", and
+  count `ProfileStore.canSave` over the settings too.
 
 ## Deferred (not in this journey)
 - What a save or a leave shows when the session has ended (401) is `<TO SUPPLY>`: show "You need an invite link", and

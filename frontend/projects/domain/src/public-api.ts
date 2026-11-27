@@ -11,6 +11,7 @@ export * from './lib/pins/group-pins';
 export * from './lib/pins/place-labels';
 export * from './lib/pins/place-pins';
 export * from './lib/time/local-time';
+export * from './lib/time/time-zone-name';
 export * from './lib/time/status';
 export * from './lib/time/clock-format';
 export * from './lib/time/offset';

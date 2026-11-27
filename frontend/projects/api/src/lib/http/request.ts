@@ -19,6 +19,16 @@ export function postJson<T>(url: string, body: unknown, signal: AbortSignal): Pr
   });
 }
 
+/** Puts `body` as JSON and reads JSON back, as `postJson` does. */
+export function putJson<T>(url: string, body: unknown, signal: AbortSignal): Promise<T> {
+  return send<T>(url, {
+    signal,
+    method: 'PUT',
+    headers: { accept: 'application/json', 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
 /** Posts `body` as JSON to an endpoint that answers with no body, as `postJson` does. */
 export async function post(url: string, body: unknown, signal: AbortSignal): Promise<void> {
   await send<null>(

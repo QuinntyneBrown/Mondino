@@ -54,8 +54,9 @@ contentTypes.Mappings[".glb"] = "model/gltf-binary";
 app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
 
 app.UseRouting();
-app.UseRateLimiter();
+// The limiter runs after authentication, so a teammate's own lookups are counted for them (docs/adr/0022).
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 // Liveness and readiness, each a status and nothing else (L2-051).
