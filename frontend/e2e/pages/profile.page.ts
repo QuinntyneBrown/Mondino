@@ -32,6 +32,10 @@ export class ProfilePage {
   readonly tryLookupAgain: Locator;
   /** "Your city", which Join offers while the lookup is down; never here. */
   readonly yourCity: Locator;
+  /** The Display section: a radio group each for the temperature and the clock. */
+  readonly display: Locator;
+  readonly temperature: Locator;
+  readonly clock: Locator;
   readonly saveBar: Locator;
   readonly saveChanges: Locator;
   readonly saveBarButton: Locator;
@@ -68,6 +72,9 @@ export class ProfilePage {
     this.warning = this.location.locator('.alert--warning');
     this.tryLookupAgain = this.warning.getByRole('button', { name: 'Try again' });
     this.yourCity = page.getByLabel('Your city');
+    this.display = this.main.getByRole('region', { name: 'Display' });
+    this.temperature = this.display.getByRole('radiogroup', { name: 'Temperature' });
+    this.clock = this.display.getByRole('radiogroup', { name: 'Clock' });
     this.saveBar = page.locator('.save-bar');
     this.saveChanges = this.saveBar.getByRole('button', { name: 'Save changes' });
     this.saveBarButton = this.saveBar.getByRole('button');
@@ -77,6 +84,16 @@ export class ProfilePage {
     this.errorText = this.main.locator('.empty__text');
     this.tryAgain = this.main.getByRole('button', { name: 'Try again' });
     this.backToGlobe = this.main.getByRole('link', { name: 'Back to the globe' });
+  }
+
+  /** An option of a Display radio group: "°F" of Temperature. */
+  option(group: Locator, name: string): Locator {
+    return group.getByRole('radio', { name, exact: true });
+  }
+
+  /** The tick a chosen option carries besides its fill. */
+  tick(option: Locator): Locator {
+    return option.locator('.segmented__check');
   }
 
   async open(): Promise<void> {

@@ -167,10 +167,35 @@
               }
             </div>
           </section>
+          <section class="settings-section" aria-labelledby="s-display">
+            <h2 class="settings-section__title" id="s-display">Display</h2>
+            <div class="settings-section__body">
+              <fieldset class="setting-row">
+                <legend class="setting-row__label">Temperature</legend>
+                <mo-segmented
+                  mode="radio"
+                  label="Temperature"
+                  [options]="temperatureUnits"
+                  [value]="store.settings()?.temperatureUnit ?? ''"
+                  (valueChange)="chooseTemperatureUnit($event)"
+                />
+              </fieldset>
+              <fieldset class="setting-row">
+                <legend class="setting-row__label">Clock</legend>
+                <mo-segmented
+                  mode="radio"
+                  label="Clock"
+                  [options]="clockFormats"
+                  [value]="store.settings()?.clockFormat ?? ''"
+                  (valueChange)="chooseClockFormat($event)"
+                />
+              </fieldset>
+            </div>
+          </section>
         </div>
       </div>
-      @if (store.canSave()) {
-        <mo-save-bar [saving]="store.saving()" (save)="save()" />
+      @if (store.barState() !== 'hidden') {
+        <mo-save-bar [state]="store.barState()" (save)="save()" (retry)="save()" />
       }
     </main>
   }

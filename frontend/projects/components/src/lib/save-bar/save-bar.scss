@@ -1,4 +1,4 @@
-// The bar for unsaved changes (docs/design-system/components/save-bar.html).
+// The bar for unsaved changes and the result of a save (docs/design-system/components/save-bar.html).
 :host {
   display: contents;
 }
@@ -27,6 +27,10 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) 0;
+}
+.save-bar--saved .icon,
+.save-bar--failed .icon {
+  color: var(--color-fg-inverse-accent);
 }
 .icon {
   width: var(--icon-size-sm);

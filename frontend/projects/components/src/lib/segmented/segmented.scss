@@ -1,4 +1,4 @@
-// A choice of a few, as tabs (docs/design-system/components/segmented).
+// A choice of a few, as tabs or as a setting's radios (docs/design-system/components/segmented-control).
 :host {
   display: inline-block;
   max-width: 100%;
@@ -34,7 +34,8 @@
 .segmented__option:hover {
   color: var(--color-fg-default);
 }
-.segmented__option[aria-selected='true'] {
+.segmented__option[aria-selected='true'],
+.segmented__option[aria-checked='true'] {
   background: var(--color-accent);
   color: var(--color-fg-on-accent);
 }
@@ -46,6 +47,28 @@
 }
 .segmented__count {
   opacity: 0.7;
+}
+// A chosen setting carries a tick as well as the fill (L2-033).
+.segmented__check {
+  display: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.segmented__option[aria-checked='true'] .segmented__check {
+  display: block;
+}
+// A setting's options on Profile & Settings: 32px drawn, a 44px target.
+.segmented--radio .segmented__option {
+  min-height: var(--space-8);
+  padding-inline: 0.875rem;
+}
+.segmented--radio .segmented__option::after {
+  inset-block: calc((var(--space-8) - var(--target-comfortable)) / 2);
 }
 @media (min-width: 36rem) {
   .segmented__option {

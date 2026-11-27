@@ -9,7 +9,7 @@ import {
   untracked,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CLOCK, type StatusFilter } from '@mondino/api';
+import { CLOCK, SETTINGS_STORE, type StatusFilter } from '@mondino/api';
 import {
   Alert,
   Button,
@@ -64,8 +64,8 @@ const notes: Record<StatusFilter, { title: string; text: string } | null> = {
 /**
  * Team, "Where everyone is in their day" (L2-026 to L2-028): everyone west to east with their
  * local time, offset and weather, worked out again as the one clock's minute changes. Times are on
- * the viewer's clock and temperatures in their unit: until Profile & Settings stores a choice
- * (journey 23), the defaults for the country of their pin (L2-019). A row opens the Globe with
+ * the viewer's clock and temperatures in their unit, as saved on Profile & Settings (L2-019,
+ * L2-033), or their country's until a profile has been read in this browser. A row opens the Globe with
  * that teammate selected.
  */
 @Component({
@@ -100,9 +100,15 @@ export class TeamPage {
   /** The filter the address names, `?filter=working` or `asleep`; anything else is All. */
   protected readonly filter = signal<StatusFilter>('all');
 
+  /** The viewer's clock and unit, as saved on Profile & Settings, or their country's (L2-019, L2-033). */
+  private readonly settings = inject(SETTINGS_STORE);
   private readonly viewer = computed(() => this.store.team()?.pins.find((pin) => pin.isViewer));
-  private readonly clockFormat = computed(() => defaultClockFormat(this.viewer()?.country ?? ''));
-  private readonly unit = computed(() => defaultTemperatureUnit(this.viewer()?.country ?? ''));
+  private readonly clockFormat = computed(
+    () => this.settings.clockFormat() ?? defaultClockFormat(this.viewer()?.country ?? ''),
+  );
+  private readonly unit = computed(
+    () => this.settings.temperatureUnit() ?? defaultTemperatureUnit(this.viewer()?.country ?? ''),
+  );
 
   /** The pins with the minute they were worked out at, so every value below moves together. */
   private readonly now = computed(() => {

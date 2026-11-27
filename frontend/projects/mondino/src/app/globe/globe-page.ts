@@ -116,15 +116,20 @@ export class GlobePage {
   /**
    * What each pin shows, its local time and status among it, worked out in one pass each time the
    * one clock's minute changes (L2-014, L2-015), with the weather (L2-018). Times are on the
-   * viewer's clock and temperatures in their unit: until Profile & Settings stores a choice
-   * (journey 23), the defaults for the country of their pin (L2-019).
+   * viewer's clock and temperatures in their unit, as saved on Profile & Settings (L2-019, L2-033);
+   * until a profile has been read in this browser, the defaults for the country of their pin.
    */
+  private readonly settings = inject(SETTINGS_STORE);
   private readonly viewer = computed(() => this.store.team()?.pins.find((pin) => pin.isViewer));
-  protected readonly clockFormat = computed(() => defaultClockFormat(this.viewer()?.country ?? ''));
-  private readonly unit = computed(() => defaultTemperatureUnit(this.viewer()?.country ?? ''));
+  protected readonly clockFormat = computed(
+    () => this.settings.clockFormat() ?? defaultClockFormat(this.viewer()?.country ?? ''),
+  );
+  private readonly unit = computed(
+    () => this.settings.temperatureUnit() ?? defaultTemperatureUnit(this.viewer()?.country ?? ''),
+  );
 
   /** The kinds of moment the viewer chose to see on the globe and in the week (L2-022). */
-  protected readonly kinds = inject(SETTINGS_STORE).momentKinds;
+  protected readonly kinds = this.settings.momentKinds;
   protected readonly everyKindOff = computed(() => this.kinds().length === 0);
 
   private readonly views = computed(() => {

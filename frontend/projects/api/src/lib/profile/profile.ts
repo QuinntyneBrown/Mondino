@@ -1,12 +1,13 @@
 import { InjectionToken } from '@angular/core';
 import type { PostalCodeResult } from '../cities/city';
+import type { Settings } from '../settings/settings-store';
 import type { Pin } from '../teams/team-pins';
 
 /**
  * What Profile & Settings reads: the team's name, the viewer's own pin, their country and their
- * own postal code (L2-031). It is the only answer after joining that carries a postal code, and
- * only the viewer's own (L2-007); it is kept in memory for the screen and in no storage. The
- * postal code is null for a pin placed through "Your city". The settings join with journey 23.
+ * own postal code (L2-031), and their own settings (ADR 0023). It is the only answer after joining
+ * that carries a postal code, and only the viewer's own (L2-007); it is kept in memory for the
+ * screen and in no storage. The postal code is null for a pin placed through "Your city".
  */
 export interface Profile {
   readonly teamName: string;
@@ -14,12 +15,18 @@ export interface Profile {
   /** ISO 3166-1 alpha-2: "IT". */
   readonly countryCode: string;
   readonly postalCode: string | null;
+  readonly settings: Settings;
 }
 
-/** A save of the viewer's own location: the country and the postal code, sent in the body. */
+/**
+ * A save from Profile & Settings, sent in the body: the parts that changed. A new location is the
+ * country and the postal code together; the settings are the whole set. A part left out is
+ * unchanged.
+ */
 export interface ProfileUpdate {
-  readonly countryCode: string;
-  readonly postalCode: string;
+  readonly countryCode?: string;
+  readonly postalCode?: string;
+  readonly settings?: Settings;
 }
 
 /** The viewer's own pin and settings. A refusal is an `ApiError`. */
@@ -40,8 +47,9 @@ export interface ProfileApi {
   ): Promise<PostalCodeResult>;
 
   /**
-   * Saves the viewer's own new location: the pin moves to the city of the postal code (L2-032).
-   * Refused as the lookup is, and nothing is stored.
+   * Saves the viewer's own new location, whose pin moves to the city of the postal code (L2-032),
+   * and their settings (L2-033, L2-034). Refused as the lookup is, or with `invalid_request` or
+   * `validation_failed`, and nothing is stored.
    */
   updateProfile(teamId: string, update: ProfileUpdate, signal: AbortSignal): Promise<Profile>;
 }

@@ -7,7 +7,13 @@ import {
   untracked,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CLOCK, HttpProfileApi, PROFILE_API } from '@mondino/api';
+import {
+  CLOCK,
+  type ClockFormat,
+  HttpProfileApi,
+  PROFILE_API,
+  type TemperatureUnit,
+} from '@mondino/api';
 import {
   Alert,
   Button,
@@ -16,6 +22,8 @@ import {
   GlobePlaceholder,
   LookupMessage,
   SaveBar,
+  Segmented,
+  type SegmentedOption,
   SelectField,
   type SelectOption,
   Skeleton,
@@ -23,7 +31,6 @@ import {
 } from '@mondino/components';
 import {
   BrowserClock,
-  defaultClockFormat,
   formatTime,
   localTime,
   stillPlacements,
@@ -38,8 +45,9 @@ import { ProfileStore } from './profile-store';
  * Profile & Settings, "Your pin" (L2-031): the viewer's own pin on a small globe that does not turn
  * on its own and cannot be dragged, their city and country, local time and time zone, and the
  * Location section, where a teammate who has moved looks a new postal code up and saves it
- * (L2-032). The postal code shown is the viewer's own, the only one any screen shows after joining.
- * Display, sharing and leaving join with journeys 23 and 24.
+ * (L2-032), and the settings: Display (L2-033), Moments on the globe (L2-022) and What teammates
+ * see (L2-034), saved through the bar for unsaved changes (L2-035). The postal code shown is the
+ * viewer's own, the only one any screen shows after joining. Leaving the team joins with journey 24.
  */
 @Component({
   selector: 'mo-profile-page',
@@ -53,6 +61,7 @@ import { ProfileStore } from './profile-store';
     LookupMessage,
     RouterLink,
     SaveBar,
+    Segmented,
     SelectField,
     Skeleton,
     TextField,
@@ -77,6 +86,15 @@ export class ProfilePage {
     label: country.name,
   }));
 
+  protected readonly temperatureUnits: SegmentedOption[] = [
+    { value: 'celsius', label: '°C' },
+    { value: 'fahrenheit', label: '°F' },
+  ];
+  protected readonly clockFormats: SegmentedOption[] = [
+    { value: '24-hour', label: '24-hour' },
+    { value: '12-hour', label: '12-hour' },
+  ];
+
   /** The country chosen in the draft, with the form its postal codes take. */
   protected readonly country = computed(
     () => supportedCountries.find((country) => country.code === this.store.countryCode()) ?? null,
@@ -88,20 +106,21 @@ export class ProfilePage {
     return pin ? `${pin.cityName}, ${pin.country}` : '';
   });
 
-  /** "15:05 local · Central European Time", ticking with the one clock. */
+  /** "15:05 local · Central European Time", on the saved clock, ticking with the one clock. */
   protected readonly time = computed(() => {
-    const pin = this.store.profile()?.pin;
-    if (!pin) return '';
+    const profile = this.store.profile();
+    if (!profile) return '';
+    const pin = profile.pin;
     this.clock.minute();
     const now = untracked(() => this.clock.now());
-    const time = formatTime(localTime(now, pin.timeZoneId), defaultClockFormat(pin.country));
+    const time = formatTime(localTime(now, pin.timeZoneId), profile.settings.clockFormat);
     return `${time} local · ${timeZoneName(pin.timeZoneId, now)}`;
   });
 
   /** The city a found postal code lies in, not saved yet. */
   private readonly found = computed(() => {
     const lookup = this.store.lookup();
-    return lookup.kind === 'Found' && this.store.canSave() ? lookup.result.city : null;
+    return lookup.kind === 'Found' && this.store.locationChanged() ? lookup.result.city : null;
   });
 
   /** The viewer's pin on the small globe: where it is saved, or "New · Toronto" where it is found. */
@@ -146,11 +165,19 @@ export class ProfilePage {
     void this.store.load();
   }
 
+  protected chooseTemperatureUnit(value: string): void {
+    this.store.setTemperatureUnit(value as TemperatureUnit);
+  }
+
+  protected chooseClockFormat(value: string): void {
+    this.store.setClockFormat(value as ClockFormat);
+  }
+
   protected tryAgain(): void {
     void this.store.load();
   }
 
-  /** Saves the new location; the team is read again so every screen shows the pin there. */
+  /** Saves what changed; when the pin moved, the team is read again so every screen shows it there. */
   protected async save(): Promise<void> {
     if (await this.store.save()) void this.team.load();
   }

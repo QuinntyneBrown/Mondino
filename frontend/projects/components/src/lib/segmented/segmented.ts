@@ -8,10 +8,11 @@ export interface SegmentedOption {
 }
 
 /**
- * The mocks' `segmented` block as a tab list (L2-028): one `tablist` whose options are tabs with
- * ids `tab-{value}`. Only the chosen tab is in the tab order; Left and Right move to the previous
- * and next tab, wrapping, Home and End to the first and last, and each chooses the tab it reaches.
- * The panel it controls is labelled by the chosen tab.
+ * The mocks' `segmented` block. As `tabs` (L2-028), one `tablist` whose options are tabs with ids
+ * `tab-{value}`; the panel it controls is labelled by the chosen tab. As `radio` (L2-033), a setting:
+ * one `radiogroup` whose chosen option is `aria-checked` and carries a tick besides its fill. Only
+ * the chosen option is in the tab order; Left and Right move to the previous and next option,
+ * wrapping, Home and End to the first and last, and each chooses the option it reaches.
  */
 @Component({
   selector: 'mo-segmented',
@@ -22,10 +23,12 @@ export interface SegmentedOption {
 export class Segmented {
   readonly options = input.required<readonly SegmentedOption[]>();
   readonly value = input.required<string>();
-  /** What the tab list chooses: "Filter by status". */
+  /** `tabs` for a filter, `radio` for a setting. */
+  readonly mode = input<'tabs' | 'radio'>('tabs');
+  /** What the options choose: "Filter by status", "Temperature". */
   readonly label = input.required<string>();
-  /** The id of the panel the tabs control. */
-  readonly controls = input.required<string>();
+  /** The id of the panel the tabs control; none for a setting. */
+  readonly controls = input<string | null>(null);
 
   readonly valueChange = output<string>();
 
@@ -51,7 +54,7 @@ export class Segmented {
               : null;
     if (to === null) return;
     event.preventDefault();
-    // The tabs are the tab list's children, in order; a signal query would bring its runtime into
+    // The options are the group's children, in order; a signal query would bring its runtime into
     // the initial bundle.
     const tabs = (event.currentTarget as HTMLElement).parentElement?.children;
     (tabs?.[to] as HTMLElement | undefined)?.focus();

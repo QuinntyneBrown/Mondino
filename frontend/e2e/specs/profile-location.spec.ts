@@ -82,11 +82,11 @@ test.describe('Profile & Settings: change your location', () => {
     expect(saves[0].postDataJSON()).toEqual({ countryCode: 'CA', postalCode: 'M5V 2T6' });
     expect(saves[0].url()).not.toContain('M5V');
 
-    // When it is saved, her pin is at Toronto, with Toronto's local time and time zone, and the
-    // team is read again so every screen shows it there
+    // When it is saved, her pin is at Toronto, with Toronto's local time and time zone, on the
+    // clock she chose, not Canada's (L2-033), and the team is read again so every screen shows it there
     save.release(SOFIA_IN_TORONTO);
     await expect(profilePage.city).toHaveText('Toronto, Canada');
-    await expect(profilePage.time).toHaveText('10:05 am local · Eastern Time');
+    await expect(profilePage.time).toHaveText('10:05 local · Eastern Time');
     await expect(profilePage.youLabel).toHaveCount(0);
     await expect(profilePage.saveBar).toHaveCount(0);
     await expect(profilePage.postalCode).toHaveValue('M5V 2T6');

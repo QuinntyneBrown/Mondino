@@ -1,4 +1,4 @@
-// Traces to: L2-022
+// Traces to: L2-022, L2-033, L2-019
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { ALL_MOMENT_KINDS, TEAM_MEMBERSHIP, type TeamMembership } from '@mondino/api';
@@ -46,5 +46,56 @@ describe('SettingsCache', () => {
     TestBed.resetTestingModule();
     localStorage.setItem(settingsKey, 'not json');
     expect(cacheFor('sofia').momentKinds()).toEqual(ALL_MOMENT_KINDS);
+  });
+
+  it('has no unit and no clock with nothing kept, so the screens take the country’s', () => {
+    const cache = cacheFor('sofia');
+    expect(cache.temperatureUnit()).toBeNull();
+    expect(cache.clockFormat()).toBeNull();
+  });
+
+  it('keeps the backend’s copy for the viewer, and reads it back on a later visit', () => {
+    cacheFor('sofia').replace({
+      temperatureUnit: 'fahrenheit',
+      clockFormat: '12-hour',
+      momentKinds: ['sport', 'holiday'],
+      sharesWeather: false,
+      sharesStatus: false,
+    });
+    expect(JSON.parse(localStorage.getItem(settingsKey)!)).toEqual({
+      teammateId: 'sofia',
+      momentKinds: ['holiday', 'sport'],
+      temperatureUnit: 'fahrenheit',
+      clockFormat: '12-hour',
+    });
+    TestBed.resetTestingModule();
+    const later = cacheFor('sofia');
+    expect(later.temperatureUnit()).toBe('fahrenheit');
+    expect(later.clockFormat()).toBe('12-hour');
+    expect(later.momentKinds()).toEqual(['holiday', 'sport']);
+  });
+
+  it('changes what it gives at once on a replace', () => {
+    const cache = cacheFor('sofia');
+    cache.replace({
+      temperatureUnit: 'celsius',
+      clockFormat: '12-hour',
+      momentKinds: [],
+      sharesWeather: true,
+      sharesStatus: true,
+    });
+    expect(cache.clockFormat()).toBe('12-hour');
+    expect(cache.momentKinds()).toEqual([]);
+  });
+
+  it('drops a unit or a clock it does not know', () => {
+    localStorage.setItem(
+      settingsKey,
+      JSON.stringify({ teammateId: 'sofia', temperatureUnit: 'kelvin', clockFormat: 24 }),
+    );
+    const cache = cacheFor('sofia');
+    expect(cache.temperatureUnit()).toBeNull();
+    expect(cache.clockFormat()).toBeNull();
+    expect(cache.momentKinds()).toEqual(ALL_MOMENT_KINDS);
   });
 });
