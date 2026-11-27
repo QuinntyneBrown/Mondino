@@ -35,6 +35,8 @@ function textOf(markup: string, className: string): string | null {
   return found[2]
     .replace(/<svg[\s\S]*?<\/svg>/g, '')
     .replace(/<[^>]+>/g, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
     .trim();
@@ -97,4 +99,66 @@ export function mockPanel(path: string): MockPanel {
     ),
     announcement: /<p class="visually-hidden" role="status"[^>]*>([^<]*)</.exec(panel)?.[1] ?? null,
   };
+}
+
+/** A row of a mock's Team table, part by part, as a spec compares it with the screen's. */
+export interface MockTeamRow {
+  /** The link's text, "(you)" with it. */
+  name: string;
+  /** Under 768 px: the city and the offset. */
+  phone: string;
+  /** The status in words under the name, or null. */
+  status: string | null;
+  /** The city, and the country under it. */
+  city: string;
+  country: string;
+  time: string;
+  offset: string;
+  /** The weather's text, the degrees, and its icon's accessible name and shapes. */
+  degrees: string;
+  weatherName: string | null;
+  weatherIcon: string[];
+}
+
+/** Every row of the Team table in a mock, in order. */
+export function mockTeamRows(path: string): MockTeamRow[] {
+  const markup = mockMarkup(path);
+  return [...markup.matchAll(/<tr class="team-table__row">([\s\S]*?)<\/tr>/g)].map(([, row]) => {
+    const weather = /<td class="team-table__weather[^"]*">([\s\S]*?)<\/td>/.exec(row)?.[1] ?? '';
+    const svg = /<svg[\s\S]*?<\/svg>/.exec(weather)?.[0] ?? '';
+    return {
+      name: textOf(row, 'team-table__link') ?? '',
+      phone: textOf(row, 'team-table__phone') ?? '',
+      status: /<span class="team-table__sub">([^<]*)<\/span><\/span><\/th>/.exec(row)?.[1] ?? null,
+      city: /<td class="team-table__location">([^<]*)</.exec(row)?.[1] ?? '',
+      country:
+        /<td class="team-table__location">[^<]*<span class="team-table__sub">([^<]*)</.exec(
+          row,
+        )?.[1] ?? '',
+      time: textOf(row, 'team-table__time') ?? '',
+      offset: textOf(row, 'team-table__offset') ?? '',
+      degrees: textOf(row, 'team-table__weather') ?? '',
+      weatherName:
+        /aria-label="([^"]*)"/.exec(svg)?.[1] ?? /aria-label="([^"]*)"/.exec(weather)?.[1] ?? null,
+      weatherIcon: shapesOf(svg),
+    };
+  });
+}
+
+/** The day ribbon's markers in a mock, in order: where each sits, its row, its tooltip and its name. */
+export function mockMarkers(
+  path: string,
+): { at: string; row: string; title: string; name: string }[] {
+  const markup = mockMarkup(path).replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  return [
+    ...markup.matchAll(
+      /class="day-ribbon__marker"[^>]*style="--at: ([\d.]+)%; --row: (\d+)" title="([^"]*)" aria-label="([^"]*)"/g,
+    ),
+  ].map(([, at, row, title, name]) => ({ at, row, title, name }));
+}
+
+/** The hour marks under a mock's ribbon. */
+export function mockScale(path: string): string[] {
+  const scale = /<ul class="day-ribbon__scale[^"]*"[^>]*>([\s\S]*?)<\/ul>/.exec(mockMarkup(path));
+  return [...(scale?.[1] ?? '').matchAll(/<li>([^<]*)<\/li>/g)].map(([, mark]) => mark);
 }

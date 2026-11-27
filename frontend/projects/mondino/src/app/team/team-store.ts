@@ -37,6 +37,7 @@ export class TeamStore {
       this.state.set('Forgotten');
       return;
     }
+    this.state.set('Loading');
     try {
       this.team.set(await this.api.getPins(teamId, this.releasing.signal));
       this.state.set('Ready');

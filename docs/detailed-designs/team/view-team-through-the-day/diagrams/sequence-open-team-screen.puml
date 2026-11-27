@@ -26,28 +26,29 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "Router" as router
 end box
 actor -> page : Open /team
-page -> store : pins, viewerPin, counts
-store --> page : Pin[], TeamCounts
+page -> store : team()
+store --> page : TeamPins (or Loading: skeletons and "Loading team…"; Failed: "The team didn’t load")
 page --> actor : "Where everyone is in their day", "13 teammates · 12 time zones · live" (L2-026)
-page -> fn : teamRows(pins, viewerPin, clock.now(), settings)
+page -> fn : teamCounts(pins, clock.now()), teamLine(counts)
+page -> fn : teamRows(pins, clock.now(), clockFormat, unit)
 fn -> fn : orderWestToEast: current UTC offset, then longitude (L2-026)
-fn -> fn : localTime, statusFor, offsetBetween, next moment and its when per pin
+fn -> fn : localTime, statusFor, offsetBetween and the weather in the viewer's unit per pin
 fn --> page : TeamRow[] (city and country only)
 page -> chips : "All 13", "Working now 8", "Asleep 2"; All selected (L2-028)
 alt a team of 40 or fewer
-  page -> fn : ribbonMarkers(pins, clock.now(), settings)
-  fn -> fn : dayFraction from the local hour and minute; a lane per marker that would overlap another (L2-027)
-  fn --> page : RibbonMarker[]
-  page -> ribbon : markers
+  page -> fn : ribbonMarkers(pins, clock.now(), clockFormat)
+  fn -> fn : at from the local hour and minute; the lowest lane whose last marker\nis three hours or more before (L2-027)
+  fn --> page : RibbonView: markers and rows
+  page -> ribbon : markers, rows, ribbonScale(clockFormat)
   page -> table : rows, at most 40
   table --> actor : Table from 768 px; name, status, local time with city and offset, and next moment below
 else a large team, more than 40 (L2-056)
-  page -> fn : ribbonDensity(pins, clock.now(), settings)
+  page -> fn : ribbonDensity(pins, clock.now(), clockFormat) (journey 18)
   fn -> fn : Count the pins in 48 half-hour bins by local time (L2-027)
   fn --> page : RibbonDensity
   page -> ribbon : density, summary "324 of 500 are in working hours right now"
   ribbon --> actor : 48 bars over the four bands, "123" over the tallest
-  page -> fn : citySections(rows, toggled, clock.now(), settings)
+  page -> fn : citySections(rows, toggled, clock.now(), clockFormat)
   fn --> page : CitySectionContent[]: west to east, the first two open,\nat most 50 rows in each
   page -> city : content, for each city
   city --> actor : A search, then one section for each city with its count and local time

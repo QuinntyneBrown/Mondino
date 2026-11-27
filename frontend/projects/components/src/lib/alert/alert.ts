@@ -29,7 +29,12 @@ export interface AlertLink {
 })
 export class Alert {
   readonly tone = input<'danger' | 'warning'>('danger');
-  readonly icon = input<'alert' | 'clock'>('alert');
+  readonly icon = input<'alert' | 'clock' | 'weather-off'>('alert');
+  /**
+   * `status` for a warning that is no alarm, announced politely: Team's "Weather is unavailable
+   * right now" (L2-049).
+   */
+  readonly live = input<'alert' | 'status'>('alert');
   readonly title = input<string | null>(null);
   /** Bold, at the start of the line. */
   readonly strong = input<string | null>(null);

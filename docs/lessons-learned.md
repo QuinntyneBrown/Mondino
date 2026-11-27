@@ -1050,3 +1050,48 @@ criterion 4.
   clock paused once it shows.
 - *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit followed
   `node tools/verify/verify.mjs &&`.
+
+## Journey 17: View the team through the day
+
+**What slowed it**
+
+- Two Team states had no mock: Working now with no one in working hours (L2-028 criterion 3) and a
+  teammate who shares neither status nor weather. `team/quiet` and `team/sharing-off` were drawn, and
+  `team/asleep`, which had lost Luca's marker, was mended, before any code.
+- The mocks placed the four Milan, Berlin and Stockholm markers at 15:05 in rows that no single rule gives.
+  The rule (by local minute, then west to east, the viewer first in their city, each in the lowest row free
+  for three hours) was written down, and the mocks' rows for Luca, Lena and Mara were brought to it; the
+  unit test then caught that the viewer's city was told apart by name rather than by position.
+- An encapsulated `td { display: block }` outweighed `.team-table__moment:has(.team-table__none)`, so the
+  phone's empty "Coming up" showed. The phone spec found it; the rule now names the row too.
+- The arrow-key tabs first used `viewChildren`: the signal-query runtime is `@angular/core`'s, and core
+  lives in the initial chunk, so a lazy screen's use of it grew `main` by 0.85 kB. The tabs are found
+  through the DOM instead and `main` went back to 272.84 kB.
+- Reading names straight after a click raced the list's redraw; each read now waits for the row count first.
+
+**Lessons**
+
+1. **Write down the rule a mock's layout follows before coding it, and fix the mock where it has none.**
+   A placement read off pixels gives no tie-breaks; one written rule gave the code, the unit test and the
+   mocks the same rows.
+2. **An Angular API new to the app costs the initial chunk even from a lazy route.** `@angular/core` is
+   shared with `main`, so whatever of it a lazy chunk uses is kept there. Read the chunk table after each
+   slice, not only at the end.
+3. **In a spec, wait for the count before reading a list's text.** `allInnerTexts` does not retry;
+   `toHaveCount` does.
+4. **A `:has()` rule in an encapsulated stylesheet still loses to a later, equally specific one.** Give
+   the rule that hides something the row's class as well, and prove it at the width where it applies.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): the two new mocks, three L2 changes, the design's signatures and four diagrams
+  were one commit before any code. It worked: no slice met a design question.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice's spec failed first on the
+  missing rows, ribbon, tabs and states.
+- *Measure the initial chunk after importing anything new from a package already in it* (journey 15,
+  lesson 1): it caught the `viewChildren` growth at the slice that made it.
+- *Prove a timed message as soon as it is seen* (journey 11, lesson 3), in its spirit: the hour that moves
+  Tomás into working hours is set with the page's paused clock, with no wait.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit followed
+  `node tools/verify/verify.mjs &&`.

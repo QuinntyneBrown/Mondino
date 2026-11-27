@@ -76,8 +76,9 @@ A few states need something the cast cannot give at that hour, and say so in a n
 - **A team of 500**, in `globe/hundreds`, `team/hundreds` and `team/hundreds-no-match`: the
   prototype's seeded team (`bigTeam.ts`: the cast and 487 generated teammates in 40 cities),
   reproduced name for name, at the cast's "now": 38 time zones, 324 working, 42 asleep.
-- **A smaller team** of Sofia, Mara and Liam: `globe/quiet` (23:30 in Milan, nobody in working
-  hours, every kind of moment turned off) and `team/no-results` (mid-afternoon, no one asleep).
+- **A smaller team** of Sofia, Mara and Liam: `globe/quiet` and `team/quiet` (23:30 in Milan,
+  nobody in working hours, every kind of moment turned off on the Globe) and `team/no-results`
+  (mid-afternoon, no one asleep).
 - **A week with no moment**, in `globe/no-moments`: the cast at its "now" with no moment where
   any teammate lives from today to 7 days ahead, so no pin carries a moment marker.
 - **A team of one**, Sofia: `globe/empty`, `team/empty` and `create-team/created`.
@@ -88,8 +89,8 @@ A few states need something the cast cannot give at that hour, and say so in a n
   Berlin; the city is the cast's, not a rule.)
 - **°F and the 12-hour clock**, the prototype's own controls, in `globe/fahrenheit-12-hour` and
   `team/edge`.
-- **Sharing off**, in `globe/sharing-off`: Ahmed shares neither his weather nor whether he is
-  working or asleep. (The prototype shows Lena.)
+- **Sharing off**, in `globe/sharing-off` and `team/sharing-off`: Ahmed shares neither his weather
+  nor whether he is working or asleep. (The prototype shows Lena.)
 
 ## Where the mocks depart from the prototype, and why
 
@@ -124,7 +125,10 @@ kind's icon, darker pin text and control edges, all four kinds of moment on. Wha
 The prototype now draws most states itself. These are still the mocks' own, written from the L2
 requirements: Join's error summary, Profile & Settings with the lookup down or rate limited,
 Team with long and odd names, the Globe in °F on a 12-hour clock, the Globe's week with no moment
-(`globe/no-moments`: "No moments this week.", with "All moments" under it), and the brand sheet's notes.
+(`globe/no-moments`: "No moments this week.", with "All moments" under it), Team with no one in
+working hours (`team/quiet`, whose note carries "Show everyone" as the note for Asleep does) and with a
+teammate who shares neither their weather nor their status (`team/sharing-off`: no status, and a dash
+named "Weather not shared"), and the brand sheet's notes.
 
 ## The globe
 
@@ -208,7 +212,7 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Create Team (`create-team`) | [✅](pages/create-team/default.html) | ➖ | ➖ | [✅](pages/create-team/error.html) | [✅](pages/create-team/locating.html) | [✅](pages/create-team/found.html) | [✅](pages/create-team/not-found.html) | [✅](pages/create-team/lookup-unavailable.html) |  | [✅](pages/create-team/invalid.html) | [✅](pages/create-team/submitting.html) |  | [✅](pages/create-team/rate-limited.html) |  |  |  | [✅](pages/create-team/created.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-003`, `L2-004`, `L2-006`, `L2-037`, `L2-039`, `L2-044`, `L2-045`, `L2-053` |
 | Invite Needed (`invite-needed`) | [✅](pages/invite-needed/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-038`, `L2-043`, `L2-052`, `L2-053` |
 | Globe (`globe`) | [✅](pages/globe/default.html) | [✅](pages/globe/loading.html) | [✅](pages/globe/empty.html) | [✅](pages/globe/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/globe/selected.html) | [✅](pages/globe/selected-self.html) | [✅](pages/globe/selected-asleep.html) | [✅](pages/globe/pin-lifted.html) | [✅](pages/globe/just-joined.html) | [✅](pages/globe/group.html) | [✅](pages/globe/hundreds.html) | [✅](pages/globe/sharing-off.html) | [✅](pages/globe/quiet.html) | [✅](pages/globe/no-moments.html) | [✅](pages/globe/globe-unavailable.html) | [✅](pages/globe/fahrenheit-12-hour.html) | [✅](pages/globe/weather-unavailable.html) |  |  |  |  |  |  |  | `L2-005`, `L2-007`, `L2-008`, `L2-009`, `L2-010`, `L2-011`, `L2-012`, `L2-013`, `L2-014`, `L2-015`, `L2-016`, `L2-017`, `L2-018`, `L2-019`, `L2-021`, `L2-022`, `L2-023`, `L2-024`, `L2-025`, `L2-033`, `L2-034`, `L2-037`, `L2-038`, `L2-040`, `L2-049`, `L2-054` |
-| Team (`team`) | [✅](pages/team/default.html) | [✅](pages/team/loading.html) | [✅](pages/team/empty.html) | [✅](pages/team/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/team/hundreds.html) |  |  |  |  |  | [✅](pages/team/weather-unavailable.html) | [✅](pages/team/working.html) | [✅](pages/team/asleep.html) | [✅](pages/team/no-results.html) | [✅](pages/team/edge.html) | [✅](pages/team/hundreds-no-match.html) |  |  | `L2-007`, `L2-014`, `L2-015`, `L2-016`, `L2-018`, `L2-019`, `L2-026`, `L2-027`, `L2-028`, `L2-037`, `L2-038`, `L2-044`, `L2-047`, `L2-049`, `L2-054`, `L2-056` |
+| Team (`team`) | [✅](pages/team/default.html) | [✅](pages/team/loading.html) | [✅](pages/team/empty.html) | [✅](pages/team/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/team/hundreds.html) | [✅](pages/team/sharing-off.html) | [✅](pages/team/quiet.html) |  |  |  | [✅](pages/team/weather-unavailable.html) | [✅](pages/team/working.html) | [✅](pages/team/asleep.html) | [✅](pages/team/no-results.html) | [✅](pages/team/edge.html) | [✅](pages/team/hundreds-no-match.html) |  |  | `L2-007`, `L2-014`, `L2-015`, `L2-016`, `L2-018`, `L2-019`, `L2-026`, `L2-027`, `L2-028`, `L2-034`, `L2-037`, `L2-038`, `L2-044`, `L2-047`, `L2-049`, `L2-054`, `L2-056` |
 | Moments (`moments`) | [✅](pages/moments/default.html) | [✅](pages/moments/loading.html) | [✅](pages/moments/empty.html) | [✅](pages/moments/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/moments/no-results.html) |  |  | [✅](pages/moments/filtered.html) |  | `L2-007`, `L2-020`, `L2-029`, `L2-030`, `L2-037`, `L2-038`, `L2-049`, `L2-054` |
 | Profile & Settings (`profile`) | [✅](pages/profile/default.html) | [✅](pages/profile/loading.html) | ➖ | [✅](pages/profile/error.html) | [✅](pages/profile/locating.html) |  |  | [✅](pages/profile/lookup-unavailable.html) |  | [✅](pages/profile/invalid.html) |  |  | [✅](pages/profile/rate-limited.html) |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/profile/sharing-off.html) |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/profile/location-found.html) | `L2-007`, `L2-019`, `L2-022`, `L2-031`, `L2-032`, `L2-033`, `L2-034`, `L2-035`, `L2-036`, `L2-037`, `L2-038`, `L2-049`, `L2-054` |
 | Left Team (`left-team`) | [✅](pages/left-team/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-036`, `L2-052`, `L2-053` |

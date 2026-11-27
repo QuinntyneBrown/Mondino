@@ -31,8 +31,14 @@ becomes a bar chart of how many teammates are at each half hour of their day, an
 gains a search and is split into one city section for each city (L2-056).
 
 The Team screen reads no data of its own. It presents the pins the `TeamStore` holds, and
-recomputes from the one shared clock each minute. A team may hold 500 teammates, so the page
-holds rows only for the city sections that are open, and at most 50 for each.
+recomputes from the one clock each minute. A team may hold 500 teammates, so the page holds
+rows only for the city sections that are open, and at most 50 for each.
+
+Journey 17 builds the team of 40 or fewer; journey 18 builds the large team (the bar chart, the
+search and the city sections, L2-056). Until it does, a team past 40 is drawn with the ribbon's
+bands and scale and no marker, as the bar chart will be, and the first 40 rows of the filter, west
+to east, so the rows in the page stay bounded. The next moment under "Coming up" comes with the
+moments (journey 19); until then every row's "Coming up" is a dash, "Nothing coming up".
 
 ## Description
 
@@ -41,17 +47,21 @@ loading and refreshing are designed in `keep-team-fresh`.
 
 **The page and its state**
 
-- **`TeamPage`** — page of the `mondino` application at `/team`, a lazy route. It receives the
-  `filter` query parameter as a component input and reads the `StatusFilter` from it: none is
-  `All`, `working` is `Working` and `asleep` is `Asleep`. Choosing a tab navigates to the
-  address of that filter, replacing the current entry, so "2 more on the Team page" on the
-  Globe screen opens `/team?filter=working` with Working now chosen
-  (`view-week-around-the-world`). It holds the search text as the signal `query` and the city
+- **`TeamPage`** — page of the `mondino` application at `/team`, a lazy child route of
+  `TeamShell` (`view-week-around-the-world`), under the header, whose "Team" link it is. It reads
+  the `filter` query parameter from the route's `queryParamMap`, as the Globe reads `teammate`,
+  and the `StatusFilter` from it: none is `all`, `working` is `working` and `asleep` is
+  `asleep`; any other value is `all`. Choosing a tab navigates to the address of that filter,
+  replacing the current entry, so "2 more on the Team page" on the Globe screen opens
+  `/team?filter=working` with Working now chosen (`view-week-around-the-world`). It provides
+  the screen's one clock (`CLOCK`, `BrowserClock`), as the Globe does, and reads the viewer's
+  clock and unit from the country of their pin (`defaultClockFormat`,
+  `defaultTemperatureUnit`) until Profile & Settings stores a choice (journey 23). It holds the search text as the signal `query` and the city
   sections the teammate has opened or closed as the signal `toggled`. Neither is in the
   address: what is typed in the search can be a teammate's name, and a name never goes into a
-  URL. `large` is true when `TeamStore.pins` holds more than `LargeTeamThreshold` (40) pins.
+  URL. `large` is true when the team `TeamStore` holds has more than `LargeTeamThreshold` (40) pins.
   Its `rows`, `visibleRows`, `sections`, `markers`, `density` and `options` are computed
-  signals over `TeamStore.pins`, the filter, the search and the clock's minute tick. It
+  signals over the pins `TeamStore` holds, the filter, the search and the clock's minute tick. It
   navigates to `/globe?teammate={teammateId}` when a teammate is chosen. The search and the
   opened sections are the screen's own state and go when the teammate leaves the screen.
 
@@ -59,23 +69,30 @@ loading and refreshing are designed in `keep-team-fresh`.
 
 - **`orderWestToEast(pins, now)`** — pure function in `pins/`. It orders pins by
   `zoneOffsetMinutes(now, timeZoneId)` ascending, then by longitude ascending (L2-026). The
-  offset is the current one, so the order follows daylight saving time. The teammates of one
+  offset is the current one, so the order follows daylight saving time; teammates at one place are
+  then ordered by name. The teammates of one
   city are next to each other in this order.
 - **`zoneOffsetMinutes(now, timeZoneId)`** — pure function in `time/`: a time zone's offset from
   UTC at an instant, in minutes.
-- **`teamRows(pins, viewer, now, settings)`** — pure function in `pins/`. It returns one
-  `TeamRow` per pin in west-to-east order: name, city and country, formatted local time, offset
-  from the viewer, status, weather and next moment. The offset is in the row's form ("7h
-  behind", "4h 30m ahead", "Same time"; `time/show-offset-and-overlap`). The status is what
+- **`teamRows(pins, now, format, unit)`** — pure function in `pins/`. It returns one
+  `TeamRow` per pin in west-to-east order: name, initials and colour, city and country,
+  formatted local time, offset from the viewer, status and weather. The viewer is the pin with
+  `isViewer`. The offset is `offsetBetween` in the row's form ("7h behind", "4h 30m ahead",
+  "Same time"; `formatOffset(…, 'row')`, `time/show-offset-and-overlap`). The status is what
   `statusFor(pin, time)` gives, so it is null, and the row shows none, at every hour, for a
   teammate who does not share their status. The viewer's own row has `isViewer` set and a null
-  offset. `nextMoment` is the pin's earliest moment dated today or later in its city, or
-  null, and `nextMomentWhen` says when it is: `whenLabel`'s words up to 7 days ahead ("Today",
-  "In 5 days"), and from 8 days ahead its day and month ("9 Nov"). The row carries the pin's
-  `weatherState` beside its weather, so weather that is unavailable is told from weather that
-  is not shared (`show-weather`). A `TeamRow` holds no postal code; the `Pin` type has none to give.
-- **`filterByStatus(rows, filter)`** — pure function in `pins/`. `All` keeps every row,
-  `Working` keeps status Working hours and `Asleep` keeps status Probably asleep. A row whose
+  offset. The weather is the degrees in the viewer's unit (`formatDegrees`), the condition and
+  whether the sky is a night sky, or null; the row carries the pin's `weatherState` beside it, so
+  weather that is unavailable is told from weather that is not shared (`show-weather`). With the
+  moments (journey 19) the row gains `nextMoment`, the pin's earliest moment dated today or later
+  in its city, and `nextMomentWhen`: `whenLabel`'s words up to 7 days ahead ("Today", "In 5
+  days"), and from 8 days ahead its day and month ("9 Nov"). A `TeamRow` holds no postal code;
+  the `Pin` type has none to give.
+- **`teamLine(counts)`** — pure function in `pins/`, beside `countsWords`: the screen's lead
+  from `teamCounts`, "13 teammates · 12 time zones · live", or "Just you · 1 time zone · live"
+  for a team of one.
+- **`filterByStatus(rows, filter)`** — pure function in `pins/`. `all` keeps every row,
+  `working` keeps status Working hours and `asleep` keeps status Probably asleep. A row whose
   status is null is kept by `All` only. The order is unchanged (L2-028).
 - **`searchRows(rows, query)`** — pure function in `pins/`. It trims the query and, when
   anything is left, keeps the rows whose name or city contains it, without regard to case. An
@@ -90,11 +107,18 @@ loading and refreshing are designed in `keep-team-fresh`.
   sections of the list and the teammate has not closed it. An open section holds its first
   `CityRowLimit` (50) rows, and `more` is the count less those; a closed section holds no
   rows. A city none of whose teammates passes the filter and the search has no section.
-- **`ribbonMarkers(pins, now, settings)`** — pure function in `pins/`, for a team of 40 or
-  fewer. It returns one `RibbonMarker` per pin. `dayFraction` is the local hour and minute as a
-  fraction of 24 hours, so a local time of 08:05 sits just after the 08:00 mark. Markers close
-  enough to overlap, those at the same local time and those less than an hour after the marker
-  before them, take successive `lane` values, so each stays visible and can be chosen (L2-027).
+- **`ribbonMarkers(pins, now, format)`** — pure function in `pins/`, for a team of 40 or
+  fewer. It returns a `RibbonView`: one `RibbonMarker` per pin and the number of `rows` the
+  track needs. A marker's `at` is the local hour and minute as a percentage of 24 hours, to two
+  decimals (08:05 is 33.68), so it sits just after the 08:00 mark. The markers are taken in order
+  of local time, then west to east, the viewer's own first among teammates of the same city; each
+  takes the lowest `lane` whose last marker is three hours (one step of the scale) or more before
+  it, so markers at the same hour or close to it are each visible and can be chosen (L2-027), as
+  the mocks place them. The markers are listed in that order, which is how a screen reader reads
+  them. `rows` is the highest lane plus one.
+- **`ribbonScale(format)`** — pure function in `pins/`: the nine marks, every three hours from
+  midnight to midnight, "00:00" to "00:00", or on the 12-hour clock by the hour alone, "12 am",
+  "3 am" to "9 pm" and "12 am" (L2-027).
 - **`ribbonDensity(pins, now, settings)`** — pure function in `pins/`, for a large team. It
   counts the pins in 48 bins, one for each half hour of the day, by each pin's local time: a
   pin at 15:05 is in the bin that starts at 15:00. It returns a `RibbonDensity`: the 48
@@ -105,22 +129,23 @@ loading and refreshing are designed in `keep-team-fresh`.
 **In the `components` library**
 
 - **`DayRibbon`** (`mo-day-ribbon`) — presentation component, the mocks' `day-ribbon` block, a
-  section named by its visually hidden heading "The day, hour by hour". It takes `markers` or
-  `density`, and `summary`. It draws the 24 hours with a
-  mark every three hours, labelled "00:00", "03:00", "06:00" and so on, or on the 12-hour clock
-  by the hour alone ("12 am", "3 am", "6 am"), and four bands, each with a text label and not
-  by colour alone: "Night" from 23:00 to 07:00, "Morning" from 07:00 to 09:00, "Working hours"
-  from 09:00 to 18:00 and "Evening" from 18:00 to 23:00. Given `markers`, each marker is a
-  link holding an `Avatar`,
-  placed by percentage so the ribbon fits any width without scrolling the page. A marker's
-  accessible name is the teammate's name and local time ("Noah Williams, 01:05"), and its
-  tooltip the name and city ("Noah Williams · Melbourne"). It emits `teammateChosen`.
+  section named by its visually hidden heading "The day, hour by hour". It takes `markers`,
+  `rows`, `scale` and `address` (the address that selects a teammate), and with journey 18
+  `density` and `summary`. It draws the 24 hours with the nine marks of `scale`, and four bands,
+  each with a text label and not by colour alone: "Night" from 23:00 to 07:00, "Morning" from
+  07:00 to 09:00, "Working hours" from 09:00 to 18:00 and "Evening" from 18:00 to 23:00. Each
+  marker is a link to `/globe?teammate={teammateId}` holding an `Avatar`, placed by percentage
+  in its row. The track and its scale are at least 45rem wide, inside `day-ribbon__scroll`, a
+  focusable region named by the heading: under that width the ribbon scrolls sideways inside
+  itself and the page does not (L2-027). A marker's accessible name is the teammate's name and
+  local time ("Noah Williams, 01:05"), and its tooltip the name and city ("Noah Williams ·
+  Melbourne"). A plain click emits `teammateChosen`; any other follows the link.
 - **The ribbon as a bar chart** — given `density`, `DayRibbon` draws no marker. Over the same
   four bands it draws 48 bars (`day-ribbon__bar`), one for each half hour, each as tall as its
   bin's share of `max`; an empty bin is a `day-ribbon__bar--none`. The count stands in figures
   over the tallest bar ("123", `day-ribbon__bar-count`). Above the track a summary line
   (`day-ribbon__summary`) reads "324 of 500" and "are in working hours right now"; `TeamPage`
-  builds it from `TeamStore.counts`, so it follows the clock and leaves out a teammate who
+  builds it from `teamCounts`, so it follows the clock and leaves out a teammate who
   does not share their status. The track (`day-ribbon__track--density`) is one picture,
   `role="img"`, named "How many teammates are at each half hour of their day. The most, 123,
   are at 15:00."; its bars are hidden from assistive technology and are not controls. Where
@@ -128,12 +153,15 @@ loading and refreshing are designed in `keep-team-fresh`.
   `day-ribbon__scroll`, a focusable group named "The day ribbon; scroll sideways to see all 24
   hours", and the page itself does not scroll sideways. A teammate of a large team is reached
   through the list and its search, not through the ribbon.
-- **`Segmented`** (`mo-segmented`) — presentation component. It takes `options`, each with an
-  optional `count`, `value` and a `mode` (`tabs` or `radio`), and emits `valueChange`. Here its
-  mode is `tabs`: one `tablist` named "Filter by status": the arrow keys
-  move between its tabs, one tab is in the tab order, the chosen tab carries `aria-selected`,
-  and the list under it is its `tabpanel` (L2-028). `TeamPage` builds the filter's three tabs
-  from `TeamStore.counts`: "All 13", "Working now 8", "Asleep 2", and for a team of 500 "All
+- **`Segmented`** (`mo-segmented`) — presentation component, the mocks' `segmented` block as
+  a tab list. It takes `options` (each a `value`, a `label` and an optional `count`), the
+  chosen `value`, the list's `label` and the id of the panel it `controls`, and emits
+  `valueChange`. It is one `tablist`, "Filter by status": each option is a `tab` whose id is
+  `tab-{value}`; Left and Right (and Home and End) move focus between its tabs and choose the one
+  they reach, one tab is in the tab order, the chosen tab carries `aria-selected`, and the list
+  under it is its `tabpanel`, labelled by the chosen tab (L2-028). A radio mode, for Profile &
+  Settings' two-way choices, joins with journey 23. `TeamPage` builds the filter's three tabs
+  from `teamCounts`: "All 13", "Working now 8", "Asleep 2", and for a team of 500 "All
   500", "Working now 324", "Asleep 42". The counts are the team's, and a search does not
   change them.
 - **`SearchField`** (`mo-search-field`) — presentation component, shown for a large team
@@ -144,15 +172,20 @@ loading and refreshing are designed in `keep-team-fresh`.
   memory, so the search needs no request, no delay and no timer. What is typed is data: it is
   rendered as text and sent nowhere (L2-044).
 - **`TeamTable`** (`mo-team-table`) — presentation component, the mocks' `team-table` block. It
-  takes `rows` and `caption`, and emits `teammateChosen`. From 768 px it has the columns
+  takes `rows`, `caption` and `address`, and emits `teammateChosen`. From 768 px it has the columns
   Person, Location, Local time, Compared to you, Weather and Coming up; below that each row
   gives the name, the status in words, the local time, the city with the offset ("Mexico City
   · 7h behind") and the next moment. The viewer's row shows the name
   followed by "(you)" and a dash for the offset, named "You" for assistive technology. Coming
   up gives the next moment's kind icon, its title and when it is ("October Bank Holiday ·
   Today", "Día de Muertos · In 5 days", "São Paulo Grand Prix · 9 Nov"). A row with no next
-  moment shows a dash under Coming up, named "Nothing coming up". Each row holds one link over
-  the teammate's name that covers the row, so a row is chosen by pointer, touch or keyboard.
+  moment shows a dash under Coming up, named "Nothing coming up". The weather is its icon, read
+  as its word (`WeatherIcon`), then the degrees ("13°"); where it is unavailable, a mark named
+  "Weather unavailable"; where the teammate does not share it, a dash named "Weather not shared"
+  (`team/sharing-off`). The local time carries a dot for the status, decorative, beside the status
+  in words; a row with no status has no dot. Each row holds one link over the teammate's name,
+  to `/globe?teammate={teammateId}`, that covers the row, so a row is chosen by pointer, touch or
+  keyboard; a plain click emits `teammateChosen`.
   For a team of 40 or fewer the list is one table, headed "Everyone, west to east", whose
   caption names what it holds:
   "Everyone, west to east", "Teammates in working hours, west to east" or "Teammates probably
@@ -171,14 +204,28 @@ loading and refreshing are designed in `keep-team-fresh`.
 - **`ListNote`** (`mo-list-note`) — presentation component, the mocks' `list-note` block, a
   `role="status"` region shown in the list's place when it holds no row. It takes a `title`,
   a `text` and an optional `action`, and emits `actionChosen`.
+- **`EmptyState`** (`mo-empty-state`) — presentation component, the design system's `empty`
+  block: an icon, a title that is the screen's heading, a line and its actions, projected. Team
+  shows it when the team's first read fails (`team/error`): "The team didn’t load", "We
+  couldn’t reach Mondino. Check your connection and try again.", with "Try again", which reads
+  the team again (`TeamStore.load`), and "Back to the globe" (L2-049).
+- **`Alert`** (`mo-alert`) — the existing component, with a `live` input so a warning that is no
+  alarm is announced politely (`role="status"`): above the list, while any pin's weather is
+  `Unavailable`, "Weather is unavailable right now. Local times are still right."
+  (`team/weather-unavailable`, L2-049).
 - **`InvitePrompt`** (`mo-invite-prompt`) — presentation component, the mocks' `invite-prompt`
   card, shown for a team of one. It takes the team's name and emits `invite` with the button's
   element, to which focus returns when the dialog closes.
 
+**Loading.** Until the team's first read answers, `TeamPage` shows the mock's placeholder
+(`team/loading`): the heading, then skeletons for the lead, the ribbon and six rows, in a `main`
+marked `aria-busy`, with "Loading team…" announced once in a visually hidden `role="status"`
+(L2-049).
+
 **A team of one**
 
 The heading of the screen gives the number of teammates and of distinct time zones from
-`TeamStore.counts`, as "13 teammates · 12 time zones · live". For a team of one it reads "Just
+`teamCounts` and `teamLine`, as "13 teammates · 12 time zones · live". For a team of one it reads "Just
 you · 1 time zone · live". The day ribbon shows the viewer's own marker. Under it
 `InvitePrompt` reads "It’s just you on Northwind so far" and "This list fills up west to east
 as teammates join with the invite link.", with the button "Invite teammates". On `invite`,
@@ -194,12 +241,12 @@ When the filter or the search leaves no row, `TeamPage` shows a `ListNote` in th
 | Case | Title | Text | Action |
 |---|---|---|---|
 | Asleep, and no one is asleep | "No one is asleep right now" | "Try another filter." | "Show everyone" |
-| Working now, and no one is in working hours | "No one is in working hours right now" | "It’s the quiet gap between time zones. Check back in an hour." | `<TO SUPPLY>` |
+| Working now, and no one is in working hours | "No one is in working hours right now" | "It’s the quiet gap between time zones. Check back in an hour." | "Show everyone" |
 | A search that matches no one | "No one matches “Reykjavik”" | "Try another filter." | "Show everyone" |
 
 "Show everyone" clears the search and returns the filter to All. The title of the third case
-quotes what was typed, as text. Whether the note for Working now carries "Show everyone" is
-`<TO SUPPLY>`; the mocks draw the note for Asleep and for a search.
+quotes what was typed, as text. The mocks draw the note for Asleep (`team/no-results`), for
+Working now (`team/quiet`) and for a search (`team/hundreds-no-match`).
 
 **A large team**
 
@@ -233,8 +280,11 @@ at any hour and they are listed under All only: not under Working now or Asleep,
 neither count, since `teamCounts` and `filterByStatus` both read `statusFor` (L2-015, L2-028).
 
 The viewer's time zone is the time zone of the viewer's own pin. The viewer's display settings
-(°C or °F, 24-hour or 12-hour clock) come from `SettingsCache`. A teammate's name, a city and a
-moment's title are rendered as text, never as HTML.
+(°C or °F, 24-hour or 12-hour clock) are the defaults for the country of their pin until
+Profile & Settings stores a choice (journey 23). A teammate's name, a city and a moment's title
+are rendered as text, never as HTML. Every value is worked out again when the clock's minute
+changes, so the local times, the statuses, the counts, the filter's list and the ribbon follow
+the hour with no reload (L2-028).
 
 ## Requirements
 
