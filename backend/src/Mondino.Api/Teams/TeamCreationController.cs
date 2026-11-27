@@ -2,8 +2,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Mondino.Api.Joining;
 using Mondino.Api.RateLimiting;
 using Mondino.Api.Security;
+using Mondino.Application.Joining;
 using Mondino.Application.Teams;
 using Mondino.Infrastructure.Teammates;
 
@@ -18,6 +20,20 @@ namespace Mondino.Api.Teams;
 [AllowAnonymous]
 public sealed class TeamCreationController(ISender sender) : ControllerBase
 {
+    /// <summary>Looks a postal code up for its country, as Join does, with no invite link (L2-003).</summary>
+    [HttpPost("postal-code-lookups")]
+    [EnableRateLimiting(RateLimitPolicies.Lookup)]
+    public Task<PostalCodeResultDto> LookUpPostalCode(
+        [FromBody] PostalCodeLookupRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new LookUpPostalCodeQuery(null, request.CountryCode, request.PostalCode), cancellationToken);
+
+    /// <summary>The cities of a country that start with the text, while the lookup is down (L2-004).</summary>
+    [HttpPost("city-searches")]
+    [EnableRateLimiting(RateLimitPolicies.CitySearch)]
+    public Task<IReadOnlyList<CityResultDto>> SearchCities(
+        [FromBody] CitySearchRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SearchCitiesQuery(null, request.CountryCode, request.Text), cancellationToken);
+
     /// <summary>
     /// Makes a team with its maker's pin at the city, and signs the maker in: 201 for a new team,
     /// 200 for a request already answered. Fields the body does not define are ignored.
