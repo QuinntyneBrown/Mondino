@@ -55,9 +55,11 @@ decides how they are drawn.
   and no local time: the browser works the time out from the time zone id.
 - **`CachedWeatherSource`** — `IWeatherSource` decorator over `OpenMeteoWeatherSource`, with a
   timeout and a circuit breaker.
-- **`PinColourPicker`** — picks a teammate's colour from the pin palette when they join, so
-  that it differs from the teammates nearest to them where the palette allows. It runs in the
-  join slice; this feature reads the stored colour.
+- **`PinColourPicker`** — picks a teammate's colour from the pin palette when they join or
+  make a team, so that it differs from the teammates nearest to them where the palette allows:
+  the colour whose nearest holder is farthest from the new teammate's city, a colour no one
+  holds first, then the fewest held, then the lowest number. This feature reads the stored
+  colour.
 
 **In the `api` library**
 
