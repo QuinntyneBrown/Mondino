@@ -8,7 +8,7 @@ Person(teammate, "Teammate", "Uses Mondino")
 System_Boundary(mondino, "Mondino") {
   Container(spa, "Mondino web app", "Angular", "Sends no analytics or telemetry to anyone")
   Container(api, "Mondino API", "ASP.NET Core", "Instrumented with OpenTelemetry; health endpoints; correlation id in each error")
-  ContainerDb(db, "Mondino database", "EF Core, engine TO SUPPLY", "Checked by the readiness endpoint")
+  ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Checked by the readiness endpoint")
 }
 
 System_Ext(telemetry, "Telemetry backend", "Product TO SUPPLY")

@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Keep team data
+
+Person(teammate, "Teammate", "Uses Mondino")
+
+System_Boundary(mondino, "Mondino, in the resource group mondino-rg") {
+  Container(spa, "Mondino web app", "Angular", "Served by the API from its own origin")
+  Container(api, "Mondino API", "ASP.NET Core on Azure App Service", "Reads and writes rows as mondino_app; answers /health/ready")
+  ContainerDb(db, "Mondino database", "Azure Database for PostgreSQL Flexible Server, database mondino", "Entra authentication only; firewall; 7 days of backups")
+}
+
+System_Ext(runner, "Deployment", "GitHub Actions, deploy.yml. Runs Mondino.Cli migrate as mondino_migrator, then publishes")
+System_Ext(entra, "Microsoft Entra ID", "Issues tokens")
+
+Rel(teammate, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Reads and writes rows", "EF Core, Npgsql, TLS verified")
+Rel(api, entra, "Token for its managed identity")
+Rel(runner, db, "Applies migrations through a firewall rule held for one step", "Npgsql, TLS verified")
+Rel(runner, api, "Publishes; requires Healthy from /health/live and /health/ready", "HTTPS")
+Rel(runner, entra, "Signs in", "OpenID Connect")
+@enduml

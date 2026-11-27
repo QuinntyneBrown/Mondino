@@ -24,5 +24,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0014](0014-drawing-the-pins.md) | The page places the pins over the globe, and the numbers that group, fade and label them | Accepted |
 | [0015](0015-weather-source.md) | The weather comes from Open-Meteo, asked once per city and kept 15 minutes | Accepted |
 | [0016](0016-no-limit-on-making-a-team.md) | Making a team has no rate limit, the one open request without one | Accepted; supersedes part of 0009 |
+| [0017](0017-azure-postgresql.md) | The deployed database is an Azure PostgreSQL Flexible Server, reached without a password and migrated by the deployment | Accepted |
 
 Not decided yet, by the journey that first needs it: the providers of the calendars (journey 19).

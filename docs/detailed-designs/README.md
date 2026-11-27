@@ -45,8 +45,9 @@ python .claude/skills/writing-software-design-documents/scripts/render_puml.py d
 | | [stay-fast-and-light](platform/stay-fast-and-light/) | L2-046, L2-047 |
 | | [survive-source-failure](platform/survive-source-failure/) | L2-049, L2-050 |
 | | [observe-without-exposing](platform/observe-without-exposing/) | L2-051 |
+| | [keep-team-data](platform/keep-team-data/) | L2-057 |
 
-Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
+Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
 
 ## The system in brief
 
@@ -57,7 +58,9 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
   `Mondino.Application`, `Mondino.Infrastructure` and `Mondino.Api`. It is the only thing that
   calls an outside source.
 - **Mondino database** holds teams and teammates through EF Core, in PostgreSQL
-  ([ADR 0004](../adr/0004-database-engine.md)).
+  ([ADR 0004](../adr/0004-database-engine.md)). Deployed, it is an Azure Database for PostgreSQL
+  Flexible Server, reached without a password and migrated by the deployment
+  ([ADR 0017](../adr/0017-azure-postgresql.md), [`keep-team-data`](platform/keep-team-data/)).
 - **Outside sources** are the postal code source, Open-Meteo for the weather, the holiday,
   race and event calendars, and the email source that delivers sign-in links.
 - **The screens** are Join (`/join/{inviteToken}`), Sign In (`/sign-in`), Create Team (`/new`),
@@ -190,8 +193,6 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 
 The designs mark these as `<TO SUPPLY>`:
 
-- The hosting platform, and with it how the API learns a client's own address behind the
-  platform's proxy (forwarded headers), which the rate limits count by.
 - The providers of the holiday, race and event calendars. (The postal code source and the city
   search's data set are ADR 0006's; the email source is ADR 0011's.)
 - Signing in (`joining/sign-in`): how a teammate who joined by invite link signs in again,

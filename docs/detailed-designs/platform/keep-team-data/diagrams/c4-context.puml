@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System context — Keep team data
+
+Person(teammate, "Teammate", "Comes back and finds their team as they left it")
+Person(operator, "Operator", "Sets the database up once; restores it if it is ever lost")
+System(mondino, "Mondino", "Keeps teams, teammates, pins and sign-in links in a database")
+System_Ext(github, "GitHub Actions", "Deploys every commit to main; migrates the database first")
+System_Ext(entra, "Microsoft Entra ID", "Issues the short-lived tokens the database accepts in place of a password")
+
+Rel(teammate, mondino, "Uses", "HTTPS")
+Rel(github, mondino, "Migrates, publishes and checks", "HTTPS, PostgreSQL over TLS")
+Rel(github, entra, "Signs in as mondino-deploy", "OpenID Connect")
+Rel(mondino, entra, "Asks for a token as the App Service identity")
+Rel(operator, mondino, "Administers the database", "PostgreSQL over TLS")
+@enduml

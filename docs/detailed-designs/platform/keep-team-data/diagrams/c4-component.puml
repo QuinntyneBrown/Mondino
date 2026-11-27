@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Keep team data
+
+Container_Boundary(api, "Mondino API and Mondino.Cli") {
+  Component(di, "AddInfrastructure", "Mondino.Infrastructure", "Reads Database:Provider and binds the database")
+  Component(connection, "DatabaseConnection", "Mondino.Infrastructure", "Checks the settings and builds the data source")
+  Component(tokens, "EntraDatabaseTokens", "Mondino.Infrastructure, Azure.Identity", "Asks for a token as the managed identity or the Azure CLI account")
+  Component(context, "AppDbContext", "EF Core", "The database; retries a transient failure")
+  Component(ready, "DatabaseReadyCheck", "Mondino.Api, IHealthCheck", "Healthy when the database can be reached")
+  Component(health, "HealthEndpoints", "Mondino.Api", "/health/live and /health/ready, a status and nothing else")
+  Component(migrator, "DatabaseMigrator", "Mondino.Infrastructure", "Applies the migrations for Mondino.Cli migrate")
+}
+ContainerDb(db, "Mondino database", "PostgreSQL Flexible Server", "Entra authentication only")
+System_Ext(entra, "Microsoft Entra ID", "Issues tokens")
+
+Rel(di, connection, "Create(configuration)")
+Rel(connection, tokens, "Password provider, when Database:Authentication is ManagedIdentity or AzureCli")
+Rel(tokens, entra, "Token for the database audience")
+Rel(context, connection, "Opens connections from the data source")
+Rel(context, db, "Reads and writes", "TLS, VerifyFull")
+Rel(health, ready, "Readiness")
+Rel(ready, context, "CanConnectAsync, through IAppDbContext")
+Rel(migrator, context, "MigrateAsync")
+@enduml
