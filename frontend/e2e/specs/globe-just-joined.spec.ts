@@ -34,19 +34,29 @@ test.describe('Globe: just joined', () => {
     joinPage,
     globePage,
   }) => {
-    // When Sofia joins Northwind
-    await join(joinPage);
+    // When Sofia joins Northwind. The clock is stopped before she presses "Join", so the toast's
+    // 4 seconds pass only as the steps below say, however slow the machine is
+    await joinPage.open('northwind-7Kq2');
+    await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
+    await joinPage.leavePostalCode();
+    await expect(joinPage.submit).toHaveText('Join Northwind');
+    await pauseTheClock(joinPage.page);
+    await joinPage.submit.click();
 
     // Then the Globe opens, and a toast, in a region that announces it once, says she is on the map
+    await expect
+      .poll(async () => {
+        await globePage.page.clock.runFor(16);
+        return globePage.toast.count();
+      })
+      .toBe(1);
     await expect(globePage.page).toHaveURL('/globe');
     await expect(globePage.toastRegion).toHaveAttribute('role', 'status');
     await expect(globePage.toast).toHaveText(
       'You’re on the map. Northwind can now see your pin in Milan.',
     );
 
-    // And the toast dismisses itself after 4 seconds. The clock is stopped as soon as the toast is
-    // seen, so the time the steps below take does not count towards its 4 seconds
-    await pauseTheClock(globePage.page);
+    // And the toast dismisses itself after 4 seconds
     await letTimePass(globePage.page, 3_000);
     await expect(globePage.toast).toBeVisible();
     await letTimePass(globePage.page, 1_000);
