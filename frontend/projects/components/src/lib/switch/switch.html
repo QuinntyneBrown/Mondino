@@ -1,0 +1,19 @@
+<button
+  class="switch-row"
+  type="button"
+  role="switch"
+  [attr.aria-checked]="checked()"
+  (click)="checkedChange.emit(!checked())"
+>
+  @if (kind(); as kind) {
+    <mo-emblem size="sm" [kind]="kind" [plain]="!checked()" />
+  }
+  <span class="switch-row__text"
+    ><span class="switch-row__label">{{ label() }}</span>
+    @if (hint(); as hint) {
+      <span class="switch-row__hint">{{ hint }}</span>
+    }
+  </span>
+  <span class="switch__state" aria-hidden="true">{{ checked() ? 'On' : 'Off' }}</span>
+  <span class="switch"></span>
+</button>

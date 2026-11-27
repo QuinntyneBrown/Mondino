@@ -32,9 +32,22 @@ export class ProfilePage {
   readonly tryLookupAgain: Locator;
   /** "Your city", which Join offers while the lookup is down; never here. */
   readonly yourCity: Locator;
+  /** The Display section: a radio group each for the temperature and the clock. */
+  readonly display: Locator;
+  readonly temperature: Locator;
+  readonly clock: Locator;
+  /** Moments on the globe, a switch per kind, and What teammates see, the two sharing switches. */
+  readonly moments: Locator;
+  readonly privacy: Locator;
+  readonly shareWeather: Locator;
+  readonly shareStatus: Locator;
+  /** The note under the sharing switches when both are off. */
+  readonly sharingNote: Locator;
   readonly saveBar: Locator;
   readonly saveChanges: Locator;
   readonly saveBarButton: Locator;
+  readonly saveBarText: Locator;
+  readonly trySavingAgain: Locator;
   /** While the profile is read, and when it fails. */
   readonly loadingAnnouncement: Locator;
   readonly skeletons: Locator;
@@ -68,15 +81,57 @@ export class ProfilePage {
     this.warning = this.location.locator('.alert--warning');
     this.tryLookupAgain = this.warning.getByRole('button', { name: 'Try again' });
     this.yourCity = page.getByLabel('Your city');
+    this.display = this.main.getByRole('region', { name: 'Display' });
+    this.temperature = this.display.getByRole('radiogroup', { name: 'Temperature' });
+    this.clock = this.display.getByRole('radiogroup', { name: 'Clock' });
+    this.moments = this.main.getByRole('region', { name: 'Moments on the globe' });
+    this.privacy = this.main.getByRole('region', { name: 'What teammates see' });
+    this.shareWeather = this.privacy.getByRole('switch', { name: /^Share my local weather/ });
+    this.shareStatus = this.privacy.getByRole('switch', {
+      name: /^Share whether I’m working or asleep/,
+    });
+    this.sharingNote = this.privacy.locator('.panel__note');
     this.saveBar = page.locator('.save-bar');
     this.saveChanges = this.saveBar.getByRole('button', { name: 'Save changes' });
     this.saveBarButton = this.saveBar.getByRole('button');
+    this.saveBarText = this.saveBar.locator('.save-bar__text');
+    this.trySavingAgain = this.saveBar.getByRole('button', { name: 'Try again' });
     this.loadingAnnouncement = this.main.getByRole('status');
     this.skeletons = this.main.locator('.skeleton');
     this.errorTitle = this.main.locator('.empty__title');
     this.errorText = this.main.locator('.empty__text');
     this.tryAgain = this.main.getByRole('button', { name: 'Try again' });
     this.backToGlobe = this.main.getByRole('link', { name: 'Back to the globe' });
+  }
+
+  /** An option of a Display radio group: "°F" of Temperature. */
+  option(group: Locator, name: string): Locator {
+    return group.getByRole('radio', { name, exact: true });
+  }
+
+  /** A kind's switch under Moments on the globe: "Big sporting days". */
+  kindSwitch(label: string): Locator {
+    return this.moments.getByRole('switch', { name: label });
+  }
+
+  /** "On" or "Off" beside a switch's track. */
+  stateOf(control: Locator): Locator {
+    return control.locator('.switch__state');
+  }
+
+  /** The line under a switch's label. */
+  hintOf(control: Locator): Locator {
+    return control.locator('.switch-row__hint');
+  }
+
+  /** The emblem leading a kind's switch. */
+  emblemOf(control: Locator): Locator {
+    return control.locator('.emblem');
+  }
+
+  /** The tick a chosen option carries besides its fill. */
+  tick(option: Locator): Locator {
+    return option.locator('.segmented__check');
   }
 
   async open(): Promise<void> {

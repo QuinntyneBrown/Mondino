@@ -7,7 +7,7 @@ Container_Boundary(spa, "Mondino web app") {
   Component(page, "ProfilePage", "Angular page, lazy route", "Segmented, Switch and SaveBar bound to the draft")
   Component(store, "ProfileStore", "Route-scoped signal store", "Draft, unsaved changes, save state")
   Component(guard, "unsavedChangesGuard", "CanDeactivateFn", "Asks before leaving with unsaved changes")
-  Component(settings, "SettingsStore", "Root signal store", "The viewer's settings for every screen")
+  Component(settings, "SettingsCache", "SETTINGS_STORE, bound by TeamShell", "The viewer's unit, clock and kinds for every teammate screen (ADR 0023)")
   Component(client, "HttpProfileApi", "ProfileApi over HTTP", "Sends the settings")
 }
 Container_Boundary(api, "Mondino API") {

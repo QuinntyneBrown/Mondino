@@ -26,3 +26,12 @@
   width: var(--space-6);
   height: var(--space-6);
 }
+// Beside a kind's switch: smaller, and out of the moment colour while the kind is off.
+:host(.emblem--sm) {
+  width: var(--space-8);
+  height: var(--space-8);
+}
+:host(.emblem--plain) {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+}

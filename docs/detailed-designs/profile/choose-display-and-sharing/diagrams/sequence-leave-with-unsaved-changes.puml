@@ -26,24 +26,28 @@ end box
 actor -> shell : Choose "Globe" in the navigation
 shell -> router : Navigate to /globe
 router -> guard : canDeactivate(/profile)
-guard -> store : hasUnsavedChanges
+guard -> page : canLeave()
+page -> store : hasUnsavedChanges
 alt no unsaved changes
-  store --> guard : false
+  store --> page : false
+  page --> guard : true
   guard --> router : true
   router --> actor : Globe screen
 else unsaved changes (L2-035)
-  store --> guard : true
-  guard -> dialog : Open through CDK Dialog
+  store --> page : true
+  page -> dialog : Open through CDK Dialog, imported on first use
   dialog --> actor : "Leave without saving?", role alertdialog, focus on "Keep editing"
   alt "Discard and leave"
     actor -> dialog : Confirm
-    dialog --> guard : leave
+    dialog --> page : leave
+    page --> guard : true
     guard --> router : true
     router -> page : Destroy; ProfileStore and its draft go with the route
     router --> actor : Globe screen; nothing was saved
   else "Keep editing", or Escape
     actor -> dialog : Cancel
-    dialog --> guard : stay
+    dialog --> page : stay
+    page --> guard : false
     guard --> router : false
     router --> actor : Profile & Settings with the changes still unsaved; focus returns
   end

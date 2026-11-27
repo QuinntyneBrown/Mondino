@@ -1416,3 +1416,75 @@ Settings, and the limit on its lookup (journey 6, 36 of 40, still 90); Profile &
 - *Keep wall-clock timeouts out of the request path*: the postal code form's regex had a 100 ms match
   timeout, so on a loaded machine one of the five failing lookups could be refused before the source, the
   breaker never opened and the sixth answered 200; a linear-time (`NonBacktracking`) match needs no timeout.
+
+## Journey 23: Choose display and sharing
+
+**What slowed it**
+
+- The design still described the code as unwritten: a `SettingsStore` in `root`, a `TeammateSettings` no
+  journey had built, switches named `ShareWeather` and `ShareStatus`, and a whole-profile save. Journeys 11 to
+  22 had built `statusFor`, `SharesStatus` and `SharesWeather` (already applied by the read of the pins),
+  `SETTINGS_STORE` bound by `TeamShell` and a location-only `PUT /me`. The design, its five changed diagrams,
+  the shared contracts and ADR 0023 were brought to that before any code.
+- A save sends the parts that changed. Journey 22's save had to keep sending only the location, so `PUT /me`
+  takes a location part and a settings part, each optional; its spec and its backend tests stood unchanged.
+- Journey 22's location spec read Toronto's time as "10:05 am", Canada's clock; with the clock the
+  teammate's own it is "10:05". The same spec waited 4 seconds for the bar to go after a save; it now reads
+  "Saved — your pin is up to date".
+- `<button mo-switch>` with its content in the component's template failed angular-eslint's
+  `elements-content`: the rule reads the consumer's empty button. `Switch` became the element `mo-switch`
+  holding its button.
+- Tomás is on the far side of the still picture, so the Globe's pin list has no button for him; the spec
+  reads Chloé's pin and opens Tomás's panel by his address, as journey 20 found.
+- Slice 2 built the store's whole save state, so the save bar's and the dialog's specs were green on
+  arrival; each was broken (a lifetime of 8 seconds, a failure reported as idle, the guard removed, the
+  `beforeunload` listener removed) and seen to fail.
+- During one break, `git checkout` on the page threw away the slice's uncommitted template work with the
+  sabotage; it was rebuilt from the copy taken before the break.
+
+**Lessons**
+
+1. **Break a slice with a copy, not with git.** Copy the file aside, sabotage, copy it back; `git checkout`
+   restores the last commit and takes the slice's own work with it.
+2. **A component that draws a button's content is an element, not an attribute on an empty button.** The
+   linter reads the consumer's template, where the button looks empty.
+3. **When a setting becomes the teammate's own, find every spec that read its default.** A clock or a unit
+   worked out from the country reaches screens far from the one that changes it.
+4. **Make each part of an update optional, and send only what changed.** Earlier callers and their tests
+   stay valid, and one unit of work still stores the parts together or not at all.
+5. **Prove the browser's own leave prompt with `page.close({ runBeforeUnload: true })`.** A dialog handler
+   that dismisses it records the `beforeunload` and keeps the page; with nothing unsaved the page closes.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): the design, its diagrams, the shared contracts and ADR 0023 were one commit before
+  any code.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit code,
+  written to a log; it stopped three commits (the Toronto clock, the empty switch button, a selector in a
+  spec).
+- *Measure the initial bundle* (journey 2, lesson 1): 273.29 kB before, 273.19 kB after; `/profile` moved to
+  its own routes file with the guard, and "Leave without saving?" and the CDK Dialog load on first use.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5): seven times,
+  including the Globe ignoring the saved clock and the cache dropping the unit.
+- *A design-system block gets its own component* (journey 19, lesson 4): `Switch` holds `switch-row`;
+  `Segmented` gained its radio mode with `segmented__check`.
+- *One value per text interpolation in a lazy component* (journey 18, lesson 2): each switch's line and the
+  notes are one computed string.
+- *Default an e2e fixture to the state earlier specs assumed* (journey 19, lesson 3): `sofiaProfile()`
+  answers the settings her country gives, so no earlier profile spec changed its request.
+- *Prove a timed message as soon as it is seen* (journey 11, lesson 3): the clock is paused once "Saved"
+  shows, then run 3.9 and 0.1 seconds.
+- *Look at an overlay once* (journey 16, lesson 3): one screenshot at 1280 and 375 px of the sections with
+  the switches off and of "Leave without saving?" as a sheet.
+- *A setting whose switch comes later is read through its token now* (journey 20, lesson 3): the switches
+  only write `SETTINGS_STORE`; the Globe's every-kind-off note and legend needed no change.
+
+**Progress:** 20 of 20 criteria proven (100%). L2-034 criteria 2, 3 and 8 are read off the pin, panel,
+counts, week, Team row, ribbon and filter specs of journeys 11, 14, 15 and 17, which answer a teammate whose
+`sharesStatus` is false; this journey's backend test proves the switch is what makes it false. Proven here
+for earlier journeys: L2-019 criterion 3, a changed unit on every screen (journey 13, 9 of 9: 100); L2-022's
+switches turning every kind off and bringing the Globe's note and legend (journey 20 stays 90: L2-021
+criterion 4's held emblem cannot be reached). Handed on: what "Leave Northwind" does with unsaved changes
+(prompt 24), carrying the backend's settings to a browser that never opened Profile & Settings (prompt 25),
+and a save with an ended session (prompt 27). Total: 80.

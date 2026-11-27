@@ -22,12 +22,13 @@ public sealed class ProfileController(ISender sender) : ControllerBase
         sender.Send(new GetProfileQuery(teamId), cancellationToken);
 
     /// <summary>
-    /// Saves the asker's own new location (L2-032): the city is found again and the pin moves to
-    /// it. Fields the body does not define, a teammate id among them, are ignored (L2-044).
+    /// Saves the asker's own new location (L2-032), whose city is found again and the pin moved to
+    /// it, and their settings (L2-033, L2-034); a part left out is unchanged. Fields the body does
+    /// not define, a teammate id among them, are ignored (L2-044).
     /// </summary>
     [HttpPut]
     public Task<ProfileDto> Put(Guid teamId, [FromBody] ProfileUpdateRequest request, CancellationToken cancellationToken) =>
-        sender.Send(new UpdateProfileCommand(teamId, request.CountryCode, request.PostalCode), cancellationToken);
+        sender.Send(new UpdateProfileCommand(teamId, request.CountryCode, request.PostalCode, request.Settings), cancellationToken);
 
     /// <summary>
     /// Looks a new postal code up for the asker's own pin (L2-032) and changes nothing. The postal
@@ -40,8 +41,8 @@ public sealed class ProfileController(ISender sender) : ControllerBase
         sender.Send(new LookUpOwnPostalCodeQuery(teamId, request.CountryCode, request.PostalCode), cancellationToken);
 }
 
-/// <summary>A country and a postal code, as typed on Profile &amp; Settings. Journey 23 adds the settings.</summary>
-public sealed record ProfileUpdateRequest(string? CountryCode, string? PostalCode)
+/// <summary>A country and a postal code, as typed on Profile &amp; Settings, and the settings; each part optional.</summary>
+public sealed record ProfileUpdateRequest(string? CountryCode, string? PostalCode, SettingsUpdate? Settings = null)
 {
     /// <summary>Only the type: what a teammate sent is never written to a log (L2-051).</summary>
     public override string ToString() => nameof(ProfileUpdateRequest);

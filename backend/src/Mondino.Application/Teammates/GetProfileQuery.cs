@@ -4,6 +4,7 @@ using Mondino.Application.Errors;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teams;
+using Mondino.Domain.Teams;
 
 namespace Mondino.Application.Teammates;
 
@@ -15,10 +16,10 @@ public sealed record GetProfileQuery(Guid TeamId) : IRequest<ProfileDto>, ITeamS
 
 /// <summary>
 /// What Profile &amp; Settings reads: the team's name, the teammate's own pin, country and postal
-/// code, which no other answer carries (L2-007); null for a pin placed through "Your city". The
-/// settings join with journeys 22 and 23.
+/// code, which no other answer carries (L2-007), null for a pin placed through "Your city"; and
+/// their own settings (docs/adr/0023).
 /// </summary>
-public sealed record ProfileDto(string TeamName, PinDto Pin, string CountryCode, string? PostalCode);
+public sealed record ProfileDto(string TeamName, PinDto Pin, string CountryCode, string? PostalCode, SettingsDto Settings);
 
 internal sealed class GetProfileQueryHandler(
     IAppDbContext database, ICurrentTeammate currentTeammate, IWeatherSource weatherSource)
@@ -48,6 +49,11 @@ internal static class OwnProfiles
                 t.City.Longitude,
                 t.City.TimeZoneId,
                 t.PostalCode,
+                t.TemperatureUnit,
+                t.ClockFormat,
+                t.MomentKinds,
+                t.SharesWeather,
+                t.SharesStatus,
             })
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw RefusedException.NotFound(ErrorCodes.TeamNotFound);
@@ -70,6 +76,8 @@ internal static class OwnProfiles
                 weather,
                 weather is null ? WeatherState.Unavailable : WeatherState.Available),
             own.CountryCode,
-            own.PostalCode);
+            own.PostalCode,
+            SettingsDto.From(new TeammateSettings(
+                own.TemperatureUnit, own.ClockFormat, own.MomentKinds, own.SharesWeather, own.SharesStatus)));
     }
 }

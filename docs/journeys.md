@@ -12,7 +12,7 @@
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 100 |
 | 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 100 |
 | 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 100 |
-| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 90 |
+| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 100 |
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 100 |
 | 15 | [View the week around the world](prompts/15-view-the-week-around-the-world-prompt.md) | See this week's moments, who is working, and team counts. | L2-024, L2-025 | 4 | 100 |
 | 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 60 |
@@ -22,7 +22,7 @@
 | 20 | [Mark pins with moments](prompts/20-mark-pins-with-moments-prompt.md) | See a moment marker beside pins with moments this week. | L2-021, L2-022 | 4 | 90 |
 | 21 | [List moments](prompts/21-list-moments-prompt.md) | Browse upcoming moments by when and filter by kind. | L2-029, L2-030 | 4 | 100 |
 | 22 | [Change location](prompts/22-change-location-prompt.md) | See your own pin and move it to a new city. | L2-031, L2-032 | 4 | 100 |
-| 23 | [Choose display and sharing](prompts/23-choose-display-and-sharing-prompt.md) | Choose units, clock, moment kinds and what teammates see. | L2-033, L2-034, L2-035 | 5 | 0 |
+| 23 | [Choose display and sharing](prompts/23-choose-display-and-sharing-prompt.md) | Choose units, clock, moment kinds and what teammates see. | L2-033, L2-034, L2-035 | 5 | 100 |
 | 24 | [Leave the team](prompts/24-leave-the-team-prompt.md) | Remove your pin and everything held about you. | L2-036 | 3 | 0 |
 | 25 | [Keep the team fresh](prompts/25-keep-the-team-fresh-prompt.md) | An open screen refreshes pins, weather and moments quietly. | L2-048 | 3 | 0 |
 | 26 | [Survive a source failure](prompts/26-survive-a-source-failure-prompt.md) | Pins keep their local time when weather or calendars fail. | L2-049, L2-050 | 4 | 0 |
@@ -30,4 +30,4 @@
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 10 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 20 |
-| | **Total** | | | **147** | **76** |
+| | **Total** | | | **147** | **80** |

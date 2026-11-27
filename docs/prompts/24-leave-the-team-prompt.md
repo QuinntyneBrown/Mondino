@@ -109,6 +109,9 @@ Builds on: journeys 6 and 22.
   lesson it applied worked.
 - Journey 22 built `/profile` without "Leave Northwind" (`settings__leave`, `pages/profile/default`): add it
   under the sections there.
+- Journey 23 put `unsavedChangesGuard` on `/profile` (`profile.routes.ts`): leaving the screen with unsaved
+  settings asks "Leave without saving?" first. Decide whether "Leave Northwind" opens its dialog before or
+  after that question, record it in the design, and prove it.
 - Set journey 24 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

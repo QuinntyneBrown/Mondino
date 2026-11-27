@@ -1,20 +1,45 @@
-<div class="segmented" role="tablist" [attr.aria-label]="label()">
-  @for (option of options(); track option.value; let index = $index) {
-    <button
-      class="segmented__option tnum"
-      type="button"
-      role="tab"
-      [id]="'tab-' + option.value"
-      [attr.aria-controls]="controls()"
-      [attr.aria-selected]="option.value === value()"
-      [attr.tabindex]="option.value === value() ? 0 : -1"
-      (click)="choose(option.value)"
-      (keydown)="move($event, index)"
-    >
-      {{ option.label }}
-      @if (option.count !== undefined) {
-        <span class="segmented__count">{{ option.count }}</span>
-      }
-    </button>
-  }
-</div>
+@if (mode() === 'radio') {
+  <div class="segmented segmented--radio" role="radiogroup" [attr.aria-label]="label()">
+    @for (option of options(); track option.value; let index = $index) {
+      <button
+        class="segmented__option tnum"
+        type="button"
+        role="radio"
+        [attr.aria-checked]="option.value === value()"
+        [attr.tabindex]="option.value === value() ? 0 : -1"
+        (click)="choose(option.value)"
+        (keydown)="move($event, index)"
+      >
+        <svg
+          class="icon icon--sm segmented__check"
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path d="M20 6 9 17l-5-5" /></svg
+        >{{ option.label }}
+      </button>
+    }
+  </div>
+} @else {
+  <div class="segmented" role="tablist" [attr.aria-label]="label()">
+    @for (option of options(); track option.value; let index = $index) {
+      <button
+        class="segmented__option tnum"
+        type="button"
+        role="tab"
+        [id]="'tab-' + option.value"
+        [attr.aria-controls]="controls()"
+        [attr.aria-selected]="option.value === value()"
+        [attr.tabindex]="option.value === value() ? 0 : -1"
+        (click)="choose(option.value)"
+        (keydown)="move($event, index)"
+      >
+        {{ option.label }}
+        @if (option.count !== undefined) {
+          <span class="segmented__count">{{ option.count }}</span>
+        }
+      </button>
+    }
+  </div>
+}

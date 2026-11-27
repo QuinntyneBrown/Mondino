@@ -79,7 +79,7 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
 - `GET /api/invites/{inviteToken}` answers an `InviteDto`. Its `Avatars` are the initials and
   colour of the five teammates who joined most recently, with no name, id or city; they are
   the most a holder of an invite link learns of a teammate.
-- `PinDto.SharesStatus` (`Pin.sharesStatus`; `TeammateSettings.ShareStatus` on the backend) is
+- `PinDto.SharesStatus` (`Pin.sharesStatus`; `Teammate.SharesStatus` on the backend) is
   false when a teammate has switched off "Share whether I’m working or asleep". The flag is
   renamed from the earlier one, which hid the status outside working hours only: the status
   is now hidden at every hour. Anything that shows, counts or filters by status calls
@@ -87,6 +87,13 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
   pin. Such a teammate has no working-hours overlap shown, is counted neither as working nor
   as asleep on the Globe, is not listed under "In working hours now", and on Team is listed
   under All only.
+- A teammate's settings are the backend's (ADR 0023): `TeammateSettings` (`TemperatureUnit`,
+  `ClockFormat`, `MomentKinds`, `SharesWeather`, `SharesStatus`), defaulted from the country on
+  joining and on making a team. `ProfileDto.Settings` (`Settings` in `@mondino/api`) carries them
+  to their own teammate alone, and `PUT /api/teams/{teamId}/me` takes a location part and a
+  settings part, each optional. The teammate screens read the display settings and the kinds
+  through `SETTINGS_STORE`, bound by `TeamShell` to `SettingsCache`; a null unit or clock means the
+  viewer's country's default.
 - A postal code travels only in a request body. `IPostalCodeLookup.FindCityAsync` answers a
   `PostalCodeLookupOutcome`: found with a `City`, not found or unavailable; the API answers 422 `postal_code_not_found` and 503
   `postal_code_unavailable`, and 429 `rate_limited` over the limit. A person joining looks one up

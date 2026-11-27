@@ -13,13 +13,19 @@ title Class structure — Choose display and sharing
 
 package "Frontend" {
   class ProfileStore {
-    +saved: Signal<Profile>
-    +draft: Signal<ProfileUpdate>
+    +profile: Signal<Profile>
+    +settings: Signal<Settings>
+    +locationChanged: Signal<boolean>
+    +settingsChanged: Signal<boolean>
     +hasUnsavedChanges: Signal<boolean>
     +saveState: Signal<SaveState>
     +barState: Signal<SaveBarState>
-    +changeSettings(patch: Partial<Settings>): void
-    +save(): void
+    +setTemperatureUnit(unit): void
+    +setClockFormat(format): void
+    +setMomentKind(kind, on): void
+    +setSharesWeather(on): void
+    +setSharesStatus(on): void
+    +save(): Promise<SaveResult>
   }
   enum SaveState {
     idle
@@ -48,25 +54,29 @@ package "Frontend" {
   class Switch {
     +checked: boolean
     +label: string
+    +hint: string?
     +checkedChange: Output
   }
-  class ProfilePage
+  class ProfilePage {
+    +canLeave(): Promise<boolean>
+  }
   class DiscardChangesDialog
   class unsavedChangesGuard << (F,#D1E9FF) function >>
-  class SettingsStore {
-    +settings: Signal<Settings>
+  interface SettingsStore {
+    +momentKinds: Signal<MomentKind[]>
+    +temperatureUnit: Signal<TemperatureUnit?>
+    +clockFormat: Signal<ClockFormat?>
     +replace(settings: Settings): void
   }
   class SettingsCache {
-    +read(): Settings?
-    +write(settings: Settings): void
+    -mondino.settings: unit, clock, kinds
   }
   class Settings {
     +temperatureUnit: TemperatureUnit
     +clockFormat: ClockFormat
     +momentKinds: MomentKind[]
-    +shareWeather: boolean
-    +showOutsideWorkingHours: boolean
+    +sharesWeather: boolean
+    +sharesStatus: boolean
   }
 }
 
@@ -81,14 +91,16 @@ package "Backend" {
   class Teammate {
     +Guid Id
     +TeammateSettings Settings
+    +bool SharesWeather
+    +bool SharesStatus
     +ChangeSettings(settings: TeammateSettings): void
   }
   class TeammateSettings {
     +TemperatureUnit TemperatureUnit
     +ClockFormat ClockFormat
     +MomentKind[] MomentKinds
-    +bool ShareWeather
-    +bool ShareStatus
+    +bool SharesWeather
+    +bool SharesStatus
     +{static} DefaultsFor(countryCode: string): TeammateSettings
   }
   enum TemperatureUnit {
@@ -118,14 +130,14 @@ package "Backend" {
 ProfilePage --> ProfileStore : reads / sends changes
 ProfilePage --> SaveBar : state
 ProfilePage --> Segmented : unit, clock format (mode radio)
-ProfilePage --> Switch : two sharing switches
+ProfilePage --> Switch : four kinds, two sharing switches
 ProfileStore --> SaveState : has
 SaveBar --> SaveBarState : shows
 ProfileStore --> Settings : draft and saved
 ProfileStore ..> SettingsStore : publishes on save
-SettingsStore ..> SettingsCache : starts from / writes
-unsavedChangesGuard ..> ProfileStore : hasUnsavedChanges
-unsavedChangesGuard ..> DiscardChangesDialog : opens
+SettingsCache ..|> SettingsStore
+unsavedChangesGuard ..> ProfilePage : canLeave()
+ProfilePage ..> DiscardChangesDialog : opens
 ProfileStore ..> UpdateProfileCommandHandler : PUT through ProfileApi
 UpdateProfileCommandHandler ..> UpdateProfileCommandValidator : validated by
 UpdateProfileCommandHandler --> Teammate : ChangeSettings
