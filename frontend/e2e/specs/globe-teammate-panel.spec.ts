@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-007, L2-014, L2-015, L2-016, L2-017, L2-018, L2-019, L2-020, L2-023, L2-044
+// Traces to: L2-007, L2-014, L2-015, L2-016, L2-017, L2-018, L2-019, L2-020, L2-023, L2-044, L2-049
 // Description: A selected teammate's panel gives their name, city and country, local time and own day, offset, status, weather and the overlap with the viewer, and their upcoming moments, as the mocks draw it; the viewer's own has "(you)" and no offset or overlap; a teammate who shares neither weather nor status has the private note
 
 import { expect, test } from '../fixtures/test';

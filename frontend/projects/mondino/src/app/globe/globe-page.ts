@@ -22,12 +22,15 @@ import {
   type Position,
 } from '@mondino/api';
 import {
+  Button,
+  EmptyState,
   GlobeFallback,
   GlobeLegend,
   GlobePlaceholder,
   GroupPanel,
   PinLayer,
   InviteCard,
+  Skeleton,
   TeammatePanel,
   WeekPanel,
 } from '@mondino/components';
@@ -61,6 +64,8 @@ import { Toaster } from '../team/toaster';
 @Component({
   selector: 'mo-globe-page',
   imports: [
+    Button,
+    EmptyState,
     GlobeFallback,
     GlobeLegend,
     GlobePlaceholder,
@@ -68,6 +73,7 @@ import { Toaster } from '../team/toaster';
     GroupPanel,
     PinLayer,
     InviteCard,
+    Skeleton,
     TeammatePanel,
     WeekPanel,
   ],
@@ -102,6 +108,13 @@ export class GlobePage {
     (inject(Router).currentNavigation() ?? inject(Router).lastSuccessfulNavigation())?.extras
       .state?.['justJoined'],
   );
+
+  /**
+   * Whether the team's first read is pending: the heading and the panel are placeholders, and the
+   * wait is announced (L2-049). A failed first read shows the error state instead.
+   */
+  protected readonly loading = computed(() => this.store.state() === 'Loading');
+  protected readonly loadingRows = [1, 2, 3, 4];
 
   /** Whether the 3D globe is loading, drawn, or cannot be drawn and the still picture is shown. */
   protected readonly globeState = signal<GlobeState>('Loading');
@@ -310,6 +323,7 @@ export class GlobePage {
    * Mexico City, selected.". It changes with the selection only, not as the minute passes.
    */
   protected readonly announcement = computed(() => {
+    if (this.loading()) return 'Loading your team…';
     const id = this.store.selectedId();
     const pin = this.store.team()?.pins.find((each) => each.teammateId === id);
     if (pin) return `${pin.name}${pin.isViewer ? ', you' : ''}, ${pin.cityName}, selected.`;
@@ -435,6 +449,11 @@ export class GlobePage {
     this.store.selectGroup(placement.pins.map((pin) => pin.teammateId));
     void this.show(null);
     if (keyboard) afterNextRender(() => this.focusHeading(), { injector: this.injector });
+  }
+
+  /** "Try again" after a failed first read: the team is read again. */
+  protected tryAgain(): void {
+    void this.store.load();
   }
 
   /** "All moments", "Choose moments" and "2 more on the Team page": the screens they lead to. */
