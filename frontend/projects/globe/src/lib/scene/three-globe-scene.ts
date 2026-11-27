@@ -18,7 +18,8 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Position } from '@mondino/api';
-import modelUrl from '../assets/globe.glb';
+import lowModelUrl from '../assets/globe-low.glb';
+import highModelUrl from '../assets/globe-high.glb';
 import surfaceUrl from '../assets/surface.png';
 import cloudsUrl from '../assets/clouds.png';
 import { directionOf } from '../sun/sun-position';
@@ -149,7 +150,28 @@ function mask(image: ImageBitmap): Texture {
 /** A colour as written in the token, with no colour-space conversion: the mocks' own values. */
 const colour = (css: string) => new Color().setStyle(css.trim(), LinearSRGBColorSpace);
 
-/** The scene, drawn by three.js (ADR 0012). Only `createGlobeScene` imports this module. */
+/** Parses a fetched glTF binary and takes out the named meshes, with their placeholder materials released. */
+async function meshesOf<Name extends string>(
+  bytes: ArrayBuffer,
+  names: readonly Name[],
+): Promise<Record<Name, Mesh>> {
+  const gltf = await new GLTFLoader().parseAsync(bytes, '');
+  const found = {} as Record<Name, Mesh>;
+  for (const name of names) {
+    const mesh = gltf.scene.getObjectByName(name);
+    if (!(mesh instanceof Mesh)) throw new Error(`The model has no ${name}`);
+    // The model's own materials are placeholders; Mondino's shader colours it.
+    (mesh.material as Material).dispose();
+    found[name] = mesh;
+  }
+  return found;
+}
+
+/**
+ * The scene, drawn by three.js (ADR 0012). Only `createGlobeScene` imports this module. It is
+ * drawn first from the low model; the high one is fetched after the first frame, while the step
+ * asks for it, and shown when it arrives (ADR 0030).
+ */
 export class ThreeGlobeScene implements GlobeScene {
   private readonly scene = new Scene();
   private readonly globe = new Group();
@@ -162,21 +184,27 @@ export class ThreeGlobeScene implements GlobeScene {
   private inFrame = false;
   private running = false;
   private disposed = false;
+  private step: DetailStep;
+  /** The high model: fetched after the first frame while the step asks for it, then held. */
+  private high: Mesh | null = null;
+  private highLoading: AbortController | null = null;
 
   private constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly renderer: WebGLRenderer,
-    private readonly meshes: { high: Mesh; low: Mesh; clouds: Mesh },
+    private readonly meshes: { low: Mesh; clouds: Mesh },
     private readonly surfaceMaterial: ShaderMaterial,
     private readonly cloudMaterial: ShaderMaterial,
     private readonly images: ImageBitmap[],
     private readonly onContextLost: (event: Event) => void,
+    detail: DetailStep,
   ) {
+    this.step = detail;
     const halfAngle = Math.atan(Math.tan(Math.asin(1 / cameraDistance)) / DiscShare);
     this.camera = new PerspectiveCamera((2 * halfAngle * 180) / Math.PI, 1, 0.1, 20);
     this.camera.position.set(0, 0, cameraDistance);
     this.globe.rotation.order = 'XYZ';
-    this.globe.add(meshes.high, meshes.low, meshes.clouds);
+    this.globe.add(meshes.low, meshes.clouds);
     this.scene.add(this.globe);
     this.orient(STARTING_ORIENTATION);
   }
@@ -188,22 +216,14 @@ export class ThreeGlobeScene implements GlobeScene {
   ): Promise<ThreeGlobeScene> {
     const { signal } = options;
     const images: ImageBitmap[] = [];
-    let meshes: { high: Mesh; low: Mesh; clouds: Mesh };
     try {
       const [model, surface, clouds] = await Promise.all([
-        fetched(modelUrl, signal).then((response) => response.arrayBuffer()),
+        fetched(lowModelUrl, signal).then((response) => response.arrayBuffer()),
         bitmap(surfaceUrl, signal).then((image) => (images.push(image), image)),
         bitmap(cloudsUrl, signal).then((image) => (images.push(image), image)),
       ]);
-      const gltf = await new GLTFLoader().parseAsync(model, '');
-      const mesh = (name: string) => {
-        const found = gltf.scene.getObjectByName(name);
-        if (!(found instanceof Mesh)) throw new Error(`The model has no ${name}`);
-        return found;
-      };
-      meshes = { high: mesh('GlobeHigh'), low: mesh('GlobeLow'), clouds: mesh('Clouds') };
-      // The model's own materials are placeholders; Mondino's shader colours it.
-      for (const each of Object.values(meshes)) (each.material as Material).dispose();
+      const { GlobeLow: low, Clouds: cloudShell } = await meshesOf(model, ['GlobeLow', 'Clouds']);
+      const meshes = { low, clouds: cloudShell };
       if (signal.aborted) throw signal.reason;
       return ThreeGlobeScene.assemble(canvas, context, options, meshes, surface, clouds, images);
     } catch (error) {
@@ -218,7 +238,7 @@ export class ThreeGlobeScene implements GlobeScene {
     canvas: HTMLCanvasElement,
     context: WebGL2RenderingContext,
     options: GlobeSceneOptions,
-    meshes: { high: Mesh; low: Mesh; clouds: Mesh },
+    meshes: { low: Mesh; clouds: Mesh },
     surface: ImageBitmap,
     clouds: ImageBitmap,
     images: ImageBitmap[],
@@ -252,7 +272,6 @@ export class ThreeGlobeScene implements GlobeScene {
       depthWrite: false,
       uniforms: { clouds: { value: mask(clouds) }, cloud: { value: new Color() }, night, sun },
     });
-    meshes.high.material = surfaceMaterial;
     meshes.low.material = surfaceMaterial;
     meshes.clouds.material = cloudMaterial;
     meshes.clouds.renderOrder = 1;
@@ -267,6 +286,7 @@ export class ThreeGlobeScene implements GlobeScene {
       cloudMaterial,
       images,
       onContextLost,
+      options.detail,
     );
     scene.setDetail(options.detail);
     return scene;
@@ -286,9 +306,14 @@ export class ThreeGlobeScene implements GlobeScene {
   }
 
   setDetail(step: DetailStep): void {
+    this.step = step;
     this.renderer.setPixelRatio(step.pixelRatio);
-    this.meshes.high.visible = step.modelDetail === 'High';
-    this.meshes.low.visible = step.modelDetail === 'Low';
+    // A lower step no longer needs the high model: a fetch still on its way is given up.
+    if (step.modelDetail === 'Low') {
+      this.highLoading?.abort();
+      this.highLoading = null;
+    }
+    this.showMesh();
     this.invalidate();
   }
 
@@ -348,9 +373,11 @@ export class ThreeGlobeScene implements GlobeScene {
     if (this.disposed) return;
     this.disposed = true;
     this.stop();
+    this.highLoading?.abort();
+    this.highLoading = null;
     this.frameListeners.length = 0;
     this.canvas.removeEventListener('webglcontextlost', this.onContextLost);
-    for (const mesh of Object.values(this.meshes)) mesh.geometry.dispose();
+    for (const mesh of [...Object.values(this.meshes), this.high]) mesh?.geometry.dispose();
     for (const material of [this.surfaceMaterial, this.cloudMaterial]) {
       (material.uniforms['surface']?.value as Texture | undefined)?.dispose();
       (material.uniforms['clouds']?.value as Texture | undefined)?.dispose();
@@ -359,6 +386,41 @@ export class ThreeGlobeScene implements GlobeScene {
     this.images.forEach((image) => image.close());
     this.renderer.dispose();
     this.renderer.forceContextLoss();
+  }
+
+  /** Shows the step's mesh: the high one once it has arrived, the low one until then. */
+  private showMesh(): void {
+    const high = this.step.modelDetail === 'High' && this.high !== null;
+    if (this.high) this.high.visible = high;
+    this.meshes.low.visible = !high;
+  }
+
+  /**
+   * Fetches the high model after the first frame, so it never holds the globe up, and only while
+   * the step asks for it. It is shown when it arrives; a failed fetch leaves the low one.
+   */
+  private async loadHigh(): Promise<void> {
+    if (this.high || this.highLoading || this.step.modelDetail !== 'High') return;
+    // Given up when the step goes down and when the scene is disposed, which the page's leaving does.
+    const loading = (this.highLoading = new AbortController());
+    const { signal } = loading;
+    try {
+      const bytes = await (await fetched(highModelUrl, signal)).arrayBuffer();
+      const { GlobeHigh: high } = await meshesOf(bytes, ['GlobeHigh']);
+      if (signal.aborted || this.disposed) {
+        high.geometry.dispose();
+        return;
+      }
+      high.material = this.surfaceMaterial;
+      this.high = high;
+      this.globe.add(high);
+      this.showMesh();
+      this.invalidate();
+    } catch {
+      // The low model stays: the globe looks the same, a little coarser (L2-008).
+    } finally {
+      if (this.highLoading === loading) this.highLoading = null;
+    }
   }
 
   /** Turns the globe so the centre of the view is at `orientation`'s longitude and latitude. */
@@ -375,13 +437,14 @@ export class ThreeGlobeScene implements GlobeScene {
   private invalidate(): void {
     if (!this.running || this.frame !== undefined) return;
     if (!this.inFrame) this.previousFrameAt = undefined;
-    this.frame = requestAnimationFrame(() => {
+    // The frame's own time, which the browser gives every callback of the same frame.
+    this.frame = requestAnimationFrame((now) => {
       this.frame = undefined;
-      const now = performance.now();
       const previous = this.previousFrameAt;
       const elapsed = previous === undefined ? 0 : Math.max(0, now - previous);
       this.previousFrameAt = now;
       this.renderer.render(this.scene, this.camera);
+      void this.loadHigh();
       this.inFrame = true;
       try {
         for (const listener of [...this.frameListeners]) listener(elapsed);

@@ -39,23 +39,29 @@
         </div>
       } @else if (globeState() === 'Fallback') {
         <div class="globe-screen__globe">
-          <mo-globe-fallback
-            pinned
-            data-measured
-            [label]="globeLabel()"
-            (widthChange)="stillWidth.set($event)"
-          >
-            @if (stillPinPlacements(); as placements) {
-              <mo-pin-layer
-                pins
-                [placements]="placements"
-                [selectedId]="store.selectedId()"
-                [selectedGroupKey]="store.selectedGroupKey()"
-                (selectPin)="select($event)"
-                (selectGroup)="selectGroup($event)"
-              />
-            }
-          </mo-globe-fallback>
+          <!-- The still picture is a large drawing that only a globe that cannot be drawn needs, so
+               it arrives on its own, after the screen (ADR 0030). -->
+          @defer (on immediate) {
+            <mo-globe-fallback
+              pinned
+              data-measured
+              [label]="globeLabel()"
+              (widthChange)="stillWidth.set($event)"
+            >
+              @if (stillPinPlacements(); as placements) {
+                <mo-pin-layer
+                  pins
+                  [placements]="placements"
+                  [selectedId]="store.selectedId()"
+                  [selectedGroupKey]="store.selectedGroupKey()"
+                  (selectPin)="select($event)"
+                  (selectGroup)="selectGroup($event)"
+                />
+              }
+            </mo-globe-fallback>
+          } @placeholder {
+            <mo-globe-placeholder variant="disc" />
+          }
         </div>
       } @else {
         <div class="globe-screen__globe">

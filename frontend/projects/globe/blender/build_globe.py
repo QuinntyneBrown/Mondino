@@ -4,10 +4,12 @@
 
 Run it from `frontend/` after `npm ci` (it reads Natural Earth's land from `world-atlas`). It writes:
 
-- `projects/globe/src/lib/assets/globe.glb`: the model. `GlobeHigh` and `GlobeLow` are the
-  sphere at two levels of detail with the land raised from the sea; `Clouds` is the smooth shell
-  the clouds are drawn on (and the outline drawn from). Positions and normals only: the surface
-  is looked up from the direction of each point, so the model carries no texture coordinates.
+- `projects/globe/src/lib/assets/globe-low.glb` and `globe-high.glb`: the model, in two files so
+  the globe is drawn from the lighter one first (docs/adr/0030). `GlobeLow` and `GlobeHigh` are the
+  sphere at two levels of detail with the land raised from the sea; `Clouds`, in the low file, is
+  the smooth shell the clouds are drawn on (and the outline drawn from). Positions and normals
+  only: the surface is looked up from the direction of each point, so the model carries no
+  texture coordinates.
 - `projects/globe/src/lib/assets/surface.png`: where the land is (red), its forest (green), its
   sand (blue) and its ice (alpha), equirectangular, north at the top, 2048 x 1024.
 - `projects/globe/src/lib/assets/clouds.png`: where the clouds are (red), 1024 x 512.
@@ -350,13 +352,26 @@ def main():
     def smooth(radius):
         return lambda lons, lats: np.full(np.shape(lons), radius)
 
-    sphere("GlobeHigh", HIGH, raised)
-    sphere("GlobeLow", LOW, raised)
-    sphere("Clouds", SHELL, smooth(CLOUD_RADIUS))
+    high = sphere("GlobeHigh", HIGH, raised)
+    low = sphere("GlobeLow", LOW, raised)
+    clouds = sphere("Clouds", SHELL, smooth(CLOUD_RADIUS))
 
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, "globe.blend"), compress=True)
+    # The globe is drawn first from the low file, which every device needs; the high file follows
+    # while the device keeps the finer step (docs/adr/0030).
+    export("globe-low.glb", [low, clouds])
+    export("globe-high.glb", [high])
+    print("mondino: done")
+
+
+def export(name, objects):
+    """Exports `objects` alone to `name` in the assets."""
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in objects:
+        obj.select_set(True)
     bpy.ops.export_scene.gltf(
-        filepath=os.path.join(ASSETS, "globe.glb"),
+        filepath=os.path.join(ASSETS, name),
+        use_selection=True,
         export_format="GLB",
         export_yup=True,
         export_normals=True,
@@ -368,7 +383,6 @@ def main():
         export_animations=False,
         export_apply=True,
     )
-    print("mondino: done")
 
 
 if __name__ == "__main__":
