@@ -13,7 +13,7 @@ import {
   SOFIA_JOINED,
 } from '../fixtures/invites';
 import { letTimePass, pauseTheClock } from '../support/turning';
-import { announcements, listenForAnnouncements } from '../support/accessibility';
+import { announcements, fastRepeats, listenForAnnouncements } from '../support/accessibility';
 
 test.describe('Globe: just joined', () => {
   test.beforeEach(({ api }) => {
@@ -59,6 +59,8 @@ test.describe('Globe: just joined', () => {
     );
     const toasts = async () =>
       (await announcements(globePage.page)).filter((said) => said.text.startsWith('You’re on'));
+    // And the new pin's pulse runs once, and nothing repeats more than three times a second
+    expect(await fastRepeats(globePage.page)).toEqual([]);
     expect(await toasts()).toEqual([
       {
         politeness: 'polite',

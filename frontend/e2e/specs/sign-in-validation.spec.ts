@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-052, L2-044
+// Traces to: L2-052, L2-044, L2-041
 // Description: Text that is not an email sends nothing, marks the field invalid with an alert under it, and puts focus back on the field
 
 import { expect, test } from '../fixtures/test';
