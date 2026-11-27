@@ -1,9 +1,11 @@
 // The search above a large team (docs/design-system/components/text-field, "Search").
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
   width: 100%;
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   :host {
     width: var(--layout-search-width);
   }

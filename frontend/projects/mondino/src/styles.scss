@@ -1,6 +1,7 @@
 // Global styles are foundations only: the tokens and @font-face (docs/design-system/tokens/
 // tokens.css, added in angular.json), the reset and a few utilities. A component's look lives in
 // its own stylesheet.
+@use 'breakpoints' as bp;
 
 *,
 *::before,
@@ -76,12 +77,12 @@ svg {
 ::selection {
   background: var(--color-moment-subtle);
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   h1 {
     font: var(--text-h1);
   }
 }
-@media (min-width: 62rem) {
+@media (min-width: bp.$lg) {
   h1 {
     font: var(--text-h1-lg);
   }

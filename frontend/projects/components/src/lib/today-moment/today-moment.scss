@@ -1,5 +1,7 @@
 // Today's moment on the Moments screen (docs/design-system/components/moment-row): a card in the
 // moment colour, the whole of it one link.
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
   margin-top: var(--space-8);
@@ -58,7 +60,7 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-@media (min-width: 40rem) {
+@media (min-width: bp.$stage) {
   .today-moment {
     flex-direction: row;
     align-items: center;

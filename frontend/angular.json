@@ -24,6 +24,9 @@
             "browser": "projects/mondino/src/main.ts",
             "tsConfig": "projects/mondino/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/components/src/styles"]
+            },
             "assets": [
               {
                 "glob": "**/*",

@@ -1,5 +1,7 @@
 // The header (docs/design-system/components/app-header). The links in its slots are the screen's,
 // styled where they are written.
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
 }
@@ -79,7 +81,7 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .app-header {
     gap: var(--space-6);
   }
@@ -87,7 +89,7 @@
     gap: var(--space-3);
   }
 }
-@media (min-width: 48rem) {
+@media (min-width: bp.$md) {
   .app-header__invite {
     width: auto;
     height: auto;
@@ -102,7 +104,7 @@
   }
 }
 // A phone under 416 px: the header tightens so its tabs, the invite button and the avatar fit.
-@media (max-width: 25.99rem) {
+@media (max-width: bp.$header-tight - 0.01rem) {
   .app-header {
     gap: var(--space-2);
     padding: 0 var(--space-3);
@@ -111,7 +113,7 @@
     gap: 0;
   }
 }
-@media (max-width: 22.49rem) {
+@media (max-width: bp.$header-tighter - 0.01rem) {
   .app-header {
     gap: var(--space-1);
     padding: 0 var(--space-2);

@@ -1,4 +1,6 @@
 // A choice of a few, as tabs or as a setting's radios (docs/design-system/components/segmented-control).
+@use 'breakpoints' as bp;
+
 :host {
   display: inline-block;
   max-width: 100%;
@@ -70,7 +72,7 @@
 .segmented--radio .segmented__option::after {
   inset-block: calc((var(--space-8) - var(--target-comfortable)) / 2);
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .segmented__option {
     padding: 0 var(--space-4);
   }

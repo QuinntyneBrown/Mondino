@@ -1,5 +1,6 @@
 // The `auth` block that Sign In and Create Team both draw (docs/adr/0011): the form beside the
 // globe, one column under 992 px. Each page uses it in its own encapsulated stylesheet.
+@use 'breakpoints' as bp;
 
 .auth {
   display: flex;
@@ -45,7 +46,7 @@
 .auth__footer a {
   font-weight: var(--font-weight-semibold);
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .auth__form {
     padding: var(--space-8) var(--space-10);
   }
@@ -57,7 +58,7 @@
     height: var(--layout-globe-tablet-height);
   }
 }
-@media (min-width: 62rem) {
+@media (min-width: bp.$lg) {
   .auth {
     flex-direction: row;
     height: 100dvh;

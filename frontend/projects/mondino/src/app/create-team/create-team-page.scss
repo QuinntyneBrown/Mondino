@@ -1,3 +1,5 @@
+@use 'breakpoints' as bp;
+
 @use '../auth/auth';
 
 :host {
@@ -9,7 +11,7 @@
   gap: var(--space-4);
 }
 
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .auth__field-row {
     grid-template-columns: minmax(0, 1fr) var(--layout-field-short);
   }

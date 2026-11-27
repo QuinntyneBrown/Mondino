@@ -1,0 +1,20 @@
+// The widths at which a layout changes (ADR 0027): the values of the design system's
+// --layout-breakpoint-* tokens, named here because a media query cannot read a custom property.
+// A min-width query reads `bp.$md`; a max-width one `bp.$md - 0.01rem`, so the sides never meet.
+// Read with `@use 'breakpoints' as bp;`. It emits no CSS.
+
+/// 576 px: the phone ends; the wordmark joins the mark, a dialog is in the middle.
+$sm: 36rem;
+/// 640 px: the Globe's 4:3 stage, with its heading, legend and invite card over the globe.
+$stage: 40rem;
+/// 768 px: the Team table, "Invite teammate" in words.
+$md: 48rem;
+/// 992 px: the form beside the globe on Join, Sign In and Create Team.
+$lg: 62rem;
+/// 1024 px: the panel beside the globe, the pin card beside the settings.
+$wide: 64rem;
+/// 1200 px: text keeps its measure through the containers' maximum widths; the globe grows.
+$xl: 75rem;
+/// 416 px and 360 px: the header alone tightens, so it fits 320 px.
+$header-tight: 26rem;
+$header-tighter: 22.5rem;

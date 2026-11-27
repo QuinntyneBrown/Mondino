@@ -1,4 +1,6 @@
 // The host takes no box: the legend is laid over the stage it is placed in.
+@use 'breakpoints' as bp;
+
 :host {
   display: contents;
 }
@@ -22,7 +24,7 @@
   font: var(--text-caption);
   color: var(--color-fg-muted);
 }
-@media (min-width: 40rem) {
+@media (min-width: bp.$stage) {
   .globe-screen__still {
     display: none;
   }
