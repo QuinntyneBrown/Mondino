@@ -105,6 +105,8 @@ Builds on: journeys 10 to 13.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 12 built the offset, the overlap and `OverlapBar` and waits for this screen to prove
+  the panel's offset and overlap (L2-016 criteria 1 to 5, L2-017 criteria 1 to 8) in Playwright; raise journey 12's % by the criteria proven here.
 - Set journey 14 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

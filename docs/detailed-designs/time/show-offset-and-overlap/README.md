@@ -38,11 +38,16 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
 
 ### Frontend — `api` library
 
-- **`Clock`** and **`CLOCK`** — the one injected clock: `now(): Date` and `minute: Signal<Date>`.
+- **`Clock`** and **`CLOCK`** — the one injected clock: `now(): number` and `minute: Signal<number>`,
+  each in milliseconds since the epoch (`show-local-time-and-status`).
 - **`Pin`** — carries `teammateId`, `timeZoneId` and `sharesStatus`, which is false for a
   teammate who has switched off "Share whether I’m working or asleep"
   (`show-local-time-and-status`).
 - **`ClockFormat`** — `'24-hour' | '12-hour'`, the viewer's choice in `Settings`.
+- **`Offset`**, **`DaySpan`**, **`Overlap`** and **`OverlapText`** (`time/`) — the types the
+  functions of `domain`'s `time/` return, described below. They are declared in `api`, beside
+  `Status` and `ClockFormat`, because `OverlapBar` in `components` takes them and `components`
+  depends on `api` alone, for types only.
 
 ### Frontend — `domain` library
 
@@ -54,7 +59,7 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
   this feature.
 - **`offsetBetween(now, timeZoneId, viewerTimeZoneId): Offset`** (`time/`) — pure function. It
   subtracts the viewer's `zoneOffsetMinutes` from the teammate's.
-- **`Offset`** — `minutes` (the size of the difference, never negative) and `direction`
+- **`Offset`** (`api`) — `minutes` (the size of the difference, never negative) and `direction`
   (`'ahead' | 'behind' | 'same'`). A teammate in Mexico City seen from Milan in winter has 420
   minutes and `behind`; a teammate in Bengaluru has 270 minutes and `ahead`.
 - **`formatOffset(offset, form): string`** (`time/`) — pure function; `form` is `'row'` or
@@ -70,7 +75,7 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
 - **`workingDayOnViewerClock(now, timeZoneId, viewerTimeZoneId): DaySpan`** (`time/`) — pure
   function. It takes the offset between the two zones at `now` and moves the teammate's working
   day onto the viewer's clock by subtracting that offset.
-- **`DaySpan`** — `startMinute` and `endMinute` in minutes from midnight on the viewer's clock;
+- **`DaySpan`** (`api`) — `startMinute` and `endMinute` in minutes from midnight on the viewer's clock;
   the end is smaller than the start when the span passes midnight. For a viewer in Milan it is
   960 and 60 for a teammate in Mexico City (16:00 to 01:00) and 1380 and 480 for a teammate in
   Melbourne (23:00 to 08:00).
@@ -79,28 +84,35 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
   working day. Because a working day recurs every 24 hours, the moved interval is also tried one
   day earlier and one day later. A working day lasts 9 hours and the gap between two is 15
   hours, so at most one of the three intersects. An empty intersection gives `null`.
-- **`Overlap`** — `startMinute` and `endMinute` in minutes from midnight on the viewer's clock,
+- **`Overlap`** (`api`) — `startMinute` and `endMinute` in minutes from midnight on the viewer's clock,
   and `lengthMinutes`. For a viewer in Milan (UTC+1) and a teammate in Mexico City (UTC−6) it is
   960, 1080 and 120: 16:00 to 18:00, two hours. For a teammate in the viewer's own time zone it
   is 540, 1080 and 540.
+- **`formatMinuteOfDay(minute, format): string`** (`time/`) — pure function. A minute of the
+  viewer's day as the overlap gives it: "16:00" on the 24-hour clock, and on the 12-hour clock
+  "4 pm" on the hour and "4:30 pm" otherwise. `formatTime` keeps its minutes on the hour
+  ("4:00 pm") for local times; the overlap drops them (L2-017 criterion 4).
 - **`formatOverlap(overlap, theirDay, firstName, format): OverlapText`** (`time/`) — pure
-  function. It gives the start and end through `formatTime` in the viewer's `ClockFormat`, and
-  the length in hours and minutes. On the 12-hour clock a time on the hour is given without its
-  minutes ("4 pm").
-- **`OverlapText`** — `figure` and `sentence`, worded as the mocks word them. With an overlap
+  function. It gives the start and end through `formatMinuteOfDay` in the viewer's
+  `ClockFormat`, and the length in hours and minutes: "2 hours", "1 hour", "4 hours 30 minutes",
+  "30 minutes". No mock draws an overlap of part of an hour; Bengaluru's, seen from Milan, is
+  "09:00 to 13:30", four hours and a half, and is worded so.
+- **`OverlapText`** (`api`) — `figure` and `sentence`, worded as the mocks word them. With an overlap
   they are "16:00–18:00 your time" and "You and Tomás share 2 hours of working hours: 16:00 to
   18:00 on your clock."; on the 12-hour clock, "4 pm–6 pm your time" and "… 4 pm to 6 pm on your
   clock.". For `null` they are "None today" and "You and Noah share no working hours. Noah’s
   working day is 23:00 to 08:00 on your clock.", the teammate's working day being `theirDay`.
   The first name is `firstName(name)` from `pins/`, the first word of the teammate's name,
   which the page passes in; it is data and is rendered as text.
+- **`WorkingDay`** is read by `statusAt` too: "Working hours" begins at `startMinute` and ends at
+  `endMinute`.
 
 `overlapBetween` uses the offset at the instant `now` for the whole day. On the day of a
 daylight-saving change the overlap shown before the change is the one that held before it, and
 the next tick after the change corrects it.
 
-No function in `time/` calls `new Date()`; each takes the instant as an argument, and the
-instant comes from `CLOCK`.
+No function in `time/` calls `new Date()` or `Date.now()`; each takes the instant, in milliseconds
+since the epoch, as an argument, and the instant comes from `CLOCK`.
 
 ### Frontend — pages and presentation
 
@@ -121,7 +133,10 @@ instant comes from `CLOCK`.
   of each row.
 - **`OverlapBar`** — presentation component, the `overlap` block of the mocks, under the title
   "Working-hours overlap". It takes the `Overlap` or `null`, the teammate's `DaySpan`, the
-  viewer's minute of the day, the teammate's first name and the `OverlapText`. It draws the
+  viewer's minute of the day (`nowMinute`), the teammate's first name, the `OverlapText` and the
+  viewer's `ClockFormat`, which chooses the scale. `barParts`, a pure helper beside it with its
+  own tests, turns those minutes into the parts of the track, each a `from` and a `span` in
+  percent of the day, a span past midnight split in two. It draws the
   viewer's day as a 24-hour track: the viewer's working day outlined, the teammate's filled
   faintly (in two parts when it passes midnight), the part both share filled solid, and a tick
   for now, each positioned by its minute divided by 1440. Under the track are a scale ("00:00",

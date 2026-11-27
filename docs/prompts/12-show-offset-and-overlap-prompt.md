@@ -2,7 +2,7 @@
 
 ## Goal
 
-A teammate's offset from the viewer is given in words ("7 h behind", "4 h 30 min ahead", "Same time"), and the
+A teammate's offset from the viewer is given in words ("7h behind", "4h 30m ahead", "Same time"), and the
 overlap of both working days is given on the viewer's own clock with a bar that draws it ("16:00–18:00 your
 time", or that the two share no working hours).
 
