@@ -9,7 +9,7 @@ import {
   untracked,
 } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   CLOCK,
   HttpTeamApi,
@@ -58,7 +58,15 @@ export const toastLifetime = 4000;
 export class GlobePage {
   private readonly membership = inject(TEAM_MEMBERSHIP);
   private readonly clock = inject(CLOCK);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected readonly store = inject(TeamStore);
+
+  /**
+   * The teammate the address selects: `/globe?teammate={teammateId}`, an opaque id and nothing
+   * else (L2-023). The address is the source of the selection; the store follows it.
+   */
+  private readonly requestedId = signal<string | null>(null);
 
   /** The teammate who has just joined, from the navigation that opened the screen; null on a reload. */
   protected readonly justJoined = justJoinedIn(
@@ -129,8 +137,34 @@ export class GlobePage {
   protected readonly toast = signal<{ strong: string; text: string } | null>(null);
 
   constructor() {
-    const router = inject(Router);
+    const router = this.router;
+    const destroyRef = inject(DestroyRef);
+    const subscription = this.route.queryParamMap.subscribe((params) =>
+      this.requestedId.set(params.get('teammate')),
+    );
+    destroyRef.onDestroy(() => subscription.unsubscribe());
     void this.store.load();
+    // Once the pins are read, the address chooses the selected pin; an id that is no pin of the
+    // team is taken out of the address. With no id a held group pin stays held.
+    let joinedPending = this.justJoined?.teammateId ?? null;
+    effect(() => {
+      const team = this.store.team();
+      const id = this.requestedId();
+      if (!team) return;
+      untracked(() => {
+        if (joinedPending && id === null) {
+          // The new pin stands alone, lifted and labelled, for this visit only: a reload of the
+          // Globe greets no one, so it is not put in the address.
+          this.store.select(joinedPending);
+          joinedPending = null;
+          return;
+        }
+        joinedPending = null;
+        if (id === null) this.store.selectedId.set(null);
+        else if (team.pins.some((pin) => pin.teammateId === id)) this.store.select(id);
+        else this.show(null);
+      });
+    });
     // A team the session no longer has: the same address now says an invite link is needed.
     effect(() => {
       if (this.store.state() === 'Forgotten')
@@ -139,8 +173,6 @@ export class GlobePage {
 
     const joined = this.justJoined;
     if (!joined) return;
-    // The new pin stands alone, lifted and labelled, and the globe turns to it.
-    this.store.select(joined.teammateId);
     // Shown once: a reload or a return through history does not greet the teammate again.
     const location = inject(Location);
     const state = location.getState();
@@ -154,7 +186,25 @@ export class GlobePage {
       text: `${teamName} can now see your pin in ${joined.cityName}.`,
     });
     const timer = setTimeout(() => this.toast.set(null), toastLifetime);
-    inject(DestroyRef).onDestroy(() => clearTimeout(timer));
+    destroyRef.onDestroy(() => clearTimeout(timer));
+  }
+
+  /** Selects a teammate's pin through the address, or clears the selection. */
+  private show(teammateId: string | null): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: teammateId ? { teammate: teammateId } : {},
+      replaceUrl: true,
+    });
+  }
+
+  protected select(teammateId: string): void {
+    this.show(teammateId);
+  }
+
+  protected clear(): void {
+    this.store.clear();
+    this.show(null);
   }
 
   protected showView(viewport: GlobeViewport): void {
@@ -163,6 +213,7 @@ export class GlobePage {
 
   protected selectGroup(placement: PinPlacement): void {
     this.store.selectGroup(placement.pins.map((pin) => pin.teammateId));
+    this.show(null);
   }
 
   protected dismissToast(): void {

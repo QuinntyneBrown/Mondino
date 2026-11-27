@@ -164,6 +164,17 @@ export class GlobePage {
     await this.page.goto('/globe');
   }
 
+  /** Opens the Globe at the address of a selected teammate, as a reload or a shared address does. */
+  async openAt(teammateId: string): Promise<void> {
+    await this.page.goto(`/globe?teammate=${encodeURIComponent(teammateId)}`);
+  }
+
+  /** The address shown, from its path on: "/globe?teammate=…". */
+  address(): string {
+    const url = new URL(this.page.url());
+    return `${url.pathname}${url.search}`;
+  }
+
   /** Loses the 3D globe's WebGL context, as a browser does when the GPU is reset. */
   async loseTheContext(): Promise<void> {
     await this.canvas.evaluate((canvas: HTMLCanvasElement) =>

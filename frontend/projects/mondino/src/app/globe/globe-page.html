@@ -13,7 +13,7 @@
               [placements]="placements"
               [selectedId]="store.selectedId()"
               [selectedGroupKey]="store.selectedGroupKey()"
-              (selectPin)="store.select($event)"
+              (selectPin)="select($event)"
               (selectGroup)="selectGroup($event)"
             />
           }
@@ -27,7 +27,7 @@
           [facing]="facing()"
           (stateChange)="globeState.set($event)"
           (viewChange)="showView($event)"
-          (blankTap)="store.clear()"
+          (blankTap)="clear()"
         >
           <mo-globe-placeholder loading variant="disc" />
           @if (placements(); as placements) {
@@ -36,7 +36,7 @@
               [placements]="placements"
               [selectedId]="store.selectedId()"
               [selectedGroupKey]="store.selectedGroupKey()"
-              (selectPin)="store.select($event)"
+              (selectPin)="select($event)"
               (selectGroup)="selectGroup($event)"
             />
           }

@@ -51,8 +51,8 @@ loading and refreshing are designed in `keep-team-fresh`.
   selection: selecting a pin, choosing a group's row, closing and a tap off the pins navigate,
   each replacing the history entry (so glancing at pins does not fill the history that "back"
   walks), and the store follows the address. The pin of a teammate who has just joined
-  (`joining/join-team`) is selected the same way: the Globe replaces its address with
-  `?teammate=` and the new teammate's id, which also takes the greeting out of history.
+  (`joining/join-team`) is the one selection not in the address: it is selected for that visit
+  only, so a reload of the Globe selects no one, as it greets no one.
 - **`TeamStore`** — signal store of the Globe screen, in the app's `globe/` (built by
   `globe/show-pins`), provided at the Globe route so the selection is released when the teammate
   leaves the screen; `TeamShell` provides it for the four screens of a team when it is built. It
