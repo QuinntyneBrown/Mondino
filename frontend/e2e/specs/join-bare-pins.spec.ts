@@ -7,6 +7,9 @@ import { NORTHWIND_INVITE, northwindInvite } from '../fixtures/invites';
 import { mockMarkup } from '../support/mocks';
 
 test.describe('Join: the team on the globe', () => {
+  // The mock draws the still picture; the 3D globe's pins are join-globe.spec.ts's.
+  test.use({ webgl: false });
+
   test('the globe carries a pin for each of the 12 teammates', async ({ api, joinPage }) => {
     // Given a valid invite link for Northwind, with 12 teammates
     api.answer('GET', NORTHWIND_INVITE, northwindInvite());
