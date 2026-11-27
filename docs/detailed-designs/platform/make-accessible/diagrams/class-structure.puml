@@ -12,45 +12,36 @@ skinparam class {
 hide empty members
 title Class structure — Make accessible
 
-interface MotionPreference {
-  +reduced: Signal<boolean>
-}
-
-class BrowserMotionPreference {
-  -query: MediaQueryList
-  +reduced: Signal<boolean>
-  -onChange(event: MediaQueryListEvent): void
+class GlobeMotion {
+  +setReducedMotion(reduced: boolean): void
+  +advance(elapsedMs: number): Orientation
 }
 
 class GlobeView <<mo-globe>> {
-  +pins: InputSignal<Pin[]>
-  +descriptions: InputSignal<Map<string, string>>
-  +selectedId: InputSignal<string | null>
-  +interactive: InputSignal<boolean>
   +label: InputSignal<string>
-  +select: OutputEmitterRef<string | null>
+  +interactive: InputSignal<boolean>
+  +facing: InputSignal<Position | null>
+  +blankTap: OutputEmitterRef<void>
+  -reducedMotion: MediaQueryList
+  [pins] slot
 }
 
-class PinLayer {
+class PinLayer <<mo-pin-layer>> {
   +placements: InputSignal<PinPlacement[]>
-  +descriptions: InputSignal<Map<string, string>>
   +selectedId: InputSignal<string | null>
-  +select: OutputEmitterRef<string | null>
-  +liftedId: Signal<string | null>
-  one button per pin: aria-label, aria-pressed
+  +selectPin: OutputEmitterRef<string>
+  +selectGroup: OutputEmitterRef<PinPlacement>
+  one button per pin: aria-label = description, aria-pressed
 }
 
 class describePin <<function>> {
-  +(pin: Pin, now: Date, settings: Settings): string
+  +(name, cityName, localTime, status, weather, marker): string
 }
 
 class GlobePage {
-  +onSelect(teammateId: string): void
-  -announceSelection(pin: Pin): void
-}
-
-class LiveAnnouncer <<Angular CDK>> {
-  +announce(message: string, politeness: "polite"): Promise<void>
+  #placements: Signal<PinPlacement[]>
+  #announcement: Signal<string>
+  polite live region: p[role=status]
 }
 
 class App {
@@ -65,10 +56,9 @@ class PostalCodeField <<mo-postal-code-field>> {
   +blurred: void
 }
 
-MotionPreference <|.. BrowserMotionPreference
-GlobeView *-- PinLayer
-GlobeView ..> MotionPreference : reads
+GlobeView o-- PinLayer : [pins] slot
+GlobeView *-- GlobeMotion : reduced motion
 GlobePage --> GlobeView : renders
-GlobePage ..> describePin : calls
-GlobePage ..> LiveAnnouncer : announces through
+GlobePage --> PinLayer : places
+GlobePage ..> describePin : through pinViews
 @enduml
