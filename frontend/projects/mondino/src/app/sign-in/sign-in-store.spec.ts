@@ -86,6 +86,32 @@ describe('SignInStore', () => {
     expect(store.state().kind).toBe('Idle');
   });
 
+  it('opens a link by its token and gives what it came to', async () => {
+    const membership = { teamId: 't', teammateId: 'm', teamName: 'Northwind' };
+    const { store, api } = storeAnswering({
+      redeem: vi.fn(() => Promise.resolve({ membership, email: null })),
+    });
+
+    const result = await store.open('h3ZSIRBy9Sa9NK7burl1q6JTN1KD2EB3KgdIlW7Vxuw');
+
+    expect(api.redeem).toHaveBeenCalledWith(
+      'h3ZSIRBy9Sa9NK7burl1q6JTN1KD2EB3KgdIlW7Vxuw',
+      expect.any(AbortSignal),
+    );
+    expect(result).toEqual({ membership, email: null });
+  });
+
+  for (const code of ['sign_in_link_unusable', 'rate_limited', ApiError.unreachable]) {
+    it(`signs no one in when opening is refused with ${code}`, async () => {
+      const { store } = storeAnswering({ redeem: () => Promise.reject(new ApiError(code, 410)) });
+
+      const result = await store.open('used');
+
+      expect(result).toBeNull();
+      expect(store.state().kind).toBe('LinkUnusable');
+    });
+  }
+
   it('aborts the pending request when it is destroyed', () => {
     let signal!: AbortSignal;
     const { store } = storeAnswering({
