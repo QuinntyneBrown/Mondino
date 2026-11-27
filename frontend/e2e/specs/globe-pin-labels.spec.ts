@@ -21,9 +21,9 @@ test.describe('Globe: pin labels and group pins', () => {
     await expect(globePage.pinButtons).toHaveCount(8);
 
     // Then each pin alone that faces the viewer carries its local time; the group pin none
-    await expect(globePage.labelOf('Lena Fischer')).toHaveText('15:05');
-    await expect(globePage.labelOf('Kwame Mensah')).toHaveText('14:05');
-    await expect(globePage.labelOf('Ahmed Al-Sayed')).toHaveText('18:05');
+    await expect(globePage.labelTimeOf('Lena Fischer')).toHaveText('15:05');
+    await expect(globePage.labelTimeOf('Kwame Mensah')).toHaveText('14:05');
+    await expect(globePage.labelTimeOf('Ahmed Al-Sayed')).toHaveText('18:05');
     await expect(globePage.labelOf('2 teammates close together')).toHaveCount(0);
 
     // And every label sits inside the globe and covers no pin

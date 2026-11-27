@@ -22,7 +22,8 @@ public sealed record TeamPinsDto(
 /// A teammate's pin as their teammates see it: at their city, never at their postal code, which is
 /// in no part of it (L2-007), and with no email (L2-043). It carries the city's IANA time zone and
 /// no local time: the browser works the time and the status out (L2-014), and shows no status for a
-/// teammate who does not share it (L2-015). Weather and moments join with journeys 13 and 19.
+/// teammate who does not share it (L2-015). It carries the weather at the city, or none, and why
+/// (L2-018). Moments join with journey 19.
 /// </summary>
 public sealed record PinDto(
     Guid TeammateId,
@@ -33,9 +34,12 @@ public sealed record PinDto(
     PositionDto Position,
     string TimeZoneId,
     bool SharesStatus,
-    bool IsViewer);
+    bool IsViewer,
+    WeatherDto? Weather,
+    WeatherState WeatherState);
 
-internal sealed class GetPinsQueryHandler(IAppDbContext database, ICurrentTeammate currentTeammate)
+internal sealed class GetPinsQueryHandler(
+    IAppDbContext database, ICurrentTeammate currentTeammate, IWeatherSource weatherSource)
     : IRequestHandler<GetPinsQuery, TeamPinsDto>
 {
     public async Task<TeamPinsDto> Handle(GetPinsQuery request, CancellationToken cancellationToken)
@@ -60,10 +64,23 @@ internal sealed class GetPinsQueryHandler(IAppDbContext database, ICurrentTeamma
                 t.City.Longitude,
                 t.City.TimeZoneId,
                 t.SharesStatus,
+                t.SharesWeather,
             })
             .ToListAsync(cancellationToken);
 
         var viewer = currentTeammate.TeammateId;
+
+        // The weather once per city, in parallel, for the cities of the pins whose weather the
+        // viewer may see: their own, and every teammate's who shares it (docs/adr/0015).
+        bool showsWeather(Guid id, bool shares) => shares || id == viewer;
+        var places = teammates
+            .Where(t => showsWeather(t.Id, t.SharesWeather))
+            .Select(t => WeatherPlaces.Of(t.Latitude, t.Longitude))
+            .Distinct()
+            .ToList();
+        var readings = await Task.WhenAll(places.Select(place => weatherSource.GetCurrentAsync(place, cancellationToken)));
+        var weatherAt = places.Zip(readings).ToDictionary(pair => pair.First, pair => WeatherDto.From(pair.Second));
+
         return new TeamPinsDto(
             team.Id,
             team.Name,
@@ -79,7 +96,17 @@ internal sealed class GetPinsQueryHandler(IAppDbContext database, ICurrentTeamma
                 t.TimeZoneId,
                 // A teammate still sees their own status, whatever they share.
                 t.SharesStatus || t.Id == viewer,
-                t.Id == viewer)).ToList());
+                t.Id == viewer,
+                WeatherOf(t.Id, t.SharesWeather, t.Latitude, t.Longitude),
+                StateOf(t.Id, t.SharesWeather, t.Latitude, t.Longitude))).ToList());
+
+        WeatherDto? WeatherOf(Guid id, bool shares, double latitude, double longitude) =>
+            showsWeather(id, shares) ? weatherAt[WeatherPlaces.Of(latitude, longitude)] : null;
+
+        WeatherState StateOf(Guid id, bool shares, double latitude, double longitude) =>
+            !showsWeather(id, shares) ? WeatherState.NotShared
+            : WeatherOf(id, shares, latitude, longitude) is null ? WeatherState.Unavailable
+            : WeatherState.Available;
     }
 }
 

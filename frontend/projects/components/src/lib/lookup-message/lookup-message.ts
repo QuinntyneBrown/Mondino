@@ -5,7 +5,7 @@ import {
   computed,
   input,
 } from '@angular/core';
-import type { Country, LookupState } from '@mondino/api';
+import type { Country, FoundWeather, LookupState } from '@mondino/api';
 
 type Shown = 'Private' | 'Locating' | 'Found' | 'NotFound' | 'Nothing';
 
@@ -14,8 +14,8 @@ type Shown = 'Private' | 'Locating' | 'Found' | 'NotFound' | 'Nothing';
  * region: the privacy promise, "Finding 20121…", the city found, or, as an alert, a postal code
  * that cannot be found with the form its country's postal codes take. It says nothing while the
  * lookup is down or rate limited, or when `quiet` (the postal code field shows its own error).
- * The postal code, the city and the form are rendered as text. The weather joins the found line
- * with journey 13.
+ * The postal code, the city and the form are rendered as text. The found line carries the
+ * weather at the city when there is any: "13° and foggy right now." (L2-003).
  */
 @Component({
   selector: 'mo-lookup-message',
@@ -30,6 +30,8 @@ export class LookupMessage {
   /** The chosen country, whose form a postal code that cannot be found is told. */
   readonly country = input<Country | null>(null);
   readonly quiet = input(false, { transform: booleanAttribute });
+  /** The weather at the city found, in the page's unit; none leaves it out, never a zero. */
+  readonly weather = input<FoundWeather | null>(null);
 
   protected readonly shown = computed<Shown>(() => {
     if (this.quiet()) return 'Nothing';

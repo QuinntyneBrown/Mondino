@@ -10,10 +10,12 @@ using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.SignIn;
 using Mondino.Application.Teammates;
+using Mondino.Application.Teams;
 using Mondino.Domain.Teams;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
 using Mondino.Infrastructure.SignIn;
+using Mondino.Infrastructure.WeatherSource;
 
 namespace Mondino.Tests.Support;
 
@@ -44,6 +46,17 @@ public class MondinoApi : WebApplicationFactory<Program>
     public FakePostalCodeSource PostalCodeSource { get; } = new();
 
     public bool UsesPostalCodeSource { get; set; }
+
+    /// <summary>The weather source, answering as the test tells it: nothing, until told.</summary>
+    public FakeWeatherSource Weather { get; } = new();
+
+    /// <summary>
+    /// The outside weather service. Set <see cref="UsesWeatherSource"/> before the first request to
+    /// run the real weather source, with its cache and timeout, against it.
+    /// </summary>
+    public FakeOpenMeteo OpenMeteo { get; } = new();
+
+    public bool UsesWeatherSource { get; set; }
 
     /// <summary>Set before the first request to serve <c>TestApp</c>, a stand-in for the Angular build, as wwwroot.</summary>
     public bool ServesApp { get; set; }
@@ -142,6 +155,17 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.AddSingleton<IPostalCodeLookup>(PostalCodes);
             }
 
+            if (UsesWeatherSource)
+            {
+                services.AddHttpClient(OpenMeteoWeatherSource.ClientName)
+                    .ConfigurePrimaryHttpMessageHandler(() => OpenMeteo);
+            }
+            else
+            {
+                services.RemoveAll<IWeatherSource>();
+                services.AddSingleton<IWeatherSource>(Weather);
+            }
+
             if (UsesEmailSource)
             {
                 services.AddHttpClient(PostmarkSignInEmailSender.ClientName)
@@ -235,6 +259,16 @@ public class MondinoApi : WebApplicationFactory<Program>
         var database = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var teammate = await database.Teammates.SingleAsync(t => t.Id == teammateId);
         database.Entry(teammate).Property(t => t.SharesStatus).CurrentValue = false;
+        await database.SaveChangesAsync(CancellationToken.None);
+    }
+
+    /// <summary>Turns off a teammate's "Share my local weather", as stored (journey 23 adds the switch).</summary>
+    public async Task HideWeatherAsync(Guid teammateId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var teammate = await database.Teammates.SingleAsync(t => t.Id == teammateId);
+        database.Entry(teammate).Property(t => t.SharesWeather).CurrentValue = false;
         await database.SaveChangesAsync(CancellationToken.None);
     }
 

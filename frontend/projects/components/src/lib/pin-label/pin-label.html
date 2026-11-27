@@ -1,7 +1,28 @@
 @if (lifted()) {
   <span class="pin-label__name">{{ nameAndCity() }}</span><span class="pin-label__line"
-    ><strong>{{ pin().localTime }}</strong></span
-  >
+    ><strong>{{ pin().localTime }}</strong>
+    @if (pin().weather; as weather) {
+      <svg
+        mo-weather-icon
+        decorative
+        size="xs"
+        [condition]="weather.condition"
+        [night]="weather.night"
+      ></svg
+      ><span>{{ weather.degrees }}</span
+      ><span>{{ weather.word }}</span>
+    }
+  </span>
 } @else {
   <strong>{{ pin().localTime }}</strong>
+  @if (pin().weather; as weather) {
+    <svg
+      mo-weather-icon
+      decorative
+      size="xs"
+      [condition]="weather.condition"
+      [night]="weather.night"
+    ></svg
+    ><span>{{ weather.degrees }}</span>
+  }
 }

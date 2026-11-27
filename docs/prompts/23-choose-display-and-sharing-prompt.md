@@ -112,6 +112,10 @@ Builds on: journeys 11, 13, 20 and 22.
   lesson it applied worked.
 - Set journey 23 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
+- Journey 13 waits for this screen to prove a changed unit reaching every temperature (L2-019 criterion
+  3); raise journey 13's % when it is proven. Until now the unit (`defaultTemperatureUnit`) and the clock
+  are worked out from the viewer's country in the browser, and "Share my local weather" is
+  `Teammate.SharesWeather` beside `SharesStatus` (ADR 0015): this journey stores them.
 
 ## Deferred (not in this journey)
 - What a save or a leave shows when the session has ended (401) is `<TO SUPPLY>`: show "You need an invite link", and

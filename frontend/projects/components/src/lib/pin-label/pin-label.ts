@@ -6,14 +6,17 @@ import {
   input,
 } from '@angular/core';
 import type { LabelSide, PinView } from '@mondino/api';
+import { WeatherIcon } from '../weather-icon/weather-icon';
 
 /**
- * The label beside a pin (L2-011, L2-012): at rest its local time; lifted, the teammate's name
- * and city above it. It sits on the side it is given, and is hidden from assistive technology:
+ * The label beside a pin (L2-011, L2-012, L2-018): at rest its local time, the weather's icon and
+ * the degrees; lifted, the teammate's name and city above them and the weather's word after. With
+ * no weather to show, the local time alone. It sits on the side it is given, and is hidden from assistive technology:
  * the pin's button names the teammate. Everything in it is text (L2-044).
  */
 @Component({
   selector: 'mo-pin-label',
+  imports: [WeatherIcon],
   templateUrl: './pin-label.html',
   styleUrl: './pin-label.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

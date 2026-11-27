@@ -166,6 +166,9 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                     b.Property<bool>("SharesStatus")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("SharesWeather")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");
 

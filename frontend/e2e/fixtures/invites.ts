@@ -104,23 +104,43 @@ export const CITIES = {
     position: { latitude: 43.65333, longitude: -79.38389 },
     timeZoneId: 'America/Toronto',
   },
+  Austin: {
+    name: 'Austin',
+    region: 'Texas',
+    countryCode: 'US',
+    position: { latitude: 30.26715, longitude: -97.74306 },
+    timeZoneId: 'America/Chicago',
+  },
+};
+
+/** The weather at each city found, as the backend answers it: in °C, at the mocks' "now". */
+export const WEATHER_AT: Record<keyof typeof CITIES, unknown> = {
+  Milan: { temperatureC: 13, condition: 'fog', observedAt: '2025-10-27T14:00:00Z' },
+  Milazzo: { temperatureC: 19, condition: 'clear', observedAt: '2025-10-27T14:00:00Z' },
+  Mississauga: { temperatureC: 6, condition: 'cloudy', observedAt: '2025-10-27T14:00:00Z' },
+  Toronto: { temperatureC: 7, condition: 'cloudy', observedAt: '2025-10-27T14:00:00Z' },
+  Austin: { temperatureC: 24, condition: 'partly-cloudy', observedAt: '2025-10-27T14:00:00Z' },
 };
 
 /** The postal codes the lookup knows, by country and as the backend normalises them. */
-const KNOWN: Record<string, (typeof CITIES)[keyof typeof CITIES]> = {
-  'IT 20121': CITIES.Milan,
-  'CA L5B3C1': CITIES.Mississauga,
-  'CA M5V2T6': CITIES.Toronto,
+const KNOWN: Record<string, keyof typeof CITIES> = {
+  'IT 20121': 'Milan',
+  'CA L5B3C1': 'Mississauga',
+  'CA M5V2T6': 'Toronto',
+  'US 78701': 'Austin',
 };
 
 /**
- * Answers a postal code lookup as the backend would: the city of a postal code it knows, and
- * `postal_code_not_found` for any other.
+ * Answers a postal code lookup as the backend would: the city of a postal code it knows, with the
+ * weather there (none when `withWeather` is false), and `postal_code_not_found` for any other.
  */
-export function lookupAnswer(body: { countryCode: string; postalCode: string }): Answer {
+export function lookupAnswer(
+  body: { countryCode: string; postalCode: string },
+  withWeather = true,
+): Answer {
   const key = `${body.countryCode} ${body.postalCode.replace(/[\s-]/g, '').toUpperCase()}`;
   const city = KNOWN[key];
-  if (city) return { json: { city, weather: null } };
+  if (city) return { json: { city: CITIES[city], weather: withWeather ? WEATHER_AT[city] : null } };
   return {
     status: 422,
     headers: { 'content-type': 'application/problem+json' },

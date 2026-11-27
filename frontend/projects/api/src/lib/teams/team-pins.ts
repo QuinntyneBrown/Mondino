@@ -1,10 +1,12 @@
 import { InjectionToken } from '@angular/core';
 import type { Position } from '../globe/position';
+import type { Weather, WeatherState } from '../weather/weather';
 
 /**
  * A teammate's pin as their teammates see it: at their city, never at their postal code, which is
  * in no part of it (L2-007). The local time is not sent: the browser works it out from the time
- * zone (L2-014). Weather and moments join with journeys 13 and 20.
+ * zone (L2-014). It carries the weather at its city, or none and why (L2-018). Moments join with
+ * journey 20.
  */
 export interface Pin {
   readonly teammateId: string;
@@ -20,6 +22,9 @@ export interface Pin {
   readonly sharesStatus: boolean;
   /** The viewer's own pin. */
   readonly isViewer: boolean;
+  /** The weather at the city, in °C; null unless `weatherState` is `Available`. */
+  readonly weather: Weather | null;
+  readonly weatherState: WeatherState;
 }
 
 /** A team as its own teammates see it: its id and name, its invite token, the viewer and the pins. */

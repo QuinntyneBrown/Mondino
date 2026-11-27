@@ -43,7 +43,9 @@ test.describe('A full visit', () => {
     await createTeamPage.open();
     await createTeamPage.fillNorthwind();
     await createTeamPage.leavePostalCode();
-    await expect(createTeamPage.lookup).toHaveText('Milan, Lombardy — pinned at city level.');
+    await expect(createTeamPage.lookup).toHaveText(
+      'Milan, Lombardy — pinned at city level. 13° and foggy right now.',
+    );
     kept.push(await record.everythingKept());
     await createTeamPage.submit.click();
     await expect(createTeamPage.title).toHaveText('Now bring everyone in.');

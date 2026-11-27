@@ -123,7 +123,9 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
   `RateLimitPolicies` (`protect-team-data`).
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
-  15 minutes.
+  15 minutes. Open-Meteo is given a city's position rounded to two decimal places and nothing
+  else (ADR 0015). `WeatherDto.Condition` travels as the web app's word (`partly-cloudy`), and
+  the temperature in °C only. `PostalCodeResultDto.Weather` is the weather at the city found.
 - The `globe` library depends on `api` only (ADR 0014). `GlobeView` reports where things are on
   the globe as a `GlobeViewport` (`viewChange`) and a tap on no pin (`blankTap`); `GlobePage`
   places the pins itself with `placePins` (`domain`'s `pins/`), which groups pins that would
