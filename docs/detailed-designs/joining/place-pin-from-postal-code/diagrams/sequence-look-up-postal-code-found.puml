@@ -20,7 +20,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "JoinPage" as page
   participant "JoinStore" as store
   participant "HttpInviteApi" as client
-  participant "GlobeView" as globe
+  participant "GlobeFallback" as globe
 end box
 box "Backend — Mondino API" #D1FADF
   participant "InvitesController" as controller
