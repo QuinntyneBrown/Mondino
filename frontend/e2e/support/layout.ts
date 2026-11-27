@@ -36,7 +36,7 @@ export function touchTarget(control: Locator): Promise<{ width: number; height: 
 /**
  * What a person would find cut off at the page's current width (L2-037): any text or control that
  * sticks out past the window's sides or out of a box that hides its overflow, and any two controls
- * that lie over each other. Each is named by its tag, its class and its text. What the globe draws
+ * or lines of text that lie over each other. Each is named by its tag, its class and its text. What the globe draws
  * (its pins and their labels, at its own rim) and a box that scrolls on its own are left to their
  * own specs.
  */
@@ -100,19 +100,53 @@ export function cutOff(page: Page): Promise<string[]> {
           found.push(`${name(element)} is cut off by ${name(parent).split(' ')[0]}`);
         break;
       }
-      if (isControl(element)) controls.push(element);
+      controls.push(element);
     }
 
-    // Two controls over each other, neither holding the other, outside an overlay.
-    const flat = controls.filter((control) => !control.closest('.cdk-overlay-container'));
+    // Two controls, or two lines of text, over each other, neither holding the other, outside an
+    // overlay. A control is its box; text is the boxes of its own lines.
+    // Text a box hides with its overflow (an ellipsis) is drawn only inside that box.
+    const clipOf = (element: Element): DOMRect | null => {
+      for (let at: Element | null = element; at && at !== document.body; at = at.parentElement)
+        if (getComputedStyle(at).overflowX !== 'visible') return at.getBoundingClientRect();
+      return null;
+    };
+    const areas = (element: Element): DOMRect[] => {
+      if (isControl(element)) return [element.getBoundingClientRect()];
+      const clip = clipOf(element);
+      return [...element.childNodes]
+        .filter((node) => node.nodeType === Node.TEXT_NODE && (node.textContent ?? '').trim())
+        .flatMap((node) => {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          return [...range.getClientRects()].map((line) =>
+            clip
+              ? DOMRect.fromRect({
+                  x: Math.max(line.left, clip.left),
+                  y: line.top,
+                  width: Math.min(line.right, clip.right) - Math.max(line.left, clip.left),
+                  height: line.height,
+                })
+              : line,
+          );
+        });
+    };
+    const flat = controls
+      .filter((element) => !element.closest('.cdk-overlay-container'))
+      .map((element) => ({ element, boxes: areas(element) }));
     for (let i = 0; i < flat.length; i++) {
       for (let j = i + 1; j < flat.length; j++) {
         const [a, b] = [flat[i], flat[j]];
-        if (a.contains(b) || b.contains(a)) continue;
-        const [p, q] = [a.getBoundingClientRect(), b.getBoundingClientRect()];
-        const across = Math.min(p.right, q.right) - Math.max(p.left, q.left);
-        const down = Math.min(p.bottom, q.bottom) - Math.max(p.top, q.top);
-        if (across > 1 && down > 1) found.push(`${name(a)} lies over ${name(b)}`);
+        if (a.element.contains(b.element) || b.element.contains(a.element)) continue;
+        const over = a.boxes.some((p) =>
+          b.boxes.some((q) => {
+            const across = Math.min(p.right, q.right) - Math.max(p.left, q.left);
+            const down = Math.min(p.bottom, q.bottom) - Math.max(p.top, q.top);
+            // A line's box is its font's whole height; lines set tightly may share a little of it.
+            return across > 1 && down > Math.max(1, Math.min(p.height, q.height) / 3);
+          }),
+        );
+        if (over) found.push(`${name(a.element)} lies over ${name(b.element)}`);
       }
     }
     return found;
