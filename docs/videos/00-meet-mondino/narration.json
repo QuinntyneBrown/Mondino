@@ -1,0 +1,152 @@
+{
+  "voice": "af_heart",
+  "bpm": 92.99,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": {
+    "file": "../assets/music/beautiful-boom-bap.mp3",
+    "offset": 0.009,
+    "duckDb": 16,
+    "betweenDb": 5,
+    "fadeSeconds": 2
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "bars": 3,
+      "lines": [
+        "Your team is spread around the world. Do you know what it's like where they are, right now?"
+      ]
+    },
+    {
+      "id": "problem",
+      "bars": 3,
+      "lines": [
+        "A list of names and time zones tells you almost nothing. Is it morning there? Is it raining? Are they asleep?"
+      ]
+    },
+    {
+      "id": "meet",
+      "bars": 3,
+      "lines": [
+        "Meet Mondino. Your team, around the world, right now, on one little globe."
+      ]
+    },
+    {
+      "id": "create",
+      "bars": 5,
+      "lines": [
+        "Start a team in a minute: a team name, your name, a work email, a country and a postal code.",
+        "Then Mondino hands you an invite link, to bring everyone in."
+      ]
+    },
+    {
+      "id": "join",
+      "bars": 5,
+      "lines": [
+        "A teammate opens the link, and sees the team already on the globe.",
+        "They type a postal code. Mondino finds the city and the weather there, and the button says: Join Northwind."
+      ]
+    },
+    {
+      "id": "private",
+      "bars": 3,
+      "lines": [
+        "Only the city is ever shown. The postal code stays private, and nobody sees an address."
+      ]
+    },
+    {
+      "id": "signin",
+      "bars": 4,
+      "lines": [
+        "Coming back on another device? There is no password. Mondino emails a link that signs you in, once, within fifteen minutes."
+      ]
+    },
+    {
+      "id": "globe",
+      "bars": 4,
+      "lines": [
+        "Then, the globe. Lit and shaded in three dimensions, with the night side in dusk.",
+        "It turns slowly on its own, and you can drag it to spin."
+      ]
+    },
+    {
+      "id": "pins",
+      "bars": 5,
+      "lines": [
+        "Every pin is a person, their clock and their sky: initials in their own colour, local time, weather and temperature.",
+        "Teammates who are close together share one group pin."
+      ]
+    },
+    {
+      "id": "panel",
+      "bars": 6,
+      "lines": [
+        "Select a pin, and the globe turns to that teammate.",
+        "You see their city, their local time, how far ahead or behind they are, their status and their weather.",
+        "And the working hours you share, on your own clock."
+      ]
+    },
+    {
+      "id": "status",
+      "bars": 4,
+      "lines": [
+        "Status comes from the local hour: early morning, working hours, evening, or probably asleep. No tracking. Just the clock."
+      ]
+    },
+    {
+      "id": "week",
+      "bars": 4,
+      "lines": [
+        "With no pin selected, the panel counts teammates and time zones, and lists who is in working hours right now."
+      ]
+    },
+    {
+      "id": "team",
+      "bars": 6,
+      "lines": [
+        "The Team page shows where everyone is in their day. A day ribbon places each teammate at the hour they are living through.",
+        "Below it, everyone from west to east, filtered by working now, or asleep."
+      ]
+    },
+    {
+      "id": "large",
+      "bars": 4,
+      "lines": [
+        "It scales, too. A team of five hundred is drawn as group pins, each with a count."
+      ]
+    },
+    {
+      "id": "invite",
+      "bars": 4,
+      "lines": [
+        "Invite teammate opens the team's invite link, with one button to copy it. No admins, and no roles."
+      ]
+    },
+    {
+      "id": "everywhere",
+      "bars": 4,
+      "lines": [
+        "And it fits every screen: a phone, a tablet, a desktop, in light and in dark."
+      ]
+    },
+    {
+      "id": "next",
+      "bars": 4,
+      "lines": [
+        "Coming next: Moments, for holidays, races and local events where teammates live; and Profile and Settings, for your own pin."
+      ]
+    },
+    {
+      "id": "close",
+      "bars": 11,
+      "lines": [
+        "Mondino. Your team, around the world, right now.",
+        "Mondino is where a team spread around the world sees each other.",
+        "A teammate joins with a postal code and appears as a pin on an interactive 3D globe.",
+        "Each pin shows that teammate's local time, temperature and weather, and a playful highlight when something is happening where they live: a local holiday, a Formula 1 race, a festival."
+      ]
+    }
+  ]
+}
