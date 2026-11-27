@@ -29,3 +29,5 @@ export * from './lib/pins/ribbon-markers';
 export * from './lib/pins/ribbon-density';
 export * from './lib/pins/city-sections';
 export * from './lib/moments/moment-days';
+export * from './lib/moments/moment-marker';
+export * from './lib/storage/settings-cache';

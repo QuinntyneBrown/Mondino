@@ -278,3 +278,43 @@ export function mockCitySections(
 export function mockText(path: string, className: string): string | null {
   return textOf(mockMarkup(path), className);
 }
+
+/** A pin's moment marker in a mock: the pin's accessible name, the marker's classes, its count or icon. */
+export interface MockPinMarker {
+  name: string;
+  className: string;
+  count: string;
+  icon: string[];
+}
+
+/** The pins of a mock that carry a moment marker, in the mock's order. */
+export function mockPinMarkers(path: string): MockPinMarker[] {
+  return [
+    ...mockMarkup(path).matchAll(
+      /<button class="pin [^"]*"[^>]*aria-label="([^"]*)"><span aria-hidden="true">[^<]*<\/span><span class="(moment-marker[^"]*)"[^>]*>([\s\S]*?)<\/span><\/button>/g,
+    ),
+  ].map(([, name, className, inside]) => ({
+    name,
+    className,
+    count: inside.startsWith('<svg') ? '' : inside.trim(),
+    icon: inside.startsWith('<svg') ? shapesOf(inside) : [],
+  }));
+}
+
+/** A mock's lifted pin label, whose name line is `nameAndCity`: its text, and its moment line's icon. */
+export function mockLiftedLabel(
+  path: string,
+  nameAndCity: string,
+): { text: string; momentIcon: string[] } {
+  const found = new RegExp(
+    `<span class="pin-label pin-label--lifted[^"]*"[^>]*><span class="pin-label__name">${nameAndCity}</span>([\\s\\S]*?)</span></li>`,
+  ).exec(mockMarkup(path));
+  if (!found) throw new Error(`No lifted label for ${nameAndCity} in ${path}`);
+  const moment = /<span class="pin-label__moment">(<svg[\s\S]*?<\/svg>)/.exec(found[1]);
+  return {
+    text: (
+      nameAndCity + found[1].replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, '')
+    ).replace(/\s+/g, ''),
+    momentIcon: moment ? shapesOf(moment[1]) : [],
+  };
+}

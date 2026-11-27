@@ -13,6 +13,7 @@ const pin = (id: string): PinView => ({
   description: id,
   isViewer: false,
   isNew: false,
+  marker: null,
 });
 
 const place = (x: number, y: number, ids: string[], depth = 1): PlacePoint => ({

@@ -1,0 +1,53 @@
+// A moment marker (docs/design-system/components/moment-marker.html): a sun disc at the pin's
+// top right, 16 px and never smaller, 20 px with an ink ring for today, a pill for a count.
+:host {
+  position: absolute;
+  right: calc(-1 * var(--space-2));
+  top: calc(-1 * var(--space-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--moment-marker-size);
+  height: var(--moment-marker-size);
+  border-radius: var(--radius-full);
+  background: var(--color-moment);
+  color: var(--color-fg-on-moment);
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-pin-ring);
+  pointer-events: none;
+}
+.icon {
+  width: var(--icon-size-2xs);
+  height: var(--icon-size-2xs);
+  stroke-width: 2.5;
+}
+// Today's is stronger by size and a ring, not by colour.
+:host(.moment-marker--today) {
+  width: var(--moment-marker-size-today);
+  height: var(--moment-marker-size-today);
+  right: calc(-1 * var(--space-3));
+  top: calc(-1 * var(--space-3));
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-fg-default);
+}
+:host(.moment-marker--today) .icon {
+  width: var(--space-3);
+  height: var(--space-3);
+}
+:host(.moment-marker--count) {
+  width: auto;
+  min-width: var(--moment-marker-size);
+  padding: 0 var(--space-1);
+  font: var(--text-pin);
+  font-size: var(--font-size-3xs);
+  font-variant-numeric: tabular-nums;
+}
+:host(.moment-marker--today.moment-marker--count) {
+  min-width: var(--moment-marker-size-today);
+}
+// On a globe under 500 px the marker keeps its size and moves further out, clear of the small pin.
+@container globe (max-width: 31.249rem) {
+  :host {
+    right: calc(-1 * var(--space-3));
+    top: calc(-1 * var(--space-3));
+  }
+}

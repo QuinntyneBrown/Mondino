@@ -1,0 +1,5 @@
+@if (marker().count > 1) {
+  {{ marker().count }}
+} @else {
+  <svg mo-moment-icon decorative [kind]="marker().kind"></svg>
+}

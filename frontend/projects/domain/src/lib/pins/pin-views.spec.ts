@@ -1,4 +1,4 @@
-import type { Pin, PinView } from '@mondino/api';
+import type { Moment, Pin, PinView } from '@mondino/api';
 import { describeGroup, pinViews } from './pin-views';
 
 const now = Date.UTC(2025, 9, 27, 14, 5);
@@ -102,6 +102,50 @@ describe('pinViews', () => {
       'B',
     );
     expect([views.get('A')?.isNew, views.get('B')?.isNew]).toEqual([false, true]);
+  });
+});
+
+describe('pinViews: moments', () => {
+  const moment = (
+    teammateId: string,
+    kind: Moment['kind'],
+    date: string,
+    title: string,
+  ): Moment => ({
+    teammateId,
+    teammateName: teammateId,
+    cityName: '',
+    countryCode: '',
+    timeZoneId: 'Europe/Dublin',
+    kind,
+    title,
+    date,
+    detail: '',
+    emblemKey: null,
+  });
+  const liam = pin('Liam O’Connor', 'Dublin', 'Europe/Dublin');
+  const lena = pin('Lena Fischer', 'Berlin', 'Europe/Berlin');
+  const moments = [
+    moment('Liam O’Connor', 'holiday', '2025-10-27', 'October Bank Holiday'),
+    moment('Lena Fischer', 'formula-1', '2025-10-30', 'Race screening'),
+  ];
+
+  it('gives each pin its own teammate’s marker, and ends its name with it', () => {
+    const views = pinViews([liam, lena], now, null, '24-hour', 'celsius', moments);
+    expect(views.get('Liam O’Connor')?.marker).toMatchObject({ count: 1, today: true });
+    expect(views.get('Liam O’Connor')?.description).toBe(
+      'Liam O’Connor, Dublin, 14:05, Working hours, October Bank Holiday, today',
+    );
+    expect(views.get('Lena Fischer')?.marker?.title).toBe('Race screening');
+  });
+
+  it('marks no pin with no moments, and only the chosen kinds', () => {
+    expect(pinViews([liam], now).get('Liam O’Connor')?.marker).toBeNull();
+    const views = pinViews([liam, lena], now, null, '24-hour', 'celsius', moments, ['holiday']);
+    expect(views.get('Lena Fischer')?.marker).toBeNull();
+    expect(views.get('Lena Fischer')?.description).toBe(
+      'Lena Fischer, Berlin, 15:05, Working hours',
+    );
   });
 });
 

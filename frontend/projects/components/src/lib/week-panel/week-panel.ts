@@ -27,9 +27,16 @@ export class WeekPanel {
   /** The Moments screen, and the Team screen with "Working now" chosen. */
   readonly allMomentsAddress = input.required<string>();
   readonly moreWorkingAddress = input.required<string>();
+  /**
+   * Whether the viewer has turned every kind of moment off (L2-022): a note then takes the place of
+   * the lead, the moments and "All moments", with "Choose moments", leading to Profile & Settings.
+   */
+  readonly everyKindOff = input(false);
+  readonly chooseMomentsAddress = input('');
 
   readonly teammateChosen = output<string>();
   readonly allMoments = output();
+  readonly chooseMoments = output();
   readonly moreWorking = output();
 
   /** Whether a click is a plain one, which the page handles; any other follows the link. */
@@ -46,6 +53,10 @@ export class WeekPanel {
 
   protected toMoments(event: MouseEvent): void {
     if (this.plain(event)) this.allMoments.emit();
+  }
+
+  protected toProfile(event: MouseEvent): void {
+    if (this.plain(event)) this.chooseMoments.emit();
   }
 
   protected toTeam(event: MouseEvent): void {

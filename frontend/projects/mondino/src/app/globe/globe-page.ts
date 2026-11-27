@@ -15,6 +15,7 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   CLOCK,
+  SETTINGS_STORE,
   TEAM_MEMBERSHIP,
   type GlobeViewport,
   type PinPlacement,
@@ -37,6 +38,7 @@ import {
   defaultClockFormat,
   defaultTemperatureUnit,
   groupCities,
+  ofKinds,
   pinViews,
   placePins,
   stillViewport,
@@ -121,6 +123,10 @@ export class GlobePage {
   protected readonly clockFormat = computed(() => defaultClockFormat(this.viewer()?.country ?? ''));
   private readonly unit = computed(() => defaultTemperatureUnit(this.viewer()?.country ?? ''));
 
+  /** The kinds of moment the viewer chose to see on the globe and in the week (L2-022). */
+  protected readonly kinds = inject(SETTINGS_STORE).momentKinds;
+  protected readonly everyKindOff = computed(() => this.kinds().length === 0);
+
   private readonly views = computed(() => {
     this.clock.minute();
     const team = this.store.team();
@@ -131,6 +137,8 @@ export class GlobePage {
       this.justJoined?.teammateId ?? null,
       this.clockFormat(),
       this.unit(),
+      this.store.moments(),
+      this.kinds(),
     );
   });
 
@@ -255,15 +263,16 @@ export class GlobePage {
   });
 
   /**
-   * This week's moments for the week's view (L2-024): six at most, from today to 7 days ahead in
-   * each place, worked out again as the minute changes; none while a panel is open.
+   * This week's moments for the week's view (L2-024): six at most, of the kinds the viewer chose
+   * (L2-022), from today to 7 days ahead in each place, worked out again as the minute changes;
+   * none while a panel is open.
    */
   protected readonly momentsThisWeek = computed(() => {
     this.clock.minute();
     const team = this.store.team();
     if (!team || this.week() === null) return [];
     return weekMoments(
-      this.store.moments(),
+      ofKinds(this.store.moments(), this.kinds()),
       team.pins,
       untracked(() => this.clock.now()),
     );
@@ -416,7 +425,7 @@ export class GlobePage {
     if (keyboard) afterNextRender(() => this.focusHeading(), { injector: this.injector });
   }
 
-  /** "All moments" and "2 more on the Team page": the screens they lead to. */
+  /** "All moments", "Choose moments" and "2 more on the Team page": the screens they lead to. */
   protected go(address: string): void {
     void this.router.navigateByUrl(address);
   }

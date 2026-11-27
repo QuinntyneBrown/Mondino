@@ -27,5 +27,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0017](0017-azure-postgresql.md) | The deployed database is an Azure PostgreSQL Flexible Server, reached without a password and migrated by the deployment | Accepted |
 | [0018](0018-initial-bundle-budget.md) | The initial budget (290 kB warning, 300 kB error) pays for Angular's runtime, which lazy screens put in the main chunk | Accepted; supersedes the budgets of 0005 and 0007 |
 | [0019](0019-moment-calendars.md) | Holidays come from OpenHolidays and Mondino's own calendar; races, events and sport from Mondino's own calendar | Accepted |
+| [0020](0020-chosen-kinds-in-the-browser.md) | The viewer's chosen kinds of moment are read through `SETTINGS_STORE`, kept in the browser until Profile & Settings saves them | Accepted |
 
 Not decided yet: nothing a journey has reached.

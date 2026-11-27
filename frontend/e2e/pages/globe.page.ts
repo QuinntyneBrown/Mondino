@@ -23,6 +23,8 @@ export class GlobePage {
   /** The list of pins over the globe, a keyboard's and a screen reader's way to the teammates. */
   readonly pinList: Locator;
   readonly pinButtons: Locator;
+  /** Everything over the globe a person can press or focus. */
+  readonly pinControls: Locator;
   /** The pins that are lifted, and the labels shown at rest and lifted. */
   readonly liftedPins: Locator;
   /** The pins placed just now, which pulse once. */
@@ -73,6 +75,12 @@ export class GlobePage {
   readonly week: Locator;
   readonly weekLead: Locator;
   readonly weekEmpty: Locator;
+  /** The note in the week's place with every kind of moment switched off, and its link. */
+  readonly weekNote: Locator;
+  readonly chooseMoments: Locator;
+  readonly weekNoteTitle: Locator;
+  /** Every moment marker over the globe. */
+  readonly allMarkers: Locator;
   readonly allMoments: Locator;
   /** The week's moment rows. */
   readonly weekRows: Locator;
@@ -136,6 +144,7 @@ export class GlobePage {
     this.allPins = this.stage.locator('.globe__pin');
     this.pinList = this.stage.locator('ul.globe__pins');
     this.pinButtons = this.pinList.locator('li.globe__pin > button.pin');
+    this.pinControls = this.pinList.locator('button, a, [tabindex], [role="button"]');
     this.liftedPins = this.pinList.locator('li.globe__pin--lifted');
     this.newPins = this.pinList.locator('.pin--new');
     this.restingLabels = this.pinList.locator('.pin-label:not(.pin-label--lifted)');
@@ -176,6 +185,10 @@ export class GlobePage {
     this.week = this.panel.locator('section:has(> h2:text-is("This week around the world"))');
     this.weekLead = this.week.locator('.panel__lead');
     this.weekEmpty = this.week.locator('.panel__empty');
+    this.weekNote = this.week.locator('.panel__note');
+    this.weekNoteTitle = this.weekNote.locator('strong');
+    this.allMarkers = this.pinList.locator('.moment-marker');
+    this.chooseMoments = this.weekNote.getByRole('link', { name: 'Choose moments' });
     this.allMoments = this.week.locator('a.panel__more');
     this.weekRows = this.week.locator('.row-list a.row');
     this.working = this.panel.locator('section:has(h2:text-is("In working hours now"))');
@@ -247,6 +260,79 @@ export class GlobePage {
   /** The text the page has selected. */
   selectedText(): Promise<string> {
     return this.page.evaluate(() => window.getSelection()?.toString() ?? '');
+  }
+
+  /** A pin's moment marker, beside its initials. */
+  markerOf(name: string): Locator {
+    return this.pin(name).locator('.moment-marker');
+  }
+
+  /** The pins' moment markers, each read as a mock's: its pin's name, classes, count or icon. */
+  pinMarkers(): Promise<{ name: string; className: string; count: string; icon: string[] }[]> {
+    return this.pinButtons.evaluateAll((buttons) =>
+      buttons.flatMap((button) => {
+        const marker = button.querySelector('.moment-marker');
+        if (!marker) return [];
+        const svg = marker.querySelector('svg');
+        return [
+          {
+            name: button.getAttribute('aria-label') ?? '',
+            className: [...marker.classList].join(' '),
+            count: svg ? '' : (marker.textContent ?? '').trim(),
+            icon: [...(svg?.children ?? [])].map((shape) =>
+              [
+                shape.tagName,
+                ...[...shape.attributes]
+                  .filter((attribute) => !attribute.name.startsWith('_ng'))
+                  .map((attribute) => `${attribute.name}=${attribute.value}`)
+                  .sort(),
+              ].join(' '),
+            ),
+          },
+        ];
+      }),
+    );
+  }
+
+  /** The moment line of a pin's lifted label, and the shapes of its icon. */
+  labelMomentOf(name: string): Locator {
+    return this.labelOf(name).locator('.pin-label__moment');
+  }
+
+  async labelMomentIconShapes(name: string): Promise<string[]> {
+    return this.labelMomentOf(name)
+      .locator('svg')
+      .evaluate((svg) =>
+        [...svg.children].map((shape) =>
+          [
+            shape.tagName,
+            ...[...shape.attributes]
+              .filter((attribute) => !attribute.name.startsWith('_ng'))
+              .map((attribute) => `${attribute.name}=${attribute.value}`)
+              .sort(),
+          ].join(' '),
+        ),
+      );
+  }
+
+  /** Where a pin's marker and initials are drawn, and the marker's ring. */
+  markerBoxes(name: string): Promise<{
+    marker: { x: number; y: number; width: number; height: number };
+    initials: { x: number; y: number; width: number; height: number };
+    ring: string;
+  }> {
+    return this.pin(name).evaluate((button) => {
+      const box = (element: Element | null) => {
+        const { x, y, width, height } = element!.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      const marker = button.querySelector('.moment-marker');
+      return {
+        marker: box(marker),
+        initials: box(button.querySelector('span[aria-hidden="true"]:not(.moment-marker)')),
+        ring: getComputedStyle(marker!).boxShadow,
+      };
+    });
   }
 
   /** A moment row of the week, by its title. */

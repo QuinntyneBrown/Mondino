@@ -37,6 +37,9 @@
           (blur)="focus(null)"
         >
           <span aria-hidden="true">{{ placement.pins[0].initials }}</span>
+          @if (placement.pins[0].marker; as marker) {
+            <span mo-moment-marker [marker]="marker"></span>
+          }
         </button>
         @if (lifted(placement)) {
           <mo-pin-label lifted [pin]="placement.pins[0]" [side]="placement.labelSide ?? 'below'" />

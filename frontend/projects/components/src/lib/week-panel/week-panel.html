@@ -1,38 +1,54 @@
 <section aria-labelledby="mo-week-panel-week">
   <h2 id="mo-week-panel-week">This week around the world</h2>
-  <p class="panel__lead">Holidays, races and local moments where your teammates live.</p>
-  @if (moments().length > 0) {
-    <ul class="row-list">
-      @for (moment of moments(); track $index) {
-        <li>
-          <a
-            class="row"
-            [attr.href]="address()(moment.teammateId)"
-            (click)="choose($event, moment.teammateId)"
-          >
-            <mo-emblem strong [solid]="moment.today" [kind]="moment.kind" />
-            <span class="row__body">
-              <span class="row__title">{{ moment.title }}</span>
-              <span class="row__meta"
-                ><span class="visually-hidden">{{ moment.kindName + ', ' }}</span
-                >{{ moment.who }}</span
-              >
-            </span>
-            <span class="row__trail">{{ moment.when }}</span>
-          </a>
-        </li>
-      }
-    </ul>
+  @if (everyKindOff()) {
+    <div class="panel__note">
+      <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5" />
+        <path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+        <path d="m2 2 20 20" />
+      </svg>
+      <div>
+        <strong>Every kind of moment is switched off</strong>
+        Holidays, races, events and sport won’t show on pins until you turn some back on.
+        <a [attr.href]="chooseMomentsAddress()" (click)="toProfile($event)">Choose moments</a>
+      </div>
+    </div>
   } @else {
-    <p class="panel__empty">No moments this week.</p>
+    <p class="panel__lead">Holidays, races and local moments where your teammates live.</p>
+    @if (moments().length > 0) {
+      <ul class="row-list">
+        @for (moment of moments(); track $index) {
+          <li>
+            <a
+              class="row"
+              [attr.href]="address()(moment.teammateId)"
+              (click)="choose($event, moment.teammateId)"
+            >
+              <mo-emblem strong [solid]="moment.today" [kind]="moment.kind" />
+              <span class="row__body">
+                <span class="row__title">{{ moment.title }}</span>
+                <span class="row__meta"
+                  ><span class="visually-hidden">{{ moment.kindName + ', ' }}</span
+                  >{{ moment.who }}</span
+                >
+              </span>
+              <span class="row__trail">{{ moment.when }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="panel__empty">No moments this week.</p>
+    }
+    <a class="panel__more" [attr.href]="allMomentsAddress()" (click)="toMoments($event)">
+      All moments
+      <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+      </svg>
+    </a>
   }
-  <a class="panel__more" [attr.href]="allMomentsAddress()" (click)="toMoments($event)">
-    All moments
-    <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  </a>
 </section>
 <section aria-labelledby="mo-week-panel-working">
   @if (working().count > 0) {

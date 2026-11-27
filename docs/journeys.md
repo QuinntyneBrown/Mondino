@@ -19,7 +19,7 @@
 | 17 | [View the team through the day](prompts/17-view-the-team-through-the-day-prompt.md) | See everyone west to east on a day ribbon. | L2-026, L2-027, L2-028 | 6 | 100 |
 | 18 | [Find a teammate in a large team](prompts/18-find-a-teammate-in-a-large-team-prompt.md) | Search a team past 40, listed in a section per city. | L2-027, L2-056 | 3 | 100 |
 | 19 | [Find moments](prompts/19-find-moments-prompt.md) | Holidays, races, events and sport found where teammates live. | L2-020 | 8 | 100 |
-| 20 | [Mark pins with moments](prompts/20-mark-pins-with-moments-prompt.md) | See a moment marker beside pins with moments this week. | L2-021, L2-022 | 4 | 0 |
+| 20 | [Mark pins with moments](prompts/20-mark-pins-with-moments-prompt.md) | See a moment marker beside pins with moments this week. | L2-021, L2-022 | 4 | 80 |
 | 21 | [List moments](prompts/21-list-moments-prompt.md) | Browse upcoming moments by when and filter by kind. | L2-029, L2-030 | 4 | 0 |
 | 22 | [Change location](prompts/22-change-location-prompt.md) | See your own pin and move it to a new city. | L2-031, L2-032 | 4 | 0 |
 | 23 | [Choose display and sharing](prompts/23-choose-display-and-sharing-prompt.md) | Choose units, clock, moment kinds and what teammates see. | L2-033, L2-034, L2-035 | 5 | 0 |
@@ -30,4 +30,4 @@
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 20 |
-| | **Total** | | | **147** | **67** |
+| | **Total** | | | **147** | **69** |

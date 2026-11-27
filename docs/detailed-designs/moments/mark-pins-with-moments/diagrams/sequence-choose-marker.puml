@@ -19,54 +19,45 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "GlobePage" as page
   participant "TeamStore" as store
   participant "SettingsCache" as settings
+  participant "pinViews" as views
   participant "markerFor" as marker
-  participant "emblemFor" as emblem
-  participant "GlobeView" as view
   participant "PinLayer" as layer
 end box
 box "Backend — Mondino API" #D1FADF
   participant "TeamsController" as controller
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
-  participant "GetPinsQueryHandler" as handler
+  participant "GetMomentsQueryHandler" as handler
   participant "EmblemCatalogue" as catalogue
 end box
 
 actor -> page : Open the Globe screen
-page -> store : Read pins
-store -> controller : GET /api/teams/{teamId}/pins
-controller -> handler : Send GetPinsQuery
-handler -> catalogue : KeyFor(subject) for each moment,\nthrough MomentFinder
-alt Mondino holds the right to the emblem
-  catalogue --> handler : Emblem key
-else right not held
-  catalogue --> handler : No key
-end
-handler --> controller : TeamPinsDto, each PinDto with its moments
-controller --> store : Pins
-store --> page : Pins signal
+page -> store : Read pins and moments
+store -> controller : GET /api/teams/{teamId}/moments
+controller -> handler : Send GetMomentsQuery
+handler -> catalogue : KeyFor(subject) for each moment
+catalogue --> handler : No key: Mondino holds no emblem (ADR 0019)
+handler --> controller : Moments, one for each teammate
+controller --> store : Moments
+store --> page : Pins and moments signals
 page -> settings : Read the viewer's chosen kinds
 settings --> page : momentKinds (all four at first, L2-022)
+page -> views : pinViews(pins, now, ..., moments, kinds)
 loop each pin
-  page -> marker : markerFor(pin, kinds, now)
+  views -> marker : markerFor(the teammate's moments, kinds, now)
   marker -> marker : Drop moments of a kind turned off (L2-022)
-  marker -> marker : Keep moments today or in the next 7 days,\nin the pin's own time zone (L2-021)
+  marker -> marker : Keep moments today or in the next 7 days,\nin each moment's own place (L2-021)
   alt no moment left
-    marker --> page : No marker
+    marker --> views : No marker
   else at least one moment
-    marker -> emblem : emblemFor(nearest moment)
-    alt emblemKey is in HELD_EMBLEMS
-      emblem --> marker : Held emblem
-    else no key, or key not bundled
-      emblem --> marker : Icon of the moment's kind
-    end
-    marker --> page : MomentMarker with its moments, their count,\nthe nearest one's emblem and the today flag
+    marker --> views : MarkerView: the nearest one's kind, title and when,\nthe count and the today flag
   end
+  views -> views : The accessible name ends with the marker's words
 end
-page -> view : pins and markers
-view -> layer : setMarkers(markers)
+views --> page : PinViews
+page -> layer : Placements of the pins
 alt one moment this week
-  layer --> actor : Marker in sun with the emblem (L2-021)
+  layer --> actor : Marker in sun with the kind's icon (L2-021)
 else two or more
   layer --> actor : Marker in sun with the count, "2" (L2-021)
 end

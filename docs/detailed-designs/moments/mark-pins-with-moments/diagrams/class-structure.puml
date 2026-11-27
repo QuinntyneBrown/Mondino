@@ -15,53 +15,52 @@ title Class structure — Mark pins with moments
 
 enum MomentKind {
   holiday
-  formula1
-  localEvent
+  formula-1
+  local-event
   sport
 }
 
 interface Moment {
+  +teammateId: string
+  +timeZoneId: string
   +kind: MomentKind
   +title: string
   +date: string
-  +detail: string
   +emblemKey: string | null
 }
 
-interface Pin {
-  +teammateId: string
-  +timeZoneId: string
-  +moments: Moment[]
+interface SettingsStore <<api, SETTINGS_STORE>> {
+  +momentKinds: Signal<MomentKind[]>
 }
 
-interface Settings {
-  +momentKinds: MomentKind[]
+class SettingsCache <<domain storage/>> {
+  +momentKinds: Signal<MomentKind[]>
 }
 
-interface Emblem {
-  +source: 'held' | 'kind'
-  +key: string | null
+interface MarkerView {
   +kind: MomentKind
-}
-
-interface MarkedMoment {
-  +moment: Moment
+  +title: string
   +when: string
-}
-
-interface MomentMarker {
-  +moments: MarkedMoment[]
-  +emblem: Emblem
   +count: number
   +today: boolean
+  +spoken: string
+}
+
+interface PinView {
+  +teammateId: string
+  +description: string
+  +marker: MarkerView | null
 }
 
 class "moments/ (domain)" as moments <<functions>> {
-  +markerFor(pin: Pin, kinds: MomentKind[], now: Date): MomentMarker | null
-  +emblemFor(moment: Moment): Emblem
-  +daysUntil(date: string, timeZoneId: string, now: Date): number
-  +whenLabel(daysAhead: number): string
-  +HELD_EMBLEMS: ReadonlySet<string>
+  +markerFor(moments: Moment[], kinds: MomentKind[], now: number): MarkerView | null
+  +daysUntil(date: string, timeZoneId: string, now: number): number
+  +whenLabel(date: string, daysAhead: number): string
+}
+
+class "pins/ (domain)" as pins <<functions>> {
+  +pinViews(pins, now, ..., moments: Moment[], kinds: MomentKind[]): Map<string, PinView>
+  +describePin(..., marker: MarkerView | null): string
 }
 
 class EmblemCatalogue <<backend>> {
@@ -69,36 +68,37 @@ class EmblemCatalogue <<backend>> {
 }
 
 class GlobePage {
-  -markers: Signal<Map<string, MomentMarker>>
-}
-
-class GlobeView {
-  +pins: Pin[]
-  +markers: Map<string, MomentMarker>
-  +selectedId: string | null
+  -views: Signal<Map<string, PinView>>
 }
 
 class PinLayer {
-  +setMarkers(markers: Map<string, MomentMarker>): void
-  +dispose(): void
+  +placements: PinPlacement[]
+}
+
+class MomentMarker <<components>> {
+  +marker: MarkerView
+}
+
+class PinLabel {
+  +pin: PinView
 }
 
 class MomentIcon {
   +kind: MomentKind
 }
 
-GlobePage ..> moments : calls markerFor
-GlobePage --> GlobeView : passes pins and markers
-moments ..> Pin : reads
-moments ..> Settings : takes momentKinds from
-moments ..> MomentMarker : returns
-MomentMarker "1" o-- "1..*" MarkedMoment
-MarkedMoment --> Moment
-MomentMarker --> Emblem
-Pin "1" --> "*" Moment
+SettingsCache ..|> SettingsStore
+GlobePage ..> SettingsStore : reads momentKinds
+GlobePage ..> pins : calls pinViews
+pins ..> moments : calls markerFor
+moments ..> Moment : reads
+moments ..> MarkerView : returns
+PinView --> MarkerView
 Moment --> MomentKind
-EmblemCatalogue ..> Moment : sets emblemKey
-GlobeView --> PinLayer
-PinLayer ..> MomentMarker : draws
-PinLayer ..> MomentIcon : draws a kind's icon with
+EmblemCatalogue ..> Moment : sets no emblemKey (ADR 0019)
+GlobePage --> PinLayer : passes placements
+PinLayer --> MomentMarker : draws beside a pin
+PinLayer --> PinLabel : draws the lifted label
+MomentMarker ..> MomentIcon : the kind's icon, one moment
+PinLabel ..> MomentIcon : the nearest moment's line
 @enduml

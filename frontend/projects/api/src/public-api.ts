@@ -25,3 +25,4 @@ export * from './lib/moments/moment';
 export * from './lib/weather/weather';
 export * from './lib/pins/team-row';
 export * from './lib/pins/ribbon';
+export * from './lib/settings/settings-store';
