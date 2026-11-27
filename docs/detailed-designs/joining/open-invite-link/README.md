@@ -79,7 +79,7 @@ source.
   refusal is an `ApiError` with its `code`, and no answer the code `unreachable`. The Join
   route's lazy routes file binds the token, so the client stays out of the initial bundle.
 - **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined`
-  and `countries` (`full` joins with `join-team`). Until the postal code lookup (journey 3) a
+  `full` (set by `join-team`) and `countries`. Until the postal code lookup (journey 3) a
   `Country` is its `code` and `name`. The `countries` list serves the Join form and is described in
   `place-pin-from-postal-code`.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
@@ -110,8 +110,8 @@ source.
   that was reset (`invite-teammates`) receives the same refusal as one that was never issued.
   When `ICurrentTeammate` reports a session on this team, the handler returns an `InviteDto`
   with `AlreadyJoined` set and no positions or avatars. From `join-team` on, when the team has `Team.MaxTeammates`
-  (500) teammates, it returns an `InviteDto` with `Full` set, the team's name and no count,
-  positions or avatars. Otherwise it builds the full `InviteDto`: the positions ordered by
+  (500) teammates, it returns an `InviteDto` with `Full` set, the team's name, a count of 0 and
+  no positions or avatars. Otherwise it builds the full `InviteDto`: the positions ordered by
   latitude and longitude, so their order says nothing of when anyone joined.
 - **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined`, `Full`
   and `Countries`. `Positions` holds one `Position` for each teammate: the position of the

@@ -1,0 +1,67 @@
+:host {
+  display: block;
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  box-shadow: var(--shadow-4);
+  font: var(--text-body-sm);
+  animation: fade-in var(--duration-base) var(--ease-standard);
+}
+.icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  flex: none;
+  margin-top: var(--space-0-5);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--color-fg-inverse-accent);
+}
+.icon--sm {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+.toast__body {
+  flex: 1;
+  min-width: 0;
+}
+.toast__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--target-comfortable);
+  height: var(--target-comfortable);
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-1)) calc(-1 * var(--space-2)) 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.toast__close .icon {
+  margin: 0;
+  color: inherit;
+}
+.toast__close:focus-visible {
+  // On the inverse surface the ring takes the text's colour, so it shows in both themes.
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: calc(-1 * var(--focus-ring-offset));
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

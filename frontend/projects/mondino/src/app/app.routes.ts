@@ -7,6 +7,11 @@ export const routes: Routes = [
     loadChildren: () => import('./join/join.routes').then((m) => m.joinRoutes),
   },
   {
+    path: 'globe',
+    title: 'Globe · Mondino',
+    loadComponent: () => import('./globe/globe-page').then((m) => m.GlobePage),
+  },
+  {
     path: '**',
     title: 'Page not found · Mondino',
     loadComponent: () => import('./not-found/not-found-page').then((m) => m.NotFoundPage),

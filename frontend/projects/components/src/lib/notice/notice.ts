@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/** The icons a notice can carry: a broken link, or no connection. */
-export type NoticeIcon = 'link-off' | 'offline';
+/** The icons a notice can carry: a broken link, no connection, or a full team. */
+export type NoticeIcon = 'link-off' | 'offline' | 'users';
 
 /**
  * A notice that takes a form's place: an icon, a title, a line and a way on. The title is the

@@ -16,6 +16,7 @@ const invite: Invite = {
   positions: [{ latitude: 45.4642, longitude: 9.19 }],
   avatars: [{ initials: 'ML', colour: 'teammate-2' }],
   alreadyJoined: false,
+  full: false,
   countries: [
     {
       code: 'CA',
@@ -40,6 +41,7 @@ function storeAnswering(
     getInvite,
     lookUpPostalCode: () => new Promise(() => undefined),
     searchCities: () => Promise.resolve([]),
+    join: () => new Promise(() => undefined),
     ...rest,
   };
   TestBed.configureTestingModule({
@@ -358,5 +360,109 @@ describe('JoinStore: too many tries', () => {
     expect(store.lookup().kind).toBe('RateLimited');
     TestBed.resetTestingModule();
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe('JoinStore joining the team', () => {
+  async function storeJoining(join: InviteApi['join']): Promise<JoinStore> {
+    const { store } = storeAnswering(() => Promise.resolve(invite), {
+      lookUpPostalCode: () => Promise.resolve(milan),
+      join,
+    });
+    await store.open('northwind-7Kq2');
+    store.setName(' Sofia Bianchi ');
+    store.setCountry('IT');
+    store.setPostalCode('20121');
+    await store.lookUp();
+    return store;
+  }
+
+  const joined = { teamId: 'team', teammateId: 'sofia' };
+
+  it('sends the name, the country and the postal code, and answers the team and teammate', async () => {
+    const sent: unknown[] = [];
+    const store = await storeJoining((token, request) => {
+      sent.push([token, request]);
+      return Promise.resolve(joined);
+    });
+    expect(await store.join()).toEqual(joined);
+    expect(sent).toEqual([
+      [
+        'northwind-7Kq2',
+        {
+          name: 'Sofia Bianchi',
+          countryCode: 'IT',
+          postalCode: '20121',
+          cityId: null,
+          joinRequestId: expect.any(String),
+        },
+      ],
+    ]);
+  });
+
+  it('locks the form while the join is answered, and sends one join at a time', async () => {
+    let calls = 0;
+    const store = await storeJoining(() => {
+      calls++;
+      return new Promise(() => undefined);
+    });
+    void store.join();
+    expect(store.joinState()).toBe('Joining');
+    expect(await store.join()).toBeNull();
+    store.setName('Someone else');
+    store.setPostalCode('10115');
+    store.setCountry('DE');
+    expect([store.name(), store.postalCode(), store.countryCode()]).toEqual([
+      ' Sofia Bianchi ',
+      '20121',
+      'IT',
+    ]);
+    expect(calls).toBe(1);
+  });
+
+  it('sends the same join request id when the join is tried again', async () => {
+    const ids: string[] = [];
+    const store = await storeJoining((_token, request) => {
+      ids.push(request.joinRequestId);
+      return ids.length === 1
+        ? Promise.reject(new ApiError('unreachable', 0))
+        : Promise.resolve(joined);
+    });
+    expect(await store.join()).toBeNull();
+    expect(store.joinState()).toBe('Failed');
+    expect(await store.join()).toEqual(joined);
+    expect(ids[0]).toBe(ids[1]);
+  });
+
+  for (const [code, inviteState, joinState, lookup] of [
+    ['unexpected', 'Ready', 'Failed', 'Found'],
+    ['validation_failed', 'Ready', 'Failed', 'Found'],
+    ['team_full', 'Full', 'Idle', 'Found'],
+    ['invite_not_found', 'NotFound', 'Idle', 'Found'],
+    ['rate_limited', 'Ready', 'Idle', 'RateLimited'],
+  ] as const) {
+    it(`gives ${inviteState}, ${joinState} and ${lookup} for ${code}`, async () => {
+      const store = await storeJoining(() => Promise.reject(new ApiError(code, 400)));
+      await store.join();
+      expect([store.inviteState(), store.joinState(), store.lookup().kind]).toEqual([
+        inviteState,
+        joinState,
+        lookup,
+      ]);
+      expect([store.name(), store.postalCode()]).toEqual([' Sofia Bianchi ', '20121']);
+      TestBed.resetTestingModule();
+    });
+  }
+
+  it('aborts a pending join when the screen is left', async () => {
+    let given: AbortSignal | null = null;
+    const store = await storeJoining((_token, _request, signal) => {
+      given = signal;
+      return new Promise(() => undefined);
+    });
+    void store.join();
+    TestBed.resetTestingModule();
+    expect(store.joinState()).toBe('Joining');
+    expect((given as AbortSignal | null)?.aborted).toBe(true);
   });
 });

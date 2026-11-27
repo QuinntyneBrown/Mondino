@@ -32,6 +32,10 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                         .HasMaxLength(2)
                         .HasColumnType("character varying(2)");
 
+                    b.Property<string>("DirectoryId")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
 
@@ -49,6 +53,9 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DirectoryId")
+                        .IsUnique();
 
                     b.HasIndex("CountryCode", "Name");
 
@@ -91,6 +98,9 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");
 
+                    b.Property<Guid?>("JoinRequestId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTimeOffset>("JoinedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -99,12 +109,19 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("character varying(60)");
 
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
+
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CityId");
+
+                    b.HasIndex("TeamId", "JoinRequestId")
+                        .IsUnique();
 
                     b.HasIndex("TeamId", "JoinedAt");
 

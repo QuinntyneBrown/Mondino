@@ -22,6 +22,7 @@ var app = builder.Build();
 // Every error is ProblemDetails with a code. No migration is applied here: `Mondino.Cli migrate` does.
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseAuthentication();
 app.UseRateLimiter();
 
 // Liveness: the process is running. It checks nothing else, so it never fails with a dependency.

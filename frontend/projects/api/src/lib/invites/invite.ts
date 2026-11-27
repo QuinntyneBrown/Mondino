@@ -31,7 +31,28 @@ export interface Invite {
   readonly avatars: readonly InviteAvatar[];
   /** The browser's session already belongs to a teammate of this team. */
   readonly alreadyJoined: boolean;
+  /** The team has all 500 of its places taken: only its name is given, with no count, pins or avatars. */
+  readonly full: boolean;
   readonly countries: readonly Country[];
+}
+
+/**
+ * A join: a name, a country, and the postal code, or the city chosen from "Your city" while the
+ * lookup is down, with one id the screen makes for all its join requests, so a repeated request
+ * makes no second pin.
+ */
+export interface JoinRequest {
+  readonly name: string;
+  readonly countryCode: string;
+  readonly postalCode: string | null;
+  readonly cityId: string | null;
+  readonly joinRequestId: string;
+}
+
+/** The team and the new teammate, by their random ids. */
+export interface JoinResult {
+  readonly teamId: string;
+  readonly teammateId: string;
 }
 
 /** The invite link's side of the backend. A refusal is an `ApiError`. */
@@ -58,6 +79,13 @@ export interface InviteApi {
     text: string,
     signal: AbortSignal,
   ): Promise<readonly CityResult[]>;
+
+  /**
+   * Joins the team and starts the session, an `HttpOnly` cookie. The postal code travels in the
+   * body. Refused with `validation_failed`, `team_full`, `invite_not_found`, `rate_limited` (with
+   * `retryAfterSeconds`), `postal_code_not_found` or `postal_code_unavailable`.
+   */
+  join(inviteToken: string, request: JoinRequest, signal: AbortSignal): Promise<JoinResult>;
 }
 
 export const INVITE_API = new InjectionToken<InviteApi>('InviteApi');

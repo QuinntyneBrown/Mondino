@@ -22,12 +22,16 @@ internal static class RateLimitPolicies
     /// <summary>Searching the cities for "Your city": 30 a minute, as the person types.</summary>
     public const string CitySearch = "city-search";
 
+    /// <summary>Joining a team: 5 a minute.</summary>
+    public const string Join = "join";
+
     public static IServiceCollection AddRateLimitPolicies(this IServiceCollection services) =>
         services.AddRateLimiter(options =>
         {
             options.AddPolicy(Invite, context => PerClient(context, permits: 30, window: TimeSpan.FromMinutes(1)));
             options.AddPolicy(Lookup, context => PerClient(context, permits: 10, window: TimeSpan.FromMinutes(1)));
             options.AddPolicy(CitySearch, context => PerClient(context, permits: 30, window: TimeSpan.FromMinutes(1)));
+            options.AddPolicy(Join, context => PerClient(context, permits: 5, window: TimeSpan.FromMinutes(1)));
             options.OnRejected = RefuseAsync;
         });
 

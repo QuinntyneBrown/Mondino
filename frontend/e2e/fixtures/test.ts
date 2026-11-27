@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { ApiFixture } from './api';
 import { NOW } from './now';
+import { GlobePage } from '../pages/globe.page';
 import { JoinPage } from '../pages/join.page';
 import { NotFoundPage } from '../pages/not-found.page';
 
@@ -13,6 +14,7 @@ interface Fixtures {
   guard: void;
   notFoundPage: NotFoundPage;
   joinPage: JoinPage;
+  globePage: GlobePage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -69,6 +71,10 @@ export const test = base.extend<Fixtures>({
 
   joinPage: async ({ page }, use) => {
     await use(new JoinPage(page));
+  },
+
+  globePage: async ({ page }, use) => {
+    await use(new GlobePage(page));
   },
 });
 

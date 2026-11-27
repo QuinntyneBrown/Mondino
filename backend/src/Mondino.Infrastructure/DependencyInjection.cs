@@ -16,7 +16,7 @@ namespace Mondino.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// The database, the seed, who is asking, the cities and the postal code source
+    /// The database, the seed, who is asking and their session (docs/adr/0008), the cities and the postal code source
     /// (<c>PostalCodeSource:*</c>, docs/adr/0006). <c>Database:Provider</c> names the engine
     /// (docs/adr/0004): <c>PostgreSQL</c>, with the connection string <c>ConnectionStrings:Mondino</c>,
     /// or <c>InMemory</c>, which keeps nothing between runs.
@@ -64,6 +64,7 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentTeammate, CurrentTeammate>();
+        services.AddTeammateSessions(configuration);
         return services;
     }
 }

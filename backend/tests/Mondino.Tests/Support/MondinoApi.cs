@@ -8,6 +8,7 @@ using Microsoft.Extensions.Time.Testing;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
+using Mondino.Domain.Teams;
 using Mondino.Infrastructure.PostalCodes;
 
 namespace Mondino.Tests.Support;
@@ -65,8 +66,13 @@ public class MondinoApi : WebApplicationFactory<Program>
             services.RemoveAll<IDatabaseMigrator>();
             services.AddSingleton<IDatabaseMigrator>(Migrator);
 
-            services.RemoveAll<ICurrentTeammate>();
-            services.AddSingleton<ICurrentTeammate>(CurrentTeammate);
+            // A teammate the test signs in stands in for the session; otherwise the session
+            // cookie the API issued is read as the API reads it.
+            var session = services.Single(service => service.ServiceType == typeof(ICurrentTeammate));
+            services.Remove(session);
+            services.AddScoped<ICurrentTeammate>(provider => CurrentTeammate.IsAuthenticated
+                ? CurrentTeammate
+                : (ICurrentTeammate)ActivatorUtilities.CreateInstance(provider, session.ImplementationType!));
 
             if (UsesPostalCodeSource)
             {
@@ -101,6 +107,45 @@ public class MondinoApi : WebApplicationFactory<Program>
         }
 
         await database.SaveChangesAsync(CancellationToken.None);
+    }
+
+    /// <summary>
+    /// A browser at https://localhost that keeps the cookies it is given, as a browser keeps the
+    /// session cookie, which is sent only over HTTPS.
+    /// </summary>
+    public HttpClient CreateSecureClient() =>
+        CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
+
+    /// <summary>How many teammates the team of the invite token has, as stored.</summary>
+    public async Task<int> TeammateCountAsync(string inviteToken)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var team = await database.Teams.AsNoTracking().SingleAsync(t => t.InviteToken == inviteToken);
+        return await database.Teammates.CountAsync(t => t.TeamId == team.Id);
+    }
+
+    /// <summary>Adds made-up teammates at the team's first city until it has <paramref name="count"/>.</summary>
+    public async Task FillTeamAsync(string inviteToken, int count)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var team = await database.Teams.Include(t => t.Teammates).ThenInclude(t => t.City).SingleAsync(t => t.InviteToken == inviteToken);
+        var city = team.Teammates[0].City;
+        for (var i = team.Teammates.Count; i < count; i++)
+        {
+            team.Add(Guid.NewGuid(), $"Teammate {i}", "teammate-1", city, Now.AddMinutes(-i));
+        }
+
+        await database.SaveChangesAsync(CancellationToken.None);
+    }
+
+    /// <summary>A teammate as stored, with their city.</summary>
+    public async Task<Teammate> TeammateAsync(Guid teammateId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        return await database.Teammates.AsNoTracking().Include(t => t.City).SingleAsync(t => t.Id == teammateId);
     }
 
     /// <summary>Makes the browser's session one of the team's teammates: the one who joined first.</summary>

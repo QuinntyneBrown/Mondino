@@ -38,27 +38,44 @@ screen.
 - **`JoinPage`** — calls `JoinStore.join()` when the person chooses the button. On success it
   calls `TeamMembership.remember(membership)` with a `Membership`: the `teamId` and `teammateId`
   of the `JoinResult` and the `teamName` of the `Invite`, and never the postal code. It then
-  navigates to `/globe` and passes the new teammate's id and a "new" flag in the navigation
-  state, never in the URL. `GlobePage` selects that pin, pulses it once, and shows the toast
-  "You’re on the map. Northwind can now see your pin in Milan.", which dismisses itself after
-  4 s. Under the fields, `Failed` shows the alert "We couldn’t add you to Northwind. Your
+  navigates to `/globe` and passes a `JustJoined` in the navigation state, never in the URL:
+  the new teammate's id, their name and the found city's name and position. `GlobePage` shows
+  that pin lifted and labelled ("Sofia Bianchi (you) · Milan"), pulses it once, and shows the
+  toast "You’re on the map. Northwind can now see your pin in Milan." (`mo-toast`, block
+  `toast`, in a `role="status"` region, so it is announced once), which dismisses itself after
+  4 s by the shared clock's timer and has a "Dismiss" button. Until `draw-globe` and
+  `show-pins` (journeys 8 and 10) `GlobePage` draws the still globe (`GlobeFallback`) with
+  only that pin; opened without a `JustJoined` (a reload), it shows the still globe with no
+  pin and no toast. Under the fields, `Failed` shows the alert "We couldn’t add you to Northwind. Your
   details are still here — try joining again." and the button reads "Try joining again".
 - **`JoinStore`** — route-scoped service. It holds the `joinState` signal and one
   `joinRequestId`, made with `crypto.randomUUID()` when the store is created.
-  - `join()` sets `Joining` and calls `InviteApi.join`. While `Joining`, the button reads
+  - `join()` sets `Joining` and calls `InviteApi.join(inviteToken, request, signal)`. While `Joining`, the button reads
     "Joining" and the team's name with an ellipsis ("Joining Northwind…") and is disabled, the
     name and postal code are read-only and the country cannot be changed.
   - A failure sets `RateLimited` or `Failed` by the `code` of the `ApiError`. The signals
-    `name`, `countryCode` and `postalCode` and the found city are left as they are. `Failed`
-    enables the button again. `RateLimited` shows "Too many tries from this device. You can
-    try again in 9:42." and keeps the button disabled until the countdown from the refusal's
-    `Retry-After` ends (`place-pin-from-postal-code`).
+    `name`, `countryCode` and `postalCode` (and a city chosen through "Your city") are left as
+    they are. `Failed` keeps the found city and enables the button again. `RateLimited` is the
+    lookup's own state (`place-pin-from-postal-code`), as `pages/join/rate-limited` draws it:
+    the found city goes, "Too many tries from this device. You can try again in 9:42." is
+    shown, and the button reads "Place my pin" and stays disabled until the countdown from the
+    refusal's `Retry-After` ends; it then finds the city again (from the cache) before
+    "Join Northwind" comes back.
   - The code `team_full` sets `inviteState` to `Full`, and the code `invite_not_found` sets it
     to `NotFound`. Each replaces the form with its notice and takes the pins off the globe
     (`open-invite-link`): "Northwind is full", or "This invite link no longer works".
   - A retry sends the same `joinRequestId`, so a join whose response was lost does not make a
     second pin.
-- **`JoinState`** — feature-local union of `Idle`, `Joining`, `RateLimited` and `Failed`.
+- **`JoinState`** — feature-local union of `Idle`, `Joining` and `Failed`. A join refused with
+  429 is the lookup's own `RateLimited` state, and a full team or a reset link an `InviteState`.
+- **`TeamMembership` / `TEAM_MEMBERSHIP`** — contract and token in `@mondino/api`, with the
+  `Membership` type; **`LocalTeamMembership`** in `domain`'s `storage/` keeps it in local
+  storage under `mondino.membership` (ids and the team's name only) and is bound in
+  `app.config.ts`, since every screen of a team reads it.
+- **`GlobePage`** — reads the `JustJoined` from `Router.currentNavigation()`, checks its shape
+  (it is data), and replaces the history entry's state without it, so a reload or a return
+  through history does not greet the teammate again. The toast's timer is cleared when the
+  screen is left.
 - **`InviteApi.join(inviteToken, request)`** — sends
   `POST /api/invites/{inviteToken}/teammates` with a `JoinRequest` body: `name`, `countryCode`,
   `postalCode` or `cityId`, and `joinRequestId`. It returns a `JoinResult`: `teamId` and
@@ -86,13 +103,18 @@ screen.
   1. It loads the `Team` by invite token with its teammates, and refuses with
      `invite_not_found` when no team matches.
   2. When a teammate of that team already has the command's `JoinRequestId`, it returns that
-     teammate and adds nothing.
+     teammate and adds nothing. Steps 2 to 5 run one at a time for one team within an API
+     instance (`TeamJoinGate`, a fixed set of 64 locks chosen by the invite token), so a
+     double-click on one instance cannot pass step 2 twice; across instances the unique index
+     of step 6 holds.
   3. It normalises the postal code with `PostalCodeFormats` and resolves the city through
      `IPostalCodeLookup`. The outcome is normally in the cache of `CachedPostalCodeLookup` from
      the lookup on the Join screen. `NotFound` and `Unavailable` are refused with
      `postal_code_not_found` and `postal_code_unavailable`. A command with a `CityId` resolves
      the city through `ICityDirectory.Find` instead, calls no outside source, and stores no
-     postal code for the teammate; an unknown city id is refused with `validation_failed`.
+     postal code for the teammate; an unknown city id, or one in another country, is refused
+     with `validation_failed`. The found `KnownCity` becomes the `City` entity whose
+     `DirectoryId` is its `CityId`, made the first time a teammate is placed there.
   4. It picks the pin's colour with `PinColourPicker` and calls `Team.AddTeammate` with the
      time from `TimeProvider`.
   5. It saves through `IAppDbContext` in one unit of work.
@@ -109,8 +131,11 @@ screen.
   409 with the code `team_full`.
 - **`JoinResultDto`** — `TeamId` and `TeammateId`. The Globe screen reads the pin itself through
   `GetPinsQuery`.
-- **`TeammateSessionHandler`** — issues the session cookie: `HttpOnly`, `Secure` and `SameSite`.
-  The cookie carries the team id and teammate id; its lifetime is `<TO SUPPLY>`.
+- **`TeammateSessionHandler`** — issues the session cookie `__Host-mondino-session`:
+  `HttpOnly`, `Secure` and `SameSite=Lax`. The cookie carries the team id and teammate id; it
+  lasts 365 days and slides ([ADR 0008](../../../adr/0008-session-and-cross-site-requests.md)).
+- **`[SameSiteOnly]`** — the join action refuses a request from another site with 403 and the
+  code `cross_site_request` (ADR 0008).
 
 **Refusals**
 
@@ -119,6 +144,7 @@ screen.
 | Team has 500 teammates | 409 | `team_full` | "Northwind is full" and "The team has all 500 of its places taken. Ask a teammate at Northwind to tell you when a place opens, then open this link again.", in the form's place |
 | Over 5 join requests a minute | 429 | `rate_limited` | "Too many tries from this device. You can try again in 9:42."; the button is disabled until the countdown ends |
 | Invalid name, country or postal code | 400 | `validation_failed` | "We couldn’t add you to Northwind. Your details are still here — try joining again." |
+| From another site (`Sec-Fetch-Site` or `Origin`) | 403 | `cross_site_request` | — (a browser on Mondino never sends one) |
 | Unknown or reset invite token | 404 | `invite_not_found` | "This invite link no longer works", in the form's place |
 | Network failure or any other error | — | — | "We couldn’t add you to Northwind. Your details are still here — try joining again." and "Try joining again" |
 
@@ -131,8 +157,8 @@ team and an unknown invite token, which replace the form with a notice.
   pass the limit check. The guard that makes the limit exact under concurrency (a concurrency
   token on `Team`, which PostgreSQL ([ADR 0004](../../../adr/0004-database-engine.md)) can
   give as its `xmin` system column) is `<TO SUPPLY>`.
-- The protection of this pre-session, state-changing request against cross-site request forgery
-  follows the session design: `<TO SUPPLY>`.
+- The protection of this pre-session, state-changing request against cross-site request
+  forgery is decided in [ADR 0008](../../../adr/0008-session-and-cross-site-requests.md).
 
 ## Requirements
 

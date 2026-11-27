@@ -25,7 +25,9 @@ import {
   TextField,
   Wordmark,
 } from '@mondino/components';
+import { TEAM_MEMBERSHIP } from '@mondino/api';
 import { stillPlacements } from '@mondino/domain';
+import type { JustJoined } from '../globe/just-joined';
 import { JoinStore, nameLimit } from './join-store';
 
 /**
@@ -60,6 +62,7 @@ import { JoinStore, nameLimit } from './join-store';
 export class JoinPage {
   protected readonly store = inject(JoinStore);
   private readonly router = inject(Router);
+  private readonly membership = inject(TEAM_MEMBERSHIP);
   /** Counts the submits that found a problem: each moves focus to the summary. */
   protected readonly summaryFocus = signal(0);
 
@@ -75,19 +78,22 @@ export class JoinPage {
   /** The team's bare pins on the still globe, until the 3D globe draws them (journey 8). */
   protected readonly pins = computed(() => {
     const invite = this.store.invite();
-    return invite ? stillPlacements(invite.positions) : [];
+    return invite && this.store.inviteState() === 'Ready' ? stillPlacements(invite.positions) : [];
   });
+
+  /** The join is being answered: the form is locked (L2-005). */
+  protected readonly joining = computed(() => this.store.joinState() === 'Joining');
 
   /** The new pin at the city found, until joining puts it on the team (journey 4). */
   protected readonly you = computed(() => {
     const lookup = this.store.lookup();
-    if (lookup.kind !== 'Found') return null;
+    if (lookup.kind !== 'Found' || this.store.inviteState() !== 'Ready') return null;
     const [placement] = stillPlacements([lookup.result.city.position]);
     return placement ? { ...placement, label: `You · ${lookup.result.city.name}` } : null;
   });
 
   protected readonly globeLabel = computed(() => {
-    const invite = this.store.invite();
+    const invite = this.store.inviteState() === 'Ready' ? this.store.invite() : null;
     const lookup = this.store.lookup();
     if (invite && lookup.kind === 'Found') {
       const count = invite.positions.length;
@@ -168,7 +174,34 @@ export class JoinPage {
 
   protected submit(event: Event): void {
     event.preventDefault();
+    if (this.store.lookup().kind === 'Found') {
+      void this.joinTeam();
+      return;
+    }
     if (this.store.submit()) this.summaryFocus.update((count) => count + 1);
+  }
+
+  /**
+   * Joins the team; once in, remembers it and opens the Globe with the new pin, which travels in the
+   * navigation state, never in the address (L2-005, L2-007).
+   */
+  private async joinTeam(): Promise<void> {
+    const lookup = this.store.lookup();
+    const invite = this.store.invite();
+    const result = await this.store.join();
+    if (!result || !invite || lookup.kind !== 'Found') return;
+    this.membership.remember({
+      teamId: result.teamId,
+      teammateId: result.teammateId,
+      teamName: invite.teamName,
+    });
+    const justJoined: JustJoined = {
+      teammateId: result.teammateId,
+      name: this.store.name().trim(),
+      cityName: lookup.result.city.name,
+      position: lookup.result.city.position,
+    };
+    await this.router.navigateByUrl('/globe', { state: { justJoined } });
   }
 
   /** A link in the summary moves focus to its field. */

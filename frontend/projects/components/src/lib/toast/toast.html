@@ -1,0 +1,19 @@
+<div class="toast toast--success">
+  <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+  <div class="toast__body">
+    <p>
+      @if (strong(); as strong) {
+        <strong>{{ strong }}</strong>
+      }
+      {{ text() }}
+    </p>
+  </div>
+  <button class="toast__close" type="button" aria-label="Dismiss" (click)="dismiss.emit()">
+    <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  </button>
+</div>

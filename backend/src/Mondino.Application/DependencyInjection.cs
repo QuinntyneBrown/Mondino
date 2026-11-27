@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Mondino.Application.Joining;
 
 namespace Mondino.Application;
 
@@ -11,6 +12,7 @@ public static class DependencyInjection
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<TeamJoinGate>();
         return services;
     }
 }

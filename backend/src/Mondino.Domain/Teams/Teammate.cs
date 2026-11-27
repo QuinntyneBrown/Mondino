@@ -10,7 +10,15 @@ public sealed class Teammate
         City = null!;
     }
 
-    internal Teammate(Guid id, Guid teamId, string name, string colour, City city, DateTimeOffset joinedAt)
+    internal Teammate(
+        Guid id,
+        Guid teamId,
+        string name,
+        string colour,
+        City city,
+        DateTimeOffset joinedAt,
+        string? postalCode = null,
+        Guid? joinRequestId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(colour);
@@ -22,6 +30,8 @@ public sealed class Teammate
         City = city;
         CityId = city.Id;
         JoinedAt = joinedAt;
+        PostalCode = postalCode;
+        JoinRequestId = joinRequestId;
     }
 
     public Guid Id { get; private set; }
@@ -38,6 +48,15 @@ public sealed class Teammate
     public City City { get; private set; }
 
     public DateTimeOffset JoinedAt { get; private set; }
+
+    /// <summary>
+    /// The postal code the pin was placed from, in its country's canonical spelling. It is the
+    /// teammate's own and is returned to no one else. A teammate placed through "Your city" has none.
+    /// </summary>
+    public string? PostalCode { get; private set; }
+
+    /// <summary>The id the browser gave its join request, so a repeated request makes no second pin. Never returned.</summary>
+    public Guid? JoinRequestId { get; private set; }
 
     /// <summary>The first character of up to the first two words of the name: "Liam O’Connor" is "LO".</summary>
     public string Initials => TeammateInitials.Of(Name);

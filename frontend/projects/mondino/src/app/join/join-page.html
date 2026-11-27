@@ -38,9 +38,10 @@
                 autocomplete="name"
                 [maxlength]="60"
                 [value]="store.name()"
+                [readonly]="joining()"
                 [invalid]="nameError() !== null"
                 [error]="nameError()"
-                (valueChange)="store.name.set($event)"
+                (valueChange)="store.setName($event)"
               />
               <div class="join__field-row">
                 <mo-select-field
@@ -50,6 +51,7 @@
                   autocomplete="country-name"
                   [options]="countries()"
                   [value]="store.countryCode()"
+                  [disabled]="joining()"
                   (valueChange)="store.setCountry($event)"
                 />
                 <mo-text-field
@@ -61,6 +63,7 @@
                   tabular
                   [describedBy]="lookupDown() ? null : 'lookup'"
                   [disabled]="lookupDown()"
+                  [readonly]="joining()"
                   [value]="store.postalCode()"
                   [invalid]="postalCodeError() !== null || store.lookup().kind === 'NotFound'"
                   [error]="postalCodeError()"
@@ -96,6 +99,13 @@
                   end="."
                 />
               }
+              @if (store.joinState() === 'Failed' && store.lookup().kind === 'Found') {
+                <mo-alert
+                  tone="danger"
+                  [strong]="'We couldn’t add you to ' + invite.teamName + '.'"
+                  text="Your details are still here — try joining again."
+                />
+              }
               @switch (store.lookup().kind) {
                 @case ('Locating') {
                   <button
@@ -118,9 +128,31 @@
                   </button>
                 }
                 @case ('Found') {
-                  <button mo-button variant="primary" size="lg" block type="submit">
-                    Join {{ invite.teamName }}
-                  </button>
+                  @switch (store.joinState()) {
+                    @case ('Joining') {
+                      <button
+                        mo-button
+                        variant="primary"
+                        size="lg"
+                        block
+                        type="submit"
+                        aria-busy="true"
+                        disabled
+                      >
+                        Joining {{ invite.teamName }}…
+                      </button>
+                    }
+                    @case ('Failed') {
+                      <button mo-button variant="primary" size="lg" block type="submit">
+                        Try joining again
+                      </button>
+                    }
+                    @default {
+                      <button mo-button variant="primary" size="lg" block type="submit">
+                        Join {{ invite.teamName }}
+                      </button>
+                    }
+                  }
                 }
                 @case ('RateLimited') {
                   <button mo-button variant="primary" size="lg" block type="submit" disabled>
@@ -173,6 +205,19 @@
           >
             <a slot="actions" mo-button size="lg" routerLink="/new">Start your own team</a>
           </mo-notice>
+        </div>
+      }
+      @case ('Full') {
+        <div class="join__body">
+          <mo-notice
+            icon="users"
+            [title]="(store.invite()?.teamName ?? '') + ' is full'"
+            [text]="
+              'The team has all 500 of its places taken. Ask a teammate at ' +
+              (store.invite()?.teamName ?? '') +
+              ' to tell you when a place opens, then open this link again.'
+            "
+          />
         </div>
       }
       @case ('Failed') {
