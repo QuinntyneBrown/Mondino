@@ -73,9 +73,12 @@ public sealed class OpenInviteLinkTests
         using var client = api.CreateClient();
 
         // When its invite link is opened
-        var body = await client.GetStringAsync(Northwind);
+        var answer = System.Text.Json.Nodes.JsonNode.Parse(await client.GetStringAsync(Northwind))!.AsObject();
 
-        // Then nothing in the answer names a teammate, a city, a time zone, the weather or a postal code
+        // Then, beside the supported countries and the form of their postal codes, nothing in the
+        // answer names a teammate, a city, a time zone, the weather or a postal code
+        Assert.True(answer.Remove("countries"));
+        var body = answer.ToJsonString();
         foreach (var secret in new[]
                  {
                      "Mara", "Lindqvist", "Kwame", "Stockholm", "Milan", "Accra", "Europe/", "Africa/",
