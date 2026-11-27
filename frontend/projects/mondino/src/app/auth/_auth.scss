@@ -44,7 +44,18 @@
   color: var(--color-fg-muted);
 }
 .auth__footer a {
+  position: relative;
   font-weight: var(--font-weight-semibold);
+}
+// A link in a line of text takes a touch over 44 px, above and below the line.
+.auth__footer a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--target-comfortable);
+  translate: 0 -50%;
 }
 @media (min-width: bp.$sm) {
   .auth__form {

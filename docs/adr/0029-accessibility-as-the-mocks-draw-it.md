@@ -37,11 +37,20 @@ the axe sweep only when a person asks.
   reduced motion; an animation that repeats or pulses (the new pin's pulse, the shimmer of a
   skeleton or the globe's placeholder) is `animation: none` in a
   `@media (prefers-reduced-motion: reduce)` block in its component's stylesheet.
+- **No text on the globe fades under 4.5:1.** The mocks faded every pin with its depth, so a
+  labelled pin near the rim drew its initials and its label under AA. A labelled pin is now
+  drawn at full strength; a far pin (ADR 0014) still fades, unlabelled, and draws no initials
+  until it lifts. Its name is read in full from its button.
+- **A target is measured as the browser lays it out.** A transparent `::before` or `::after`
+  that grows a control to 44 px is placed inside the control's border, so its inset counts the
+  border too; the header's "Invite teammate" and the Moments chips were 42 px. Links in a line
+  of text (the footers of Join and Sign In) and the Team ribbon's markers grow the same way.
 - **The behaviour specs measure every screen.** One spec walks each screen with Tab and
   measures the focus ring's contrast, the touch targets, the contrast of each line of text
   and the figures of each time and temperature, in light and dark, and reads the motion under
-  each setting. Browser text at 200% is the root font size at 200%, which is what the
-  browser's setting changes, since every size is in `rem`. The axe sweep stays written for
+  each setting. Browser text at 200% is the browser's own default font size set from 16 to
+  32 px (Chromium's `Page.setFontSizes`), so every size and every breakpoint in `rem` follows,
+  as they do for a person who changes the setting. The axe sweep stays written for
   every screen in every state and runs when a person asks.
 
 ## Consequences

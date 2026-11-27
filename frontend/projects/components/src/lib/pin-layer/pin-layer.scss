@@ -18,7 +18,14 @@
   left: var(--x);
   top: var(--y);
   z-index: var(--z-raised);
+}
+// A far pin fades towards the rim, unlabelled, and draws no initials until it lifts, so no text
+// on the globe falls under 4.5:1. A labelled pin is drawn at full strength.
+.globe__pin--far {
   opacity: var(--depth, 1);
+}
+.globe__pin--far:not(:focus-within, :hover, .globe__pin--lifted) .pin {
+  color: transparent;
 }
 .globe__pin:focus-within,
 .globe__pin:hover,

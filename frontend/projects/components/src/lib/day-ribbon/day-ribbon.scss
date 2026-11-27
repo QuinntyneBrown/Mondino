@@ -67,6 +67,16 @@
   text-decoration: none;
   transition: scale var(--duration-fast) var(--ease-standard);
 }
+// The marker takes a touch over 44 px, whatever its drawn size.
+.day-ribbon__marker::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--target-comfortable);
+  height: var(--target-comfortable);
+  translate: -50% -50%;
+}
 .day-ribbon__marker:hover {
   scale: 1.1;
 }

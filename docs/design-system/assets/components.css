@@ -89,13 +89,15 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 }
 .skip-link {
   position: absolute; left: var(--space-4); top: calc(-1 * var(--space-24)); z-index: var(--z-tooltip);
+  display: inline-flex; align-items: center; min-height: var(--target-comfortable);
   padding: var(--space-2) var(--space-4); border-radius: var(--radius-full);
   background: var(--color-accent); color: var(--color-fg-on-accent); text-decoration: none; font: var(--text-label);
 }
 .skip-link:focus-visible { top: var(--space-3); }
 
-/* Times and temperatures never shift as they change. */
-.tnum { font-variant-numeric: tabular-nums; }
+/* Times and temperatures never shift as they change. A utility: it holds against a component's
+   own `font` shorthand, which would otherwise reset it. */
+.tnum { font-variant-numeric: tabular-nums !important; }
 .text-muted { color: var(--color-fg-muted); }
 .nowrap { white-space: nowrap; }
 
@@ -192,7 +194,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .segmented__option[aria-current="page"],
 .segmented__option[aria-selected="true"],
 .segmented__option[aria-checked="true"] { background: var(--color-accent); color: var(--color-fg-on-accent); }
-.segmented__count { opacity: 0.7; }
+.segmented__count { font-weight: var(--font-weight-regular); }
 .segmented__check { display: none; }
 .segmented__option[aria-checked="true"] .segmented__check { display: block; }
 @media (min-width: 36rem) { .segmented__option { padding: 0 var(--space-4); } }
@@ -350,7 +352,10 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .globe--placeholder .globe__art { animation: shimmer var(--duration-deliberate) ease-in-out infinite alternate; }
 .globe__pins { position: absolute; inset: 0; }
 .globe__pin { position: absolute; left: var(--x); top: var(--y); z-index: var(--z-raised); }
-.globe__pin { opacity: var(--depth, 1); }
+.globe__pin--far { opacity: var(--depth, 1); }
+/* A far pin fades towards the rim, unlabelled; it draws no initials until it lifts, so no text on
+   the globe falls under 4.5:1. A labelled pin is drawn at full strength. */
+.globe__pin--far:not(:focus-within, :hover, .globe__pin--lifted) .pin { color: transparent; }
 .globe__pin:focus-within, .globe__pin:hover { opacity: 1; }
 .globe__pin--lifted { z-index: var(--z-pin-lifted); opacity: 1; }
 
@@ -547,6 +552,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 @media (min-width: 48rem) { .day-ribbon__band--edge span { display: inline; } }
 .day-ribbon__marker { position: absolute; left: clamp(var(--space-5), var(--at), calc(100% - var(--space-5))); top: calc(var(--ribbon-top) + var(--row) * var(--ribbon-row-height)); translate: -50% 0; border-radius: var(--radius-full); text-decoration: none; transition: scale var(--duration-fast) var(--ease-standard); }
 .day-ribbon__marker:hover { scale: 1.1; }
+/* The marker takes a touch over 44 px, whatever its drawn size. */
+.day-ribbon__marker::after { content: ""; position: absolute; left: 50%; top: 50%; width: var(--target-comfortable); height: var(--target-comfortable); translate: -50% -50%; }
 .day-ribbon__marker .avatar { width: var(--avatar-size-xs); height: var(--avatar-size-xs); font-size: var(--font-size-3xs); box-shadow: 0 0 0 var(--border-width-thick) var(--color-bg-surface); }
 @media (min-width: 48rem) { .day-ribbon__marker .avatar { width: var(--space-8); height: var(--space-8); font-size: var(--font-size-xs); } }
 .day-ribbon__scale { display: flex; justify-content: space-between; margin-top: var(--space-2); font: var(--text-caption); font-size: var(--font-size-2xs); color: var(--color-fg-muted); }
@@ -576,7 +583,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .team-table__phone { display: block; font: var(--text-caption); color: var(--color-fg-muted); }
 .team-table__moment { grid-column: 1 / -1; min-width: 0; }
 .team-table__moment:has(.team-table__none) { display: none; }
-.team-table__weather-in { display: inline-flex; align-items: center; gap: var(--space-1-5); }
+.team-table__weather-in { display: inline-flex; align-items: center; gap: var(--space-1-5); font-variant-numeric: tabular-nums; }
 @media (min-width: 48rem) {
   .team-table { margin-top: var(--space-4); }
   .team-table thead { display: block; }
@@ -615,7 +622,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   background: var(--color-bg-surface); color: var(--color-fg-default); font: var(--text-label); white-space: nowrap; cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
-.chip::after { content: ""; position: absolute; inset: calc((var(--control-height-sm) - var(--target-comfortable)) / 2) 0; }
+.chip::after { content: ""; position: absolute; inset: calc((var(--control-height-sm) - var(--target-comfortable)) / 2 - var(--border-width-hairline)) 0; }
 .chip .icon { width: var(--icon-size-xs); height: var(--icon-size-xs); }
 .chip:hover { border-color: var(--color-fg-default); }
 .chip[aria-pressed="true"] { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-fg-on-accent); }
@@ -846,7 +853,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .auth__stage { width: 100%; height: var(--layout-globe-phone-height); flex: none; padding-bottom: var(--space-16); }
 /* The line under the form on Join, Sign In and Create Team: the other way in. */
 .auth__footer, .join__footer { margin-top: var(--space-10); font: var(--text-body-sm); color: var(--color-fg-muted); }
-.auth__footer a, .join__footer a { font-weight: var(--font-weight-semibold); }
+.auth__footer a, .join__footer a { position: relative; font-weight: var(--font-weight-semibold); }
+/* A link in a line of text takes a touch over 44 px, above and below the line. */
+.auth__footer a::after, .join__footer a::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: var(--target-comfortable); translate: 0 -50%; }
 @media (min-width: 36rem) {
   .auth__form { padding: var(--space-8) var(--space-10); }
   .auth__title { font: var(--text-display); letter-spacing: var(--letter-spacing-tight); }
@@ -1057,7 +1066,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .app-header .segmented__option { min-height: var(--space-8); }
 .app-header .segmented__option::after { inset-block: calc((var(--space-8) - var(--target-comfortable)) / 2); }
 
-@media (min-width: 48rem) { .app-header__invite { position: relative; min-height: var(--space-9, 2.25rem); padding-inline: var(--space-3); } .app-header__invite::after { content: ""; position: absolute; inset: calc(-1 * var(--space-1)) 0; } }
+@media (min-width: 48rem) { .app-header__invite { position: relative; min-height: var(--space-9, 2.25rem); padding-inline: var(--space-3); } .app-header__invite::after { content: ""; position: absolute; inset: calc(-1 * var(--space-1) - var(--border-width-hairline)) 0; } }
 
 @media (min-width: 64rem) { .team-table thead tr, .team-table__row { grid-template-columns: minmax(0,2.4fr) minmax(0,1.6fr) 6rem 6.5rem 5rem minmax(0,2fr) var(--space-5); } }
 
@@ -1065,7 +1074,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .moment-pill__when { color: inherit; }
 
 .chip { min-height: var(--space-8); padding-inline: .875rem; }
-.chip::after { inset-block: calc((var(--space-8) - var(--target-comfortable)) / 2); }
+.chip::after { inset-block: calc((var(--space-8) - var(--target-comfortable)) / 2 - var(--border-width-hairline)); }
 
 .today-moment__title { line-height: 1.25; letter-spacing: -.01em; }
 .today-moment__detail { color: inherit; }
@@ -1201,7 +1210,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 
 .app-header__me .avatar { width: 2.125rem; height: 2.125rem; }
 
-@media (max-width: 47.999rem) { .app-header__invite { position: relative; width: 2.125rem; height: 2.125rem; min-height: 0; } .app-header__invite::after { content: ""; position: absolute; inset: -.3125rem; border-radius: inherit; } }
+@media (max-width: 47.999rem) { .app-header__invite { position: relative; width: 2.125rem; height: 2.125rem; min-height: 0; } .app-header__invite::after { content: ""; position: absolute; inset: calc(-.3125rem - var(--border-width-hairline)); border-radius: inherit; } }
 
 @media (min-width: 23.4375rem) and (max-width: 39.999rem) { .app-header .segmented__option { padding-inline: var(--space-3); font-size: var(--font-size-sm); } }
 

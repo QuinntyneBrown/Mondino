@@ -136,7 +136,7 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 - Times and temperatures use `font-variant-numeric: tabular-nums`, set by a foundation utility.
 - The behaviour specs measure every screen, in light and dark: the focus ring's contrast,
   every touch target, the contrast of each line of text over its painted background, the
-  figures of each time and temperature, and 200% text as the root font size at 200% (ADR 0029).
+  figures of each time and temperature, and 200% text as the browser's default font size at 32 px (ADR 0029).
 - An axe sweep with the WCAG 2.2 AA rules covers every screen in every state. Like the visual
   and responsive sweeps, it is kept current and runs only when a person asks.
 

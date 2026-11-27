@@ -48,7 +48,7 @@
   inset: calc((var(--control-height-sm) - var(--target-comfortable)) / 2) 0;
 }
 .segmented__count {
-  opacity: 0.7;
+  font-weight: var(--font-weight-regular);
 }
 // A chosen setting carries a tick as well as the fill (L2-033).
 .segmented__check {

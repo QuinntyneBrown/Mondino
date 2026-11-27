@@ -60,8 +60,17 @@ export class ProfilePage {
   /** "Leave Northwind", under the sections. */
   readonly leave: Locator;
 
+  /** Any control for the theme, which Profile & Settings does not have: the device decides. */
+  readonly themeControls: Locator;
+
   constructor(readonly page: Page) {
     this.main = page.locator('main#main');
+    this.themeControls = this.main
+      .getByRole('radio')
+      .or(this.main.getByRole('switch'))
+      .or(this.main.getByRole('button'))
+      .or(this.main.getByRole('combobox'))
+      .filter({ hasText: /theme|dark|light|appearance/i });
     this.title = this.main.locator('h1');
     this.header = page.locator('header.app-header');
     this.profileLink = this.header.getByRole('link', { name: 'Profile & Settings' });
