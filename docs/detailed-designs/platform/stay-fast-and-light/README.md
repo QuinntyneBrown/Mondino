@@ -91,8 +91,9 @@ is ADR 0030.
   signal.
 - **The backend answers a team of 500 quickly.** `GetPinsQueryHandler` loads the team's
   teammates in one query without tracking, and weather comes from the cache
-  (`survive-source-failure`). The `Mondino API` compresses its responses. The 95th-percentile
-  target is 300 ms.
+  (`survive-source-failure`), asked once per city. The `Mondino API` compresses its responses;
+  the answer for 500 is at most 24 kB compressed. The 95th-percentile target is 300 ms, timed
+  only in the performance sweep (`dotnet test --filter Category=Performance`).
 
 **Release everything acquired (L2-047).**
 

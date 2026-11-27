@@ -170,8 +170,8 @@ Every setting is described in [`docs/deployment/README.md`](docs/deployment/READ
 | Unit tests | `cd frontend && npm test` |
 | Production build | `cd frontend && npm run build` |
 | Behaviour specs | `cd frontend && npx playwright install chromium && npm run e2e` |
-| Backend format and tests | `cd backend && dotnet format --verify-no-changes && dotnet test` |
-| Visual, responsive, accessibility and performance sweeps | `cd frontend && npm run e2e:visual`, `e2e:responsive`, `e2e:accessibility`, `e2e:performance` |
+| Backend format and tests | `cd backend && dotnet format --verify-no-changes && dotnet test --filter "Category!=Performance"` |
+| Visual, responsive, accessibility and performance sweeps | `cd frontend && npm run e2e:visual`, `e2e:responsive`, `e2e:accessibility`, `e2e:performance`; the backend's timed read of a team of 500: `cd backend && dotnet test --filter Category=Performance` |
 
 Run `node tools/verify/verify.mjs` before you push. It runs every CI check and the unit tests.
 

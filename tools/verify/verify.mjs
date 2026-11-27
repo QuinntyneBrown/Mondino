@@ -32,7 +32,7 @@ const tracks = [
     steps: [
       ['format', 'dotnet format --verify-no-changes'],
       ['build', 'dotnet build --nologo'],
-      ['tests', 'dotnet test --no-build --nologo'],
+      ['tests', 'dotnet test --no-build --nologo --filter "Category!=Performance"'],
     ],
   },
 ];

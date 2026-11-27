@@ -1898,8 +1898,11 @@ still 90. Total: 93.
    keeps a deferred dependency eager when its import statement names anything else.
 4. **Time an animation by the frame's own time.** A spec can then give each frame the time a slow
    device would, whatever the machine running it can draw.
-5. **Time a backend call in a collection of its own.** Parallel tests time each other's thread
-   pool.
+5. **Keep a wall-clock time out of the always-run suite.** The 500 read was timed in a
+   collection of its own after parallel tests timed each other's thread pool, which only lowered
+   the odds; and on EF Core InMemory it proved nothing about the real database. The suite now
+   proves what does not depend on the clock (compressed, at most 24 kB, every pin, the weather
+   once per city), and the timing is a `Performance` trait that verify and CI filter out.
 6. **Hold the globe still in a spec whose clock jumps.** A turning globe draws a frame for every
    16 ms that `runFor` passes; the hidden-tab refresh spec took 12 s on CI for frames it never
    looked at.
@@ -1931,17 +1934,17 @@ still 90. Total: 93.
 - *Measure the initial bundle* (journey 2, lesson 1): 274.41 kB before, 281.16 kB after (the
   `@defer` runtime), 88 kB compressed; the budget is tightened to 285 and 290 kB.
 
-**Progress:** 10 of 14 criteria proven (70, from 10). L2-046: the screen within 2.5 s and the
+**Progress:** 9 of 14 criteria proven (60, from 10). L2-046: the screen within 2.5 s and the
 globe within 5 s on the phone's connection, by the model, with the screen usable before the
 globe and no layout shift (1, 2); the initial bundle 88 kB of 150 compressed without the renderer,
 which arrives with the first globe (5); the step down after 3 seconds under 30 frames a second
-(6); content-hashed addresses cached for a year (7); the team of 500 read with a 95th percentile
-of a few milliseconds on EF Core InMemory, compressed (8). L2-047: one clock for 13 or 500 pins
+(6); content-hashed addresses cached for a year (7). L2-047: one clock for 13 or 500 pins
 on Globe and Team (3); a tab hidden for an hour draws nothing and is right at once (4); bounded
 rows, pins and panel lists (5, journeys 10, 15, 18 and 21); requests cancelled on leaving (6).
 Not proven, and in the `performance` sweep, run when a person asks: the frame rate while a team
-of 100 is dragged (L2-046 criterion 3), the response to an interaction (4), and the heap after 8
+of 100 is dragged (L2-046 criterion 3), the response to an interaction (4), the 300 ms read of a
+team of 500 (8; `dotnet test --filter Category=Performance`), and the heap after 8
 simulated hours and after 20 enters and leaves (L2-047 criteria 1 and 2; what criterion 2 also
 asks of contexts, loops and listeners is proven for three visits by `globe-release`). The model
 leaves the phone's processor out; the sweep measures the largest contentful paint on a throttled
-connection. Total: 95.
+connection. Total: 94 (94.9, rounded down).
