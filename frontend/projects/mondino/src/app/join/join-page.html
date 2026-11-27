@@ -253,6 +253,7 @@
         [label]="globeLabel()"
         [pins]="positions()"
         [you]="newPin()"
+        [facing]="newPin()?.position ?? null"
         (stateChange)="globeState.set($event)"
       >
         <mo-globe-placeholder loading variant="disc" />

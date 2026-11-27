@@ -1,0 +1,96 @@
+import type { Page } from '@playwright/test';
+import { expect } from '../fixtures/test';
+import type { ApiFixture } from '../fixtures/api';
+import {
+  lookupAnswer,
+  NORTHWIND_INVITE,
+  NORTHWIND_JOINS,
+  NORTHWIND_LOOKUPS,
+  northwindInvite,
+  SOFIA_JOINED,
+} from '../fixtures/invites';
+import type { GlobePage } from '../pages/globe.page';
+import type { JoinPage } from '../pages/join.page';
+
+/**
+ * Sofia joins Northwind from Milan and lands on the Globe screen, her pin on the 3D globe: the one
+ * pin the Globe screen draws until the team's pins are built, so how it moves is how the globe
+ * turns.
+ */
+export async function joinFromMilan(
+  api: ApiFixture,
+  joinPage: JoinPage,
+  globePage: GlobePage,
+): Promise<void> {
+  api.answer('GET', NORTHWIND_INVITE, northwindInvite());
+  api.answer('POST', NORTHWIND_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
+  api.answer('POST', NORTHWIND_JOINS, SOFIA_JOINED);
+  await joinPage.open('northwind-7Kq2');
+  await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
+  await joinPage.leavePostalCode();
+  await expect(joinPage.submit).toHaveText('Join Northwind');
+  await joinPage.submit.click();
+  await expect(globePage.youPin).toBeVisible();
+}
+
+/**
+ * Stops the clock where it is, give or take a few milliseconds, so time passes only when the spec
+ * says: frames, and Angular's rendering, then come only with `page.clock.runFor`.
+ */
+export async function pauseTheClock(page: Page): Promise<void> {
+  for (let attempt = 0; ; attempt++) {
+    const now = await page.evaluate(() => Date.now());
+    try {
+      await page.clock.pauseAt(now + 20);
+      return;
+    } catch (error) {
+      // The page's clock ran past the moment before it was paused; try the next one.
+      if (attempt === 4 || !String(error).includes('to the past')) throw error;
+    }
+  }
+}
+
+/** Lets a spec hide and show the tab, as switching to another tab would. Call before opening. */
+export async function makeTheTabHideable(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    let hidden = false;
+    Object.defineProperty(document, 'hidden', { get: () => hidden });
+    Object.defineProperty(document, 'visibilityState', {
+      get: () => (hidden ? 'hidden' : 'visible'),
+    });
+    Object.assign(window, {
+      __setHidden(value: boolean) {
+        hidden = value;
+        document.dispatchEvent(new Event('visibilitychange'));
+      },
+    });
+  });
+}
+
+export async function setTheTabHidden(page: Page, hidden: boolean): Promise<void> {
+  await page.evaluate(
+    (value) => (window as unknown as { __setHidden(v: boolean): void }).__setHidden(value),
+    hidden,
+  );
+}
+
+/**
+ * Turns reduced motion on or off while the page is open, as the system setting would. The browser
+ * tells the page at its next rendering, which the paused clock does not bring about, so a
+ * one-pixel picture of the page does.
+ */
+export async function changeReducedMotion(page: Page, reduce: boolean): Promise<void> {
+  await page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' });
+  await page.screenshot({ clip: { x: 0, y: 0, width: 1, height: 1 } });
+}
+
+/**
+ * Lets `ms` pass on the paused clock in one step, then draws: the globe's next frame reports the
+ * whole time since the one before (ADR 0013), so seconds of turning cost one frame, not one a
+ * 16 ms. The globe's frame loop must already be running, as it is a frame after it was last
+ * asked to move.
+ */
+export async function letTimePass(page: Page, ms: number): Promise<void> {
+  await page.clock.fastForward(ms);
+  await page.clock.runFor(32);
+}

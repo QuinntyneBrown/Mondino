@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -17,11 +18,15 @@ import { CLOCK, type Position } from '@mondino/api';
 import {
   createGlobeScene,
   detailSteps,
+  DiscShare,
   type GlobePalette,
   type GlobeScene,
   type ProjectedPoint,
+  STARTING_ORIENTATION,
 } from '../scene/globe-scene';
 import { subsolarPoint } from '../sun/sun-position';
+import { GlobeMotion, type GlobeOrientation } from '../motion/globe-motion';
+import { GlobeGestures } from '../motion/globe-gestures';
 
 /** Loading until the first 3D frame is drawn; Fallback where it cannot be, and the page shows the still picture. */
 export type GlobeState = 'Loading' | 'Ready' | 'Fallback';
@@ -63,8 +68,20 @@ export class GlobeView {
   readonly pins = input<readonly Position[] | null>(null);
   /** The teammate's own new pin, lifted, labelled and pulsing once; or null. */
   readonly you = input<NewPin | null>(null);
+  /**
+   * The Globe screen's globe: it turns on its own (L2-009). A globe that is not interactive stays
+   * still (ADR 0013).
+   */
+  readonly interactive = input(false, { transform: booleanAttribute });
+  /** The position to turn to and hold, or null to let the globe go (L2-009). */
+  readonly facing = input<Position | null>(null);
 
   readonly stateChange = output<GlobeState>();
+
+  /** The globe's name: an interactive globe says how it is turned, as the mocks name it. */
+  protected readonly name = computed(() =>
+    this.interactive() ? `${this.label()}. Drag to spin, or use the arrow keys.` : this.label(),
+  );
 
   protected readonly state = signal<GlobeState>('Loading');
 
@@ -73,6 +90,9 @@ export class GlobeView {
   private readonly clock = inject(CLOCK);
   private readonly releasing = new AbortController();
   private readonly scene = signal<GlobeScene | null>(null);
+  private readonly motion = signal<GlobeMotion | null>(null);
+  /** Where the globe faces, so the markers move with it. */
+  private readonly orientation = signal<GlobeOrientation>(STARTING_ORIENTATION);
   private resizing: ResizeObserver | undefined;
 
   /** The markers, where the scene draws their places; none on the far side. */
@@ -80,6 +100,7 @@ export class GlobeView {
     const scene = this.scene();
     const pins = this.pins();
     if (!scene || this.state() !== 'Ready' || pins === null) return null;
+    this.orientation();
     const placed = (position: Position) => scene.project(position);
     const you = this.you();
     const youAt = you ? placed(you.position) : null;
@@ -97,6 +118,17 @@ export class GlobeView {
       this.clock.minute();
       const scene = this.scene();
       scene?.setSun(subsolarPoint(untracked(() => this.clock.now())));
+    });
+    // Told to face a position, the globe turns to it and holds; let go, it rests and goes on.
+    let holding = false;
+    effect(() => {
+      const facing = this.facing();
+      const motion = this.motion();
+      if (!motion) return;
+      if (facing) motion.hold(facing);
+      else if (holding) motion.release();
+      holding = facing !== null;
+      untracked(() => this.scene())?.requestFrame();
     });
   }
 
@@ -141,10 +173,43 @@ export class GlobeView {
       () => (this.document.hidden ? scene.stop() : scene.start()),
       { signal: released },
     );
-    scene.onFrame(() => {
+    // One frame loop turns the globe: each frame moves it on by the time the frame took, and
+    // asks for the next only while it is moving (ADR 0013).
+    const motion = new GlobeMotion(this.interactive(), STARTING_ORIENTATION);
+    const reducedMotion = view?.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reducedMotion) {
+      motion.setReducedMotion(reducedMotion.matches);
+      reducedMotion.addEventListener(
+        'change',
+        (event) => {
+          motion.setReducedMotion(event.matches);
+          scene.requestFrame();
+        },
+        { signal: released },
+      );
+    }
+    scene.onFrame((elapsedMs) => {
       if (this.state() === 'Loading') this.moveTo('Ready');
+      const after = motion.advance(elapsedMs);
+      // Compared with what is drawn, so a turn made between frames (a hold under reduced
+      // motion) is drawn too.
+      if (after !== this.orientation()) {
+        scene.setOrientation(after);
+        this.orientation.set(after);
+      } else if (motion.isMoving()) scene.requestFrame();
     });
+    if (this.interactive()) {
+      const turned = () => {
+        scene.setOrientation(motion.orientation);
+        this.orientation.set(motion.orientation);
+      };
+      new GlobeGestures(motion, () => (box.clientWidth / 2) * DiscShare, turned).attach(
+        box,
+        released,
+      );
+    }
     this.scene.set(scene);
+    this.motion.set(motion);
     if (!this.document.hidden) scene.start();
   }
 
@@ -174,5 +239,6 @@ export class GlobeView {
     this.resizing = undefined;
     this.scene()?.dispose();
     this.scene.set(null);
+    this.motion.set(null);
   }
 }

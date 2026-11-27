@@ -55,6 +55,11 @@ criterion 4) is journey 29's, which the scene's two detail steps are ready for; 
 open their panels on the still picture (criterion 3), a pin in the shaded half and readable there
 (L2-010 criteria 2 and 4) come with journeys 9, 10 and 14; and the legend leaving out "Moment this
 week" with every kind turned off (criterion 5) with journey 22. Join's stage draws the same globe.
+Journey 9 stands at 100: every criterion of L2-009 is proven by an acceptance test in Playwright under
+a paused clock, read from where the new pin is drawn, and every rule of turning by direct unit tests
+of `GlobeMotion`, but for what its prompt hands on: the turn to a selected pin (criterion 3) is built
+as `GlobeView`'s `facing` input and proven on Join, whose globe turns to the city found and holds;
+selecting a pin and clearing the selection come with journeys 10 and 14 (ADR 0013).
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -66,7 +71,7 @@ week" with every kind turned off (criterion 5) with journey 22. Join's stage dra
 | 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 90 |
 | 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 100 |
 | 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 100 |
-| 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 0 |
+| 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 100 |
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 0 |
 | 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 0 |
 | 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 0 |
@@ -88,4 +93,4 @@ week" with every kind turned off (criterion 5) with journey 22. Join's stage dra
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **32** |
+| | **Total** | | | **147** | **36** |

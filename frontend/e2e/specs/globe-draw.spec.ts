@@ -10,6 +10,9 @@ import { rememberTeam } from '../support/membership';
 test.describe('Globe: the 3D globe', () => {
   test.beforeEach(async ({ page }) => {
     await rememberTeam(page);
+    // The globe holds still at the orientation it starts at, so its pixels are where a spec
+    // looks for them (ADR 0013).
+    await page.emulateMedia({ reducedMotion: 'reduce' });
   });
 
   test('a placeholder holds the globe’s place, and the 3D globe takes it without moving anything', async ({

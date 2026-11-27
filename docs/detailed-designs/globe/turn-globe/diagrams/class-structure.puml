@@ -17,13 +17,14 @@ enum MotionMode {
   Waiting
   TurningToPin
   Holding
+  Still
 }
 
 enum ArrowDirection {
-  North
-  East
-  South
-  West
+  Left
+  Right
+  Up
+  Down
 }
 
 class GlobeOrientation {
@@ -33,7 +34,10 @@ class GlobeOrientation {
 
 class GlobeMotion {
   {static} +IdleDelayMs: number = 5000
-  {static} +TurnToPinMaxMs: number = 1000
+  {static} +TurnToPinMs: number = 800
+  {static} +TurnRateDegreesPerSecond: number = 6
+  {static} +StepDegrees: number = 15
+  {static} +TiltLimitDegrees: number = 60
   +mode: MotionMode
   +orientation: GlobeOrientation
   +advance(elapsedMs: number): GlobeOrientation
@@ -41,7 +45,7 @@ class GlobeMotion {
   +canTurn(deltaLongitude: number, deltaTilt: number): boolean
   +dragBy(deltaLongitude: number, deltaTilt: number): void
   +dragEnd(): void
-  +step(direction: ArrowDirection): void
+  +step(direction: ArrowDirection): boolean
   +hold(position: Position): void
   +release(): void
   +setReducedMotion(reduced: boolean): void
@@ -49,10 +53,12 @@ class GlobeMotion {
 }
 
 class GlobeGestures {
+  {static} +TapThresholdPx: number = 6
   +attach(target: HTMLElement, signal: AbortSignal): void
   -onPointerDown(event: PointerEvent): void
   -onPointerMove(event: PointerEvent): void
   -onPointerUp(event: PointerEvent): void
+  -onTouchStart(event: TouchEvent): void
   -onTouchMove(event: TouchEvent): void
   -onKeyDown(event: KeyboardEvent): void
 }
@@ -61,8 +67,9 @@ class GlobeView {
   +selectedId: InputSignal<string | null>
   +selectedGroupIds: InputSignal<string[]>
   +interactive: InputSignal<boolean>
+  +facing: InputSignal<Position | null>
   -onFrame(elapsedMs: number): void
-  -onSelectedChange(): void
+  -onFacingChange(): void
   -onVisibilityChange(): void
   -onReducedMotionChange(query: MediaQueryList): void
 }
@@ -72,7 +79,7 @@ class GlobeScene {
   +onFrame(listener: (elapsedMs: number) => void): void
   +start(): void
   +stop(): void
-  +draw(): void
+  +requestFrame(): void
 }
 
 class Position {
