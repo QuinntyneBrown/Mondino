@@ -50,6 +50,14 @@
       </div>
     }
     <mo-globe-legend [still]="globeState() === 'Fallback'" />
+    @if (teamOfOne()) {
+      <mo-invite-card
+        #card
+        class="globe-screen__invite"
+        [inviteLink]="inviteLinkShown()"
+        (copyLink)="copy(card)"
+      />
+    }
   </section>
   @for (panel of panels(); track panel.teammateId) {
     <!-- One teammate at a time: another is drawn afresh, so it fades in. -->
@@ -88,8 +96,3 @@
   }
   <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
 </main>
-<div class="toast-region" role="status" aria-live="polite">
-  @if (toast(); as toast) {
-    <mo-toast [strong]="toast.strong" [text]="toast.text" (dismiss)="dismissToast()" />
-  }
-</div>

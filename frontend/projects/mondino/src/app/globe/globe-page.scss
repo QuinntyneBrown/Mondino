@@ -42,6 +42,20 @@
     font: var(--text-h1);
   }
 }
+// A team of one's invite card: under the globe on a phone, in the stage's top-right corner from 40 rem.
+.globe-screen__invite {
+  margin: 0 var(--layout-margin) var(--space-6);
+}
+@media (min-width: 40rem) {
+  .globe-screen__invite {
+    position: absolute;
+    right: var(--space-6);
+    top: var(--space-6);
+    z-index: var(--z-raised);
+    width: var(--layout-invite-card-width);
+    margin: 0;
+  }
+}
 // The panel: under the globe, and beside it from 64 rem (docs/design-system/components/person-panel).
 .globe-screen__panel {
   border-top: var(--border-width-hairline) solid var(--color-border-default);
@@ -76,16 +90,4 @@
     border-left: var(--border-width-hairline) solid var(--color-border-default);
     padding-bottom: 0;
   }
-}
-.toast-region {
-  position: fixed;
-  left: 50%;
-  bottom: var(--space-16);
-  z-index: var(--z-toast);
-  translate: -50% 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  width: calc(100% - var(--space-8));
-  max-width: var(--layout-overlay-max);
 }

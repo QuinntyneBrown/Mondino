@@ -93,6 +93,17 @@ export class GlobePage {
   /** The heading over the globe: the number of teammates, and the counts under it. */
   readonly title: Locator;
   readonly counts: Locator;
+  /** The card of a team of one, in the panel's place: its title, text, link and "Copy". */
+  readonly inviteCard: Locator;
+  readonly inviteCardTitle: Locator;
+  readonly inviteCardText: Locator;
+  readonly inviteCardLink: Locator;
+  readonly copy: Locator;
+  /** The region of a toast that goes by itself, and of one that stays: an alert. */
+  readonly alertRegion: Locator;
+  /** A toast in the status region, and one in the alert region. */
+  readonly statusToast: Locator;
+  readonly alertToast: Locator;
   readonly toastRegion: Locator;
   readonly toast: Locator;
   readonly dismiss: Locator;
@@ -176,14 +187,41 @@ export class GlobePage {
     this.profileAvatar = this.profile.locator('.avatar');
     this.title = this.stage.locator('.globe-screen__heading h1');
     this.counts = this.stage.locator('.globe-screen__counts');
-    this.toastRegion = page.locator('.toast-region');
-    this.toast = this.toastRegion.locator('.toast');
+    this.inviteCard = this.stage.locator('.invite-card');
+    this.inviteCardTitle = this.inviteCard.locator('.invite-card__title');
+    this.inviteCardText = this.inviteCard.locator('.invite-card__text');
+    this.inviteCardLink = this.inviteCard.locator('.invite-card__url');
+    this.copy = this.inviteCard.getByRole('button', { name: 'Copy' });
+    this.toastRegion = page.locator('.toast-region[role="status"]');
+    this.alertRegion = page.locator('.toast-region[role="alert"]');
+    this.toast = page.locator('.toast-region .toast');
+    this.statusToast = this.toastRegion.locator('.toast');
+    this.alertToast = this.alertRegion.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
   }
 
   /** A teammate's row in a group's panel, by their name. */
   groupRow(name: string): Locator {
     return this.group.getByRole('link', { name: named(name) });
+  }
+
+  /** Makes the browser refuse to write to the clipboard, as it may. Call before the screen opens. */
+  async refuseCopy(): Promise<void> {
+    await this.page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: () => Promise.reject(new DOMException('Refused', 'NotAllowedError')) },
+      });
+    });
+  }
+
+  /** What is on the clipboard, as text. */
+  clipboardText(): Promise<string> {
+    return this.page.evaluate(() => navigator.clipboard.readText());
+  }
+
+  /** The text the page has selected. */
+  selectedText(): Promise<string> {
+    return this.page.evaluate(() => window.getSelection()?.toString() ?? '');
   }
 
   /** A row under "In working hours now", by the teammate's name. */

@@ -26,8 +26,8 @@ import {
   GlobePlaceholder,
   GroupPanel,
   PinLayer,
+  InviteCard,
   TeammatePanel,
-  Toast,
   WeekPanel,
 } from '@mondino/components';
 import { GlobeView, type GlobeState } from '@mondino/globe';
@@ -45,10 +45,9 @@ import {
   workingNow,
 } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
+import { InviteLinkCopier } from '../team/invite-link-copier';
 import { TeamStore } from '../team/team-store';
-
-/** How long the toast after joining stays before it goes by itself. */
-export const toastLifetime = 4000;
+import { Toaster } from '../team/toaster';
 
 /**
  * Globe, the home screen: the 3D globe (L2-008, L2-010), or the still picture where it cannot be
@@ -66,8 +65,8 @@ export const toastLifetime = 4000;
     GlobeView,
     GroupPanel,
     PinLayer,
+    InviteCard,
     TeammatePanel,
-    Toast,
     WeekPanel,
   ],
   // One clock for the screen, released with it; the team is the shell's.
@@ -83,6 +82,8 @@ export class GlobePage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly store = inject(TeamStore);
+  private readonly toaster = inject(Toaster);
+  private readonly copier = inject(InviteLinkCopier);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly injector = inject(Injector);
   /** Whether the open panel was opened from the keyboard: it then takes focus, and gives it back. */
@@ -141,6 +142,8 @@ export class GlobePage {
     this.clock.minute();
     const team = this.store.team();
     if (!team) return null;
+    if (this.teamOfOne())
+      return { title: 'Just you, for now', line: 'Invite your team to fill the map' };
     return countsWords(
       teamCounts(
         team.pins,
@@ -195,7 +198,9 @@ export class GlobePage {
     const pins =
       count === undefined
         ? ''
-        : `, with ${count} ${count === 1 ? 'teammate’s pin' : 'teammates’ pins'}`;
+        : this.teamOfOne()
+          ? ', with your pin'
+          : `, with ${count} ${count === 1 ? 'teammate’s pin' : 'teammates’ pins'}`;
     return this.globeState() === 'Fallback'
       ? `A still picture of the globe${pins}.`
       : `The globe${pins}`;
@@ -219,6 +224,17 @@ export class GlobePage {
     return content.cities.reduce((total, city) => total + city.rows.length, 0) > 1 ? content : null;
   });
 
+  /** A team whose only teammate is the viewer: the invite card takes the panel's place (L2-025). */
+  protected readonly teamOfOne = computed(() => {
+    const pins = this.store.team()?.pins;
+    return pins?.length === 1 && pins[0].isViewer;
+  });
+
+  /** The invite link as the card shows it: without its scheme. */
+  protected readonly inviteLinkShown = computed(() =>
+    this.store.team() ? this.copier.link().replace(/^https?:\/\//, '') : '',
+  );
+
   /**
    * With no pin or group selected, who is in working hours now for the week's view (L2-024): six
    * at most, with their count, worked out again as the minute changes; null while a panel is open.
@@ -226,7 +242,8 @@ export class GlobePage {
   protected readonly week = computed(() => {
     this.clock.minute();
     const team = this.store.team();
-    if (!team || this.store.selectedId() !== null || this.store.heldIds().length > 0) return null;
+    if (!team || this.teamOfOne()) return null;
+    if (this.store.selectedId() !== null || this.store.heldIds().length > 0) return null;
     return workingNow(
       team.pins,
       untracked(() => this.clock.now()),
@@ -261,8 +278,6 @@ export class GlobePage {
     const group = this.group();
     return group ? `${group.title}.` : '';
   });
-
-  protected readonly toast = signal<{ strong: string; text: string } | null>(null);
 
   constructor() {
     const router = this.router;
@@ -308,12 +323,11 @@ export class GlobePage {
       justJoined: null,
     });
     const teamName = this.membership.current()?.teamName ?? 'Your team';
-    this.toast.set({
+    this.toaster.show({
+      tone: 'success',
       strong: 'You’re on the map.',
       text: `${teamName} can now see your pin in ${joined.cityName}.`,
     });
-    const timer = setTimeout(() => this.toast.set(null), toastLifetime);
-    destroyRef.onDestroy(() => clearTimeout(timer));
   }
 
   /** Selects a teammate's pin through the address, or clears the selection. */
@@ -390,8 +404,12 @@ export class GlobePage {
     void this.router.navigateByUrl(address);
   }
 
-  protected dismissToast(): void {
-    this.toast.set(null);
+  /**
+   * "Copy" on the invite card: the link is copied with no dialog; where the browser refuses, the
+   * link in the card is selected, as the alert says (L2-025).
+   */
+  protected async copy(card: InviteCard): Promise<void> {
+    if (!(await this.copier.copy())) card.selectLink();
   }
 }
 

@@ -8,9 +8,11 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { CLIPBOARD, HttpTeamApi, TEAM_API } from '@mondino/api';
-import { AppHeader, Avatar } from '@mondino/components';
+import { AppHeader, Avatar, Toast } from '@mondino/components';
 import { initialsOf, NavigatorClipboard } from '@mondino/domain';
+import { InviteLinkCopier } from './invite-link-copier';
 import { TeamStore } from './team-store';
+import { Toaster } from './toaster';
 
 /**
  * The teammate screens' shell: the header the mocks draw over Globe, Team, Moments and Profile &
@@ -20,11 +22,13 @@ import { TeamStore } from './team-store';
  */
 @Component({
   selector: 'mo-team-shell',
-  imports: [AppHeader, Avatar, RouterLink, RouterOutlet],
+  imports: [AppHeader, Avatar, RouterLink, RouterOutlet, Toast],
   providers: [
     { provide: TEAM_API, useClass: HttpTeamApi },
     { provide: CLIPBOARD, useClass: NavigatorClipboard },
     TeamStore,
+    Toaster,
+    InviteLinkCopier,
   ],
   templateUrl: './team-shell.html',
   styleUrl: './team-shell.scss',
@@ -33,6 +37,7 @@ import { TeamStore } from './team-store';
 export class TeamShell {
   private readonly router = inject(Router);
   protected readonly store = inject(TeamStore);
+  protected readonly toaster = inject(Toaster);
 
   /** The screens in the header, in the mocks' order. */
   protected readonly navigation = [

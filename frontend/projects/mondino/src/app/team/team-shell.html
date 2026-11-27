@@ -21,3 +21,22 @@
   }
 </mo-app-header>
 <router-outlet />
+<div class="toast-region" role="status" aria-live="polite">
+  @if (toaster.current(); as toast) {
+    @if (toast.tone === 'success') {
+      <mo-toast [strong]="toast.strong" [text]="toast.text" (dismiss)="toaster.dismiss()" />
+    }
+  }
+</div>
+<div class="toast-region toast-region--alert" role="alert" aria-live="assertive">
+  @if (toaster.current(); as toast) {
+    @if (toast.tone === 'danger') {
+      <mo-toast
+        tone="danger"
+        [strong]="toast.strong"
+        [text]="toast.text"
+        (dismiss)="toaster.dismiss()"
+      />
+    }
+  }
+</div>

@@ -72,7 +72,7 @@ class WeekPanel <<components, mo-week-panel>> {
 
 class InviteCard <<components, mo-invite-card>> {
   +inviteLink: InputSignal<string>
-  +copy: OutputEmitterRef<void>
+  +copyLink: OutputEmitterRef<void>
   +selectLink(): void
 }
 

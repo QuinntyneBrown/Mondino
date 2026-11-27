@@ -1,0 +1,22 @@
+<h2 class="invite-card__title">Bring the team onto the globe</h2>
+<p class="invite-card__text">
+  Anyone with this link adds their pin with a postal code. Only their city is shown.
+</p>
+<div class="invite-card__link">
+  <span class="invite-card__url" id="mo-invite-card-url">{{ inviteLink() }}</span>
+  <button
+    mo-button
+    variant="primary"
+    size="sm"
+    type="button"
+    aria-describedby="mo-invite-card-url"
+    (click)="copyLink.emit()"
+  >
+    <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+      <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+      <path d="M15 7h2a5 5 0 1 1 0 10h-2" />
+      <line x1="8" x2="16" y1="12" y2="12" />
+    </svg>
+    Copy
+  </button>
+</div>

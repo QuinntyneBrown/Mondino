@@ -103,7 +103,7 @@ pins: the team's invite token (`TeamPinsDto`, `show-pins`).
   viewer's chosen kinds (`profile/choose-display-and-sharing`, journey 23), as `pages/globe/quiet`
   draws it.
 - **`InviteCard`** (`mo-invite-card`) — presentation component, block `invite-card` on a raised
-  `card`. It takes `inviteLink` and emits `copy`. It is headed "Bring the team onto the globe",
+  `card`. It takes `inviteLink` and emits `copyLink`. It is headed "Bring the team onto the globe",
   says "Anyone with this link adds their pin with a postal code. Only their city is shown.", and
   shows the link without its scheme as selectable text (`invite-card__url`) beside "Copy".
   `selectLink()` selects the link's text.
