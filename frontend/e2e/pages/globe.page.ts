@@ -63,6 +63,14 @@ export class GlobePage {
     );
   }
 
+  /** Where the new pin's centre is on the page, in CSS px. */
+  async youPinAt(): Promise<{ x: number; y: number }> {
+    const box = await this.youPin.boundingBox();
+    if (!box) throw new Error('The new pin is not on the globe');
+    const round = (value: number) => Math.round(value * 10) / 10;
+    return { x: round(box.x + box.width / 2), y: round(box.y + box.height / 2) };
+  }
+
   /** The name of the new pin's pulse animation, or "none" when it does not pulse. */
   pulse(): Promise<string> {
     return this.youPin.evaluate((pin) => getComputedStyle(pin, '::after').animationName);

@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -20,8 +21,10 @@ import {
   type GlobePalette,
   type GlobeScene,
   type ProjectedPoint,
+  STARTING_ORIENTATION,
 } from '../scene/globe-scene';
 import { subsolarPoint } from '../sun/sun-position';
+import { GlobeMotion, type GlobeOrientation } from '../motion/globe-motion';
 
 /** Loading until the first 3D frame is drawn; Fallback where it cannot be, and the page shows the still picture. */
 export type GlobeState = 'Loading' | 'Ready' | 'Fallback';
@@ -63,6 +66,11 @@ export class GlobeView {
   readonly pins = input<readonly Position[] | null>(null);
   /** The teammate's own new pin, lifted, labelled and pulsing once; or null. */
   readonly you = input<NewPin | null>(null);
+  /**
+   * The Globe screen's globe: it turns on its own (L2-009). A globe that is not interactive stays
+   * still (ADR 0013).
+   */
+  readonly interactive = input(false, { transform: booleanAttribute });
 
   readonly stateChange = output<GlobeState>();
 
@@ -73,6 +81,8 @@ export class GlobeView {
   private readonly clock = inject(CLOCK);
   private readonly releasing = new AbortController();
   private readonly scene = signal<GlobeScene | null>(null);
+  /** Where the globe faces, so the markers move with it. */
+  private readonly orientation = signal<GlobeOrientation>(STARTING_ORIENTATION);
   private resizing: ResizeObserver | undefined;
 
   /** The markers, where the scene draws their places; none on the far side. */
@@ -80,6 +90,7 @@ export class GlobeView {
     const scene = this.scene();
     const pins = this.pins();
     if (!scene || this.state() !== 'Ready' || pins === null) return null;
+    this.orientation();
     const placed = (position: Position) => scene.project(position);
     const you = this.you();
     const youAt = you ? placed(you.position) : null;
@@ -141,8 +152,29 @@ export class GlobeView {
       () => (this.document.hidden ? scene.stop() : scene.start()),
       { signal: released },
     );
-    scene.onFrame(() => {
+    // One frame loop turns the globe: each frame moves it on by the time the frame took, and
+    // asks for the next only while it is moving (ADR 0013).
+    const motion = new GlobeMotion(this.interactive(), STARTING_ORIENTATION);
+    const reducedMotion = view?.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reducedMotion) {
+      motion.setReducedMotion(reducedMotion.matches);
+      reducedMotion.addEventListener(
+        'change',
+        (event) => {
+          motion.setReducedMotion(event.matches);
+          scene.requestFrame();
+        },
+        { signal: released },
+      );
+    }
+    scene.onFrame((elapsedMs) => {
       if (this.state() === 'Loading') this.moveTo('Ready');
+      const before = motion.orientation;
+      const after = motion.advance(elapsedMs);
+      if (after !== before) {
+        scene.setOrientation(after);
+        this.orientation.set(after);
+      } else if (motion.isMoving()) scene.requestFrame();
     });
     this.scene.set(scene);
     if (!this.document.hidden) scene.start();
