@@ -9,9 +9,13 @@ export class ApiError extends Error {
   constructor(
     readonly code: string,
     readonly status: number,
-    options?: ErrorOptions,
+    options?: ErrorOptions & { retryAfterSeconds?: number },
   ) {
     super(code, options);
     this.name = 'ApiError';
+    this.retryAfterSeconds = options?.retryAfterSeconds ?? null;
   }
+
+  /** How long a `rate_limited` refusal asks to wait, from its `Retry-After`, or null. */
+  readonly retryAfterSeconds: number | null;
 }
