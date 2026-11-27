@@ -1,5 +1,6 @@
 import type { Pin, Status } from '@mondino/api';
 import type { LocalTime } from './local-time';
+import { WorkingDay } from './working-day';
 
 /**
  * The status of a local hour, by the table of L2-015: 07:00 to 08:59 early morning, 09:00 to
@@ -7,8 +8,9 @@ import type { LocalTime } from './local-time';
  * Mondino keeps no calendar of working days.
  */
 export function statusAt(localHour: number): Status {
-  if (localHour >= 7 && localHour < 9) return 'early-morning';
-  if (localHour >= 9 && localHour < 18) return 'working-hours';
+  if (localHour >= 7 && localHour * 60 < WorkingDay.startMinute) return 'early-morning';
+  if (localHour * 60 >= WorkingDay.startMinute && localHour * 60 < WorkingDay.endMinute)
+    return 'working-hours';
   if (localHour >= 18 && localHour < 23) return 'evening';
   return 'probably-asleep';
 }
