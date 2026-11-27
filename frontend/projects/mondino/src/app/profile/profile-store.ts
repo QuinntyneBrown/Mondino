@@ -42,6 +42,7 @@ export class ProfileStore {
   private pendingRead: AbortController | null = null;
   private pendingLookup: AbortController | null = null;
   private pendingSave: AbortController | null = null;
+  private pendingLeave: AbortController | null = null;
 
   private readonly profileValue = signal<Profile | null>(null);
   private readonly stateValue = signal<ProfileState>('Loading');
@@ -50,6 +51,8 @@ export class ProfileStore {
   private readonly lookupValue = signal<LookupState>({ kind: 'Idle' });
   private readonly settingsValue = signal<Settings | null>(null);
   private readonly saveStateValue = signal<SaveState>('idle');
+  private readonly leavingValue = signal(false);
+  private readonly leaveFailedValue = signal(false);
 
   /** The viewer's profile as saved. */
   readonly profile = this.profileValue.asReadonly();
@@ -62,6 +65,10 @@ export class ProfileStore {
   /** The draft's settings: the unit, the clock, the kinds and the two switches (L2-033, L2-034). */
   readonly settings = this.settingsValue.asReadonly();
   readonly saveState = this.saveStateValue.asReadonly();
+  /** Leaving the team is being answered (L2-036). */
+  readonly leaving = this.leavingValue.asReadonly();
+  /** The last try at leaving failed, and nothing changed (L2-036). */
+  readonly leaveFailed = this.leaveFailedValue.asReadonly();
   /** A save is being answered. */
   readonly saving = computed(() => this.saveState() === 'saving');
 
@@ -100,6 +107,7 @@ export class ProfileStore {
       this.pendingRead?.abort();
       this.pendingLookup?.abort();
       this.pendingSave?.abort();
+      this.pendingLeave?.abort();
       clearTimeout(this.savedTimer);
     });
   }
@@ -220,6 +228,27 @@ export class ProfileStore {
       return false;
     } finally {
       if (this.pendingSave === pending) this.pendingSave = null;
+    }
+  }
+
+  /**
+   * Leaves the team (L2-036). One request at a time; while it is pending the dialog is busy. A
+   * failure, whatever the answer, changes nothing and is reported for "Try again".
+   */
+  async leave(): Promise<void> {
+    const teamId = this.membership.current()?.teamId;
+    if (!teamId || this.leaving()) return;
+    const pending = new AbortController();
+    this.pendingLeave = pending;
+    this.leaveFailedValue.set(false);
+    this.leavingValue.set(true);
+    try {
+      await this.api.leaveTeam(teamId, pending.signal);
+    } catch {
+      if (!pending.signal.aborted) this.leaveFailedValue.set(true);
+    } finally {
+      if (this.pendingLeave === pending) this.pendingLeave = null;
+      this.leavingValue.set(false);
     }
   }
 

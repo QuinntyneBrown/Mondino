@@ -1,6 +1,6 @@
 // Acceptance Test
 // Traces to: L2-036, L2-035, L2-039
-// Description: "Leave Northwind" asks in an alert dialog that names the team and how many teammates see the pin, with focus on "Stay"; "Stay" and Escape close it with focus back and nothing changed, unsaved changes included; "Leave without saving?" is not asked before it
+// Description: "Leave Northwind" asks in an alert dialog that names the team and how many teammates see the pin, with focus on "Stay"; "Stay" and Escape close it with focus back and nothing changed, unsaved changes included; "Leave without saving?" is not asked before it; while leaving it is busy and Escape does nothing, and a failure changes nothing and offers "Try again"
 
 import { expect, test } from '../fixtures/test';
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
@@ -9,6 +9,8 @@ import { mockText } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
 
 const dialogMock = 'dialogs/leave-team/default.html';
+const busyMock = 'dialogs/leave-team/busy.html';
+const failedMock = 'dialogs/leave-team/failed.html';
 
 test.describe('Profile & Settings: leaving the team', () => {
   test.use({ webgl: false });
@@ -66,5 +68,43 @@ test.describe('Profile & Settings: leaving the team', () => {
     await expect(profilePage.leave).toBeFocused();
     await expect(fahrenheit).toHaveAttribute('aria-checked', 'true');
     expect(removals).toBe(0);
+  });
+
+  test('while leaving the dialog is busy and stays; a failure says so, changes nothing and offers "Try again"', async ({
+    api,
+    leaveDialog,
+    page,
+    profilePage,
+  }) => {
+    // Given Sofia has confirmed leaving, and Mondino has not answered yet
+    const removal = api.hold('DELETE', NORTHWIND_ME);
+    await profilePage.open();
+    await profilePage.leave.click();
+    await leaveDialog.confirm.click();
+
+    // Then the dialog stays open, its button reads "Leaving…", both buttons are disabled, and
+    // Escape does not close it
+    await expect(leaveDialog.confirm).toHaveText(mockText(busyMock, 'btn btn--danger')!);
+    await expect(leaveDialog.confirm).toHaveAttribute('aria-busy', 'true');
+    await expect(leaveDialog.confirm).toBeDisabled();
+    await expect(leaveDialog.stay).toBeDisabled();
+    await page.keyboard.press('Escape');
+    await expect(leaveDialog.dialog).toBeVisible();
+
+    // When the removal fails, the dialog says so, as dialogs/leave-team/failed draws it, and offers
+    // "Try again" with focus on it
+    removal.release({ status: 503 });
+    await expect(leaveDialog.alert).toHaveText(mockText(failedMock, 'alert__body')!);
+    await expect(leaveDialog.confirm).toHaveText('Try again');
+    await expect(leaveDialog.confirm).toBeFocused();
+    await expect(leaveDialog.confirm).not.toHaveAttribute('aria-busy');
+    await expect(leaveDialog.stay).toBeEnabled();
+
+    // And nothing changed: she is still on Profile & Settings, on Northwind
+    await expect(page).toHaveURL('/profile');
+    expect(await page.evaluate(() => localStorage.getItem('mondino.membership'))).not.toBeNull();
+    await leaveDialog.stay.click();
+    await expect(leaveDialog.dialog).toHaveCount(0);
+    await expect(profilePage.city).toHaveText('Milan, Italy');
   });
 });

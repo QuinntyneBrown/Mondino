@@ -66,6 +66,7 @@ async function storeAnswering(rest: Partial<ProfileApi> = {}): Promise<ProfileSt
     getProfile: () => Promise.resolve(milan),
     lookUpPostalCode: () => new Promise(() => undefined),
     updateProfile: () => new Promise(() => undefined),
+    leaveTeam: () => new Promise(() => undefined),
     ...rest,
   };
   TestBed.configureTestingModule({
