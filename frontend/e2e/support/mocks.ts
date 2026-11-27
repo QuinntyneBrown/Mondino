@@ -162,3 +162,28 @@ export function mockScale(path: string): string[] {
   const scale = /<ul class="day-ribbon__scale[^"]*"[^>]*>([\s\S]*?)<\/ul>/.exec(mockMarkup(path));
   return [...(scale?.[1] ?? '').matchAll(/<li>([^<]*)<\/li>/g)].map(([, mark]) => mark);
 }
+
+/** A mock's day ribbon as a bar chart: its line, the picture's name, each bar's share and the count. */
+export function mockBars(path: string): {
+  summary: string;
+  name: string;
+  shares: string[];
+  count: { bar: number; text: string };
+} {
+  const markup = mockMarkup(path);
+  const bars = [
+    ...(/<div class="day-ribbon__bars"[^>]*>([\s\S]*?)<\/div>/.exec(markup)?.[1] ?? '').matchAll(
+      /<span class="day-ribbon__bar[^"]*" style="--share: ([\d.]+)">(?:<span class="day-ribbon__bar-count tnum">(\d+)<\/span>)?/g,
+    ),
+  ];
+  const counted = bars.findIndex(([, , count]) => count);
+  return {
+    summary: textOf(markup, 'day-ribbon__summary') ?? '',
+    name:
+      /class="day-ribbon__track day-ribbon__track--density" role="img" aria-label="([^"]*)"/.exec(
+        markup,
+      )?.[1] ?? '',
+    shares: bars.map(([, share]) => share),
+    count: { bar: counted, text: bars[counted]?.[2] ?? '' },
+  };
+}

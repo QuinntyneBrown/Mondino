@@ -27,6 +27,8 @@ import {
   defaultClockFormat,
   defaultTemperatureUnit,
   filterByStatus,
+  LargeTeamThreshold,
+  ribbonDensity,
   ribbonMarkers,
   ribbonScale,
   teamCounts,
@@ -35,9 +37,6 @@ import {
 } from '@mondino/domain';
 import { InviteDialogOpener } from '../invite-dialog-opener';
 import { TeamStore } from '../team-store';
-
-/** Past this many teammates, faces no longer fit on the ribbon and the rows in the page are capped. */
-const largeTeam = 40;
 
 const filterOf = (value: string | null): StatusFilter =>
   value === 'working' || value === 'asleep' ? value : 'all';
@@ -126,7 +125,7 @@ export class TeamPage {
    * team city by city, the rows in the page stay bounded this way (L2-026, L2-047).
    */
   protected readonly rows = computed(() =>
-    filterByStatus(this.allRows(), this.filter()).slice(0, largeTeam),
+    filterByStatus(this.allRows(), this.filter()).slice(0, LargeTeamThreshold),
   );
 
   /** "All 13", "Working now 8", "Asleep 2": the team's counts. */
@@ -154,14 +153,29 @@ export class TeamPage {
   protected readonly caption = computed(() => captions[this.filter()]);
   protected readonly note = computed(() => notes[this.filter()]);
 
+  /** Past 40 teammates faces no longer fit and rows no longer fit on a screen (L2-056). */
+  protected readonly large = computed(
+    () => (this.store.team()?.pins.length ?? 0) > LargeTeamThreshold,
+  );
+
   /** Each teammate on the day ribbon, at the hour they are living through (L2-027). */
   protected readonly ribbon = computed(() => {
     const pins = this.store.team()?.pins;
     if (!pins) return null;
-    // Past 40, faces no longer fit: the ribbon keeps its bands and scale, and journey 18 draws
-    // the bar chart in them.
-    if (pins.length > largeTeam) return { markers: [], rows: 1 };
+    if (this.large()) return { markers: [], rows: 1 };
     return ribbonMarkers(pins, this.now(), this.clockFormat());
+  });
+
+  /** A large team's ribbon: how many are at each half hour, in place of a face each (L2-027). */
+  protected readonly density = computed(() => {
+    const pins = this.store.team()?.pins;
+    return pins && this.large() ? ribbonDensity(pins, this.now(), this.clockFormat()) : null;
+  });
+
+  /** "324 of 500", who are in working hours: a teammate who hides their status is not (L2-015). */
+  protected readonly summary = computed(() => {
+    const counts = this.counts();
+    return counts ? `${counts.working} of ${counts.teammates}` : null;
   });
 
   protected readonly scale = computed(() => ribbonScale(this.clockFormat()));

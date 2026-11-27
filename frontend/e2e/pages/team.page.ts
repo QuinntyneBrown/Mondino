@@ -16,6 +16,15 @@ export class TeamPage {
   readonly ribbonBands: Locator;
   readonly markers: Locator;
   readonly scale: Locator;
+  /** A large team's ribbon: its line about working hours, its picture, its bars and the count. */
+  readonly ribbonSummary: Locator;
+  readonly densityScroll: Locator;
+  readonly density: Locator;
+  readonly bars: Locator;
+  readonly barCount: Locator;
+  readonly barsGroup: Locator;
+  readonly densityControls: Locator;
+  readonly ribbonSummaryCount: Locator;
   /** The list's heading, the filter's tab list and its tabs, and the list it controls. */
   readonly listHeading: Locator;
   readonly filters: Locator;
@@ -61,6 +70,16 @@ export class TeamPage {
     this.ribbonBands = this.main.locator('.day-ribbon__band');
     this.markers = this.main.locator('.day-ribbon__marker');
     this.scale = this.main.locator('.day-ribbon__scale li');
+    this.ribbonSummary = this.main.locator('.day-ribbon__summary');
+    this.densityScroll = page.getByRole('group', {
+      name: 'The day ribbon; scroll sideways to see all 24 hours',
+    });
+    this.density = this.main.locator('.day-ribbon__track--density');
+    this.bars = this.density.locator('.day-ribbon__bar');
+    this.barCount = this.density.locator('.day-ribbon__bar-count');
+    this.barsGroup = this.density.locator('.day-ribbon__bars');
+    this.densityControls = this.density.locator('a, button');
+    this.ribbonSummaryCount = this.ribbonSummary.locator('strong');
     this.listHeading = this.main.locator('.section-head h2');
     this.filters = page.getByRole('tablist', { name: 'Filter by status' });
     this.tabs = this.filters.getByRole('tab');
@@ -119,6 +138,18 @@ export class TeamPage {
   /** Whether the ribbon is wider than its region, which scrolls sideways inside itself. */
   async ribbonScrolls(): Promise<boolean> {
     return this.ribbonScroll.evaluate((region) => region.scrollWidth > region.clientWidth);
+  }
+
+  /** The count over the bar at `index`, from 0 at 00:00. */
+  countOnBar(index: number): Locator {
+    return this.bars.nth(index).locator('.day-ribbon__bar-count');
+  }
+
+  /** Each bar's share of the tallest, as a mock writes it: "0.154". */
+  async barShares(): Promise<string[]> {
+    return this.bars.evaluateAll((bars: HTMLElement[]) =>
+      bars.map((bar) => bar.style.getPropertyValue('--share').trim()),
+    );
   }
 
   /** A row's parts, as the mocks class them. */

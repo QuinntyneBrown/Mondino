@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import type { RibbonMarker } from '@mondino/api';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import type { RibbonDensity, RibbonMarker } from '@mondino/api';
 import { Avatar } from '../avatar/avatar';
 
 /**
@@ -9,6 +9,11 @@ import { Avatar } from '../avatar/avatar';
  * named by their name and local time; a plain click is handed to the page as an output. At its
  * least the ribbon is 45rem wide: narrower, it scrolls sideways inside its own region, which the
  * keyboard reaches, and the page does not. Names and cities are data.
+ *
+ * Given a `density`, for a team past 40 where faces no longer fit, it draws no marker: 48 bars over
+ * the same bands, one for each half hour, each as tall as its share of the tallest, which carries
+ * the count. The chart is one picture named by what it shows and where the most are; its bars are
+ * hidden and are not controls. A line above it says how many are in working hours.
  */
 @Component({
   selector: 'mo-day-ribbon',
@@ -25,6 +30,18 @@ export class DayRibbon {
   readonly scale = input.required<readonly string[]>();
   /** The address that selects a teammate on the Globe: "/globe?teammate=…". */
   readonly address = input.required<(teammateId: string) => string>();
+  /** For a large team: how many teammates are at each half hour, drawn in place of the markers. */
+  readonly density = input<RibbonDensity | null>(null);
+  /** The bold part of the line over the bar chart: "324 of 500". */
+  readonly summary = input<string | null>(null);
+
+  /** "How many teammates are at each half hour of their day. The most, 123, are at 15:00." */
+  protected readonly densityName = computed(() => {
+    const density = this.density();
+    return density
+      ? `How many teammates are at each half hour of their day. The most, ${density.max}, are at ${density.maxBinTime}.`
+      : null;
+  });
 
   readonly teammateChosen = output<string>();
 
