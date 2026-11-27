@@ -1,4 +1,4 @@
-import type { TemperatureUnit, Weather, WeatherCondition } from '@mondino/api';
+import type { FoundWeather, TemperatureUnit, Weather, WeatherCondition } from '@mondino/api';
 import { statusAt } from '../time/status';
 
 /**
@@ -52,10 +52,13 @@ export function isNightSky(localHour: number): boolean {
 }
 
 /**
- * The found line's weather on Join and Create Team (L2-003): "13° and foggy right now.", in the
- * unit of the country chosen; empty when the lookup has no weather.
+ * The found line's weather on Join and Create Team (L2-003): "13°" and "and foggy right now.", in
+ * the unit of the country chosen; null when the lookup has no weather.
  */
-export function foundWeather(weather: Weather | null, unit: TemperatureUnit): string {
-  if (!weather) return '';
-  return `${formatDegrees(weather.temperatureC, unit)} and ${weatherWord(weather.condition).toLowerCase()} right now.`;
+export function foundWeather(weather: Weather | null, unit: TemperatureUnit): FoundWeather | null {
+  if (!weather) return null;
+  return {
+    degrees: formatDegrees(weather.temperatureC, unit),
+    rest: `and ${weatherWord(weather.condition).toLowerCase()} right now.`,
+  };
 }

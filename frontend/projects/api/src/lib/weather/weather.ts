@@ -16,6 +16,12 @@ export type WeatherState = 'Available' | 'Unavailable' | 'NotShared';
 /** The unit a viewer reads temperatures in (L2-019). */
 export type TemperatureUnit = 'celsius' | 'fahrenheit';
 
+/** The weather in the found line on Join and Create Team: "13°" and "and foggy right now.". */
+export interface FoundWeather {
+  readonly degrees: string;
+  readonly rest: string;
+}
+
 /** What a pin shows of its weather: worked out once a minute with the rest of the pin. */
 export interface PinWeather {
   /** Whole degrees in the viewer's unit, with no unit letter: "13°". */
