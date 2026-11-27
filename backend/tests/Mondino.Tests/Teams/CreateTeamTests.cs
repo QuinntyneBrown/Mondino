@@ -1,6 +1,6 @@
 // Acceptance Test
 // Traces to: L2-053, L2-006, L2-043, L2-044, L2-045
-// Description: Making a team makes one team with its maker's pin at the city, an invite token and a session, keeps only a fingerprint of the email, and makes no second team for a repeated request
+// Description: Making a team makes one team with its maker's pin at the city, an invite token and a session, keeps only a fingerprint of the email, makes no second team for a repeated request, and is never refused for coming too often
 
 using System.Net;
 using System.Net.Http.Json;
@@ -190,7 +190,7 @@ public sealed class CreateTeamTests
     }
 
     [Fact]
-    public async Task The_sixth_team_in_an_hour_from_one_client_is_refused_with_rate_limited_and_Retry_After()
+    public async Task One_client_that_has_made_five_teams_this_hour_makes_more_as_any_other()
     {
         // Given one client that has made five teams this hour
         await using var api = new MondinoApi();
@@ -202,14 +202,18 @@ public sealed class CreateTeamTests
             Assert.Equal(HttpStatusCode.Created, allowed.StatusCode);
         }
 
-        // When it asks for a sixth
-        using var response = await client.PostAsJsonAsync(Teams, CreateTeamRefusedTests.Northwind(teamName: "Team 6"));
+        // When it makes seven more, well past five
+        for (var made = 6; made <= 12; made++)
+        {
+            using var response = await client.PostAsJsonAsync(Teams, CreateTeamRefusedTests.Northwind(teamName: $"Team {made}"));
 
-        // Then it is refused with 429, a Retry-After header and the code rate_limited, and no team is made
-        Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
-        Assert.True(response.Headers.RetryAfter?.Delta > TimeSpan.FromMinutes(1));
-        Assert.Equal("rate_limited", (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString());
-        Assert.Equal(5, await api.TeamCountAsync());
+            // Then each is answered 201, as any other team, with no Retry-After
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Assert.Null(response.Headers.RetryAfter);
+        }
+
+        // And every team is stored
+        Assert.Equal(12, await api.TeamCountAsync());
     }
 
     private static async Task<Guid> MakeAsync(HttpClient client, object request)

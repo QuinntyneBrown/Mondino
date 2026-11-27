@@ -1,6 +1,6 @@
 // Acceptance Test
 // Traces to: L2-043, L2-045
-// Description: No endpoint is open by omission: every endpoint the API maps refuses a request with no session but those marked open, and each open one is rate limited
+// Description: No endpoint is open by omission: every endpoint the API maps refuses a request with no session but those marked open, and each open one but making a team (docs/adr/0016) is rate limited
 
 using System.Net;
 using System.Net.Http.Json;
@@ -80,7 +80,6 @@ public sealed partial class OpenEndpointsTests
     [InlineData("POST", "/api/invites/northwind-7Kq2/city-searches", 30)]
     [InlineData("POST", "/api/city-searches", 30)]
     [InlineData("POST", "/api/invites/northwind-7Kq2/teammates", 5)]
-    [InlineData("POST", "/api/teams", 5)]
     [InlineData("POST", "/api/sign-in-links", 5)]
     [InlineData("POST", "/api/sign-in-links/redemptions", 10)]
     public async Task Each_open_endpoint_refuses_one_client_past_its_limit_with_429_and_Retry_After(string method, string path, int limit)

@@ -1,6 +1,6 @@
 // Acceptance Test
-// Traces to: L2-053, L2-044, L2-045
-// Description: A request to make a team with a value out of bounds, from another site or too often is refused, and nothing is stored
+// Traces to: L2-053, L2-043, L2-044
+// Description: A request to make a team with a value out of bounds, or from another site, is refused, and nothing is stored
 
 using System.Net;
 using System.Net.Http.Json;
