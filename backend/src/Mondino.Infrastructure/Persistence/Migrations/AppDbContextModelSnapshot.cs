@@ -143,6 +143,11 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CityId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ClockFormat")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
                     b.Property<string>("Colour")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -157,6 +162,11 @@ namespace Mondino.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("JoinedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MomentKinds")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -175,6 +185,11 @@ namespace Mondino.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("TemperatureUnit")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
 
                     b.HasKey("Id");
 

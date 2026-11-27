@@ -289,7 +289,7 @@ public class MondinoApi : WebApplicationFactory<Program>
         await database.SaveChangesAsync(CancellationToken.None);
     }
 
-    /// <summary>Turns off a teammate's "Share whether I’m working or asleep", as stored (journey 23 adds the switch).</summary>
+    /// <summary>Turns off a teammate's "Share whether I’m working or asleep", as stored, without a save.</summary>
     public async Task HideStatusAsync(Guid teammateId)
     {
         await using var scope = Services.CreateAsyncScope();
@@ -299,7 +299,7 @@ public class MondinoApi : WebApplicationFactory<Program>
         await database.SaveChangesAsync(CancellationToken.None);
     }
 
-    /// <summary>Turns off a teammate's "Share my local weather", as stored (journey 23 adds the switch).</summary>
+    /// <summary>Turns off a teammate's "Share my local weather", as stored, without a save.</summary>
     public async Task HideWeatherAsync(Guid teammateId)
     {
         await using var scope = Services.CreateAsyncScope();

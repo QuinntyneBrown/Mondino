@@ -182,8 +182,8 @@ kept is [ADR 0023](../../../adr/0023-settings-kept-by-the-backend.md).
   `SharesWeather`, `SharesStatus`. `DefaultsFor(countryCode)` gives a new teammate's
   settings: Fahrenheit for the United States and Celsius elsewhere (L2-019), the 12-hour clock
   for the United States and Canada and the 24-hour clock otherwise (L2-033), all four kinds of
-  moment, and both sharing switches on (L2-034). `JoinTeamCommandHandler` and
-  `CreateTeamCommandHandler` give it to the new teammate.
+  moment, and both sharing switches on (L2-034). A new `Teammate` takes the defaults of its
+  city's country, so joining, making a team and the seed all give them.
 - **`Teammate`** — keeps the settings as columns; `Settings` reads them as one
   `TeammateSettings`, and `ChangeSettings(settings)` replaces them whole.
 

@@ -1,3 +1,5 @@
+using Mondino.Domain.Moments;
+
 namespace Mondino.Domain.Teams;
 
 /// <summary>Someone in a team, with their pin at their city.</summary>
@@ -8,6 +10,7 @@ public sealed class Teammate
         Name = string.Empty;
         Colour = string.Empty;
         City = null!;
+        MomentKinds = TeammateSettings.AllKinds;
     }
 
     internal Teammate(
@@ -32,6 +35,8 @@ public sealed class Teammate
         JoinedAt = joinedAt;
         PostalCode = postalCode;
         JoinRequestId = joinRequestId;
+        MomentKinds = TeammateSettings.AllKinds;
+        ChangeSettings(TeammateSettings.DefaultsFor(city.CountryCode));
     }
 
     public Guid Id { get; private set; }
@@ -67,6 +72,15 @@ public sealed class Teammate
         EmailFingerprint = fingerprint;
     }
 
+    /// <summary>The unit the teammate reads temperatures in (L2-019).</summary>
+    public TemperatureUnit TemperatureUnit { get; private set; }
+
+    /// <summary>The clock the teammate reads times on (L2-033).</summary>
+    public ClockFormat ClockFormat { get; private set; }
+
+    /// <summary>The kinds of moment that mark pins for the teammate (L2-022), in their fixed order.</summary>
+    public IReadOnlyList<MomentKind> MomentKinds { get; private set; }
+
     /// <summary>
     /// Whether the teammate shares if they are working or asleep ("Share whether I’m working or
     /// asleep", L2-015, L2-034): on to begin with. Off, their teammates are shown no status for them.
@@ -78,6 +92,20 @@ public sealed class Teammate
     /// begin with. Off, their teammates are shown no weather for them (docs/adr/0015).
     /// </summary>
     public bool SharesWeather { get; private set; } = true;
+
+    /// <summary>The teammate's settings as one value (docs/adr/0023); a new teammate's follow their country.</summary>
+    public TeammateSettings Settings => new(TemperatureUnit, ClockFormat, MomentKinds, SharesWeather, SharesStatus);
+
+    /// <summary>Replaces the teammate's settings whole, as Profile &amp; Settings saves them (L2-035).</summary>
+    public void ChangeSettings(TeammateSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        TemperatureUnit = settings.TemperatureUnit;
+        ClockFormat = settings.ClockFormat;
+        MomentKinds = settings.MomentKinds;
+        SharesWeather = settings.SharesWeather;
+        SharesStatus = settings.SharesStatus;
+    }
 
     /// <summary>The id the browser gave its join request, so a repeated request makes no second pin. Never returned.</summary>
     public Guid? JoinRequestId { get; private set; }

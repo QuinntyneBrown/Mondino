@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Mondino.Application.Persistence;
+using Mondino.Domain.Moments;
 using Mondino.Domain.SignIn;
 using Mondino.Domain.Teams;
 
@@ -47,6 +49,21 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             teammate.HasIndex(t => new { t.TeamId, t.JoinRequestId }).IsUnique();
             teammate.Property(t => t.EmailFingerprint).HasMaxLength(64);
             teammate.HasIndex(t => t.EmailFingerprint);
+
+            // The settings (docs/adr/0023): the unit and the clock by name, the kinds as one column of
+            // names in their fixed order.
+            teammate.Ignore(t => t.Settings);
+            teammate.Property(t => t.TemperatureUnit).HasConversion<string>().HasMaxLength(16);
+            teammate.Property(t => t.ClockFormat).HasConversion<string>().HasMaxLength(16);
+            teammate.Property(t => t.MomentKinds)
+                .HasConversion(
+                    kinds => string.Join(',', kinds),
+                    stored => MomentKindsOf(stored),
+                    new ValueComparer<IReadOnlyList<MomentKind>>(
+                        (a, b) => a!.SequenceEqual(b!),
+                        kinds => kinds.Aggregate(0, (hash, kind) => HashCode.Combine(hash, kind)),
+                        kinds => kinds.ToList()))
+                .HasMaxLength(64);
         });
 
         modelBuilder.Entity<SignInLink>(link =>
@@ -75,4 +92,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             city.Property(c => c.Region).HasMaxLength(120);
         });
     }
+
+    private static List<MomentKind> MomentKindsOf(string stored) =>
+        stored.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<MomentKind>).ToList();
 }
