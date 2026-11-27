@@ -2,7 +2,7 @@
 // Traces to: L2-048, L2-025, L2-047
 // Description: A screen left open reads the team again every 15 minutes while it is visible, never while the tab is hidden, and at once when it is shown after longer; a teammate who joined meanwhile appears and pulses, with no toast, and the selection and the globe's place are kept
 
-import { NORTHWIND_MOMENTS, NO_MOMENTS } from '../fixtures/moments';
+import { momentOf, NORTHWIND_MOMENTS, northwindMoments, NO_MOMENTS } from '../fixtures/moments';
 import { idOf, NORTHWIND_PINS, northwindPins, northwindPinsOf } from '../fixtures/pins';
 import { expect, test } from '../fixtures/test';
 import { rememberTeam } from '../support/membership';
@@ -109,5 +109,36 @@ test.describe('Keep the team fresh', () => {
     await setTheTabHidden(page, false);
     await page.clock.runFor(1_000);
     expect(reads).toEqual({ pins: 2, moments: 2 });
+  });
+
+  test('at a teammate’s midnight their moments move between Today, This week and Later, with no reload', async ({
+    api,
+    page,
+    momentsPage,
+  }) => {
+    // Given Luca's moments in Milan tomorrow and in 8 days, at 15:05 in Milan
+    await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
+    api.answer(
+      'GET',
+      NORTHWIND_MOMENTS,
+      northwindMoments([
+        momentOf('Luca Ferri', 'local-event', '2025-10-28', 'Design week', 'Design week in Milan'),
+        momentOf('Luca Ferri', 'sport', '2025-11-04', 'Derby della Madonnina', 'Inter v Milan'),
+      ]),
+    );
+    await momentsPage.open();
+    await expect(momentsPage.groupRowTitles('This week')).toHaveText(['Design week']);
+    await expect(momentsPage.groupRowTitles('Later')).toHaveText(['Derby della Madonnina']);
+    await expect(momentsPage.todayMoments).toHaveCount(0);
+
+    // When Milan's midnight passes, with the screen left open
+    await page.clock.pauseAt(new Date('2025-10-27T23:00:30Z'));
+    await page.clock.runFor(1_000);
+
+    // Then tomorrow's moment is today's, and the one in 8 days is this week's
+    await expect(momentsPage.todayTitles).toHaveText(['Design week']);
+    await expect(momentsPage.groupRowTitles('This week')).toHaveText(['Derby della Madonnina']);
+    await expect(momentsPage.groupRowTitles('Later')).toHaveCount(0);
   });
 });
