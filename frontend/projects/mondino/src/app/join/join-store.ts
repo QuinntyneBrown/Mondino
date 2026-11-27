@@ -5,9 +5,11 @@ import {
   type CityResult,
   INVITE_API,
   type Invite,
+  type JoinResult,
   type LookupState,
 } from '@mondino/api';
 import type { InviteState } from './invite-state';
+import type { JoinState } from './join-state';
 
 /** The most characters a name may have (L2-002). */
 export const nameLimit = 60;
@@ -33,6 +35,9 @@ export class JoinStore {
   private pendingSearch: AbortController | null = null;
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
   private countdownTimer: ReturnType<typeof setInterval> | null = null;
+  private pendingJoin: AbortController | null = null;
+  /** One id for every join request from this screen, so a retried join makes no second pin. */
+  private readonly joinRequestId = crypto.randomUUID();
   private inviteToken = '';
   /** The lookup was down: it stays down for the life of the store, and is tried again next time. */
   private lookupDown = false;
@@ -40,6 +45,10 @@ export class JoinStore {
   private readonly inviteValue = signal<Invite | null>(null);
   private readonly stateValue = signal<InviteState>('Loading');
   private readonly submittedValue = signal(false);
+  private readonly joinStateValue = signal<JoinState>('Idle');
+
+  /** Where joining stands once the city is found (L2-005). */
+  readonly joinState = this.joinStateValue.asReadonly();
 
   /** The team as its invite link shows it, once it is open. */
   readonly invite = this.inviteValue.asReadonly();
@@ -94,6 +103,7 @@ export class JoinStore {
       this.pending?.abort();
       this.pendingLookup?.abort();
       this.pendingSearch?.abort();
+      this.pendingJoin?.abort();
       if (this.searchTimer !== null) clearTimeout(this.searchTimer);
       this.stopCountdown();
     });
@@ -111,7 +121,7 @@ export class JoinStore {
       if (pending.signal.aborted) return;
       this.inviteValue.set(invite.alreadyJoined ? null : invite);
       if (!this.countryCode()) this.countryCodeValue.set(invite.countries[0]?.code ?? '');
-      this.stateValue.set(invite.alreadyJoined ? 'AlreadyJoined' : 'Ready');
+      this.stateValue.set(invite.alreadyJoined ? 'AlreadyJoined' : invite.full ? 'Full' : 'Ready');
     } catch (error) {
       if (pending.signal.aborted) return;
       this.stateValue.set(stateFor(error));
@@ -122,14 +132,14 @@ export class JoinStore {
 
   /** A new postal code: whatever was found or refused for the old one goes (L2-003, L2-004). */
   setPostalCode(postalCode: string): void {
-    if (postalCode === this.postalCode()) return;
+    if (postalCode === this.postalCode() || this.joinState() === 'Joining') return;
     this.postalCodeValue.set(postalCode);
     this.clearFound();
   }
 
   /** A new country: whatever was found or refused goes, and so does a city chosen. */
   setCountry(countryCode: string): void {
-    if (countryCode === this.countryCode()) return;
+    if (countryCode === this.countryCode() || this.joinState() === 'Joining') return;
     this.countryCodeValue.set(countryCode);
     this.clearFound();
     this.setCityText('');
@@ -140,6 +150,7 @@ export class JoinStore {
    * the found city and the new pin go. A countdown that is running keeps running.
    */
   clearFound(): void {
+    this.joinStateValue.set('Idle');
     const kind = this.lookup().kind;
     if (kind === 'Idle' || kind === 'Unavailable' || kind === 'RateLimited') return;
     this.pendingLookup?.abort();
@@ -154,6 +165,7 @@ export class JoinStore {
 
   /** Typing in "Your city": what was chosen goes, and the cities are searched once typing stops. */
   setCityText(text: string): void {
+    if (this.joinState() === 'Joining') return;
     this.cityTextValue.set(text);
     this.chosenCityValue.set(null);
     if (this.lookup().kind === 'Found') this.clearFound();
@@ -248,6 +260,58 @@ export class JoinStore {
     return false;
   }
 
+  /** A name typed while the form is not locked. */
+  setName(name: string): void {
+    if (this.joinState() !== 'Joining') this.name.set(name);
+  }
+
+  /**
+   * Joins the team at the city found (L2-005): the postal code, or the city chosen from "Your
+   * city". While it is answered the form is locked; a second call does nothing. Answers the team
+   * and the teammate, or null when the join was refused, which sets the state the screen shows.
+   */
+  async join(): Promise<JoinResult | null> {
+    const lookup = this.lookup();
+    if (lookup.kind !== 'Found' || this.joinState() === 'Joining') return null;
+    const chosen = this.chosenCity();
+    const pending = new AbortController();
+    this.pendingJoin = pending;
+    this.joinStateValue.set('Joining');
+    try {
+      return await this.api.join(
+        this.inviteToken,
+        {
+          name: this.name().trim(),
+          countryCode: this.countryCode(),
+          postalCode: chosen ? null : this.postalCode(),
+          cityId: chosen ? chosen.cityId : null,
+          joinRequestId: this.joinRequestId,
+        },
+        pending.signal,
+      );
+    } catch (error) {
+      if (!pending.signal.aborted) this.joinRefused(error);
+      return null;
+    } finally {
+      if (this.pendingJoin === pending) this.pendingJoin = null;
+    }
+  }
+
+  private joinRefused(error: unknown): void {
+    const code = error instanceof ApiError ? error.code : 'unexpected';
+    this.joinStateValue.set(code === 'rate_limited' || code === 'team_full' ? 'Idle' : 'Failed');
+    if (code === 'team_full') {
+      this.stateValue.set('Full');
+    } else if (code === 'invite_not_found') {
+      this.joinStateValue.set('Idle');
+      this.inviteValue.set(null);
+      this.stateValue.set('NotFound');
+    } else if (code === 'rate_limited') {
+      const seconds = error instanceof ApiError ? (error.retryAfterSeconds ?? 60) : 60;
+      this.startCountdown(this.clock.now() + seconds * 1000);
+    }
+  }
+
   private refused(error: unknown, postalCode: string): void {
     const code = error instanceof ApiError ? error.code : 'unexpected';
     if (code === 'invite_not_found') {
@@ -278,7 +342,7 @@ export class JoinStore {
       this.nowValue.set(this.clock.now());
       if (this.secondsToWait() === 0) {
         this.stopCountdown();
-        this.lookupValue.set({ kind: 'Idle' });
+        this.lookupValue.set(this.lookupDown ? { kind: 'Unavailable' } : { kind: 'Idle' });
       }
     }, 1000);
   }

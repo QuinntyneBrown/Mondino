@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import type { CityResult, PostalCodeResult } from '../cities/city';
 import { getJson, postJson } from '../http/request';
-import type { Invite, InviteApi } from './invite';
+import type { Invite, InviteApi, JoinRequest, JoinResult } from './invite';
 
 /** `InviteApi` over HTTP. The Join route binds it, so it stays out of the initial bundle. */
 @Injectable()
@@ -32,6 +32,14 @@ export class HttpInviteApi implements InviteApi {
     return postJson<readonly CityResult[]>(
       `/api/invites/${encodeURIComponent(inviteToken)}/city-searches`,
       { countryCode, text },
+      signal,
+    );
+  }
+
+  join(inviteToken: string, request: JoinRequest, signal: AbortSignal): Promise<JoinResult> {
+    return postJson<JoinResult>(
+      `/api/invites/${encodeURIComponent(inviteToken)}/teammates`,
+      request,
       signal,
     );
   }

@@ -63,6 +63,7 @@ export function northwindInvite(overrides: Record<string, unknown> = {}): Answer
         { initials: 'AA', colour: 'teammate-6' },
       ],
       alreadyJoined: false,
+      full: false,
       countries,
       ...overrides,
     },
@@ -126,3 +127,15 @@ export function lookupAnswer(body: { countryCode: string; postalCode: string }):
     json: { status: 422, code: 'postal_code_not_found' },
   };
 }
+
+/** Where Join sends the join request through Northwind's invite link. */
+export const NORTHWIND_JOINS = '/api/invites/northwind-7Kq2/teammates';
+
+/** What a join answers when it adds Sofia to Northwind: random ids, and nothing else. */
+export const SOFIA_JOINED: Answer = {
+  status: 201,
+  json: {
+    teamId: 'c8a2f0de-5b1e-4f7c-9a3d-2e6b8f1c4d07',
+    teammateId: '5f3e9b2a-7c41-4d8e-b6a0-91d2c7e4f318',
+  },
+};

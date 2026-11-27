@@ -30,6 +30,8 @@ export class TextField {
   readonly describedBy = input<string | null>(null);
   readonly value = input('');
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Shown and focusable, but not changeable: while what was typed is being sent. */
+  readonly readonly = input(false, { transform: booleanAttribute });
   /** Marks the input `aria-invalid`. */
   readonly invalid = input(false, { transform: booleanAttribute });
   /** What to fix, under the input, which it then describes. */

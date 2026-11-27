@@ -38,9 +38,10 @@
                 autocomplete="name"
                 [maxlength]="60"
                 [value]="store.name()"
+                [readonly]="joining()"
                 [invalid]="nameError() !== null"
                 [error]="nameError()"
-                (valueChange)="store.name.set($event)"
+                (valueChange)="store.setName($event)"
               />
               <div class="join__field-row">
                 <mo-select-field
@@ -50,6 +51,7 @@
                   autocomplete="country-name"
                   [options]="countries()"
                   [value]="store.countryCode()"
+                  [disabled]="joining()"
                   (valueChange)="store.setCountry($event)"
                 />
                 <mo-text-field
@@ -61,6 +63,7 @@
                   tabular
                   [describedBy]="lookupDown() ? null : 'lookup'"
                   [disabled]="lookupDown()"
+                  [readonly]="joining()"
                   [value]="store.postalCode()"
                   [invalid]="postalCodeError() !== null || store.lookup().kind === 'NotFound'"
                   [error]="postalCodeError()"
@@ -118,9 +121,31 @@
                   </button>
                 }
                 @case ('Found') {
-                  <button mo-button variant="primary" size="lg" block type="submit">
-                    Join {{ invite.teamName }}
-                  </button>
+                  @switch (store.joinState()) {
+                    @case ('Joining') {
+                      <button
+                        mo-button
+                        variant="primary"
+                        size="lg"
+                        block
+                        type="submit"
+                        aria-busy="true"
+                        disabled
+                      >
+                        Joining {{ invite.teamName }}…
+                      </button>
+                    }
+                    @case ('Failed') {
+                      <button mo-button variant="primary" size="lg" block type="submit">
+                        Try joining again
+                      </button>
+                    }
+                    @default {
+                      <button mo-button variant="primary" size="lg" block type="submit">
+                        Join {{ invite.teamName }}
+                      </button>
+                    }
+                  }
                 }
                 @case ('RateLimited') {
                   <button mo-button variant="primary" size="lg" block type="submit" disabled>

@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { CLOCK } from '@mondino/api';
+import { CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
+import { LocalTeamMembership } from '@mondino/domain';
 import { routes } from './app.routes';
 
 // The composition root: every token the whole app shares is bound here. A lazy route binds the
@@ -10,5 +11,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     { provide: CLOCK, useValue: { now: () => Date.now() } },
+    { provide: TEAM_MEMBERSHIP, useClass: LocalTeamMembership },
   ],
 };

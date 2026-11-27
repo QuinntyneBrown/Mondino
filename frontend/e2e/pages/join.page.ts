@@ -131,6 +131,12 @@ export class JoinPage {
     return `${kept}|${JSON.stringify(cookies)}`;
   }
 
+  /** The team this browser remembers it is in, as the app keeps it, or null. */
+  async membership(): Promise<unknown> {
+    const kept = await this.page.evaluate(() => localStorage.getItem('mondino.membership'));
+    return kept === null ? null : JSON.parse(kept);
+  }
+
   /** Leaves the postal code field, which starts the lookup. */
   async leavePostalCode(): Promise<void> {
     await this.postalCode.blur();
