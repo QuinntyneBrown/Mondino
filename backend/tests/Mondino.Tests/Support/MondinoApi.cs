@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
+using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
 
@@ -27,6 +28,9 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>Who the API takes the browser to be: no one, until a test signs a teammate in.</summary>
     public FakeCurrentTeammate CurrentTeammate { get; } = new();
 
+    /// <summary>The postal code source, answering as the test tells it.</summary>
+    public FakePostalCodeLookup PostalCodes { get; } = new();
+
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
 
@@ -46,6 +50,9 @@ public class MondinoApi : WebApplicationFactory<Program>
 
             services.RemoveAll<ICurrentTeammate>();
             services.AddSingleton<ICurrentTeammate>(CurrentTeammate);
+
+            services.RemoveAll<IPostalCodeLookup>();
+            services.AddSingleton<IPostalCodeLookup>(PostalCodes);
 
             if (DatabaseFails)
             {

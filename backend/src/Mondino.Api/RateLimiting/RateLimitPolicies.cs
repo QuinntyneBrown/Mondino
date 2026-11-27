@@ -16,10 +16,14 @@ internal static class RateLimitPolicies
     /// <summary>Opening an invite link: 30 a minute, so invite links cannot be guessed at speed.</summary>
     public const string Invite = "invite";
 
+    /// <summary>Looking a postal code up: 10 a minute, before any outside source is asked.</summary>
+    public const string Lookup = "lookup";
+
     public static IServiceCollection AddRateLimitPolicies(this IServiceCollection services) =>
         services.AddRateLimiter(options =>
         {
             options.AddPolicy(Invite, context => PerClient(context, permits: 30, window: TimeSpan.FromMinutes(1)));
+            options.AddPolicy(Lookup, context => PerClient(context, permits: 10, window: TimeSpan.FromMinutes(1)));
             options.OnRejected = RefuseAsync;
         });
 
