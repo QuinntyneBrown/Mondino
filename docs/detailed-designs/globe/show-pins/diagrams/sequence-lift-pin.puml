@@ -23,30 +23,27 @@ box "Frontend — Mondino web app" #E0F2FE
 end box
 alt pointer moves over a pin (L2-012 AC1)
   actor -> layer : pointerenter on the pin's 44 x 44 px hit area
-  layer -> layer : liftedId = teammate id: raise, grow, bring to front, show the label
-  layer --> actor : Lifted pin with name, city, local time and weather, within 200 ms
+  layer -> layer : liftedKey = the placement's key: raise, grow, bring to front, show the label
+  layer --> actor : Lifted pin with name, city and local time, within 200 ms
   actor -> layer : pointerleave
-  layer -> layer : liftedId = null unless selected (L2-012 AC2)
+  layer -> layer : liftedKey = null; settles unless selected (L2-012 AC2)
   layer --> actor : Pin settles back
 else Tab moves to a pin (L2-012 AC3)
   actor -> layer : Focus the pin's button
-  layer -> layer : liftedId = teammate id
+  layer -> layer : liftedKey = the placement's key
   layer --> actor : Pin lifts exactly as under the pointer, with a focus indicator
   actor -> layer : Enter or Space
-  layer --> view : select(teammate id)
 else tap on a touch device (L2-012 AC4)
   actor -> layer : Tap a pin
-  layer --> view : select(teammate id)
 end
-view --> page : select(teammate id)
+layer --> page : select(teammate id)
 page -> store : Set the selected teammate id
-store --> page : selectedId changed
-page -> view : selectedId input
-view -> layer : selectedId input
-layer --> actor : Pin stays lifted while selected (L2-012 AC5)
+page -> view : facing = the pin's position: turn to it and hold (L2-009)
+page -> layer : selectedId
+layer --> actor : Pin stands alone and stays lifted while selected (L2-012 AC5)
 actor -> view : Tap elsewhere on the globe
-view --> page : select(null)
-page -> store : Clear the selected teammate id
-page -> view : selectedId input = null
+view --> page : blankTap
+page -> store : Clear the selection
+page -> view : facing = null
 layer --> actor : Pin settles back
 @enduml

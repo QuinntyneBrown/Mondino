@@ -27,72 +27,83 @@ package "api library" {
     +isViewer: boolean
     +moments: Moment[]
   }
-  class PlacePoint {
-    +position: Position
-    +pins: Pin[]
+  class GlobeViewport {
+    +widthPx: number
+    +project(position: Position): ProjectedPoint | null
+  }
+  class PinView {
+    +teammateId: string
+    +initials: string
+    +colour: string
+    +name: string
+    +cityName: string
+    +localTime: string
+    +description: string
+    +isViewer: boolean
+    +isNew: boolean
+  }
+  class PinPlacement {
+    +key: string
+    +kind: 'pin' | 'group'
     +x: number
     +y: number
     +depth: number
-  }
-  class PinPlacement {
-    +kind: 'pin' | 'group'
-    +position: Position
-    +pins: Pin[]
-  }
-  class GroupOptions {
-    +radiusPx: number
-    +selectedId: string | null
-    +heldGroupIds: string[]
-  }
-  interface PinGrouper {
-    +group(points: PlacePoint[], options: GroupOptions): PinPlacement[]
+    +far: boolean
+    +pins: PinView[]
+    +description: string
+    +labelSide: LabelSide | null
   }
 }
 
 package "domain library" {
+  class "placePins" as placePins << (F,#D1FADF) function >> {
+    +placePins(pins: Pin[], views: PinView[], viewport: GlobeViewport, selection): PinPlacement[]
+  }
   class "groupPins" as groupPins << (F,#D1FADF) function >> {
-    +groupPins(points: PlacePoint[], options: GroupOptions): PinPlacement[]
+    +groupPins(points: PlacePoint[], options: GroupOptions): Group[]
+  }
+  class "placeLabels" as placeLabels << (F,#D1FADF) function >> {
+    +placeLabels(placements, widthPx, compact): PinPlacement[]
+  }
+  class "pinViews" as pinViews << (F,#D1FADF) function >> {
+    +pinViews(pins: Pin[], now: number): PinView[]
+  }
+  class "stillViewport" as stillViewport << (F,#D1FADF) function >> {
+    +stillViewport(widthPx: number): GlobeViewport
   }
 }
 
 package "globe library" {
   class GlobeView {
-    +pins: InputSignal<Pin[]>
-    +descriptions: InputSignal<Map<string, string>>
-    +selectedId: InputSignal<string | null>
-    +selectedGroupIds: InputSignal<string[]>
     +interactive: InputSignal<boolean>
-    +select: OutputEmitterRef<string | null>
-    +selectGroup: OutputEmitterRef<string[]>
-    +globeSize: Signal<number>
+    +facing: InputSignal<Position | null>
+    +viewChange: OutputEmitterRef<GlobeViewport>
+    +blankTap: OutputEmitterRef<void>
   }
-  class PinLayer {
-    +pins: InputSignal<Pin[]>
-    +globeSize: InputSignal<number>
-    +descriptions: InputSignal<Map<string, string>>
-    +selectedId: InputSignal<string | null>
-    +selectedGroupIds: InputSignal<string[]>
-    +compact: InputSignal<boolean>
-    +select: OutputEmitterRef<string | null>
-    +selectGroup: OutputEmitterRef<string[]>
-    +liftedId: Signal<string | null>
-    +placements: Signal<PinPlacement[]>
-    +update(scene: GlobeScene): void
-    +anchorOf(teammateIds: string[]): Position | null
-  }
-  class LabelPlacer {
-    {static} +place(points: ProjectedPin[], globe: DOMRect): LabelSide[]
-  }
-  class PinMarkTemplate << directive moPinMark >>
-  class PinLabelTemplate << directive moPinLabel >>
   class GlobeScene {
-    +project(position: Position): ProjectedPoint
+    +project(position: Position): ProjectedPoint | null
   }
-  class ProjectedPoint {
-    +x: number
-    +y: number
-    +depth: number
-    +facing: boolean
+}
+
+package "components library" {
+  class PinLayer {
+    +placements: InputSignal<PinPlacement[]>
+    +selectedId: InputSignal<string | null>
+    +selectedGroupKey: InputSignal<string | null>
+    +compact: InputSignal<boolean>
+    +select: OutputEmitterRef<string>
+    +selectGroup: OutputEmitterRef<PinPlacement>
+    +liftedKey: Signal<string | null>
+  }
+  class GlobeFallback
+}
+
+package "mondino application" {
+  class GlobePage
+  class TeamStore {
+    +pins: Signal<TeamPins | null>
+    +selectedId: Signal<string | null>
+    +selectedGroup: Signal<PinPlacement | null>
   }
 }
 
@@ -126,19 +137,17 @@ package "Mondino.Application" {
   }
 }
 
-groupPins ..|> PinGrouper : bound to PIN_GROUPER
-PinGrouper ..> PlacePoint : reads
-PinGrouper ..> GroupOptions : reads
-PinGrouper ..> PinPlacement : returns
-PlacePoint "1" o-- "1..*" Pin
-PinPlacement "1" o-- "1..*" Pin
-GlobeView *-- PinLayer
-PinLayer ..> PinGrouper : injects
-GlobeView ..> PinMarkTemplate : content
-GlobeView ..> PinLabelTemplate : content
-PinLayer ..> LabelPlacer : places labels with
-PinLayer ..> GlobeScene : projects with
-GlobeScene ..> ProjectedPoint : returns
+GlobePage ..> TeamStore : reads
+GlobePage ..> pinViews : makes views with
+GlobePage ..> placePins : places with
+placePins ..> groupPins : groups with
+placePins ..> placeLabels : sides labels with
+GlobePage ..> stillViewport : on the still picture
+GlobeView ..> GlobeScene : projects with
+GlobeView ..> GlobeViewport : emits
+GlobeView ..> PinLayer : [pins] slot
+GlobeFallback ..> PinLayer : [pins] slot
+PinPlacement "1" o-- "1..*" PinView
 GetPinsQueryHandler ..> GetPinsQuery : handles
 GetPinsQueryHandler ..> TeamPinsDto : returns
 TeamPinsDto "1" o-- "*" PinDto

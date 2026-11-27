@@ -386,7 +386,7 @@
   /* ---------- Component sizes ------------------------------------------- */
   --pin-size: 1.625rem;          /* 26px at rest */
   --pin-size-lifted: 2.125rem;   /* 34px pointed at, focused or selected */
-  --pin-size-compact: 1.125rem;  /* 18px on a globe under 400px */
+  --pin-size-compact: 1.125rem;  /* 18px on a globe under 500px */
   --pin-dot-size: 0.75rem;       /* 12px, a pin with no name on Join */
   --pin-label-height: 1.5rem;
   --moment-marker-size: 1rem;    /* 16px, never smaller */

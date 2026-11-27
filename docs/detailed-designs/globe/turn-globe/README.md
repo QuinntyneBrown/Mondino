@@ -86,9 +86,9 @@ selected pin.
 
 **In the `mondino` application and the `domain` library**
 
-- **`GlobePage`** passes `TeamStore`'s selected teammate id to `GlobeView`'s `selectedId` input
-  and writes `GlobeView`'s `select` output back to the store. It passes the teammate ids of a
-  selected group pin to `selectedGroupIds` (`team/view-teammate-panel`).
+- **`GlobePage`** writes `PinLayer`'s `select` and `selectGroup` outputs to `TeamStore` and
+  passes the selected pin's position, or the selected group pin's, to `GlobeView`'s `facing`
+  input (`globe/show-pins`, ADR 0014).
 - **`TeamStore`** holds the selected teammate id. A refresh of the team (L2-048) leaves the
   selection and the orientation as they are, because neither is rebuilt from the response.
 
@@ -118,10 +118,9 @@ page) is prevented only when the globe turns.
 *Selecting.* An effect on `facing` calls `motion.hold(position)`, and `motion.release()` when
 it goes back to null. Until pins can be selected (journey 10), `JoinPage` passes the new pin's
 position, so Join's globe turns to the found city and holds, as the mock `join/found` draws it.
-With `show-pins`, an effect on `selectedId` and `selectedGroupIds` resolves the position to face
-into the same call. For a selected teammate it is their pin's position. For a
-selected group pin it is the position the group pin is anchored to, which `PinLayer` gives
-for the group's teammate ids. The globe turns to face it within 1 second and holds. Turning
+With `show-pins`, `GlobePage` resolves the selection into the same input. For a selected
+teammate it is their pin's position. For a selected group pin it is the position the group
+pin is anchored to, as `placePins` placed it. The globe turns to face it within 1 second and holds. Turning
 to a group pin groups the pins again as its cities come to the front (`show-pins`); the
 selected group stays one group pin while its panel is open. Choosing a teammate in the
 group's panel sets `selectedId`, and the globe turns from the group pin to that teammate's
@@ -203,8 +202,8 @@ globe waits 5 seconds of frame time and turns on its own again.
 
 ### Behaviour — turn to a selected pin and hold
 
-A selection travels from `GlobeView` to `GlobePage` and `TeamStore` and returns as the
-`selectedId` input; a selected group pin returns as `selectedGroupIds`. `GlobeMotion` then
+A selection travels from `PinLayer` to `GlobePage` and `TeamStore` and returns to `GlobeView`
+as the `facing` input. `GlobeMotion` then
 turns to the pin, or to the group pin's anchor, within 1 second, or at once under reduced
 motion, and holds until the selection is cleared.
 

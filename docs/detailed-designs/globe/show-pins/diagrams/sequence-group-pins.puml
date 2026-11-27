@@ -16,41 +16,32 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "GlobePage" as page
   participant "GlobeView" as view
+  participant "GlobePage" as page
+  participant "placePins" as placer
+  participant "groupPins" as grouper
+  participant "placeLabels" as labels
   participant "PinLayer" as layer
-  participant "GlobeScene" as scene
-  participant "groupPins (PIN_GROUPER)" as grouper
-  participant "LabelPlacer" as labels
 end box
-page -> view : pins, selectedId, selectedGroupIds
-view -> layer : pins, globe width (ResizeObserver),\ncompact = globe under 400 px wide
-layer -> layer : One place for each distinct city, once for each pins value
-loop each frame in which the globe has turned
-  alt pins, width or selection changed, or turned RegroupAfterDegrees since the last grouping
-    layer -> scene : project(place.position), once for each place
-    scene --> layer : x, y, depth and whether it faces the viewer
-    layer -> grouper : group(points facing the viewer,\nradiusPx, selectedId, heldGroupIds)
-    grouper -> grouper : Selected teammate's pin stands alone;\nthe held group stays one placement
-    grouper -> grouper : Nearest the viewer first: each ungrouped point seeds a group\nand takes the points within radiusPx, found in a grid (L2-013)
-    grouper --> layer : PinPlacement[]: pins alone and group pins with a count
-    layer -> layer : Reuse the elements that stay, by key; remove the rest
-  else between two groupings
-    layer -> scene : project(placement.position), once for each placement
-    scene --> layer : x, y and whether it faces the viewer
-  end
-  layer -> layer : Move each placement with a transform;\nhide those on the far side (L2-011)
-  layer -> labels : place(pins that stand alone, globe area)
-  labels --> layer : A side for each shown label, inside the globe\nand clear of other pins (L2-013)
+loop the first frame, each frame in which the globe has turned, and each resize
+  view --> page : viewChange(GlobeViewport: widthPx, project)
 end
+page -> placer : pins, views, viewport, selectedId, selected group
+placer -> placer : One place for each city; project each once;\ndrop the far side (L2-011)
+placer -> grouper : points facing the viewer, radiusPx (20, or 40 past 40 teammates),\nselectedId, held group
+grouper -> grouper : Selected teammate's pin stands alone;\nthe held group stays one placement
+grouper -> grouper : Nearest the viewer first: each ungrouped point seeds a group\nand takes the points within radiusPx, found in a grid (L2-013)
+grouper --> placer : Pins alone and group pins with a count
+placer -> labels : placements, width, compact = box under 500 px
+labels --> placer : A side for each pin alone's label, inside the globe\nand clear of other pins, or none (L2-013)
+placer --> page : PinPlacement[], west to east
+page -> layer : placements, selectedId, selected group key, compact
+layer -> layer : Reuse the elements that stay, by key; remove the rest
 layer --> actor : No pin covers another; a pin alone keeps its label
 actor -> layer : Select a group pin
-layer --> view : selectGroup(teammate ids)
-view --> page : selectGroup(teammate ids)
-page -> view : selectedId = null, selectedGroupIds = teammate ids
+layer --> page : selectGroup(placement)
+page -> page : selectedId = null; the group is held
+page -> view : facing = the group pin's position
 view -> view : Turn to the group pin and hold (L2-009)
-page --> actor : "2 teammates close together", its teammates city by city (L2-023)
-actor -> page : Choose a teammate
-page -> view : selectedId = teammate id, selectedGroupIds = []
-layer --> actor : That teammate's pin stands alone, lifted
+page --> actor : The group pin stays lifted and pressed; its panel is journey 14's (L2-023)
 @enduml
