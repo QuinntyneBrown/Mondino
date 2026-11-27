@@ -10,7 +10,12 @@ Journey 1 is scored against L2-038 criterion 7 (Not Found); the rest of L2-038 i
 also builds the day ribbon's bar chart for a large team (L2-027 criteria 8 to 10). Every requirement, L2-001
 to L2-056, belongs to a journey.
 
-Effort is days for one intermediate developer.
+Effort is days for one intermediate developer. % complete is counted, never estimated: the share of a
+journey's acceptance criteria that is wholly built and proven by a passing acceptance test (for journey 1,
+the share of its prompt's nine slices), rounded to the nearest 10, and 100 only when everything under "Done
+means" in its prompt holds. The total is weighted by effort. Journey 1 stands at 100: Not Found draws the still
+globe as [`mocks/pages/not-found/default.html`](mocks/pages/not-found/default.html) draws it since it was
+redrawn, and its acceptance test compares the two shape for shape.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|

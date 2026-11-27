@@ -3,6 +3,7 @@
 // Description: An address that belongs to no screen says so and offers the way back to the globe
 
 import { expect, test } from '../fixtures/test';
+import { mockMarkup } from '../support/mocks';
 
 test.describe('Not Found', () => {
   test('an address that belongs to no screen says it fell off the map', async ({
@@ -20,6 +21,18 @@ test.describe('Not Found', () => {
       `There’s nothing at ${notFoundPage.shownAddress('/team/northwind/pins/old')}. It may have moved, or the link was mistyped.`,
     );
     await expect(notFoundPage.page).toHaveTitle('Page not found · Mondino');
+  });
+
+  test('the small globe is the still picture the mock draws', async ({ notFoundPage }) => {
+    // Given the still globe the Not Found mock draws
+    const drawn = await notFoundPage.globeShapesIn(mockMarkup('pages/not-found/default.html'));
+
+    // When an address that belongs to no screen is opened
+    await notFoundPage.open('/team/northwind/pins/old');
+
+    // Then its small globe is that picture, shape for shape
+    expect(drawn).not.toEqual([]);
+    expect(await notFoundPage.globeShapes()).toEqual(drawn);
   });
 
   test('the address is shown as text, without its query string', async ({ notFoundPage }) => {
