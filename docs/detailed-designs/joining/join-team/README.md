@@ -95,7 +95,7 @@ screen.
      `invite_not_found` when no team matches.
   2. When a teammate of that team already has the command's `JoinRequestId`, it returns that
      teammate and adds nothing. Steps 2 to 5 run one at a time for one team within an API
-     instance (`TeamJoinGate`, a fixed set of 64 locks chosen by the team's id), so a
+     instance (`TeamJoinGate`, a fixed set of 64 locks chosen by the invite token), so a
      double-click on one instance cannot pass step 2 twice; across instances the unique index
      of step 6 holds.
   3. It normalises the postal code with `PostalCodeFormats` and resolves the city through

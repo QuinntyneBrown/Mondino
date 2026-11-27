@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Mondino.Api.RateLimiting;
+using Mondino.Api.Security;
 using Mondino.Application.Joining;
+using Mondino.Infrastructure.Teammates;
 
 namespace Mondino.Api.Joining;
 
@@ -41,6 +43,22 @@ public sealed class InvitesController(ISender sender) : ControllerBase
     public Task<IReadOnlyList<CityResultDto>> SearchCities(
         string inviteToken, [FromBody] CitySearchRequest request, CancellationToken cancellationToken) =>
         sender.Send(new SearchCitiesQuery(inviteToken, request.CountryCode, request.Text), cancellationToken);
+
+    /// <summary>
+    /// Joins the team with a pin at a city (L2-005), and signs the new teammate in: 201 for a new
+    /// teammate, 200 for a join request already answered. Fields the body does not define are ignored.
+    /// </summary>
+    [HttpPost("{inviteToken}/teammates")]
+    [SameSiteOnly]
+    public async Task<ActionResult<JoinResultDto>> Join(
+        string inviteToken, [FromBody] JoinRequest request, CancellationToken cancellationToken)
+    {
+        var outcome = await sender.Send(
+            new JoinTeamCommand(inviteToken, request.Name, request.CountryCode, request.PostalCode, request.CityId, request.JoinRequestId),
+            cancellationToken);
+        await TeammateSessionHandler.SignInAsync(HttpContext, outcome.Result.TeamId, outcome.Result.TeammateId);
+        return outcome.IsNew ? StatusCode(StatusCodes.Status201Created, outcome.Result) : Ok(outcome.Result);
+    }
 }
 
 /// <summary>A country and the start of a city's name, as typed.</summary>
@@ -48,3 +66,6 @@ public sealed record CitySearchRequest(string? CountryCode, string? Text);
 
 /// <summary>A country and a postal code, as typed.</summary>
 public sealed record PostalCodeLookupRequest(string? CountryCode, string? PostalCode);
+
+/// <summary>A name, a country, and a postal code or a city chosen from "Your city", as given.</summary>
+public sealed record JoinRequest(string? Name, string? CountryCode, string? PostalCode, string? CityId, Guid? JoinRequestId);

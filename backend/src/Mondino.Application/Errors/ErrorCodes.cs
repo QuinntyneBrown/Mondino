@@ -26,6 +26,12 @@ public static class ErrorCodes
     /// <summary>The postal code source did not answer in time, or its breaker is open.</summary>
     public const string PostalCodeUnavailable = "postal_code_unavailable";
 
+    /// <summary>A team that already has all 500 of its places taken.</summary>
+    public const string TeamFull = "team_full";
+
+    /// <summary>A request that changes something, sent from another site (docs/adr/0008).</summary>
+    public const string CrossSiteRequest = "cross_site_request";
+
     /// <summary>The code for a status that no handler gave a code of its own.</summary>
     public static string? ForStatus(int status) => status switch
     {

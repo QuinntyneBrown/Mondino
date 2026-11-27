@@ -37,6 +37,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             teammate.Ignore(t => t.Initials);
             teammate.HasOne(t => t.City).WithMany().HasForeignKey(t => t.CityId);
             teammate.HasIndex(t => new { t.TeamId, t.JoinedAt });
+            teammate.Property(t => t.PostalCode).HasMaxLength(12);
+            teammate.HasIndex(t => new { t.TeamId, t.JoinRequestId }).IsUnique();
         });
 
         modelBuilder.Entity<City>(city =>
@@ -48,6 +50,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             city.Property(c => c.TimeZoneId).HasMaxLength(64).IsRequired();
             city.Ignore(c => c.Position);
             city.HasIndex(c => new { c.CountryCode, c.Name });
+            city.Property(c => c.DirectoryId).HasMaxLength(16);
+            city.HasIndex(c => c.DirectoryId).IsUnique();
         });
     }
 }

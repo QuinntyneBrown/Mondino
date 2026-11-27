@@ -27,11 +27,31 @@ public sealed class Team
     /// <summary>The random value in the team's invite link. It gives no access beyond joining this team.</summary>
     public string InviteToken { get; private set; }
 
+    /// <summary>A team holds up to 500 teammates (L2-005).</summary>
+    public const int MaxTeammates = 500;
+
     public IReadOnlyList<Teammate> Teammates => teammates;
 
     public Teammate Add(Guid id, string name, string colour, City city, DateTimeOffset joinedAt)
     {
         var teammate = new Teammate(id, Id, name, colour, city, joinedAt);
+        teammates.Add(teammate);
+        return teammate;
+    }
+
+    /// <summary>
+    /// Adds a teammate who joined through the invite link, with a random id. Throws
+    /// <see cref="TeamFullException"/> when the team has all its places taken.
+    /// </summary>
+    public Teammate AddTeammate(
+        string name, string? postalCode, City city, string colour, Guid joinRequestId, DateTimeOffset joinedAt)
+    {
+        if (teammates.Count >= MaxTeammates)
+        {
+            throw new TeamFullException();
+        }
+
+        var teammate = new Teammate(Guid.NewGuid(), Id, name, colour, city, joinedAt, postalCode, joinRequestId);
         teammates.Add(teammate);
         return teammate;
     }

@@ -13,7 +13,7 @@ public sealed class City
         TimeZoneId = string.Empty;
     }
 
-    public City(Guid id, string name, string countryCode, Position position, string timeZoneId)
+    public City(Guid id, string name, string countryCode, Position position, string timeZoneId, string? directoryId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(countryCode);
@@ -25,6 +25,7 @@ public sealed class City
         Latitude = position.Latitude;
         Longitude = position.Longitude;
         TimeZoneId = timeZoneId;
+        DirectoryId = directoryId;
     }
 
     public Guid Id { get; private set; }
@@ -40,6 +41,9 @@ public sealed class City
 
     /// <summary>The IANA time zone: "Europe/Rome".</summary>
     public string TimeZoneId { get; private set; }
+
+    /// <summary>The id of the city in Mondino's city directory (docs/adr/0006), or null for a seeded city.</summary>
+    public string? DirectoryId { get; private set; }
 
     public Position Position => new(Latitude, Longitude);
 }
