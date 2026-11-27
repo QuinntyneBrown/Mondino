@@ -53,6 +53,10 @@
   padding: 0 var(--space-6);
   font-size: var(--font-size-md);
 }
+:host(.btn--block) {
+  display: flex;
+  width: 100%;
+}
 :host(.btn--sm) {
   min-height: var(--control-height-sm);
   padding: 0 var(--space-3);

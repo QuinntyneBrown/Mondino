@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Mondino.Domain.Teams;
+
 namespace Mondino.Application.Persistence;
 
 /// <summary>
@@ -6,5 +9,11 @@ namespace Mondino.Application.Persistence;
 /// </summary>
 public interface IAppDbContext
 {
+    DbSet<Team> Teams { get; }
+
+    DbSet<Teammate> Teammates { get; }
+
+    DbSet<City> Cities { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

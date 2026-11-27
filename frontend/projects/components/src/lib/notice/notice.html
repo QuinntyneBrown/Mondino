@@ -1,0 +1,26 @@
+<div class="notice">
+  <span class="notice__icon">
+    <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+      @switch (icon()) {
+        @case ('link-off') {
+          <path d="M9 17H7A5 5 0 0 1 7 7" />
+          <path d="M15 7h2a5 5 0 0 1 4 8" />
+          <line x1="8" x2="12" y1="12" y2="12" />
+          <line x1="2" x2="22" y1="2" y2="22" />
+        }
+        @case ('offline') {
+          <path d="M12 20h.01" />
+          <path d="M8.5 16.429a5 5 0 0 1 7 0" />
+          <path d="M5 12.859a10 10 0 0 1 5.17-2.69" />
+          <path d="M19 12.859a10 10 0 0 0-2.007-1.523" />
+          <path d="M2 8.82a15 15 0 0 1 4.177-2.643" />
+          <path d="M22 8.82a15 15 0 0 0-11.288-3.764" />
+          <path d="m2 2 20 20" />
+        }
+      }
+    </svg>
+  </span>
+  <h1 class="notice__title">{{ title() }}</h1>
+  <p class="notice__text">{{ text() }}</p>
+  <div class="notice__actions"><ng-content select="[slot=actions]" /></div>
+</div>

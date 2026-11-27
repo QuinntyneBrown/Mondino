@@ -1,0 +1,116 @@
+<main id="main" class="join" tabindex="-1">
+  <section class="join__form">
+    <mo-wordmark />
+    @switch (store.inviteState()) {
+      @case ('Ready') {
+        @if (store.invite(); as invite) {
+          <div class="join__body">
+            <p class="join__team">
+              <mo-avatar-group>
+                @for (avatar of invite.avatars; track $index) {
+                  <mo-avatar [initials]="avatar.initials" [colour]="avatar.colour" size="sm" ring />
+                }
+              </mo-avatar-group>
+              <span
+                >Joining <strong>{{ invite.teamName }}</strong> · {{ invite.teammateCount }} already
+                here</span
+              >
+            </p>
+            <h1 class="join__title">Put yourself on the map.</h1>
+            <p class="join__lead">
+              Your pin shows teammates your local time, weather and what’s happening where you are.
+            </p>
+            <form class="join__fields" novalidate (submit)="hold($event)">
+              <mo-text-field
+                fieldId="name"
+                name="name"
+                label="Your name"
+                autocomplete="name"
+                [maxlength]="60"
+              />
+              <div class="join__field-row">
+                <mo-select-field
+                  fieldId="country"
+                  name="country"
+                  label="Country"
+                  autocomplete="country-name"
+                  [options]="countries()"
+                />
+                <mo-text-field
+                  fieldId="postal"
+                  name="postal"
+                  label="Postal code"
+                  autocomplete="postal-code"
+                  [maxlength]="12"
+                  tabular
+                  describedBy="lookup"
+                />
+              </div>
+              <mo-lookup-message messageId="lookup" />
+              <button mo-button variant="primary" size="lg" block type="submit">
+                Place my pin
+              </button>
+            </form>
+          </div>
+        }
+      }
+      @case ('Loading') {
+        <div class="join__body" aria-busy="true">
+          <div class="join__team"><mo-skeleton shape="pill" /><mo-skeleton shape="short" /></div>
+          <h1 class="join__title">Put yourself on the map.</h1>
+          <p class="join__lead">
+            Your pin shows teammates your local time, weather and what’s happening where you are.
+          </p>
+          <div class="join__fields">
+            <mo-skeleton shape="control" />
+            <div class="join__field-row">
+              <mo-skeleton shape="control" /><mo-skeleton shape="control" />
+            </div>
+            <mo-skeleton shape="mid" />
+            <mo-skeleton shape="control" />
+          </div>
+          <p class="visually-hidden" role="status">Opening your invite link…</p>
+        </div>
+      }
+      @case ('NotFound') {
+        <div class="join__body">
+          <mo-notice
+            icon="link-off"
+            title="This invite link no longer works"
+            text="Someone on the team reset it, so it can’t be used to join. Ask whoever sent it for the new link."
+          >
+            <a slot="actions" mo-button size="lg" routerLink="/new">Start your own team</a>
+          </mo-notice>
+        </div>
+      }
+      @case ('Failed') {
+        <div class="join__body">
+          <mo-notice
+            icon="offline"
+            title="We couldn’t open this invite"
+            text="Mondino didn’t answer. Check your connection and try the link again — it hasn’t been used up."
+          >
+            <button
+              slot="actions"
+              mo-button
+              variant="primary"
+              size="lg"
+              type="button"
+              (click)="tryAgain()"
+            >
+              Try again
+            </button>
+          </mo-notice>
+        </div>
+      }
+    }
+    <p class="join__footer">Already on Mondino? <a routerLink="/sign-in">Sign in</a></p>
+  </section>
+  <section class="join__stage" aria-label="The team on the globe">
+    @if (store.inviteState() === 'Loading') {
+      <mo-globe-placeholder />
+    } @else {
+      <mo-globe-fallback [label]="globeLabel()" [pins]="pins()" />
+    }
+  </section>
+</main>

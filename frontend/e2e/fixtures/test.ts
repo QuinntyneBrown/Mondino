@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { ApiFixture } from './api';
 import { NOW } from './now';
+import { JoinPage } from '../pages/join.page';
 import { NotFoundPage } from '../pages/not-found.page';
 
 interface Fixtures {
@@ -11,6 +12,7 @@ interface Fixtures {
   /** The guard every spec runs under: fixed time, localhost only, no page error. */
   guard: void;
   notFoundPage: NotFoundPage;
+  joinPage: JoinPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -43,7 +45,12 @@ export const test = base.extend<Fixtures>({
       );
       page.on('pageerror', (error) => problems.push(`Page error: ${error.message}`));
       page.on('console', (message) => {
-        if (message.type() === 'error') problems.push(`Console error: ${message.text()}`);
+        // The browser logs every refused or failed request as "Failed to load resource". A refusal
+        // a spec answers on purpose is not a problem; an unanswered request is caught above and
+        // by the API fixture.
+        if (message.type() !== 'error' || message.text().startsWith('Failed to load resource:'))
+          return;
+        problems.push(`Console error: ${message.text()}`);
       });
       page.on('response', (response) => {
         if (response.status() === 599) problems.push(`Unanswered API request: ${response.url()}`);
@@ -58,6 +65,10 @@ export const test = base.extend<Fixtures>({
 
   notFoundPage: async ({ page }, use) => {
     await use(new NotFoundPage(page));
+  },
+
+  joinPage: async ({ page }, use) => {
+    await use(new JoinPage(page));
   },
 });
 

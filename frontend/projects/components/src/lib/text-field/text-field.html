@@ -1,0 +1,13 @@
+<div class="field">
+  <label class="field__label" [for]="fieldId()">{{ label() }}</label>
+  <input
+    class="input"
+    [class.tnum]="tabular()"
+    type="text"
+    [id]="fieldId()"
+    [attr.name]="name() || null"
+    [attr.autocomplete]="autocomplete()"
+    [attr.maxlength]="maxlength()"
+    [attr.aria-describedby]="describedBy()"
+  />
+</div>

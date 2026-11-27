@@ -63,8 +63,9 @@ test.describe('Not Found', () => {
   test('"Skip to content" is the first stop and moves focus to the page', async ({
     notFoundPage,
   }) => {
-    // Given the Not Found page
+    // Given the Not Found page, drawn
     await notFoundPage.open('/nowhere');
+    await expect(notFoundPage.title).toBeVisible();
 
     // When Tab is pressed once, then Enter
     await notFoundPage.page.keyboard.press('Tab');
