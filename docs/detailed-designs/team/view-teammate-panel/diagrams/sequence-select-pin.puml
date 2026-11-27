@@ -16,7 +16,7 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "GlobeView" as globe
+  participant "PinLayer" as globe
   participant "GlobePage" as page
   participant "Router" as router
   participant "TeamStore" as store
@@ -25,20 +25,21 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "GroupPanel" as group
 end box
 actor -> globe : Select a pin by pointer, touch or keyboard
-globe -> page : select(teammateId)
-page -> page : Note whether the selection came from the keyboard
-page -> router : navigate /globe?teammate={teammateId} (L2-023 opaque id only)
-router --> page : teammate input changes
+globe -> page : selectPin(teammateId)
+page -> page : Note whether the pin had keyboard focus (:focus-visible)
+page -> router : navigate /globe?teammate={teammateId}, replacing the entry (L2-023 opaque id only)
+router --> page : queryParamMap "teammate" changes
 page -> store : select(teammateId)
 alt the id is a pin of this team
   store --> page : selectedPin, viewerPin
-  page -> view : teammatePanelView(pin, viewerPin, clock.now(), settings)
+  page -> view : teammatePanelView(pin, viewerPin, clock.now(), clock format, unit)
   view -> view : localTime, statusFor, offsetBetween, overlapBetween
   view --> page : TeammatePanelContent (no offset or overlap for the viewer's own pin;\nno status and no overlap for a pin that does not share its status)
   page -> panel : content, fade of at most 200 ms (none under reduced motion)
-  page -> globe : selectedId; the globe turns to the pin and holds
+  page -> globe : selectedId; GlobeView turns to the pin (facing) and holds
+  page --> actor : "Tomás Herrera, Mexico City, selected." once, politely
   opt opened from the keyboard
-    page -> panel : focusHeading()
+    page -> panel : focus the heading after it renders
   end
   alt the teammate shares neither weather nor status
     panel --> actor : Name, city and country, local time, day and offset, moments, and the note\n"Ahmed keeps their weather and working hours private." (L2-023)
@@ -53,9 +54,10 @@ end
 == A group pin ==
 actor -> globe : Select a group pin
 globe -> page : selectGroup(teammate ids)
+page -> store : selectGroup(ids)
 page -> router : navigate /globe, removing the teammate parameter
-page -> page : groupTeammateIds.set(ids); groupCities, largest city first
-page -> globe : selectedGroupIds; the globe turns to the group pin and holds
+page -> page : groupCities, largest city first
+page -> globe : selectedGroupKey; GlobeView turns to the group pin and holds
 page -> group : content
 group --> actor : "2 teammates close together", "All in Milan · pick someone to see their pin",\none block for each city with its local time; announced once (L2-023)
 alt a row is chosen
@@ -65,8 +67,8 @@ alt a row is chosen
   page --> actor : That teammate's panel
 else the close button or Escape
   group -> page : closed
-  page -> page : groupTeammateIds.set([])
-  page -> globe : selectedGroupIds = []
+  page -> store : clear()
+  page -> globe : selectedGroupKey = null
   page --> actor : Week panel (L2-024)
 end
 @enduml

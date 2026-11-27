@@ -1,15 +1,18 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
+  Injector,
   signal,
   untracked,
 } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   CLOCK,
   HttpTeamApi,
@@ -19,15 +22,25 @@ import {
   type PinPlacement,
   type Position,
 } from '@mondino/api';
-import { GlobeFallback, GlobeLegend, GlobePlaceholder, PinLayer, Toast } from '@mondino/components';
+import {
+  GlobeFallback,
+  GlobeLegend,
+  GlobePlaceholder,
+  GroupPanel,
+  PinLayer,
+  TeammatePanel,
+  Toast,
+} from '@mondino/components';
 import { GlobeView, type GlobeState } from '@mondino/globe';
 import {
   BrowserClock,
   defaultClockFormat,
   defaultTemperatureUnit,
+  groupCities,
   pinViews,
   placePins,
   stillViewport,
+  teammatePanelView,
 } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
 import { TeamStore } from './team-store';
@@ -44,7 +57,16 @@ export const toastLifetime = 4000;
  */
 @Component({
   selector: 'mo-globe-page',
-  imports: [GlobeFallback, GlobeLegend, GlobePlaceholder, GlobeView, PinLayer, Toast],
+  imports: [
+    GlobeFallback,
+    GlobeLegend,
+    GlobePlaceholder,
+    GlobeView,
+    GroupPanel,
+    PinLayer,
+    TeammatePanel,
+    Toast,
+  ],
   // One clock and one team for the screen, released with it.
   providers: [
     { provide: CLOCK, useClass: BrowserClock },
@@ -54,11 +76,24 @@ export const toastLifetime = 4000;
   templateUrl: './globe-page.html',
   styleUrl: './globe-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:keydown.escape)': 'escape()' },
 })
 export class GlobePage {
   private readonly membership = inject(TEAM_MEMBERSHIP);
   private readonly clock = inject(CLOCK);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected readonly store = inject(TeamStore);
+  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
+  /** Whether the open panel was opened from the keyboard: it then takes focus, and gives it back. */
+  private openedFromKeyboard = false;
+
+  /**
+   * The teammate the address selects: `/globe?teammate={teammateId}`, an opaque id and nothing
+   * else (L2-023). The address is the source of the selection; the store follows it.
+   */
+  private readonly requestedId = signal<string | null>(null);
 
   /** The teammate who has just joined, from the navigation that opened the screen; null on a reload. */
   protected readonly justJoined = justJoinedIn(
@@ -78,17 +113,38 @@ export class GlobePage {
    * viewer's clock and temperatures in their unit: until Profile & Settings stores a choice
    * (journey 23), the defaults for the country of their pin (L2-019).
    */
+  private readonly viewer = computed(() => this.store.team()?.pins.find((pin) => pin.isViewer));
+  protected readonly clockFormat = computed(() => defaultClockFormat(this.viewer()?.country ?? ''));
+  private readonly unit = computed(() => defaultTemperatureUnit(this.viewer()?.country ?? ''));
+
   private readonly views = computed(() => {
     this.clock.minute();
     const team = this.store.team();
     if (!team) return null;
-    const viewer = team.pins.find((pin) => pin.isViewer);
     return pinViews(
       team.pins,
       untracked(() => this.clock.now()),
       this.justJoined?.teammateId ?? null,
-      defaultClockFormat(viewer?.country ?? ''),
-      defaultTemperatureUnit(viewer?.country ?? ''),
+      this.clockFormat(),
+      this.unit(),
+    );
+  });
+
+  /**
+   * The selected teammate's panel (L2-023), worked out again as the one clock's minute changes,
+   * so its local time, status, offset and overlap move with it; null with no teammate selected.
+   */
+  protected readonly panel = computed(() => {
+    this.clock.minute();
+    const id = this.store.selectedId();
+    const pin = this.store.team()?.pins.find((each) => each.teammateId === id);
+    if (!pin) return null;
+    return teammatePanelView(
+      pin,
+      this.viewer(),
+      untracked(() => this.clock.now()),
+      this.clockFormat(),
+      this.unit(),
     );
   });
 
@@ -126,11 +182,82 @@ export class GlobePage {
       : `The globe${pins}`;
   });
 
+  /**
+   * A selected group pin's panel (L2-023): its teammates city by city, each city's local time
+   * moving with the minute; null with no group selected, or once one teammate or none is left.
+   */
+  protected readonly group = computed(() => {
+    this.clock.minute();
+    const ids = this.store.heldIds();
+    const team = this.store.team();
+    if (ids.length === 0 || !team) return null;
+    const content = groupCities(
+      team.pins,
+      ids,
+      untracked(() => this.clock.now()),
+      this.clockFormat(),
+    );
+    return content.cities.reduce((total, city) => total + city.rows.length, 0) > 1 ? content : null;
+  });
+
+  /** The address that selects a teammate, which a group's rows link to. */
+  protected readonly addressOf = (teammateId: string): string =>
+    this.router.serializeUrl(
+      this.router.createUrlTree([], {
+        relativeTo: this.route,
+        queryParams: { teammate: teammateId },
+      }),
+    );
+
+  /** The panel as a list of one, so another teammate's is drawn afresh and fades in. */
+  protected readonly panels = computed(() => {
+    const panel = this.panel();
+    return panel ? [panel] : [];
+  });
+
+  /**
+   * What was selected, said once in a polite live region as the mocks word it: "Tomás Herrera,
+   * Mexico City, selected.". It changes with the selection only, not as the minute passes.
+   */
+  protected readonly announcement = computed(() => {
+    const id = this.store.selectedId();
+    const pin = this.store.team()?.pins.find((each) => each.teammateId === id);
+    if (pin) return `${pin.name}${pin.isViewer ? ', you' : ''}, ${pin.cityName}, selected.`;
+    const group = this.group();
+    return group ? `${group.title}.` : '';
+  });
+
   protected readonly toast = signal<{ strong: string; text: string } | null>(null);
 
   constructor() {
-    const router = inject(Router);
+    const router = this.router;
+    const destroyRef = inject(DestroyRef);
+    const subscription = this.route.queryParamMap.subscribe((params) =>
+      this.requestedId.set(params.get('teammate')),
+    );
+    destroyRef.onDestroy(() => subscription.unsubscribe());
     void this.store.load();
+    // Once the pins are read, the address chooses the selected pin; an id that is no pin of the
+    // team is taken out of the address. With no id a held group pin stays held.
+    let joinedPending = this.justJoined?.teammateId ?? null;
+    effect(() => {
+      const team = this.store.team();
+      const id = this.requestedId();
+      if (!team) return;
+      untracked(() => {
+        if (joinedPending && id === null) {
+          // The new pin stands alone, lifted and labelled, for this visit only: a reload of the
+          // Globe greets no one, so it is not put in the address.
+          this.store.select(joinedPending);
+          joinedPending = null;
+          return;
+        }
+        joinedPending = null;
+        if (id === null) this.store.selectedId.set(null);
+        else if (team.pins.some((pin) => pin.teammateId === id)) this.store.select(id);
+        else this.show(null);
+      });
+    });
     // A team the session no longer has: the same address now says an invite link is needed.
     effect(() => {
       if (this.store.state() === 'Forgotten')
@@ -139,8 +266,6 @@ export class GlobePage {
 
     const joined = this.justJoined;
     if (!joined) return;
-    // The new pin stands alone, lifted and labelled, and the globe turns to it.
-    this.store.select(joined.teammateId);
     // Shown once: a reload or a return through history does not greet the teammate again.
     const location = inject(Location);
     const state = location.getState();
@@ -154,7 +279,64 @@ export class GlobePage {
       text: `${teamName} can now see your pin in ${joined.cityName}.`,
     });
     const timer = setTimeout(() => this.toast.set(null), toastLifetime);
-    inject(DestroyRef).onDestroy(() => clearTimeout(timer));
+    destroyRef.onDestroy(() => clearTimeout(timer));
+  }
+
+  /** Selects a teammate's pin through the address, or clears the selection. */
+  private show(teammateId: string | null): Promise<boolean> {
+    return this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: teammateId ? { teammate: teammateId } : {},
+      replaceUrl: true,
+    });
+  }
+
+  /** Whether what was just chosen has keyboard focus: a pin, or a row of a group's panel. */
+  private chosenByKeyboard(): boolean {
+    const chosen = document.activeElement;
+    return !!chosen && this.host.contains(chosen) && chosen.matches(':focus-visible');
+  }
+
+  protected select(teammateId: string): void {
+    const keyboard = this.chosenByKeyboard();
+    this.openedFromKeyboard = keyboard;
+    void this.show(teammateId).then(() => {
+      if (keyboard) afterNextRender(() => this.focusHeading(), { injector: this.injector });
+    });
+  }
+
+  /** A tap off the pins: the selection is cleared and focus is left where it is. */
+  protected clear(): void {
+    this.openedFromKeyboard = false;
+    this.store.clear();
+    void this.show(null);
+  }
+
+  /** The close button or Escape: the panel closes, and focus returns to the pin if it came from it. */
+  protected close(): void {
+    const teammateId = this.store.selectedId() ?? this.store.heldIds()[0];
+    const keyboard = this.openedFromKeyboard;
+    this.clear();
+    if (keyboard && teammateId)
+      afterNextRender(() => this.focusPin(teammateId), { injector: this.injector });
+  }
+
+  protected escape(): void {
+    if (this.store.selectedId() !== null || this.store.heldIds().length > 0) this.close();
+  }
+
+  private focusHeading(): void {
+    this.host.querySelector<HTMLElement>('.globe-screen__panel h2')?.focus();
+  }
+
+  /** Focus on the pin, or the group pin, that stands for a teammate. */
+  private focusPin(teammateId: string): void {
+    const placements =
+      (this.globeState() === 'Fallback' ? this.stillPinPlacements() : this.placements()) ?? [];
+    const index = placements.findIndex((placement) =>
+      placement.pins.some((pin) => pin.teammateId === teammateId),
+    );
+    this.host.querySelectorAll<HTMLElement>('.globe__pins button.pin')[index]?.focus();
   }
 
   protected showView(viewport: GlobeViewport): void {
@@ -162,7 +344,11 @@ export class GlobePage {
   }
 
   protected selectGroup(placement: PinPlacement): void {
+    const keyboard = this.chosenByKeyboard();
+    this.openedFromKeyboard = keyboard;
     this.store.selectGroup(placement.pins.map((pin) => pin.teammateId));
+    void this.show(null);
+    if (keyboard) afterNextRender(() => this.focusHeading(), { injector: this.injector });
   }
 
   protected dismissToast(): void {

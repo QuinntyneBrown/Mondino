@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-012, L2-013, L2-009, L2-042
+// Traces to: L2-012, L2-023, L2-013, L2-009, L2-042
 // Description: A pin lifts when pointed at or focused and settles back; Enter, Space, a click or a tap selects it, the globe turns to it and holds, and a tap off the pins clears it
 
 import { expect, test } from '../fixtures/test';
@@ -83,22 +83,24 @@ test.describe('Globe: a pin lifts and is selected', () => {
       'Chloé Martin · São Paulo11:0526°Showers',
     );
 
-    // And Enter selects it
+    // And Enter selects it, and its panel takes focus on its heading (L2-023)
     await page.keyboard.press('Enter');
     await expect(globePage.pin('Chloé Martin')).toHaveAttribute('aria-pressed', 'true');
     await expect(globePage.pin('Liam O’Connor')).toHaveCount(0);
+    await expect(globePage.personName).toHaveText('Chloé Martin');
+    await expect(globePage.personName).toBeFocused();
 
-    // And the globe turns to São Paulo, and when Tab moves on to the next pin, Kwame's in Accra,
-    // the selected pin stays lifted and the next one lifts too
-    await page.keyboard.press('Tab');
-    await expect(globePage.pin('Kwame Mensah')).toBeFocused();
+    // And the globe turns to São Paulo, and when focus moves on to the next pin, Kwame's in
+    // Accra, the selected pin stays lifted and the next one lifts too
+    await globePage.pin('Kwame Mensah').focus();
     await expect(globePage.pinItem('Kwame Mensah')).toHaveClass(/globe__pin--lifted/);
     await expect(globePage.pinItem('Chloé Martin')).toHaveClass(/globe__pin--lifted/);
 
-    // And Space selects that one in its place, keeping focus on it
+    // And Space selects that one in its place
     await page.keyboard.press('Space');
     await expect(globePage.pin('Kwame Mensah')).toHaveAttribute('aria-pressed', 'true');
-    await expect(globePage.pin('Kwame Mensah')).toBeFocused();
+    await expect(globePage.personName).toHaveText('Kwame Mensah');
+    await expect(globePage.personName).toBeFocused();
     await expect(globePage.pin('Chloé Martin')).toHaveAttribute('aria-pressed', 'false');
   });
 
