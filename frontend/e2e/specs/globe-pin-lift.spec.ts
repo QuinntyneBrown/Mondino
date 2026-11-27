@@ -115,6 +115,7 @@ test.describe('Globe: a pin lifts and is selected', () => {
 
     // Then within a second the globe has turned to face it, and holds there
     await letTimePass(page, 1_000);
+    await page.clock.runFor(32);
     const facing = await globePage.pinPlace('Kwame Mensah');
     expect(offCentre(facing)).toBeLessThan(1);
     await letTimePass(page, 10_000);

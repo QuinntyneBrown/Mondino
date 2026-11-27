@@ -53,6 +53,8 @@ test.describe('Globe: turns to a pin and holds', () => {
     expect(turning).toBeLessThan(offCentre(placed));
     expect(turning).toBeGreaterThan(0.5);
     await letTimePass(page, 568);
+    // The pin drawn for the last frame is rendered before it is read
+    await page.clock.runFor(32);
     const facing = await joinPage.youPinPlace();
     expect(offCentre(facing)).toBeLessThan(0.5);
 
