@@ -45,8 +45,8 @@ package "@mondino/components" {
     +value: string
     +label: string
     +copied: boolean
-    +copy: Output<void>
-    +select(): void
+    +copyLink: Output<void>
+    +selectRequest: number
   }
   class PostalCodeField
 }
@@ -103,7 +103,7 @@ package "Mondino.Application" {
     +Create(): string
   }
   interface IEmailFingerprints {
-    +Of(email: EmailAddress): string
+    +FingerprintOf(email: EmailAddress): string
   }
   class PostalCodeFormats
   interface IPostalCodeLookup

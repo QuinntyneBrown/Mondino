@@ -22,7 +22,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "Toast" as toast
 end box
 actor -> field : Choose "Copy link"
-field -> page : copy
+field -> page : copyLink
 page -> copier : write(inviteLink): navigator.clipboard.writeText
 alt the browser accepts the copy
   copier --> page : resolves
@@ -30,7 +30,7 @@ alt the browser accepts the copy
   field --> actor : The button reads "Copied", with a tick
 else the browser refuses the copy
   copier --> page : rejects
-  page -> field : select()
+  page -> field : selectRequest + 1
   field --> actor : The link is selected and focused
   page -> toast : Show the danger toast, which stays
   toast --> actor : "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself."

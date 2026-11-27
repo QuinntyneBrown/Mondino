@@ -71,8 +71,8 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
     `teamId`, `teammateId` and `teamName` of the `CreatedTeam`.
   - "Copy link" copies the invite link through `CLIPBOARD` (`navigator.clipboard.writeText`,
     ADR 0009). When the copy succeeds the
-    button reads "Copied", with a tick. When the browser refuses it, the page calls
-    `CopyField.select()` and shows the `Toast` of the invite dialog, which stays: "Couldn’t
+    button reads "Copied", with a tick. When the browser refuses it, the page raises
+    `CopyField`'s `selectRequest` and shows the `Toast` of the invite dialog, which stays: "Couldn’t
     copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself."
     (`invite-teammates`).
 - **`CreateTeamStore`** — service provided at the `/new` route, so its state goes when the
@@ -108,8 +108,8 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
   `navigator.clipboard.writeText`.
 - **`CopyField`** (`mo-copy-field`, block `copy-field`) — presentation component in
   `@mondino/components`: a read-only input with the link (`copy-field__value`) and a button.
-  Its inputs are `value`, `label` and `copied`; it emits `copy`, and `select()` selects the
-  link and moves focus to it. The invite dialog uses the same component.
+  Its inputs are `value`, `label`, `copied` and `selectRequest`; it emits `copyLink`, and each
+  new `selectRequest` selects the link and moves focus to it. The invite dialog uses the same component.
 - **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block, not interactive.
   It has no pins until a city is found ("The globe, with no pins"). Once it is found, and in
   `Created`, the page passes it the maker's pin, selected and marked as new, so the globe turns
@@ -152,7 +152,7 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
      `CreateRequestId`.
   4. It picks the pin's colour with `PinColourPicker`, calls `Team.AddTeammate` with the time
      from `TimeProvider` and sets the teammate's `EmailFingerprint` from
-     `IEmailFingerprints.Of(email)`.
+     `IEmailFingerprints.FingerprintOf(email)`.
   5. It saves through `IAppDbContext` in one unit of work. When the save is rejected by the
      unique index on `Team.CreateRequestId`, it loads the team the other request made and
      returns it.
