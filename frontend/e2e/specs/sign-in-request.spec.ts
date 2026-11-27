@@ -56,8 +56,10 @@ test.describe('Sign In: asking for a link', () => {
     await signInPage.open();
     await signInPage.email.fill('sofia@northwind.co');
 
-    await signInPage.submit.click();
-    await signInPage.submit.click({ force: true });
+    // A double-click presses wherever the button is, as the first press redraws it busy; a second
+    // click by locator could land on the button being replaced.
+    await signInPage.submit.dblclick();
+    await expect(signInPage.submit).toHaveAttribute('aria-busy', 'true');
     await signInPage.email.press('Enter');
     held.release(LINK_ASKED);
 
