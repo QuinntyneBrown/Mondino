@@ -34,12 +34,20 @@ export async function joinFromMilan(
 }
 
 /**
- * Stops the clock a second from now, so time passes only when the spec says: frames, and Angular's
- * rendering, then come only with `page.clock.runFor`.
+ * Stops the clock where it is, give or take a few milliseconds, so time passes only when the spec
+ * says: frames, and Angular's rendering, then come only with `page.clock.runFor`.
  */
 export async function pauseTheClock(page: Page): Promise<void> {
-  const now = await page.evaluate(() => Date.now());
-  await page.clock.pauseAt(now + 1_000);
+  for (let attempt = 0; ; attempt++) {
+    const now = await page.evaluate(() => Date.now());
+    try {
+      await page.clock.pauseAt(now + 20);
+      return;
+    } catch (error) {
+      // The page's clock ran past the moment before it was paused; try the next one.
+      if (attempt === 4 || !String(error).includes('to the past')) throw error;
+    }
+  }
 }
 
 /** Lets a spec hide and show the tab, as switching to another tab would. Call before opening. */
