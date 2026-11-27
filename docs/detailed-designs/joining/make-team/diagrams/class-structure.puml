@@ -41,19 +41,17 @@ package "@mondino/domain" {
   }
 }
 package "@mondino/components" {
-  class AuthLayout
   class CopyField {
     +value: string
     +label: string
     +copied: boolean
-    +copy: Output<void>
-    +select(): void
+    +copyLink: Output<void>
+    +selectRequest: number
   }
   class PostalCodeField
 }
 package "@mondino/api" {
   interface TeamCreationApi {
-    +getCountries(): Promise<Country[]>
     +lookUpPostalCode(countryCode, postalCode, signal): Promise<PostalCodeResult>
     +searchCities(countryCode, text, signal): Promise<CityResult[]>
     +createTeam(request: CreateTeamRequest): Promise<CreatedTeam>
@@ -76,7 +74,6 @@ package "@mondino/api" {
 }
 package "Mondino.Api" {
   class TeamCreationController {
-    +GetCountries(): Task<ActionResult<CountryDto[]>>
     +LookUpPostalCode(body): Task<ActionResult<PostalCodeResultDto>>
     +SearchCities(body): Task<ActionResult<CityResultDto[]>>
     +Create(body: CreateTeamRequest): Task<ActionResult<CreatedTeamDto>>
@@ -105,6 +102,9 @@ package "Mondino.Application" {
   interface IInviteTokens {
     +Create(): string
   }
+  interface IEmailFingerprints {
+    +FingerprintOf(email: EmailAddress): string
+  }
   class PostalCodeFormats
   interface IPostalCodeLookup
   interface ICityDirectory
@@ -116,28 +116,28 @@ package "Mondino.Domain" {
     +Guid Id
     +string Name
     +string InviteToken
-    +Guid CreateRequestId
-    +{static} Create(name, inviteToken, createRequestId, createdAt): Team
+    +Guid? CreateRequestId
+    +{static} Create(name, inviteToken, createRequestId): Team
     +AddTeammate(name, postalCode, city, colour, joinRequestId, joinedAt): Teammate
   }
   class Teammate {
     +Guid Id
     +string Name
-    +EmailAddress? Email
+    +string? EmailFingerprint
     +PostalCode? PostalCode
     +City City
-    +SetEmail(email: EmailAddress): void
+    +SetEmailFingerprint(fingerprint: string): void
   }
   class EmailAddress
   class City
 }
 package "Mondino.Infrastructure" {
   class InviteTokens
+  class HmacEmailFingerprints
   class TeammateSessionHandler
 }
 
 CreateTeamPage --> CreateTeamStore
-CreateTeamPage ..> AuthLayout
 CreateTeamPage ..> CopyField
 CreateTeamPage ..> PostalCodeField
 CreateTeamPage ..> TeamMembership : remembers the team once it is made
@@ -151,6 +151,9 @@ CreateTeamCommandValidator ..> CreateTeamCommand : validates
 CreateTeamCommandHandler ..> CreateTeamCommand : handles
 CreateTeamCommandHandler ..> CreatedTeamDto : returns
 CreateTeamCommandHandler ..> IInviteTokens
+CreateTeamCommandHandler ..> IEmailFingerprints
+CreateTeamCommandHandler ..> EmailAddress : parses
+HmacEmailFingerprints ..|> IEmailFingerprints
 CreateTeamCommandHandler ..> PostalCodeFormats
 CreateTeamCommandHandler ..> IPostalCodeLookup
 CreateTeamCommandHandler ..> ICityDirectory
@@ -159,6 +162,5 @@ CreateTeamCommandHandler ..> IAppDbContext
 CreateTeamCommandHandler --> Team : creates
 InviteTokens ..|> IInviteTokens
 Team "1" *-- "1..500" Teammate
-Teammate --> EmailAddress
 Teammate --> City
 @enduml

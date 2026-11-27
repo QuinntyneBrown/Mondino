@@ -20,9 +20,18 @@ public sealed class Team
         InviteToken = inviteToken;
     }
 
+    /// <summary>
+    /// Makes a team with a random id and no teammates, for the request that asked for it (L2-053).
+    /// </summary>
+    public static Team Create(string name, string inviteToken, Guid createRequestId) =>
+        new(Guid.NewGuid(), name, inviteToken) { CreateRequestId = createRequestId };
+
     public Guid Id { get; private set; }
 
     public string Name { get; private set; }
+
+    /// <summary>The id the browser gave the request that made the team, so a repeated request makes no second team. Never returned.</summary>
+    public Guid? CreateRequestId { get; private set; }
 
     /// <summary>The random value in the team's invite link. It gives no access beyond joining this team.</summary>
     public string InviteToken { get; private set; }

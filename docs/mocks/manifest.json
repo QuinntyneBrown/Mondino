@@ -82,9 +82,14 @@
       ],
       "states": [
         "default",
+        "locating",
+        "found",
+        "not-found",
+        "lookup-unavailable",
         "invalid",
         "submitting",
         "error",
+        "rate-limited",
         "created"
       ],
       "not_applicable": {

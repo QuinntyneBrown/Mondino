@@ -43,8 +43,8 @@ handler -> db : Find a team with this CreateRequestId
 db --> handler : None
 handler -> lookup : FindCityAsync(normalised postal code)
 lookup --> handler : Found, City with the city's own position (L2-006)
-handler -> team : Create(name, new invite token, createRequestId, now)
-handler -> team : AddTeammate(name, postalCode, city, colour, createRequestId, now), SetEmail(email)
+handler -> team : Create(name, new invite token, createRequestId)
+handler -> team : AddTeammate(name, postalCode, city, colour, createRequestId, now),\nSetEmailFingerprint(HMAC of the email; the address is not kept)
 team --> handler : Team with one teammate and a pin at the city (L2-053)
 handler -> db : Save changes in one unit of work
 db --> handler : Committed

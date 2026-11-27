@@ -193,13 +193,11 @@ The designs mark these as `<TO SUPPLY>`:
   since Join asks for no email and only Create Team collects one; what is shown when an
   emailed link has expired or was already used, and while one is being opened; which team is
   shown when one email is on more than one team; and the words of the email.
-- Making a team (`joining/make-team`): what Create Team does when its email already belongs to
-  a teammate of another team; the longest name a team may have; and whether the screen names
-  the found city before the team is made.
 - Resetting the invite link (`joining/invite-teammates`): what "Reset link" asks before it
   acts, and what the dialog shows while the reset is pending, when it fails and once it is
   done. Resetting is not built before that design exists.
-- What Sign In and Create Team show when a request is refused with 429.
+- What Sign In shows when a request is refused with 429 (Create Team shows Join's countdown,
+  ADR 0009).
 - On Join: the words of the found line when a city is chosen through "Your city", the words
   for a name over 60 characters, and whether the lookup's rate limit window lengthens to match
   the mock's countdown ("9:42").
@@ -207,4 +205,4 @@ The designs mark these as `<TO SUPPLY>`:
 - What becomes of a team when its last teammate leaves.
 - Numbers the requirements do not give: the circuit breaker's threshold,
   the globe's turning rate and detail steps, the rate limit on a teammate's own postal code
-  lookup, and the limits on the city search and on reading the countries.
+  lookup.

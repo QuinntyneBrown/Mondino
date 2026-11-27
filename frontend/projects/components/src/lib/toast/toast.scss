@@ -65,3 +65,13 @@
     animation: none;
   }
 }
+.toast--danger {
+  background: var(--color-bg-surface-raised);
+  color: var(--color-fg-default);
+  box-shadow:
+    0 0 0 var(--border-width-thick) var(--color-danger-border),
+    var(--shadow-4);
+}
+.toast--danger > .icon {
+  color: var(--color-danger-icon);
+}

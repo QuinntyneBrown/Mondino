@@ -1,0 +1,205 @@
+<main id="main" class="auth" tabindex="-1">
+  <section class="auth__form">
+    <mo-wordmark />
+    @if (created(); as team) {
+      <div class="auth__body">
+        <p class="auth__kicker" role="status">{{ team.teamName }} is on the map</p>
+        <h1 class="auth__title" id="created-title" tabindex="-1">Now bring everyone in.</h1>
+        <p class="auth__lead">
+          Send this link to your team. Each person places their own pin with a postal code.
+        </p>
+        <mo-copy-field
+          class="auth__copy"
+          [value]="inviteLinkShown()"
+          [copied]="copied()"
+          [selectRequest]="selectRequest()"
+          (copyLink)="copy()"
+        />
+        <div class="auth__actions">
+          <a mo-button variant="primary" size="lg" block routerLink="/globe">Go to the globe</a>
+        </div>
+      </div>
+    } @else {
+      <div class="auth__body">
+        <h1 class="auth__title">Start a team.</h1>
+        <p class="auth__lead">
+          Name it, place your own pin, and you’ll get a link to invite everyone else.
+        </p>
+        <form class="auth__fields" novalidate (submit)="submit($event)">
+          <mo-text-field
+            fieldId="team"
+            name="team"
+            label="Team name"
+            autocomplete="organization"
+            [maxlength]="nameLimit"
+            [value]="store.teamName()"
+            [readonly]="store.locked()"
+            [invalid]="!!errors().team"
+            [error]="errors().team ?? null"
+            errorAlert
+            (valueChange)="store.setTeamName($event)"
+          />
+          <mo-text-field
+            fieldId="name"
+            name="name"
+            label="Your name"
+            autocomplete="name"
+            [maxlength]="nameLimit"
+            [value]="store.name()"
+            [readonly]="store.locked()"
+            [invalid]="!!errors().name"
+            [error]="errors().name ?? null"
+            errorAlert
+            (valueChange)="store.setName($event)"
+          />
+          <mo-text-field
+            fieldId="email"
+            name="email"
+            label="Work email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            help="We’ll send sign-in links here."
+            [maxlength]="emailLimit"
+            [value]="store.email()"
+            [readonly]="store.locked()"
+            [invalid]="!!errors().email"
+            [error]="errors().email ?? null"
+            errorAlert
+            (valueChange)="store.setEmail($event)"
+          />
+          <div class="auth__field-row">
+            <mo-select-field
+              fieldId="country"
+              name="country"
+              label="Country"
+              autocomplete="country-name"
+              [options]="countries"
+              [value]="store.countryCode()"
+              [disabled]="store.locked()"
+              (valueChange)="store.setCountry($event)"
+            />
+            <mo-text-field
+              fieldId="postal"
+              name="postal"
+              label="Postal code"
+              autocomplete="postal-code"
+              [maxlength]="12"
+              tabular
+              [describedBy]="lookupDown() ? null : 'lookup'"
+              [disabled]="lookupDown()"
+              [readonly]="store.locked()"
+              [value]="store.postalCode()"
+              [invalid]="!!errors().postal || store.lookup().kind === 'NotFound'"
+              [error]="errors().postal ?? null"
+              errorAlert
+              (valueChange)="store.setPostalCode($event)"
+              (blurred)="store.leavePostalCode()"
+            />
+          </div>
+          @if (lookupDown()) {
+            <mo-city-field
+              [text]="store.cityText()"
+              [results]="store.cityResults()"
+              [countryName]="store.country()?.name ?? ''"
+              (textChange)="store.setCityText($event)"
+              (choose)="store.chooseCity($event)"
+            />
+          }
+          @if (!lookupDown() || store.lookup().kind === 'Found') {
+            <mo-lookup-message
+              messageId="lookup"
+              [state]="store.lookup()"
+              [country]="store.country()"
+              [quiet]="!!errors().postal"
+            />
+          }
+          @if (store.lookup().kind === 'RateLimited') {
+            <mo-alert
+              tone="warning"
+              icon="clock"
+              strong="Too many tries from this device."
+              text="You can try again in"
+              [figure]="countdown()"
+              [figureSpoken]="countdownSpoken()"
+              end="."
+            />
+          }
+          @if (store.state().kind === 'Failed') {
+            <mo-alert
+              tone="danger"
+              [strong]="'We couldn’t create ' + store.teamName().trim() + '.'"
+              text="Nothing was saved — try again."
+            />
+          }
+          @switch (store.state().kind) {
+            @case ('Creating') {
+              <button
+                mo-button
+                variant="primary"
+                size="lg"
+                block
+                type="submit"
+                aria-busy="true"
+                disabled
+              >
+                <svg
+                  class="icon icon--sm icon--spin"
+                  aria-hidden="true"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
+                >Creating your team…
+              </button>
+            }
+            @case ('Failed') {
+              <button mo-button variant="primary" size="lg" block type="submit">Try again</button>
+            }
+            @default {
+              @switch (store.lookup().kind) {
+                @case ('Locating') {
+                  <button
+                    mo-button
+                    variant="primary"
+                    size="lg"
+                    block
+                    type="submit"
+                    aria-busy="true"
+                    disabled
+                  >
+                    Create team
+                  </button>
+                }
+                @case ('RateLimited') {
+                  <button mo-button variant="primary" size="lg" block type="submit" disabled>
+                    Create team
+                  </button>
+                }
+                @default {
+                  <button mo-button variant="primary" size="lg" block type="submit">
+                    Create team
+                  </button>
+                }
+              }
+            }
+          }
+        </form>
+      </div>
+    }
+    <p class="auth__footer">Already have a team? <a routerLink="/sign-in">Sign in</a></p>
+  </section>
+  <section class="auth__stage" aria-label="The globe">
+    <mo-globe-fallback [label]="globeLabel()" [pins]="you() ? [] : null" [you]="you()" />
+  </section>
+</main>
+<div class="toast-region" role="alert" aria-live="assertive">
+  @if (copyRefused()) {
+    <mo-toast
+      tone="danger"
+      strong="Couldn’t copy the link."
+      text="It’s selected — press Ctrl+C or ⌘C to copy it yourself."
+      (dismiss)="dismissToast()"
+    />
+  }
+</div>

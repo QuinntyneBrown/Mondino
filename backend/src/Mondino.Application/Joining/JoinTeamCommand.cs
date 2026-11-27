@@ -80,19 +80,9 @@ internal sealed class JoinTeamCommandHandler(
         }
 
         // 3. The city, found again by the backend: the browser's word for it is not trusted.
-        var (known, postalCode) = await FindCityAsync(request, cancellationToken);
-        var city = await database.Cities.SingleOrDefaultAsync(c => c.DirectoryId == known.CityId, cancellationToken);
-        if (city is null)
-        {
-            city = new City(
-                Guid.NewGuid(),
-                known.Name,
-                known.CountryCode,
-                new Position(known.Latitude, known.Longitude),
-                known.TimeZoneId,
-                known.CityId);
-            database.Cities.Add(city);
-        }
+        var (known, postalCode) = await PinCities.FindAsync(
+            lookup, directory, request.CountryCode!, request.PostalCode, request.CityId, cancellationToken);
+        var city = await PinCities.HoldAsync(database, known, cancellationToken);
 
         // 4. The teammate, with a colour of the palette, at the city.
         Teammate teammate;
@@ -124,30 +114,5 @@ internal sealed class JoinTeamCommandHandler(
         }
 
         return new JoinOutcome(new JoinResultDto(team.Id, teammate.Id), IsNew: true);
-    }
-
-    private async Task<(KnownCity City, string? PostalCode)> FindCityAsync(
-        JoinTeamCommand request, CancellationToken cancellationToken)
-    {
-        if (!string.IsNullOrWhiteSpace(request.CityId))
-        {
-            var chosen = directory.Find(request.CityId);
-            return chosen is not null && chosen.CountryCode == request.CountryCode
-                ? (chosen, null)
-                : throw new RefusedException(400, ErrorCodes.ValidationFailed);
-        }
-
-        if (!PostalCodeFormats.TryNormalise(request.CountryCode!, request.PostalCode!, out var postalCode))
-        {
-            throw new RefusedException(422, ErrorCodes.PostalCodeNotFound);
-        }
-
-        var outcome = await lookup.FindCityAsync(postalCode, cancellationToken);
-        return outcome.Status switch
-        {
-            PostalCodeLookupStatus.Found => (outcome.City!, postalCode.Value),
-            PostalCodeLookupStatus.NotFound => throw new RefusedException(422, ErrorCodes.PostalCodeNotFound),
-            _ => throw new RefusedException(503, ErrorCodes.PostalCodeUnavailable),
-        };
     }
 }

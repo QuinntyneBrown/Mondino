@@ -18,19 +18,19 @@ actor "Teammate who made the team" as actor
 box "Frontend — Mondino web app" #E0F2FE
   participant "CreateTeamPage" as page
   participant "CopyField" as field
-  participant "Clipboard (CDK)" as copier
+  participant "NavigatorClipboard (CLIPBOARD)" as copier
   participant "Toast" as toast
 end box
 actor -> field : Choose "Copy link"
-field -> page : copy
-page -> copier : copy(inviteLink)
+field -> page : copyLink
+page -> copier : write(inviteLink): navigator.clipboard.writeText
 alt the browser accepts the copy
-  copier --> page : true
+  copier --> page : resolves
   page -> field : copied = true
   field --> actor : The button reads "Copied", with a tick
 else the browser refuses the copy
-  copier --> page : false
-  page -> field : select()
+  copier --> page : rejects
+  page -> field : selectRequest + 1
   field --> actor : The link is selected and focused
   page -> toast : Show the danger toast, which stays
   toast --> actor : "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself."

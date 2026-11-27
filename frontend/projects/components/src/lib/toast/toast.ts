@@ -12,6 +12,8 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Toast {
+  /** A success, ink in light, or a failure: a raised surface with a pin edge and an alert icon. */
+  readonly tone = input<'success' | 'danger'>('success');
   /** Bold, at the start: what happened. */
   readonly strong = input<string | null>(null);
   readonly text = input.required<string>();

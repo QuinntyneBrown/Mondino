@@ -47,8 +47,8 @@ else valid
   controller --> client : 422 or 503 ProblemDetails
 end
 client --> store : ApiError
-store --> page : lookupState NotFound or Unavailable, or createState Failed
-page --> actor : The postal code's own message, or "We couldn’t create Northwind.\nNothing was saved — try again." with "Try again"; what was typed is kept
+store --> page : lookupState NotFound, Unavailable or RateLimited, or createState Failed
+page --> actor : The postal code's own message, Join's countdown "Too many tries from this device.",\nor "We couldn’t create Northwind. Nothing was saved — try again." with "Try again"; what was typed is kept
 note over controller, handler
   No refusal says whether the email is already on a team.
 end note

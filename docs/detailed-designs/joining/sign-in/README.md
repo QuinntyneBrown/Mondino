@@ -118,7 +118,8 @@ source, the Email source. The browser calls only the Mondino API.
   the `SignInLink` with that hash. It calls `SignInLink.TryUse(now)` with the time from
   `TimeProvider`. A link that does not exist, has expired or was used before is refused with
   `sign_in_link_unusable`; the three cases receive the same refusal. Otherwise it saves the use
-  and finds the `Teammate` whose `Email` equals the link's. It returns a `SignInResultDto` with
+  and finds the `Teammate` whose `EmailFingerprint` is the fingerprint of the link's email
+  (`IEmailFingerprints`, ADR 0009). It returns a `SignInResultDto` with
   the team id, the teammate id and the team's name, or with the email alone when no teammate
   has it.
 - **`SignInLink`** — entity in `Mondino.Domain`: `Id`, `TokenHash`, `Email`, `ExpiresAt` and
@@ -126,9 +127,9 @@ source, the Email source. The browser calls only the Mondino API.
   before `ExpiresAt`. The save carries a concurrency check on `UsedAt`, so two requests with
   one token start one session. A link that is used or expired is deleted by a later request for
   the same email; no timer runs.
-- **`EmailAddress`** — value object in `Mondino.Domain`. `Teammate.Email` is an optional
-  `EmailAddress`; `make-team` sets it for the teammate who makes a team. No DTO returned to
-  another teammate carries it.
+- **`EmailAddress`** — value object in `Mondino.Domain`. A teammate's email is kept only as
+  `Teammate.EmailFingerprint`, a keyed fingerprint `make-team` sets for the teammate who makes
+  a team (ADR 0009); the address itself is not stored with the teammate, and no DTO carries it.
 - **`ISignInTokens`** — interface in `Mondino.Application`. `SignInTokens` in
   `Mondino.Infrastructure` makes a token of at least 128 bits from `RandomNumberGenerator`,
   encoded for a URL, and hashes a token with SHA-256.

@@ -4,7 +4,8 @@
     #input
     class="input"
     [class.tnum]="tabular()"
-    type="text"
+    [type]="type()"
+    [attr.inputmode]="inputmode()"
     [id]="fieldId()"
     [value]="value()"
     [disabled]="disabled()"
@@ -12,13 +13,16 @@
     [attr.name]="name() || null"
     [attr.autocomplete]="autocomplete()"
     [attr.maxlength]="maxlength()"
-    [attr.aria-describedby]="error() ? errorId() : describedBy()"
+    [attr.aria-describedby]="description()"
     [attr.aria-invalid]="invalid() ? 'true' : null"
     (input)="valueChange.emit(input.value)"
     (blur)="blurred.emit()"
   />
+  @if (help(); as help) {
+    <p class="field__help" [id]="helpId()">{{ help }}</p>
+  }
   @if (error(); as error) {
-    <p class="field__error" [id]="errorId()">
+    <p class="field__error" [id]="errorId()" [attr.role]="errorAlert() ? 'alert' : null">
       <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" x2="12" y1="8" y2="12" />
