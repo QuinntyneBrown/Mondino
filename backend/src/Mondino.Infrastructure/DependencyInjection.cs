@@ -25,7 +25,7 @@ public static class DependencyInjection
 {
     /// <summary>
     /// The database, the seed, who is asking and their session (docs/adr/0008), the cities, the postal code source, the invite tokens, the email fingerprint (<c>EmailProtection:Key</c>), the sign-in links and the Email source (<c>SignInEmail:*</c>, docs/adr/0011)
-    /// (<c>PostalCodeSource:*</c>, docs/adr/0006). <c>Database:Provider</c> names the engine
+    /// (<c>PostalCodeSource:*</c>, docs/adr/0006), and the calendars of moments (<c>HolidaySource:*</c>, docs/adr/0019). <c>Database:Provider</c> names the engine
     /// (docs/adr/0004): <c>PostgreSQL</c>, with the connection string <c>ConnectionStrings:Mondino</c>
     /// and, deployed, <c>Database:Authentication</c> for a connection without a password
     /// (docs/adr/0017), or <c>InMemory</c>, which keeps nothing between runs.
@@ -78,11 +78,17 @@ public static class DependencyInjection
         services.AddSingleton<OpenMeteoWeatherSource>();
         services.AddSingleton<IWeatherSource, CachedWeatherSource>();
 
-        // The calendars moments are found in (docs/adr/0019).
-        services.AddSingleton<NoCalendars>();
-        services.AddSingleton<IHolidayCalendar>(provider => provider.GetRequiredService<NoCalendars>());
-        services.AddSingleton<IRaceCalendar>(provider => provider.GetRequiredService<NoCalendars>());
-        services.AddSingleton<IEventCalendar>(provider => provider.GetRequiredService<NoCalendars>());
+        // The calendars moments are found in (docs/adr/0019): Mondino's own, and the public holiday
+        // source behind its timeout, cache and breaker (<c>HolidaySource:*</c>). Its client logs nothing.
+        services.AddSingleton<MondinoCalendar>();
+        services.AddSingleton<IRaceCalendar>(provider => provider.GetRequiredService<MondinoCalendar>());
+        services.AddSingleton<IEventCalendar>(provider => provider.GetRequiredService<MondinoCalendar>());
+        services.Configure<HolidaySourceOptions>(configuration.GetSection(HolidaySourceOptions.Section));
+        services.AddHttpClient(OpenHolidaysCalendar.ClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .RemoveAllLoggers();
+        services.AddSingleton<OpenHolidaysCalendar>();
+        services.AddSingleton<CachedOpenHolidays>();
+        services.AddSingleton<IHolidayCalendar, HolidayCalendar>();
 
         // A new team's invite token, and the keyed fingerprint its maker's email is kept as
         // (<c>EmailProtection:Key</c>, docs/adr/0009).

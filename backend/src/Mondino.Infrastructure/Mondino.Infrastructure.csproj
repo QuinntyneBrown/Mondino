@@ -5,6 +5,7 @@
   <ItemGroup>
     <!-- The city directory (docs/adr/0006), built by tools/cities/build-cities.mjs. -->
     <EmbeddedResource Include="Cities\cities.tsv.gz" LogicalName="Mondino.Infrastructure.Cities.cities.tsv.gz" />
+    <EmbeddedResource Include="Moments\calendar.json" LogicalName="Mondino.Infrastructure.Moments.calendar.json" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Mondino.Tests" />

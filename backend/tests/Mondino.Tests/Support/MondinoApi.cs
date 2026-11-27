@@ -13,6 +13,7 @@ using Mondino.Application.SignIn;
 using Mondino.Application.Teammates;
 using Mondino.Application.Teams;
 using Mondino.Domain.Teams;
+using Mondino.Infrastructure.Moments;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
 using Mondino.Infrastructure.SignIn;
@@ -61,6 +62,15 @@ public class MondinoApi : WebApplicationFactory<Program>
 
     /// <summary>The holiday, race and event calendars, answering as the test tells them: nothing, until told.</summary>
     public FakeCalendars Calendars { get; } = new();
+
+    /// <summary>
+    /// The OpenHolidays API. Set <see cref="UsesCalendars"/> before the first request to find
+    /// moments in the real calendars: Mondino's own, and the holiday source, with its cache, timeout
+    /// and breaker, against this.
+    /// </summary>
+    public FakeOpenHolidays OpenHolidays { get; } = new();
+
+    public bool UsesCalendars { get; set; }
 
     /// <summary>Set before the first request to serve <c>TestApp</c>, a stand-in for the Angular build, as wwwroot.</summary>
     public bool ServesApp { get; set; }
@@ -178,12 +188,20 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.AddSingleton<IWeatherSource>(Weather);
             }
 
-            services.RemoveAll<IHolidayCalendar>();
-            services.RemoveAll<IRaceCalendar>();
-            services.RemoveAll<IEventCalendar>();
-            services.AddSingleton<IHolidayCalendar>(Calendars);
-            services.AddSingleton<IRaceCalendar>(Calendars);
-            services.AddSingleton<IEventCalendar>(Calendars);
+            if (UsesCalendars)
+            {
+                services.AddHttpClient(OpenHolidaysCalendar.ClientName)
+                    .ConfigurePrimaryHttpMessageHandler(() => OpenHolidays);
+            }
+            else
+            {
+                services.RemoveAll<IHolidayCalendar>();
+                services.RemoveAll<IRaceCalendar>();
+                services.RemoveAll<IEventCalendar>();
+                services.AddSingleton<IHolidayCalendar>(Calendars);
+                services.AddSingleton<IRaceCalendar>(Calendars);
+                services.AddSingleton<IEventCalendar>(Calendars);
+            }
 
             if (UsesEmailSource)
             {
