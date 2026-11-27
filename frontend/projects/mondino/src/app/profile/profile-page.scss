@@ -1,5 +1,7 @@
 // Profile & Settings (docs/design-system/components/card, form-field, select, text-field,
 // lookup-message, globe, pin, save-bar; the screen's own layout from docs/mocks/pages/profile).
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
 }
@@ -167,7 +169,7 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .field-row {
     grid-template-columns: minmax(0, 1fr) var(--layout-field-short) auto;
     align-items: end;
@@ -177,17 +179,17 @@
     min-height: var(--control-height-lg);
   }
 }
-@media (min-width: 62rem) {
+@media (min-width: bp.$lg) {
   .page {
     padding-top: var(--space-10);
   }
 }
-@media (min-width: 40rem) {
+@media (min-width: bp.$stage) {
   .settings__pin h1 {
     font: var(--text-h1-lg);
   }
 }
-@media (min-width: 64rem) {
+@media (min-width: bp.$wide) {
   .settings {
     grid-template-columns: var(--layout-pin-card-width) minmax(0, 1fr);
   }

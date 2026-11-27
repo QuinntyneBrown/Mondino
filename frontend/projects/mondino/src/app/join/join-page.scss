@@ -1,3 +1,5 @@
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
 }
@@ -62,7 +64,7 @@
 .join__footer a {
   font-weight: var(--font-weight-semibold);
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .join__form {
     padding: var(--space-8) var(--space-10);
   }
@@ -77,7 +79,7 @@
     height: var(--layout-globe-tablet-height);
   }
 }
-@media (min-width: 62rem) {
+@media (min-width: bp.$lg) {
   .join {
     flex-direction: row;
     height: 100dvh;

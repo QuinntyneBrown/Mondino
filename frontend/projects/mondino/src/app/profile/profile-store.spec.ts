@@ -42,6 +42,8 @@ const milan: Profile = {
   postalCode: '20121',
   settings: italian,
 };
+/** How many times the team was forgotten. */
+let forgotten = 0;
 /** What the screens were given through `SETTINGS_STORE`, in order. */
 let replaced: Settings[] = [];
 const settingsStore: SettingsStore = {
@@ -78,7 +80,10 @@ async function storeAnswering(rest: Partial<ProfileApi> = {}): Promise<ProfileSt
       { provide: SETTINGS_STORE, useValue: settingsStore },
       {
         provide: TEAM_MEMBERSHIP,
-        useValue: { current: signal({ teamId: 'n1', teammateId: 't1', teamName: 'Northwind' }) },
+        useValue: {
+          current: signal({ teamId: 'n1', teammateId: 't1', teamName: 'Northwind' }),
+          forget: () => (forgotten += 1),
+        },
       },
     ],
   });
@@ -88,7 +93,31 @@ async function storeAnswering(rest: Partial<ProfileApi> = {}): Promise<ProfileSt
 }
 
 describe('ProfileStore', () => {
-  beforeEach(() => (replaced = []));
+  beforeEach(() => {
+    replaced = [];
+    forgotten = 0;
+  });
+
+  it('takes a save refused with 401 as an ended session: the draft goes and the team is forgotten', async () => {
+    const store = await storeAnswering({
+      updateProfile: () => Promise.reject(new ApiError('unexpected', 401)),
+    });
+    store.setSharesWeather(false);
+    await store.save();
+    expect(store.hasUnsavedChanges()).toBe(false);
+    expect(store.barState()).toBe('hidden');
+    expect(forgotten).toBe(1);
+  });
+
+  it('takes any other refused save as a failure that keeps the draft and the team', async () => {
+    const store = await storeAnswering({
+      updateProfile: () => Promise.reject(new ApiError('team_not_found', 404)),
+    });
+    store.setSharesWeather(false);
+    await store.save();
+    expect(store.barState()).toBe('failed');
+    expect(forgotten).toBe(0);
+  });
 
   it('holds the saved country and postal code as the draft, with nothing to save', async () => {
     const store = await storeAnswering();

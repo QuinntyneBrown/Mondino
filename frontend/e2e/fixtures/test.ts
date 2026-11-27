@@ -1,5 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import { ApiFixture } from './api';
+import { AppHeaderPage } from '../pages/app-header.page';
 import { NO_MOMENTS, NORTHWIND_MOMENTS } from './moments';
 import { NOW } from './now';
 import { CreateTeamPage } from '../pages/create-team.page';
@@ -32,6 +33,7 @@ interface Fixtures {
   api: ApiFixture;
   /** The guard every spec runs under: fixed time, localhost only, no page error. */
   guard: void;
+  appHeader: AppHeaderPage;
   notFoundPage: NotFoundPage;
   joinPage: JoinPage;
   globePage: GlobePage;
@@ -111,6 +113,10 @@ export const test = base.extend<Options & Fixtures>({
     },
     { auto: true },
   ],
+
+  appHeader: async ({ page }, use) => {
+    await use(new AppHeaderPage(page));
+  },
 
   notFoundPage: async ({ page }, use) => {
     await use(new NotFoundPage(page));

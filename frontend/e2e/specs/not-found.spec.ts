@@ -48,16 +48,20 @@ test.describe('Not Found', () => {
     await expect(notFoundPage.text).not.toContainText('part');
   });
 
-  test('it offers the way back to the globe', async ({ notFoundPage }) => {
-    // Given the Not Found page
+  test('it offers the way back to the globe, where someone on no team is told an invite link is needed', async ({
+    notFoundPage,
+    inviteNeededPage,
+  }) => {
+    // Given the Not Found page, opened by someone on no team
     await notFoundPage.open('/nowhere');
 
     // When "Back to the globe" is used
     await expect(notFoundPage.backToTheGlobe).toHaveAttribute('href', '/globe');
     await notFoundPage.backToTheGlobe.click();
 
-    // Then the address is the Globe screen's
+    // Then the address is the Globe screen's, and it says an invite link is needed
     await expect(notFoundPage.page).toHaveURL(/\/globe$/);
+    await expect(inviteNeededPage.title).toHaveText('You need an invite link');
   });
 
   test('"Skip to content" is the first stop and moves focus to the page', async ({

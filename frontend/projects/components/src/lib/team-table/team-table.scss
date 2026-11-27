@@ -1,5 +1,7 @@
 // Everyone, west to east (docs/design-system/components/team-table): a stack of rows under 768 px,
 // a table from 768 px, and the row's arrow from 992 px.
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
 }
@@ -117,7 +119,7 @@
   font: var(--text-caption);
   color: var(--color-fg-muted);
 }
-@media (min-width: 48rem) {
+@media (min-width: bp.$md) {
   .team-table {
     margin-top: var(--space-4);
   }
@@ -178,7 +180,7 @@
     display: block;
   }
 }
-@media (min-width: 62rem) {
+@media (min-width: bp.$lg) {
   .team-table thead tr,
   .team-table__row {
     grid-template-columns:

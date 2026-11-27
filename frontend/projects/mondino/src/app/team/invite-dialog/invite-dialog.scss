@@ -1,5 +1,7 @@
 // The invite dialog (docs/design-system/components/dialog): a sheet from the bottom under 576 px,
 // in the middle from 576 px. The CDK pane fills the window; the dialog places its panel in it.
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
 }
@@ -86,7 +88,7 @@
     animation: none;
   }
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .dialog {
     align-items: center;
     justify-items: center;

@@ -125,7 +125,8 @@ export class ProfileStore {
       if (!teamId) throw new ApiError('team_not_found', 404);
       this.saved(await this.api.getProfile(teamId, pending.signal));
       this.stateValue.set('Ready');
-    } catch {
+    } catch (error) {
+      if (this.sessionEnded(error)) return;
       if (!pending.signal.aborted) this.stateValue.set('Failed');
     } finally {
       if (this.pendingRead === pending) this.pendingRead = null;
@@ -225,8 +226,9 @@ export class ProfileStore {
       this.saveStateValue.set('saved');
       this.savedTimer = setTimeout(() => this.saveStateValue.set('idle'), savedLifetime);
       return moving;
-    } catch {
-      if (!pending.signal.aborted) this.saveStateValue.set('failed');
+    } catch (error) {
+      if (this.sessionEnded(error)) this.saveStateValue.set('idle');
+      else if (!pending.signal.aborted) this.saveStateValue.set('failed');
       return false;
     } finally {
       if (this.pendingSave === pending) this.pendingSave = null;
@@ -237,8 +239,8 @@ export class ProfileStore {
    * Leaves the team (L2-036). One request at a time; while it is pending the dialog is busy. Once
    * left, the draft is discarded, so "Leave without saving?" is not asked, the browser forgets the
    * settings and the team, and Left Team replaces this screen with the team's name in the
-   * navigation state, never in the address. A failure, whatever the answer, changes nothing and is
-   * reported for "Try again".
+   * navigation state, never in the address. Any other failure changes nothing and is reported for
+   * "Try again"; an ended session forgets the team (ADR 0028).
    */
   async leave(): Promise<void> {
     const teamId = this.membership.current()?.teamId;
@@ -255,12 +257,30 @@ export class ProfileStore {
       this.settingsStore.clear();
       this.membership.forget();
       void this.router.navigateByUrl('/left', { replaceUrl: true, state: { teamName } });
-    } catch {
-      if (!pending.signal.aborted) this.leaveFailedValue.set(true);
+    } catch (error) {
+      if (!this.sessionEnded(error) && !pending.signal.aborted) this.leaveFailedValue.set(true);
     } finally {
       if (this.pendingLeave === pending) this.pendingLeave = null;
       this.leavingValue.set(false);
     }
+  }
+
+  /**
+   * A refusal for a session that has ended (401) forgets the team (ADR 0028): the draft goes first,
+   * since it can no longer be saved, so "Leave without saving?" is not asked, and the same address
+   * then says an invite link is needed. Answers whether it was one.
+   */
+  private sessionEnded(error: unknown): boolean {
+    if (!(error instanceof ApiError) || error.status !== 401) return false;
+    const saved = this.profile();
+    if (saved) this.saved(saved, false);
+    this.settingsStore.clear();
+    this.membership.forget();
+    void this.router.navigateByUrl(this.router.url, {
+      onSameUrlNavigation: 'reload',
+      replaceUrl: true,
+    });
+    return true;
   }
 
   /**

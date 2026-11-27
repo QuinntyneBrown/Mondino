@@ -195,7 +195,7 @@ kept is [ADR 0023](../../../adr/0023-settings-kept-by-the-backend.md).
 | A kind named twice, or a location given in part | 400 | `validation_failed` | `SaveBar` in `failed` |
 | A new location that cannot be found or checked | 422 or 503 | `postal_code_not_found`, `postal_code_unavailable` | `SaveBar` in `failed`; nothing is stored |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | `SaveBar` in `failed`; the draft stays |
-| The session has ended | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows "You need an invite link" in place (`adapt-to-every-width`); the teammate signs in again through `sign-in`. Until that interceptor is built, the save fails as above |
+| The session has ended | 401 | none | `ProfileStore` discards the draft, so "Leave without saving?" is not asked, forgets the membership and the address shows "You need an invite link" in place (ADR 0028); the teammate signs in again through `sign-in` |
 
 ## Requirements
 

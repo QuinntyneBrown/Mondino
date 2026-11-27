@@ -26,6 +26,8 @@ export function shapesOf(art: Element | null): string[] {
 export class NotFoundPage {
   readonly main: Locator;
   readonly title: Locator;
+  /** The ways on, under the text. */
+  readonly actions: Locator;
   readonly text: Locator;
   readonly address: Locator;
   readonly wordmark: Locator;
@@ -37,6 +39,7 @@ export class NotFoundPage {
   constructor(readonly page: Page) {
     this.main = page.locator('main.notice-page');
     this.title = this.main.locator('.notice-page__title');
+    this.actions = this.main.locator('.notice-page__actions a');
     this.text = this.main.locator('.notice-page__text');
     this.address = this.text.locator('strong');
     this.wordmark = this.main.locator('.brand .wordmark');

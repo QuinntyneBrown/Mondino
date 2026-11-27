@@ -62,9 +62,10 @@ exist (journeys 6, 22 and 23); the parts below are added to them or are new.
   while the request is pending, so a second request is not sent. On success it discards the draft
   (`hasUnsavedChanges` is then false), clears `SETTINGS_STORE`, calls `TeamMembership.forget()`,
   and navigates to `/left` with the team's name in the navigation state, replacing `/profile` in
-  the history; leaving `/profile` destroys the page and with it the dialog. On failure, whatever the
-  answer (no answer, 5xx, 401 or 404), it leaves everything as it was and sets `leaveFailed`, and
-  the dialog says so and offers to try again.
+  the history; leaving `/profile` destroys the page and with it the dialog. On failure (no answer, 5xx
+  or 404) it leaves everything as it was and sets `leaveFailed`, and the dialog says so and
+  offers to try again. A 401 is an ended session: the draft is discarded, the membership
+  forgotten and `/profile` shows "You need an invite link" in place (ADR 0028).
 - **`LeftPage`** — lazy route `/left`, not behind `teammateGuard`, titled "You’ve left · Mondino".
   It renders `NoticePage` (`adapt-to-every-width`): the wordmark, a small globe, a title, one text
   and its actions, with no app header. The title reads "You’ve left Northwind" and the text "Your
@@ -157,7 +158,7 @@ join it.
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
 | `teamId` is not the teammate's own team | 404 | `team_not_found` | The alert in `LeaveTeamDialog`, with "Try again" |
-| No session, or the teammate has already left | 401 | none | The alert in `LeaveTeamDialog`, with "Try again"; what an ended session does on Profile & Settings is journey 27's |
+| No session, or the teammate has already left | 401 | none | The dialog closes with the page: `ProfileStore` forgets the membership and `/profile` shows "You need an invite link" in place (ADR 0028) |
 | No antiforgery token, or another session's | 403 | `cross_site_request` | The alert in `LeaveTeamDialog`; nothing changes |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | The alert in `LeaveTeamDialog`, which stays open, with "Try again"; the pin stays |
 

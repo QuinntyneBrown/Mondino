@@ -3,9 +3,9 @@
 
 import { expect, test } from '../fixtures/test';
 import { LINK_ASKED, SIGN_IN_LINKS } from '../fixtures/sign-in';
-import { fitsItsWidth, smallestTarget } from '../support/layout';
+import { cutOff, fitsItsWidth, smallestTarget, WIDTHS } from '../support/layout';
 
-for (const width of [320, 375, 576, 768, 992, 1200, 1920]) {
+for (const width of WIDTHS) {
   test(`Sign In fits ${width} px, with the form and "Check your inbox"`, async ({
     api,
     signInPage,
@@ -15,6 +15,7 @@ for (const width of [320, 375, 576, 768, 992, 1200, 1920]) {
     await signInPage.open();
 
     await expect(signInPage.title).toBeVisible();
+    expect(await cutOff(signInPage.page)).toEqual([]);
     expect(await fitsItsWidth(signInPage.page), 'no horizontal scroll').toBe(true);
     expect(await smallestTarget(signInPage.email)).toBeGreaterThanOrEqual(44);
     expect(await smallestTarget(signInPage.submit)).toBeGreaterThanOrEqual(44);

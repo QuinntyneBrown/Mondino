@@ -10,6 +10,8 @@ export class ProfilePage {
   readonly inviteTeammate: Locator;
   /** The pin's card: the small globe, the city, the local time and the note. */
   readonly pinCard: Locator;
+  /** The sections of settings beside or under the pin's card. */
+  readonly settings: Locator;
   readonly globe: Locator;
   readonly canvas: Locator;
   readonly stillPicture: Locator;
@@ -65,6 +67,7 @@ export class ProfilePage {
     this.profileLink = this.header.getByRole('link', { name: 'Profile & Settings' });
     this.inviteTeammate = this.header.getByRole('button', { name: 'Invite teammate' });
     this.pinCard = this.main.locator('.pin-card');
+    this.settings = this.main.locator('.settings__sections');
     this.globe = this.pinCard.locator('.globe');
     this.canvas = this.pinCard.locator('canvas.globe__art');
     this.stillPicture = this.pinCard.locator('mo-globe-fallback');

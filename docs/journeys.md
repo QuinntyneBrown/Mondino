@@ -26,8 +26,8 @@
 | 24 | [Leave the team](prompts/24-leave-the-team-prompt.md) | Remove your pin and everything held about you. | L2-036 | 3 | 100 |
 | 25 | [Keep the team fresh](prompts/25-keep-the-team-fresh-prompt.md) | An open screen refreshes pins, weather and moments quietly. | L2-048 | 3 | 100 |
 | 26 | [Survive a source failure](prompts/26-survive-a-source-failure-prompt.md) | Pins keep their local time when weather or calendars fail. | L2-049, L2-050 | 4 | 100 |
-| 27 | [Adapt to every width](prompts/27-adapt-to-every-width-prompt.md) | Use every screen from a narrow phone to a large display. | L2-037, L2-038 | 4 | 0 |
+| 27 | [Adapt to every width](prompts/27-adapt-to-every-width-prompt.md) | Use every screen from a narrow phone to a large display. | L2-037, L2-038 | 4 | 100 |
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 10 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 20 |
-| | **Total** | | | **147** | **86** |
+| | **Total** | | | **147** | **89** |

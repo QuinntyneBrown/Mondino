@@ -1,3 +1,5 @@
+@use 'breakpoints' as bp;
+
 :host {
   display: inline-flex;
 }
@@ -34,7 +36,7 @@
   text-transform: lowercase;
   color: var(--color-fg-default);
 }
-@media (max-width: 35.99rem) {
+@media (max-width: bp.$sm - 0.01rem) {
   .brand--collapses .wordmark {
     display: none;
   }

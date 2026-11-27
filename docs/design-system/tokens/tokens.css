@@ -307,8 +307,10 @@
      Under 36rem a phone, one column. 48rem the Team table. 62rem the panel
      beside the globe and the form beside it. 75rem text keeps its measure. */
   --layout-breakpoint-sm: 36rem;   /* 576px */
+  --layout-breakpoint-stage: 40rem; /* 640px: the Globe's stage */
   --layout-breakpoint-md: 48rem;   /* 768px */
   --layout-breakpoint-lg: 62rem;   /* 992px */
+  --layout-breakpoint-wide: 64rem; /* 1024px: the panel and the pin card beside */
   --layout-breakpoint-xl: 75rem;   /* 1200px */
 
   --layout-columns: 4;

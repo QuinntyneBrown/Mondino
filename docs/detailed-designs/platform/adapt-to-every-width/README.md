@@ -11,7 +11,7 @@ is opened directly.
 
 The terms used below:
 
-- **breakpoint** — viewport width at which a layout changes: 576 px, 768 px, 992 px and 1200 px
+- **breakpoint** — viewport width at which a layout changes: 576 px, 640 px, 768 px, 992 px, 1024 px and 1200 px (ADR 0027)
 - **shell** — what surrounds the four teammate screens: the header with its navigation, the refresh banner and the toast
 - **teammate screen** — one of Globe, Team, Moments and Profile & Settings, shown only to a teammate
 - **membership** — record on the device that it has joined a team: the team's id, the teammate's id and the team's name
@@ -73,10 +73,15 @@ team is made (`make-team`) and `SignInPage` once an emailed link is opened (`sig
 the team calls `forget()`. It holds no postal code, no email, no position and no session: the
 session is an `HttpOnly` cookie that scripts cannot read (L2-043).
 
-**`sessionExpiredInterceptor`** — `HttpInterceptorFn` bound in `app.config.ts`. When the
-`Mondino API` answers 401, it calls `TeamMembership.forget()` and navigates to the current
-address again, which now shows `InviteNeededPage`. A membership that outlives its session
-therefore leads to the same screen as no membership.
+**An ended session** (ADR 0028) — there is no interceptor: the clients call `fetch` (ADR 0005).
+Each store that speaks for the teammate decides on a 401 itself. `TeamStore` forgets the
+membership when the pins are refused with 401 or 404 and enters `Forgotten`; Globe, Team and
+Moments then navigate to their own address again, replacing it, which now shows
+`InviteNeededPage`. `ProfileStore` does the same when reading the profile, saving or leaving is
+refused with 401: it discards the draft first, so `unsavedChangesGuard` does not ask "Leave
+without saving?", clears `SETTINGS_STORE`, calls `TeamMembership.forget()` and navigates to
+`/profile` again; an open "Leave Northwind?" closes with the page. A membership that outlives its
+session therefore leads to the same screen as no membership.
 
 **`NoticePage`** (`mo-notice-page`, block `notice-page`) — presentation component in
 `components` for a page that says one thing: the mark and wordmark, a small still picture of
@@ -141,8 +146,10 @@ every width.
 
 **Layouts.** Each screen's layout is decided by CSS in that component's own stylesheet, written
 for one column first and extended with `min-width` media queries at the breakpoints. The
-breakpoints are Sass variables in the global foundations, since a CSS custom property cannot be
-read in a media query. No component reads the viewport width in TypeScript, and no template
+breakpoints are the Sass module `breakpoints` in `components` (`src/styles/_breakpoints.scss`,
+read with `@use 'breakpoints' as bp` through `stylePreprocessorOptions.includePaths`), holding the
+values of the `--layout-breakpoint-*` tokens, since a CSS custom property cannot be read in a
+media query (ADR 0027). A `max-width` query is the next breakpoint less `0.01rem`. No component reads the viewport width in TypeScript, and no template
 branches on it. One component instance therefore serves every width, and turning a phone from
 upright to sideways keeps the selected pin, any filter and anything typed (L2-037).
 
@@ -151,12 +158,13 @@ upright to sideways keeps the selected pin, any filter and anything typed (L2-03
 | Join | under 992 px: form above the globe, one column | 992 px: form beside the globe |
 | Sign In, Create Team (block `auth`, drawn by each page from one Sass partial, ADR 0011) | under 992 px: form above the globe, one column | 992 px: form beside the globe, each filling the height of the viewport |
 | Invite Needed, Left Team, Not Found (`NoticePage`) | one centred column at every width; the two actions stack on a phone | 576 px: wider side padding |
-| Globe | under 992 px: globe, then panel, one scrolling column; the heading is above the globe under 576 px and over its top corner from 576 px | 992 px: panel to the right of the globe, scrolling on its own |
+| Globe | under 1024 px: globe, then panel, one scrolling column; the globe is a square the width of the screen under 640 px, with the heading above it, and from 640 px a 4:3 stage with the heading over its top corner | 1024 px: panel to the right of the globe, scrolling on its own; the globe fills the window's height beside it |
 | Team | under 768 px: name, status, local time with city and offset, next moment | 768 px: `TeamTable` with all its columns |
-| Profile & Settings | under 992 px: the pin's card above the settings | 992 px: the pin's card beside the settings, kept in view |
+| Profile & Settings | under 1024 px: the pin's card above the settings | 1024 px: the pin's card beside the settings, kept in view |
 
-From 1200 px, text columns are capped in width and centred, and the Globe screen's globe grows
-to fill the space. The Team screen under 768 px hides columns with CSS; it does not render a
+From 1200 px, text columns are capped in width and centred by their containers' maximum widths
+(`--layout-container-*`), with no query of their own, and the Globe screen's globe, which has no
+maximum width, grows to fill the space. The Team screen under 768 px hides columns with CSS; it does not render a
 second component. The invite dialog and the two other dialogs are centred from 576 px and are
 a sheet from the bottom under it. Each layout uses flexible tracks and `min-width: 0` on its children so that
 nothing overflows sideways from 320 px upward.
@@ -192,16 +200,17 @@ session only.
 
 `app.routes.ts` runs `teammateGuard` to match a teammate screen and loads the screen's chunk.
 `TeamShell` provides `TeamStore` and renders `AppHeader` with the navigation links and
-"Invite teammate", the refresh banner and the toast around the four screens. `teammateGuard` and
-`sessionExpiredInterceptor` read or clear `TeamMembership`.
+"Invite teammate", the refresh banner and the toast around the four screens. `teammateGuard`
+reads `TeamMembership`, and `TeamStore` and `ProfileStore` clear it on a 401. Every stylesheet
+reads the `breakpoints` module.
 
 ![C4 component view for adapting to every width](diagrams/c4-component.png)
 
 ### Class structure
 
 `TeamShell` composes three `NavItem`s and renders `AppHeader`, which shows `Wordmark` and is
-styled by the breakpoints. `teammateGuard` and `sessionExpiredInterceptor` depend on `TeamMembership`,
-which holds one `Membership`.
+styled by the `breakpoints` module. `teammateGuard`, `TeamStore` and `ProfileStore` depend on
+`TeamMembership`, which holds one `Membership`.
 
 ![Class diagram for adapting to every width](diagrams/class-structure.png)
 
@@ -219,7 +228,7 @@ reads its pins with the session cookie and shows them in the layout for the curr
 With no membership on the device, `teammateGuard` refuses the match, the same address shows
 `InviteNeededPage`, with its ways on to Create Team and Sign In, and no request reaches the
 `Mondino API` (L2-038). With a membership whose session is no longer valid,
-the API answers 401 with no team data (L2-043), and `sessionExpiredInterceptor` forgets the
-membership and shows the same screen.
+the API answers 401 with no team data (L2-043), and `TeamStore` forgets the membership and the
+screen shows its own address again, which is then the same screen (ADR 0028).
 
 ![Sequence diagram for opening a screen's address as a non-teammate](diagrams/sequence-open-address-as-non-teammate.png)

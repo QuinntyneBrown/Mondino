@@ -34,5 +34,7 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0024](0024-what-leaving-deletes.md) | Leaving deletes the teammate's row and their sign-in links, ends the session by its absence, and keeps an empty team | Accepted; changes one line of 0011 |
 | [0025](0025-the-refresh-rides-the-shells-clock.md) | The teammate screens share one clock, the refresh rides its minute, and the pins carry the viewer's own settings | Accepted; changes how 0012 binds the clock; takes up an alternative 0023 rejected |
 | [0026](0026-one-breaker-for-every-outside-source.md) | Every outside source has one kind of breaker, an older answer is given while it fails, and two sources in a row share one 6-second deadline | Accepted; completes 0015 and 0019 |
+| [0027](0027-breakpoints-where-the-mocks-break.md) | The layouts change where the mocks do, at breakpoints one Sass module names, and the Globe's globe fills its stage | Accepted |
+| [0028](0028-an-ended-session-on-profile.md) | A store that is refused with 401 forgets the team, and its screen says an invite link is needed; there is no interceptor | Accepted; replaces the design's `sessionExpiredInterceptor` |
 
 Not decided yet: nothing a journey has reached.

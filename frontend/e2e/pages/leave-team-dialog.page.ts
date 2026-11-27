@@ -4,6 +4,8 @@ import type { Locator, Page } from '@playwright/test';
 export class LeaveTeamDialogPage {
   /** The dialog, by its role, whatever its name. */
   readonly dialog: Locator;
+  /** The dialog's surface: a sheet from the bottom under 576 px, in the middle from 576 px. */
+  readonly panel: Locator;
   readonly title: Locator;
   readonly description: Locator;
   readonly stay: Locator;
@@ -16,6 +18,7 @@ export class LeaveTeamDialogPage {
 
   constructor(readonly page: Page) {
     this.dialog = page.getByRole('alertdialog');
+    this.panel = this.dialog.locator('.dialog__panel');
     this.title = this.dialog.locator('.dialog__title');
     this.description = this.dialog.locator('.dialog__body > p');
     this.stay = this.dialog.getByRole('button', { name: 'Stay' });

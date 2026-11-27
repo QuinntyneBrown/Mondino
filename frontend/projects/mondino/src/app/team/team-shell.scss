@@ -1,4 +1,6 @@
 // The links the shell puts in the header (docs/design-system/components/app-header, segmented-control).
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
 }
@@ -7,6 +9,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: var(--target-comfortable);
   min-height: var(--space-8);
   padding: 0 var(--space-3);
   border-radius: var(--radius-full);
@@ -49,17 +52,17 @@
     0 0 0 var(--border-width-thick) var(--color-bg-canvas),
     0 0 0 calc(2 * var(--border-width-thick)) var(--color-people);
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .segmented__option {
     padding: 0 var(--space-4);
   }
 }
-@media (max-width: 25.99rem) {
+@media (max-width: bp.$header-tight - 0.01rem) {
   .segmented__option {
     padding: 0 var(--space-2);
   }
 }
-@media (max-width: 22.49rem) {
+@media (max-width: bp.$header-tighter - 0.01rem) {
   .segmented__option {
     padding: 0 var(--space-1-5);
     font-size: var(--font-size-xs);

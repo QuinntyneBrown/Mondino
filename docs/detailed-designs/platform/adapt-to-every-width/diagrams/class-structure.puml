@@ -12,12 +12,15 @@ skinparam class {
 hide empty members
 title Class structure — Adapt to every width
 
-enum Breakpoint {
-  ExtraSmall = under 576 px
-  Small = 576 px
-  Medium = 768 px
-  Large = 992 px
-  ExtraLarge = 1200 px
+class breakpoints <<Sass module, components>> {
+  $sm = 36rem (576 px)
+  $stage = 40rem (640 px)
+  $md = 48rem (768 px)
+  $lg = 62rem (992 px)
+  $wide = 64rem (1024 px)
+  $xl = 75rem (1200 px)
+  $header-tight = 26rem (416 px)
+  $header-tighter = 22.5rem (360 px)
 }
 
 class App {
@@ -63,8 +66,11 @@ class teammateGuard <<CanMatchFn>> {
   +(route, segments): boolean
 }
 
-class sessionExpiredInterceptor <<HttpInterceptorFn>> {
-  +(request, next): Observable<HttpEvent>
+class ProfileStore {
+  +load(): Promise<void>
+  +save(): Promise<boolean>
+  +leave(): Promise<void>
+  -endSession(): void
 }
 
 class InviteNeededPage {
@@ -88,9 +94,10 @@ InviteNeededPage --> NoticePage : renders
 NotFoundPage --> NoticePage : renders
 NoticePage --> Wordmark : shows
 AppHeader --> Wordmark : shows
-AppHeader ..> Breakpoint : styled by
+AppHeader ..> breakpoints : styled by
 teammateGuard ..> TeamMembership : reads
 teammateGuard ..> InviteNeededPage : shown when it refuses
-sessionExpiredInterceptor ..> TeamMembership : forgets
+TeamStore ..> TeamMembership : forgets on 401
+ProfileStore ..> TeamMembership : forgets on 401
 TeamMembership --> Membership : holds
 @enduml

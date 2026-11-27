@@ -6,6 +6,8 @@ export class GlobePage {
   readonly stage: Locator;
   /** The box the globe is drawn in, whatever draws it. */
   readonly globeBox: Locator;
+  /** The heading over the globe: the team's name and its counts. */
+  readonly heading: Locator;
   readonly globe: Locator;
   /** The placeholder that holds the globe's place while it loads. */
   readonly placeholder: Locator;
@@ -141,6 +143,7 @@ export class GlobePage {
     this.everything = page.locator('body');
     this.stage = this.main.locator('.globe-screen__stage');
     this.globeBox = this.stage.locator('.globe-screen__globe');
+    this.heading = this.stage.locator('.globe-screen__heading');
     this.globe = this.stage.locator('.globe:not(.globe--loading)');
     this.placeholder = this.stage.getByRole('img', { name: 'The globe is loading' });
     this.canvas = this.stage.locator('canvas.globe__art');

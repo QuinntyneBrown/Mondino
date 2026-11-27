@@ -1,3 +1,5 @@
+@use 'breakpoints' as bp;
+
 :host {
   display: block;
 }
@@ -16,9 +18,21 @@
 }
 .globe-screen__globe {
   width: 100%;
-  max-width: 40rem;
-  margin-inline: auto;
   aspect-ratio: 1;
+}
+// From 640 px the stage is 4:3 and the globe fills it; from 1024 px the stage fills the window's
+// height beside the panel. The globe has no maximum width, so it grows (ADR 0027).
+@media (min-width: bp.$stage) {
+  .globe-screen__stage {
+    display: block;
+    aspect-ratio: 4 / 3;
+  }
+  .globe-screen__globe {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    height: 100%;
+  }
 }
 // The heading: over the globe on a phone, and in its top-left corner from 40 rem.
 .globe-screen__heading {
@@ -29,7 +43,7 @@
   font: var(--text-body-sm);
   color: var(--color-fg-muted);
 }
-@media (min-width: 40rem) {
+@media (min-width: bp.$stage) {
   .globe-screen__heading {
     position: absolute;
     left: var(--space-6);
@@ -46,7 +60,7 @@
 .globe-screen__invite {
   margin: 0 var(--layout-margin) var(--space-6);
 }
-@media (min-width: 40rem) {
+@media (min-width: bp.$stage) {
   .globe-screen__invite {
     position: absolute;
     right: var(--space-6);
@@ -68,18 +82,21 @@
   gap: var(--space-8);
   padding: var(--space-5);
 }
-@media (min-width: 36rem) {
+@media (min-width: bp.$sm) {
   .panel {
     padding: var(--space-6);
   }
 }
-@media (min-width: 64rem) {
+@media (min-width: bp.$wide) {
   .globe-screen {
     flex-direction: row;
     height: calc(100dvh - var(--layout-header-height));
   }
   .globe-screen__stage {
+    flex: 1;
     min-width: 0;
+    height: 100%;
+    aspect-ratio: auto;
   }
   .globe-screen__panel {
     flex: none;
