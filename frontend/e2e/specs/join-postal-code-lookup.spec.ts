@@ -1,6 +1,6 @@
 // Acceptance Test
-// Traces to: L2-003, L2-006, L2-007
-// Description: Leaving the postal code field looks it up; the city found is named and the new pin is placed there
+// Traces to: L2-003, L2-006, L2-007, L2-019
+// Description: Leaving the postal code field looks it up; the city found is named with its weather, in the unit of the country chosen, and the new pin is placed there
 
 import type { Request } from '@playwright/test';
 import { expect, test } from '../fixtures/test';
@@ -54,11 +54,14 @@ test.describe('Join: look up the postal code', () => {
     // Given Italy and 20121
     await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
 
-    // When the lookup finds Milan
+    // When the lookup finds Milan, where it is 13 °C and foggy
     await joinPage.leavePostalCode();
 
-    // Then the screen names the city and region and that the pin is at city level
-    await expect(joinPage.lookup).toHaveText('Milan, Lombardy — pinned at city level.');
+    // Then the screen names the city and region, that the pin is at city level, and the weather there
+    await expect(joinPage.lookup).toHaveText(
+      'Milan, Lombardy — pinned at city level. 13° and foggy right now.',
+    );
+    await expect(joinPage.lookupDegrees).toHaveText('13°');
     await expect(joinPage.lookup).toHaveClass(/lookup--found/);
 
     // And a new pin labelled "You · Milan" is on the globe, marked as new, beside the team's 12
@@ -121,10 +124,50 @@ test.describe('Join: look up the postal code', () => {
       await joinPage.fill({ name: 'Sofia Bianchi', country: 'Canada', postalCode: typed });
       await joinPage.leavePostalCode();
 
-      await expect(joinPage.lookup).toHaveText(`${city}, Ontario — pinned at city level.`);
+      await expect(joinPage.lookup).toHaveText(
+        new RegExp(`^${city}, Ontario — pinned at city level\\.`),
+      );
       await expect(joinPage.youLabel).toHaveText(`You · ${city}`);
     });
   }
+
+  test('a teammate joining from the United States first sees the temperature in °F, from Canada in °C', async ({
+    joinPage,
+  }) => {
+    // Given the United States and 78701, in Austin, where it is 24 °C and partly cloudy
+    await joinPage.fill({ name: 'Jordan Lee', country: 'United States', postalCode: '78701' });
+
+    // When the lookup finds Austin
+    await joinPage.leavePostalCode();
+
+    // Then the temperature is in °F
+    await expect(joinPage.lookup).toHaveText(
+      'Austin, Texas — pinned at city level. 75° and partly cloudy right now.',
+    );
+
+    // And from Canada, at Toronto's 7 °C, it is in °C
+    await joinPage.country.selectOption({ label: 'Canada' });
+    await joinPage.postalCode.fill('M5V 2T6');
+    await joinPage.leavePostalCode();
+    await expect(joinPage.lookup).toHaveText(
+      'Toronto, Ontario — pinned at city level. 7° and cloudy right now.',
+    );
+  });
+
+  test('a city found with no weather is named without any', async ({ api, joinPage }) => {
+    // Given the lookup finds Milan and has no weather there
+    api.answer('POST', NORTHWIND_LOOKUPS, (route) =>
+      lookupAnswer(route.request().postDataJSON(), false),
+    );
+    await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
+
+    // When it answers
+    await joinPage.leavePostalCode();
+
+    // Then the city is named, and no temperature, never a zero
+    await expect(joinPage.lookup).toHaveText('Milan, Lombardy — pinned at city level.');
+    await expect(joinPage.lookupDegrees).toHaveCount(0);
+  });
 
   test('submitting before the postal code is looked up looks it up', async ({ joinPage }) => {
     await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });

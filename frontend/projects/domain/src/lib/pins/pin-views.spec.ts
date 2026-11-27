@@ -12,6 +12,49 @@ const pin = (name: string, cityName: string, timeZoneId: string, isViewer = fals
   timeZoneId,
   sharesStatus: true,
   isViewer,
+  weather: null,
+  weatherState: 'Unavailable',
+});
+
+describe('pinViews: weather', () => {
+  const tomas: Pin = {
+    ...pin('Tomás Herrera', 'Mexico City', 'America/Mexico_City'),
+    weather: { temperatureC: 22, condition: 'partly-cloudy', observedAt: '' },
+    weatherState: 'Available',
+  };
+
+  it('gives the weather’s word and degrees, in the name too', () => {
+    const view = pinViews([tomas], now).get('Tomás Herrera');
+    expect(view?.weather).toEqual({
+      degrees: '22°',
+      condition: 'partly-cloudy',
+      word: 'Partly cloudy',
+      night: false,
+    });
+    expect(view?.description).toBe(
+      'Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°',
+    );
+  });
+
+  it('gives the degrees in the viewer’s unit: 13 °C is 55° in °F', () => {
+    const luca = { ...tomas, weather: { ...tomas.weather!, temperatureC: 13 } };
+    expect(
+      pinViews([luca], now, null, '24-hour', 'fahrenheit').get('Tomás Herrera')?.weather?.degrees,
+    ).toBe('55°');
+  });
+
+  it('marks the sky as night while the city is probably asleep', () => {
+    const aiko = { ...tomas, teammateId: 'Aiko', timeZoneId: 'Asia/Tokyo' };
+    expect(pinViews([aiko], now).get('Aiko')?.weather?.night).toBe(true);
+  });
+
+  it('gives no weather, and leaves it out of the name, when it is unavailable or not shared', () => {
+    for (const weatherState of ['Unavailable', 'NotShared'] as const) {
+      const view = pinViews([{ ...tomas, weatherState }], now).get('Tomás Herrera');
+      expect(view?.weather).toBeNull();
+      expect(view?.description).toBe('Tomás Herrera, Mexico City, 08:05, Early morning');
+    }
+  });
 });
 
 describe('pinViews', () => {

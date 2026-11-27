@@ -70,7 +70,7 @@ test.describe('Globe: just joined', () => {
     // And her pin is selected, so it stands alone, apart from Luca's in the same city
     await expect(globePage.youPin).toHaveAttribute('aria-pressed', 'true');
     await expect(globePage.pin('Luca Ferri')).toHaveAccessibleName(
-      'Luca Ferri, Milan, 15:05, Working hours',
+      'Luca Ferri, Milan, 15:05, Working hours, Foggy 13°',
     );
   });
 

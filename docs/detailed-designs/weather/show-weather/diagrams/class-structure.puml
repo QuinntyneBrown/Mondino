@@ -34,14 +34,9 @@ package "Mondino.Domain" {
     +double Latitude
     +double Longitude
   }
-  class TeammateSettings <<value object>> {
-    +TemperatureUnit TemperatureUnit
-    +bool ShareWeather
-    +{static} DefaultsFor(countryCode: string): TeammateSettings
-  }
-  enum TemperatureUnit {
-    Celsius
-    Fahrenheit
+  class Teammate <<entity>> {
+    +bool SharesStatus
+    +bool SharesWeather
   }
 }
 
@@ -88,12 +83,15 @@ package "Mondino web app" {
   class "pins/ functions" as PinFns <<domain, pins/>> {
     +formatTemperature(temperatureC: number, unit: TemperatureUnit): string
     +formatDegrees(temperatureC: number, unit: TemperatureUnit): string
+    +defaultTemperatureUnit(country: string): TemperatureUnit
+    +weatherWord(condition: WeatherCondition): string
     +weatherLabel(condition: WeatherCondition, cityName: string): string
     +isNightSky(localHour: number): boolean
   }
   class WeatherIcon <<components>> {
     +condition: WeatherCondition
     +night: boolean
+    +decorative: boolean
   }
 }
 
@@ -104,12 +102,11 @@ OpenMeteoWeatherSource ..> WeatherConditionMapper : maps with
 GetPinsQueryHandler ..> IWeatherSource : asks once per city
 GetPinsQueryHandler ..> PinDto : returns in a TeamPinsDto
 PinDto --> WeatherState : has
-GetPinsQueryHandler ..> TeammateSettings : reads ShareWeather
+GetPinsQueryHandler ..> Teammate : reads SharesWeather
 PinDto --> WeatherDto : has 0..1
 IWeatherSource ..> Weather : returns
 IWeatherSource ..> Position : takes
 Weather --> WeatherCondition : has
 WeatherConditionMapper ..> WeatherCondition : returns
-TeammateSettings --> TemperatureUnit : has
 PinFns ..> WeatherDto : reads as Weather
 @enduml

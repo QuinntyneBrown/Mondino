@@ -44,7 +44,7 @@ decides how they are drawn.
   that does not exist (L2-043). For each distinct city it asks `IWeatherSource` for the
   weather and `MomentFinder` for the moments, then builds one `PinDto` for each teammate and
   answers them in a `TeamPinsDto` (the team's id and name, its invite token, the viewer's
-  teammate id and the pins). A teammate whose `TeammateSettings.ShareWeather` is false gets a
+  teammate id and the pins). A teammate whose `Teammate.SharesWeather` is false gets a
   null weather and the `WeatherState` `NotShared`. When the weather source fails or times out
   the weather is null, the `WeatherState` is `Unavailable` and the pin is still returned
   (L2-049). The weather source receives a position and nothing else.

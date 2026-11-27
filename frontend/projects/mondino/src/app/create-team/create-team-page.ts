@@ -22,7 +22,13 @@ import {
   Toast,
   Wordmark,
 } from '@mondino/components';
-import { BrowserClock, emailLimit, stillPlacements } from '@mondino/domain';
+import {
+  BrowserClock,
+  defaultTemperatureUnit,
+  emailLimit,
+  foundWeather,
+  stillPlacements,
+} from '@mondino/domain';
 import { type CreateTeamField, CreateTeamStore, nameLimit } from './create-team-store';
 
 /** The words under a field that is missing or wrong (L2-053). */
@@ -88,6 +94,16 @@ export class CreateTeamPage {
     value: country.code,
     label: country.name,
   }));
+
+  /** The weather at the city found, in the unit of the country chosen (L2-003, L2-019). */
+  protected readonly foundWeather = computed(() => {
+    const lookup = this.store.lookup();
+    if (lookup.kind !== 'Found') return null;
+    return foundWeather(
+      lookup.result.weather,
+      defaultTemperatureUnit(this.store.country()?.name ?? ''),
+    );
+  });
 
   protected readonly copied = signal(false);
   /** Counts the refused copies: each selects the link again. */

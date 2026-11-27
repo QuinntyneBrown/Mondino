@@ -33,7 +33,9 @@ test.describe('Create Team: the postal code lookup', () => {
     answer.release(lookupAnswer({ countryCode: 'IT', postalCode: '20121' }));
 
     // Then the city is named, pinned at city level, and the new pin is on the globe
-    await expect(createTeamPage.lookup).toHaveText('Milan, Lombardy — pinned at city level.');
+    await expect(createTeamPage.lookup).toHaveText(
+      'Milan, Lombardy — pinned at city level. 13° and foggy right now.',
+    );
     await expect(createTeamPage.youLabel).toHaveText('You · Milan');
     await expect(createTeamPage.youPin).toHaveClass(/pin-dot--new/);
     await expect(createTeamPage.globe).toHaveAccessibleName(

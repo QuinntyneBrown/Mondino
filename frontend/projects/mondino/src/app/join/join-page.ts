@@ -26,7 +26,12 @@ import {
   Wordmark,
 } from '@mondino/components';
 import { CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
-import { BrowserClock, stillPlacements } from '@mondino/domain';
+import {
+  BrowserClock,
+  defaultTemperatureUnit,
+  foundWeather,
+  stillPlacements,
+} from '@mondino/domain';
 import { type GlobeState, GlobeView, type NewPin } from '@mondino/globe';
 import type { JustJoined } from '../globe/just-joined';
 import { JoinStore, nameLimit } from './join-store';
@@ -71,6 +76,16 @@ export class JoinPage {
   protected readonly summaryFocus = signal(0);
 
   private readonly inviteToken = inject(ActivatedRoute).snapshot.paramMap.get('inviteToken') ?? '';
+
+  /** The weather at the city found, in the unit of the country chosen (L2-003, L2-019). */
+  protected readonly foundWeather = computed(() => {
+    const lookup = this.store.lookup();
+    if (lookup.kind !== 'Found') return null;
+    return foundWeather(
+      lookup.result.weather,
+      defaultTemperatureUnit(this.store.country()?.name ?? ''),
+    );
+  });
 
   protected readonly countries = computed<SelectOption[]>(() =>
     (this.store.invite()?.countries ?? []).map((country) => ({

@@ -14,6 +14,7 @@ using Mondino.Infrastructure.PostalCodes;
 using Mondino.Infrastructure.SignIn;
 using Mondino.Infrastructure.Teammates;
 using Mondino.Infrastructure.Teams;
+using Mondino.Infrastructure.WeatherSource;
 
 namespace Mondino.Infrastructure;
 
@@ -65,6 +66,14 @@ public static class DependencyInjection
             .RemoveAllLoggers();
         services.AddSingleton<GeoNamesPostalCodeLookup>();
         services.AddSingleton<IPostalCodeLookup, CachedPostalCodeLookup>();
+
+        // The weather source behind its timeout and cache (<c>WeatherSource:*</c>, docs/adr/0015).
+        // Its client logs nothing: its address carries a city's position.
+        services.Configure<WeatherSourceOptions>(configuration.GetSection(WeatherSourceOptions.Section));
+        services.AddHttpClient(OpenMeteoWeatherSource.ClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .RemoveAllLoggers();
+        services.AddSingleton<OpenMeteoWeatherSource>();
+        services.AddSingleton<IWeatherSource, CachedWeatherSource>();
 
         // A new team's invite token, and the keyed fingerprint its maker's email is kept as
         // (<c>EmailProtection:Key</c>, docs/adr/0009).

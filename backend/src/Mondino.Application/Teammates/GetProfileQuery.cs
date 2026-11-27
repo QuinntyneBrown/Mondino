@@ -20,7 +20,8 @@ public sealed record GetProfileQuery(Guid TeamId) : IRequest<ProfileDto>, ITeamS
 /// </summary>
 public sealed record ProfileDto(string TeamName, PinDto Pin, string CountryCode, string? PostalCode);
 
-internal sealed class GetProfileQueryHandler(IAppDbContext database, ICurrentTeammate currentTeammate)
+internal sealed class GetProfileQueryHandler(
+    IAppDbContext database, ICurrentTeammate currentTeammate, IWeatherSource weatherSource)
     : IRequestHandler<GetProfileQuery, ProfileDto>
 {
     public async Task<ProfileDto> Handle(GetProfileQuery request, CancellationToken cancellationToken)
@@ -43,6 +44,9 @@ internal sealed class GetProfileQueryHandler(IAppDbContext database, ICurrentTea
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw RefusedException.NotFound(ErrorCodes.TeamNotFound);
 
+        // A teammate sees their own weather, whatever they share.
+        var weather = WeatherDto.From(
+            await weatherSource.GetCurrentAsync(WeatherPlaces.Of(own.Latitude, own.Longitude), cancellationToken));
         return new ProfileDto(
             own.TeamName,
             new PinDto(
@@ -54,7 +58,9 @@ internal sealed class GetProfileQueryHandler(IAppDbContext database, ICurrentTea
                 new PositionDto(own.Latitude, own.Longitude),
                 own.TimeZoneId,
                 SharesStatus: true,
-                IsViewer: true),
+                IsViewer: true,
+                weather,
+                weather is null ? WeatherState.Unavailable : WeatherState.Available),
             own.CountryCode,
             own.PostalCode);
     }

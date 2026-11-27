@@ -18,7 +18,9 @@ test.describe('Create Team: the team is made', () => {
     await createTeamPage.open();
     await createTeamPage.fillNorthwind();
     await createTeamPage.leavePostalCode();
-    await expect(createTeamPage.lookup).toHaveText('Milan, Lombardy — pinned at city level.');
+    await expect(createTeamPage.lookup).toHaveText(
+      'Milan, Lombardy — pinned at city level. 13° and foggy right now.',
+    );
     await createTeamPage.submit.click();
     await expect(createTeamPage.title).toHaveText('Now bring everyone in.');
   }

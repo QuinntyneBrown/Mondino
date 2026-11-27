@@ -115,10 +115,12 @@ test.describe('Globe: the still picture', () => {
 
       await expect(globePage.stillPicture).toBeVisible();
       await expect(globePage.pin('2 teammates close together')).toHaveText('2');
-      await expect(globePage.labelOf('Lena Fischer')).toHaveText('15:05');
+      await expect(globePage.labelTimeOf('Lena Fischer')).toHaveText('15:05');
       await expect(globePage.pin('Aiko Tanaka')).toHaveCount(0);
       await globePage.pin('Lena Fischer').hover();
-      await expect(globePage.labelOf('Lena Fischer')).toHaveText('Lena Fischer · Berlin15:05');
+      await expect(globePage.labelOf('Lena Fischer')).toHaveText(
+        'Lena Fischer · Berlin15:058°Cloudy',
+      );
       await globePage.pin('Lena Fischer').click();
       await expect(globePage.pin('Lena Fischer')).toHaveAttribute('aria-pressed', 'true');
     });

@@ -24,6 +24,7 @@ import { GlobeView, type GlobeState } from '@mondino/globe';
 import {
   BrowserClock,
   defaultClockFormat,
+  defaultTemperatureUnit,
   pinViews,
   placePins,
   stillViewport,
@@ -73,8 +74,9 @@ export class GlobePage {
 
   /**
    * What each pin shows, its local time and status among it, worked out in one pass each time the
-   * one clock's minute changes (L2-014, L2-015). Times are on the viewer's clock: until Profile &
-   * Settings stores a choice (journey 23), the default for the country of their pin.
+   * one clock's minute changes (L2-014, L2-015), with the weather (L2-018). Times are on the
+   * viewer's clock and temperatures in their unit: until Profile & Settings stores a choice
+   * (journey 23), the defaults for the country of their pin (L2-019).
    */
   private readonly views = computed(() => {
     this.clock.minute();
@@ -86,6 +88,7 @@ export class GlobePage {
       untracked(() => this.clock.now()),
       this.justJoined?.teammateId ?? null,
       defaultClockFormat(viewer?.country ?? ''),
+      defaultTemperatureUnit(viewer?.country ?? ''),
     );
   });
 

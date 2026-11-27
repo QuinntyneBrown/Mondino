@@ -111,6 +111,9 @@ Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then
   lesson it applied worked.
 - Journey 12 built the offset, the overlap and `OverlapBar` and waits for this screen to prove
   the Team rows' offset (L2-016 criteria 1 to 4 and 6) in Playwright; raise journey 12's % by the criteria proven here.
+- Journey 13 waits for this screen to prove the Team row's weather icon, a `WeatherIcon` that stands alone
+  and is read as its word (L2-018 criterion 5), and the row's "55°" for a viewer in °F (L2-019 criterion 1,
+  with the panel's from journey 14) in Playwright; raise journey 13's % by the criteria proven here.
 - Set journey 17 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
