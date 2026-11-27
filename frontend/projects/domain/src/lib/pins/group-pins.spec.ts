@@ -8,6 +8,7 @@ const pin = (id: string): PinView => ({
   name: id,
   cityName: id,
   localTime: '15:05',
+  status: 'working-hours',
   description: id,
   isViewer: false,
   isNew: false,

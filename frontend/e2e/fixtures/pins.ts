@@ -54,6 +54,8 @@ export interface PinJson {
   country: string;
   position: { latitude: number; longitude: number };
   timeZoneId: string;
+  /** Whether the teammate shares if they are working or asleep; always true on the viewer's own. */
+  sharesStatus: boolean;
   isViewer: boolean;
 }
 
@@ -66,6 +68,7 @@ function pinOf(name: string, colour: string, city: City): PinJson {
     country: cities[city].country,
     position: NORTHWIND_POSITIONS[city],
     timeZoneId: cities[city].timeZoneId,
+    sharesStatus: true,
     isViewer: name === 'Sofia Bianchi',
   };
 }
@@ -83,6 +86,11 @@ export function northwindPins(
       pins,
     },
   };
+}
+
+/** Northwind's thirteen pins, each as `change` makes it: a teammate who hides their status, another viewer. */
+export function northwindPinsWhere(change: (pin: PinJson) => PinJson): Answer {
+  return northwindPins(cast.map(([n, c, city]) => change(pinOf(n, c, city))));
 }
 
 /** Northwind with only the teammates named, as a smaller team. */
@@ -152,6 +160,7 @@ export function teamOf500(): Answer {
       country: place.country,
       position: place.position,
       timeZoneId: place.timeZoneId,
+      sharesStatus: true,
       isViewer: false,
     });
   }
