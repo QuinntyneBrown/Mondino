@@ -214,4 +214,29 @@ test.describe('Team: a team of hundreds', () => {
     await expect(teamPage.rows).toHaveCount(8);
     await expect(teamPage.cells(teamPage.rows.first()).status).toHaveText('Probably asleep');
   });
+
+  test('an open city of more than 50 lists 50 and says how many more, as the crowded-city mock draws it', async ({
+    api,
+    teamPage,
+  }) => {
+    // Given a team of 500 with 64 in London
+    api.answer('GET', NORTHWIND_PINS, teamOf500({ London: 64, Berlin: 15 }));
+    await teamPage.open();
+    await expect(teamPage.rows).toHaveCount(8);
+
+    // When London is opened
+    await teamPage.sectionToggle('London').click();
+
+    // Then the sections and the rows are the mock's: London's first 50, west to east and by name
+    const path = 'pages/team/hundreds-crowded-city.html';
+    await expect(teamPage.sectionRows('London')).toHaveCount(50);
+    expect(await teamPage.sectionHeads()).toEqual(mockCitySections(path));
+    const expected = mockTeamRows(path);
+    await expect(teamPage.rows).toHaveCount(expected.length);
+    expect(await teamPage.names()).toEqual(expected.map((row) => row.name));
+
+    // And under them a line says how many more London has, and to search for them
+    await expect(teamPage.more).toHaveText(mockText(path, 'city-section__more')!);
+    await expect(teamPage.density).toHaveAccessibleName(mockBars(path).name);
+  });
 });
