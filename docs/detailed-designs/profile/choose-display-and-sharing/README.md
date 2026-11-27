@@ -38,80 +38,96 @@ described with the moments designs. Changing the location is described in
 
 ## Description
 
-The feature is a vertical slice from `ProfilePage` to the `Mondino database`, and it reaches
-into the read of the team's pins, where the sharing switches take effect. The code does not
-exist yet; each part below is introduced by this design.
+The feature is a vertical slice from `ProfilePage` to the `Mondino database`. Journey 22 built
+the screen with its pin and its Location section, `ProfileStore`, `PROFILE_API`, `SaveBar` with
+its first two states and `PUT /api/teams/{teamId}/me` for the location; journey 20 built
+`SETTINGS_STORE` and `SettingsCache` for the kinds (ADR 0020); journeys 11 to 17 built
+`statusFor`, `Teammate.SharesStatus`, `Teammate.SharesWeather` and the read of the pins that
+applies them. This feature adds the settings to each and the parts below. How the settings are
+kept is [ADR 0023](../../../adr/0023-settings-kept-by-the-backend.md).
 
 ### Frontend — `mondino` application
 
-- **`ProfilePage`** — lazy route `/profile`. It binds the draft's settings to two `Segmented`
-  controls and two `Switch` controls, and binds the save state to `SaveBar`. A change is an
-  output from a presentation component that the page passes to `ProfileStore`. Each switch
-  carries a line under its label (`switch-row__hint`) that says what its state means for
-  teammates, and the word "On" or "Off" beside it; the table below gives the lines. While both
-  switches are off in the draft, a note under them reads "Teammates will see only your name,
-  city and local time." While either switch is off in the saved profile, the card of the
+- **`ProfilePage`** — lazy route `/profile`, now with its own routes file (`profile.routes.ts`)
+  so its guard is in its chunk. Beside Location it draws Display, Moments on the globe and What
+  teammates see, as `pages/profile/default` draws them. It binds the draft's unit and clock to two
+  `Segmented` controls in `radio` mode, each in a `fieldset.setting-row` with its legend, and the
+  four kinds and two sharing switches to `Switch` rows; it binds `ProfileStore.barState` to
+  `SaveBar`. A change is an output from a presentation component that the page passes to
+  `ProfileStore`. Each sharing switch carries a line under its label (`switch-row__hint`) that
+  says what its state means for teammates; the table below gives the lines. While both sharing
+  switches are off in the draft, a note under them (`panel__note`) reads "Teammates will see only
+  your name, city and local time." While either is off in the saved profile, the card of the
   viewer's own pin adds the note "You still see your own weather and status. Teammates don’t."
-  (L2-034).
+  (L2-034). The pin card's local time is in the saved clock.
 
   | Switch | Line when on | Line when off |
   |--------|--------------|---------------|
   | "Share my local weather" | "Shown on your pin and in your panel." | "Teammates see your local time and no weather." |
   | "Share whether I’m working or asleep" | "Worked out from your local time — 09:00 to 18:00 counts as working." | "Teammates see no status for you, at any hour." |
+
+  The kinds' switches are "Public holidays", "Formula 1 race weekends", "Local events and
+  festivals" and "Big sporting days", each with its kind's `Emblem` (`plain` while off).
 - **`ProfileStore`** — store provided at the `/profile` route. It holds the saved `Profile` and
-  the draft as signals. `hasUnsavedChanges` is computed by comparing the draft with the saved
-  profile field by field, so a setting changed back to what was saved removes the bar (L2-035).
-  `save()` calls `ProfileApi.updateProfile` and moves `saveState` through `SaveState`. On
-  success it replaces the saved profile with the response and writes the display settings to
-  `SettingsStore`. On failure it keeps the draft as it is. The 4 second dismissal of the
-  confirmation is one timer, cleared when the store is destroyed; unit tests advance a fake
-  clock.
+  the draft as signals: the country and postal code (journey 22) and now `settings`.
+  `locationChanged` is true for a new location whose postal code was found (L2-032), and
+  `settingsChanged` compares the draft's settings with the saved ones field by field, so a
+  setting changed back to what was saved removes the bar (L2-035). `hasUnsavedChanges` is
+  either; it is what journey 22 called `canSave`. `save()` sends `ProfileApi.updateProfile` the
+  parts that changed and moves `saveState` through `SaveState`. On success it replaces the saved
+  profile and the draft with the response and calls `SETTINGS_STORE.replace` with its settings;
+  a read of the profile does the same, as the backend's copy is the one that holds. On failure it
+  keeps the draft as it is. The 4 second dismissal of the confirmation is one timer, cleared when
+  the store is destroyed; unit tests advance a fake clock. `barState` gives `SaveBar` its state.
 - **`SaveState`** — feature-local union: `idle`, `saving`, `saved`, `failed`.
-- **`unsavedChangesGuard`** — `CanDeactivateFn` on the `/profile` route. When
-  `hasUnsavedChanges` is true it opens `DiscardChangesDialog` and lets the navigation continue
-  only on "Discard and leave" (L2-035). It is asked on every way out of the screen inside the
-  app: a tab in the header and the browser's back button.
+- **`unsavedChangesGuard`** — `CanDeactivateFn<ProfilePage>` on the `/profile` route. It asks
+  `ProfilePage.canLeave()`, which, while `hasUnsavedChanges` is true, opens
+  `DiscardChangesDialog` and lets the navigation continue only on "Discard and leave" (L2-035).
+  It is asked on every way out of the screen inside the app: a tab in the header, the wordmark,
+  and the browser's back button.
 - **`DiscardChangesDialog`** — CDK Dialog with `role="alertdialog"`, titled "Leave without
   saving?". It reads "You changed your settings but haven’t saved them. If you leave now,
   those changes are lost and your pin stays as it was." and offers "Discard and leave" and
   "Keep editing". Focus starts on "Keep editing". Escape and "Keep editing" close it and
-  return focus to where it was.
+  return focus to where it was. It and the CDK Dialog are imported when it first opens, through
+  the re-exports the invite dialog uses (`dialog-layers`).
 - **Closing the tab** — while `hasUnsavedChanges` is true, `ProfilePage` holds a `beforeunload`
-  listener so the browser asks before a reload or a closed tab. The listener is removed when the
-  changes are saved and when the page is destroyed.
+  listener so the browser asks before a reload or a closed tab, with its own confirmation. The
+  listener is removed when the changes are saved or undone and when the page is destroyed.
 
 ### Frontend — libraries
 
 - **`Segmented`** (`@mondino/components`, `mo-segmented`) — a set of options of which one is
-  chosen, used for "°C / °F" and "24-hour / 12-hour". It takes a `mode` (`tabs` or `radio`);
-  here the mode is `radio`, so it is a `radiogroup` named "Temperature" or "Clock";
-  each option is a `radio`, and the chosen one is exposed through `aria-checked` and carries a
-  mark besides its colour (L2-033).
-- **`Switch`** (`@mondino/components`) — a button with `role="switch"` and `aria-checked`,
-  operated by Space and Enter, at least 44 × 44 px (L2-034).
+  chosen, used for the Team filter and for "°C / °F" and "24-hour / 12-hour". It takes a `mode`
+  (`tabs` or `radio`); here the mode is `radio`, so it is a `radiogroup` named "Temperature" or
+  "Clock"; each option is a `radio`, and the chosen one is exposed through `aria-checked` and
+  carries a tick (`segmented__check`) besides its fill (L2-033). Left and Right move and choose
+  in both modes.
+- **`Switch`** (`@mondino/components`, `button[mo-switch]`, block `switch-row`) — a button with
+  `role="switch"` and `aria-checked`, operated by Space and Enter, at least 44 px tall (L2-034).
+  It projects an optional leading emblem, takes its `label` and an optional `hint`, and shows
+  "On" or "Off" beside the track, hidden from assistive technology.
 - **`SaveBar`** (`@mondino/components`) — takes a `state` input and emits `save` and `retry`.
-  It renders nothing when the state is `hidden`. Its text sits in a live region (`role="status"`)
-  so "Saved — your pin is up to date" is announced; in `failed` it is an alert (`role="alert"`).
-  Its states are in the table below.
+  The page renders it only when the state is not `hidden`. Its text sits in a live region
+  (`role="status"`) so "Saved — your pin is up to date" is announced; in `failed` it is an alert
+  (`role="alert"`). Its states are in the table below.
 - **`Settings`**, **`TemperatureUnit`**, **`ClockFormat`** (`@mondino/api`) — the types the
-  draft holds. `ProfileApi.updateProfile(teamId, update)` sends the whole `Settings` with the
-  country and postal code.
-- **`SettingsStore`** (`@mondino/domain`, `storage/`) — the viewer's `Settings` as a signal,
-  provided in `root` because every screen reads it. `formatTime` and the temperature formatting
-  read the clock format and the unit from it, so a saved choice applies on every screen without
-  a reload (L2-033). It starts from `SettingsCache` and is replaced when a profile is read or
-  saved.
-- **`SettingsCache`** (`@mondino/domain`, `storage/`) — keeps the display settings, and the chosen kinds of
-  moment, in browser storage (ADR 0020) so the first screen of a later visit is drawn in the chosen unit and clock before the
-  profile arrives. It never holds a postal code. The backend's copy is the one that holds
-  (L2-033).
-- **`statusFor(pin, time)`** (`@mondino/domain`, `time/`) — returns the status to show
-  for a pin, or none. When `Pin.sharesStatus` is false it returns none, at every hour. The
-  pin, the panel, the Team row and the day ribbon call it instead of showing `statusAt`
-  directly. Whatever counts or filters by status calls it too, so a teammate who does not
-  share their status is counted neither as working nor as asleep, and is listed under All
-  only: not under "In working hours now", "Working now" or "Asleep". The panel of such a
-  teammate shows no working-hours overlap (L2-034).
+  draft holds. `Profile.settings` carries them; `ProfileUpdate` has an optional location part
+  (`countryCode` and `postalCode`) and an optional `settings`.
+- **`SettingsStore`** (`@mondino/api`, token `SETTINGS_STORE`) — the viewer's `momentKinds`,
+  `temperatureUnit` and `clockFormat` as signals, and `replace(settings)`. The unit and the clock
+  are null until a profile has been read or saved in this browser, and the screens then take
+  the viewer's country's default (`defaultTemperatureUnit`, `defaultClockFormat`). Globe, Team
+  and Profile & Settings read them, so a saved choice applies on every screen without a reload
+  (L2-033). It is bound by `TeamShell` (ADR 0020), not in `root`: only the teammate screens
+  read it.
+- **`SettingsCache`** (`@mondino/domain`, `storage/`) — implements `SettingsStore` from the
+  browser's storage (`mondino.settings`), keeping the unit, the clock and the kinds for the
+  teammate the membership names, so the first screen of a later visit is drawn in the chosen
+  unit and clock before anything answers. It never holds a postal code, an email or a switch.
+- **`statusFor(pin, time)`** (`@mondino/domain`, `time/`, journey 11) — returns the status to
+  show for a pin, or none when `Pin.sharesStatus` is false, at every hour. The pin, the panel,
+  the Team row, the day ribbon and every count and filter call it (L2-034).
 
 | `SaveBar` state | When | Text | Action |
 |-----------------|------|------|--------|
@@ -123,59 +139,63 @@ exist yet; each part below is introduced by this design.
 
 ### Backend — `Mondino.Api`
 
-- **`ProfileController`** — `PUT /api/teams/{teamId}/me` sends one `UpdateProfileCommand`.
-  `TeammateSessionHandler` authenticates the session cookie, and the request carries an
-  anti-forgery token as every state-changing request does.
-- **`TeamsController`** — `GET /api/teams/{teamId}/pins` sends one `GetPinsQuery` and answers a
-  `TeamPinsDto`. This feature
-  adds no endpoint to it; it defines what the handler withholds.
+- **`ProfileController`** — `PUT /api/teams/{teamId}/me` sends one `UpdateProfileCommand`,
+  from a `ProfileUpdateRequest` with an optional `CountryCode` and `PostalCode` and an optional
+  `Settings`. `TeammateSessionHandler` authenticates the session cookie, and the request
+  carries an anti-forgery token as every state-changing request does (ADR 0010).
+- **`TeamsController`** — `GET /api/teams/{teamId}/pins` sends one `GetPinsQuery`. This feature
+  adds nothing to it; its handler already withholds what a teammate switched off.
 
 ### Backend — `Mondino.Application`
 
 - **`UpdateProfileCommand` / `UpdateProfileCommandHandler`** — carries `TeamId`, `CountryCode`,
   `PostalCode` and `Settings`, and no teammate id. The handler loads the teammate that
-  `ICurrentTeammate` names, calls `Teammate.ChangeSettings(settings)`, saves through
-  `IAppDbContext` in one unit of work and returns the `ProfileDto`. The location part of the
-  command is described in [Change location](../change-location/README.md).
-- **`UpdateProfileCommandValidator`** — refuses a temperature unit or clock format outside the
-  enumeration, and a kind of moment that is unknown or repeated, with `validation_failed`. A
-  field the teammate may not set is ignored.
-- **`GetPinsQuery` / `GetPinsQueryHandler`** — builds one `PinDto` per teammate of the viewer's
-  team, returns them in a `TeamPinsDto`, and applies each teammate's sharing switches for that
+  `ICurrentTeammate` names, moves the pin when a location is given and differs (see
+  [Change location](../change-location/README.md)), calls `Teammate.ChangeSettings(settings)`
+  when settings are given, saves through `IAppDbContext` in one unit of work and returns the
+  `ProfileDto`.
+- **`UpdateProfileCommandValidator`** — refuses a location given in part (a country without a
+  postal code, or the reverse) or outside its form, and a kind of moment named twice, with
+  `validation_failed`. A word outside the lists does not bind, and is refused with
+  `invalid_request`. A field the teammate may not set is ignored.
+- **`SettingsDto`** — `TemperatureUnit` (`celsius`, `fahrenheit`), `ClockFormat` (`24-hour`,
+  `12-hour`), `MomentKinds` (the web app's words, `holiday` to `sport`), `SharesWeather` and
+  `SharesStatus`.
+- **`GetPinsQuery` / `GetPinsQueryHandler`** (journeys 10, 11 and 13) — builds one `PinDto`
+  per teammate of the viewer's team and applies each teammate's sharing switches for that
   viewer:
-  - `ShareWeather` is false and the pin is another teammate's: the `PinDto` carries a null
+  - `SharesWeather` is false and the pin is another teammate's: the `PinDto` carries a null
     `Weather` (no weather and no temperature) and the `WeatherState` `NotShared`, and the
     handler does not ask `IWeatherSource` for it (L2-034).
-  - `ShareStatus` is false and the pin is another teammate's: `PinDto.SharesStatus` is false.
+  - `SharesStatus` is false and the pin is another teammate's: `PinDto.SharesStatus` is false.
     The browser then shows no status for that pin at any hour and no working-hours overlap.
     The time zone still travels, since the local time is still shown.
   - The pin is the viewer's own: the `PinDto` carries the weather and a true flag whatever the
-    switches say. The viewer's own screens read the switches from `Settings` and add the note
-    that teammates do not see them (L2-034).
-
-  `PinDto.Weather` is null unless the weather is available, and `PinDto.WeatherState` is
-  `Available`, `Unavailable` or `NotShared`, so a pin whose teammate does not share their
-  weather and a pin whose weather could not be read (L2-049) show different messages.
+    switches say. Profile & Settings reads the switches from `Profile.settings` and adds the
+    note that teammates do not see them (L2-034).
 - **`ProfileDto`** — returns the viewer's own `Settings` to the viewer and to no one else.
   Another teammate's `PinDto` carries the effect of the switches, never the switches themselves.
 
 ### Backend — `Mondino.Domain`
 
 - **`TeammateSettings`** — value object: `TemperatureUnit`, `ClockFormat`, `MomentKinds`,
-  `ShareWeather`, `ShareStatus`. `DefaultsFor(countryCode)` gives a new teammate's
+  `SharesWeather`, `SharesStatus`. `DefaultsFor(countryCode)` gives a new teammate's
   settings: Fahrenheit for the United States and Celsius elsewhere (L2-019), the 12-hour clock
   for the United States and Canada and the 24-hour clock otherwise (L2-033), all four kinds of
   moment, and both sharing switches on (L2-034). `JoinTeamCommandHandler` and
-  `CreateTeamCommandHandler` call it.
-- **`Teammate`** — `ChangeSettings(settings)` replaces the value object whole.
+  `CreateTeamCommandHandler` give it to the new teammate.
+- **`Teammate`** — keeps the settings as columns; `Settings` reads them as one
+  `TeammateSettings`, and `ChangeSettings(settings)` replaces them whole.
 
 ### Errors
 
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
-| A setting outside its allowed values | 400 | `validation_failed` | `SaveBar` in `failed` |
+| A setting outside its allowed values | 400 | `invalid_request` | `SaveBar` in `failed` |
+| A kind named twice, or a location given in part | 400 | `validation_failed` | `SaveBar` in `failed` |
+| A new location that cannot be found or checked | 422 or 503 | `postal_code_not_found`, `postal_code_unavailable` | `SaveBar` in `failed`; nothing is stored |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | `SaveBar` in `failed`; the draft stays |
-| The session has ended | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows "You need an invite link" in place (`adapt-to-every-width`); the teammate signs in again through `sign-in` |
+| The session has ended | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows "You need an invite link" in place (`adapt-to-every-width`); the teammate signs in again through `sign-in`. Until that interceptor is built, the save fails as above |
 
 ## Requirements
 

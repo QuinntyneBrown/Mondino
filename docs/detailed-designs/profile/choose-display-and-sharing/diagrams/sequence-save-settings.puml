@@ -33,7 +33,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
   database "Mondino database" as db
 end box
 actor -> page : Choose °F, the 12-hour clock; switch off "Share my local weather"
-page -> store : changeSettings(patch)
+page -> store : setTemperatureUnit, setClockFormat, setSharesWeather
 store -> store : draft differs from saved; hasUnsavedChanges = true
 store --> bar : state = unsaved
 bar --> actor : "You have unsaved changes" and "Save changes" (L2-035)
@@ -42,7 +42,7 @@ bar -> page : save
 page -> store : save()
 store --> bar : state = saving
 bar --> actor : "Saving…"; the button reads "Saving" and is disabled
-store -> client : updateProfile(teamId, draft)
+store -> client : updateProfile(teamId, { settings }): only the parts that changed
 client -> controller : PUT /api/teams/{teamId}/me
 controller -> controller : Authenticate the session; check the anti-forgery token
 controller -> handler : Send UpdateProfileCommand
@@ -50,14 +50,14 @@ alt save succeeds
   handler -> handler : UpdateProfileCommandValidator
   handler -> db : Load the teammate ICurrentTeammate names
   db --> handler : Teammate
-  handler -> entity : ChangeSettings(settings) (L2-033, L2-034)
+  handler -> entity : ChangeSettings(settings) (L2-033, L2-034); MoveTo when a location is given
   handler -> db : Save changes in one unit of work
   db --> handler : Commit result
   handler --> controller : ProfileDto
   controller --> client : 200 ProfileDto
   client --> store : Profile
   store -> store : saved = response; hasUnsavedChanges = false
-  store -> settings : replace(settings); SettingsCache is written
+  store -> settings : replace(settings); mondino.settings is written
   settings --> page : Every local time and temperature uses the new choice (L2-033)
   store --> bar : state = saved
   bar --> actor : "Saved — your pin is up to date", announced (L2-035)
