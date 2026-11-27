@@ -6,10 +6,12 @@ import { expect, test } from '../fixtures/test';
 import { BrowserRecord } from '../support/browser-record';
 import { coloursAt, placeOnGlobe } from '../support/globe-pixels';
 import { rememberTeam } from '../support/membership';
+import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
 
 test.describe('Globe: the 3D globe', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ api, page }) => {
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
     // The globe holds still at the orientation it starts at, so its pixels are where a spec
     // looks for them (ADR 0013).
     await page.emulateMedia({ reducedMotion: 'reduce' });

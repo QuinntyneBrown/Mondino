@@ -91,7 +91,7 @@ internal sealed class CreateTeamCommandHandler(
 
         // 3. The team, with a new invite token. 4. Its maker, at the city, with a colour.
         var team = Team.Create(teamName, inviteTokens.Create(), createRequestId);
-        var maker = team.AddTeammate(name, postalCode, city, PinColourPicker.Pick(team), createRequestId, time.GetUtcNow());
+        var maker = team.AddTeammate(name, postalCode, city, PinColourPicker.Pick(team, city), createRequestId, time.GetUtcNow());
         maker.SetEmailFingerprint(fingerprint);
         database.Teams.Add(team);
 

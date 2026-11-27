@@ -2,6 +2,7 @@
 // Traces to: L2-005, L2-007
 // Description: "Join Northwind" adds the teammate while the form waits locked, remembers the team and opens the Globe
 
+import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import type { Request } from '@playwright/test';
 import { expect, test } from '../fixtures/test';
 import {
@@ -20,6 +21,7 @@ test.describe('Join: join the team', () => {
     joins.length = 0;
     api.answer('GET', NORTHWIND_INVITE, northwindInvite());
     api.answer('POST', NORTHWIND_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
     await joinPage.open('northwind-7Kq2');
     await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
     await joinPage.leavePostalCode();

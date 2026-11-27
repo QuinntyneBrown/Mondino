@@ -2,6 +2,7 @@
 // Traces to: L2-052, L2-038, L2-043
 // Description: Opening an emailed sign-in link signs the teammate in and shows their team's Globe, with no token left in the address; a link that cannot be used signs no one in; an email on no team sees "You need an invite link" naming it
 
+import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import type { Request } from '@playwright/test';
 import { expect, test } from '../fixtures/test';
 import { ON_NO_TEAM, REDEMPTIONS, SIGN_IN_TOKEN, SOFIA_SIGNED_IN } from '../fixtures/sign-in';
@@ -19,6 +20,7 @@ test.describe('Sign In: opening the emailed link', () => {
   }) => {
     // Given Sofia's sign-in link, which the backend signs her in with
     api.answer('POST', REDEMPTIONS, SOFIA_SIGNED_IN);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
     const opened: Request[] = [];
     page.on('request', (request) => {
       if (request.url().endsWith(REDEMPTIONS)) opened.push(request);
@@ -53,6 +55,7 @@ test.describe('Sign In: opening the emailed link', () => {
     globePage,
   }) => {
     const held = api.hold('POST', REDEMPTIONS);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
 
     await signInPage.openLink(SIGN_IN_TOKEN);
 

@@ -2,6 +2,7 @@
 // Traces to: L2-044, L2-007, L2-043
 // Description: Through a full visit every request goes to the app's own origin, and no postal code or email is kept in storage, cookies or the address bar
 
+import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { expect, test } from '../fixtures/test';
 import {
   lookupAnswer,
@@ -29,6 +30,7 @@ test.describe('A full visit', () => {
     api.answer('POST', NORTHWIND_JOINS, SOFIA_JOINED);
     api.answer('POST', CREATE_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
     api.answer('POST', TEAMS, NORTHWIND_CREATED);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
     const record = new BrowserRecord(page);
     const kept: string[] = [];
 

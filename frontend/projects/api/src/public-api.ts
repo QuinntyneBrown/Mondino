@@ -11,3 +11,7 @@ export * from './lib/sign-in/sign-in';
 export * from './lib/time/clock';
 export * from './lib/teams/http-team-creation-api';
 export * from './lib/teams/team-creation';
+export * from './lib/globe/viewport';
+export * from './lib/pins/pin-placement';
+export * from './lib/teams/http-team-api';
+export * from './lib/teams/team-pins';

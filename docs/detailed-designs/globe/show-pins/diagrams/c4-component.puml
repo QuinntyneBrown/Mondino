@@ -4,11 +4,11 @@ LAYOUT_WITH_LEGEND()
 title Components — Show pins
 
 Container_Boundary(spa, "Mondino web app") {
-  Component(page, "GlobePage", "Angular page, mondino application", "Supplies what a pin and its label show; binds PIN_GROUPER")
-  Component(store, "TeamStore", "Signal store, domain library", "Holds the pins and the selected teammate id")
-  Component(grouper, "groupPins", "Function, domain library", "Groups pins that would cover each other into group pins")
-  Component(view, "GlobeView", "Angular component mo-globe, globe library", "Measures the globe and owns the pin layer")
-  Component(layer, "PinLayer", "Angular component, globe library", "Groups pins, places them over the globe as a list of buttons, lifts them, places labels")
+  Component(page, "GlobePage", "Angular page, mondino application", "Makes each pin's view once a minute; places the pins on each turned frame")
+  Component(store, "TeamStore", "Signal store, mondino application", "Holds the pins and the selection; forgets a team the session no longer has")
+  Component(placer, "placePins, groupPins, placeLabels", "Functions, domain library", "Project the places, group pins that would cover each other, side the labels")
+  Component(view, "GlobeView", "Angular component mo-globe, globe library", "Draws the globe; reports its viewport and taps on no pin")
+  Component(layer, "PinLayer", "Angular component mo-pin-layer, components library", "Draws the placements as a list of buttons over the globe; lifts them")
 }
 Container_Boundary(api, "Mondino API") {
   Component(ctrl, "TeamsController", "ASP.NET Core controller", "GET /api/teams/{teamId}/pins")
@@ -18,9 +18,11 @@ Container_Boundary(api, "Mondino API") {
 }
 Rel(page, store, "Reads pins and selection from")
 Rel(store, ctrl, "Reads pins through TEAM_API", "JSON/HTTPS")
-Rel(page, view, "Gives pins, selectedId, selectedGroupIds and templates to")
-Rel(view, layer, "Gives pins, width and descriptions to")
-Rel(layer, grouper, "Calls through PIN_GROUPER")
+Rel(view, page, "Emits viewChange (GlobeViewport) and blankTap to")
+Rel(page, placer, "Places the pins with")
+Rel(page, layer, "Gives placements and the selection to, in GlobeView's [pins] slot")
+Rel(layer, page, "Emits select and selectGroup to")
+Rel(page, view, "Gives facing, the selected pin's position, to")
 Rel(ctrl, handler, "Sends GetPinsQuery")
 Rel(handler, db, "Reads", "IAppDbContext")
 Rel(handler, weather, "Asks for weather at each city")

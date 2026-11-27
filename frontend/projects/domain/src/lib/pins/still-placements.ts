@@ -1,4 +1,4 @@
-import type { Position, StillPlacement } from '@mondino/api';
+import type { GlobeViewport, Position, StillPlacement } from '@mondino/api';
 
 /** The still picture faces the point at 10.1° E, 17.4° N: Europe and Africa, as the mocks draw it. */
 const centre = { longitude: 10.1, latitude: 17.4 };
@@ -31,4 +31,15 @@ export function stillPlacements(positions: readonly Position[]): StillPlacement[
     });
   }
   return placements;
+}
+
+/**
+ * The still picture's viewport (ADR 0014): where it draws each position in a box `widthPx` wide,
+ * as `stillPlacements` places them, or null on the far side.
+ */
+export function stillViewport(widthPx: number): GlobeViewport {
+  return {
+    widthPx,
+    project: (position) => stillPlacements([position])[0] ?? null,
+  };
 }

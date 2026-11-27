@@ -128,8 +128,7 @@ loading and refreshing are designed in `keep-team-fresh`.
   the mocks draw the panel for a group of 2.
 - **`GlobeView`** (`mo-globe`) — component of the `globe` library. It emits `select` with a
   teammate id, takes `selectedId`, turns to the selected pin and lifts it. It emits `selectGroup`
-  with the teammate ids of a group pin (`globe/show-pins`) and takes them back as
-  `selectedGroupIds`, which keeps that group pin together, lifted and pressed, and turns the
+  with the group pin (`globe/show-pins`) and takes it back as the selected group, which keeps that group pin together, lifted and pressed, and turns the
   globe to it (`globe/turn-globe`). `focusPin(teammateId)` returns focus to the pin, or the
   group pin, that stands for that teammate; it is a method this design adds to the component.
 - **`Clock`** (`CLOCK`) — the one injected clock. `panel` is a computed signal that reads the
@@ -142,7 +141,7 @@ teammate that was selected.
 
 A group is held by `GlobePage` alone, as `groupTeammateIds`, and is not in the address. On
 `selectGroup` the page removes the `teammate` parameter, which clears the selection, sets
-`groupTeammateIds`, passes them to `GlobeView` as `selectedGroupIds` and renders `GroupPanel`
+`groupTeammateIds`, passes the group to `PinLayer` and `placePins` as the held group and renders `GroupPanel`
 from `groupCities`; the globe turns to the group pin and holds. A polite `role="status"`
 region says "2 teammates close together." once, when the group opens. Choosing a row
 navigates to `/globe?teammate={teammateId}`, which empties `groupTeammateIds` and opens that

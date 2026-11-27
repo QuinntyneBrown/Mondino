@@ -1,36 +1,19 @@
 import type { Page } from '@playwright/test';
 import { expect } from '../fixtures/test';
 import type { ApiFixture } from '../fixtures/api';
-import {
-  lookupAnswer,
-  NORTHWIND_INVITE,
-  NORTHWIND_JOINS,
-  NORTHWIND_LOOKUPS,
-  northwindInvite,
-  SOFIA_JOINED,
-} from '../fixtures/invites';
+import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
+import { rememberTeam } from './membership';
 import type { GlobePage } from '../pages/globe.page';
-import type { JoinPage } from '../pages/join.page';
 
 /**
- * Sofia joins Northwind from Milan and lands on the Globe screen, her pin on the 3D globe: the one
- * pin the Globe screen draws until the team's pins are built, so how it moves is how the globe
- * turns.
+ * Sofia opens Northwind's Globe, on a team of her alone in Milan, and waits for her pin: how it
+ * moves is how the globe turns. Her pin is not selected, so nothing holds the globe.
  */
-export async function joinFromMilan(
-  api: ApiFixture,
-  joinPage: JoinPage,
-  globePage: GlobePage,
-): Promise<void> {
-  api.answer('GET', NORTHWIND_INVITE, northwindInvite());
-  api.answer('POST', NORTHWIND_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
-  api.answer('POST', NORTHWIND_JOINS, SOFIA_JOINED);
-  await joinPage.open('northwind-7Kq2');
-  await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
-  await joinPage.leavePostalCode();
-  await expect(joinPage.submit).toHaveText('Join Northwind');
-  await joinPage.submit.click();
-  await expect(globePage.youPin).toBeVisible();
+export async function openTheGlobe(api: ApiFixture, globePage: GlobePage): Promise<void> {
+  await rememberTeam(globePage.page);
+  api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
+  await globePage.open();
+  await expect(globePage.pin('Sofia Bianchi (you)')).toBeVisible();
 }
 
 /**
