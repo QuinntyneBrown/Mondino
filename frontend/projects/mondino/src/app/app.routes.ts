@@ -12,6 +12,10 @@ export const routes: Routes = [
     loadChildren: () => import('./create-team/create-team.routes').then((m) => m.createTeamRoutes),
   },
   {
+    path: 'sign-in',
+    loadChildren: () => import('./sign-in/sign-in.routes').then((m) => m.signInRoutes),
+  },
+  {
     path: 'globe',
     title: 'Globe · Mondino',
     canMatch: [teammateGuard],

@@ -1,0 +1,120 @@
+// The `auth` block that Sign In and Create Team both draw (docs/adr/0011): the form beside the
+// globe, one column under 992 px. Each page uses it in its own encapsulated stylesheet.
+
+.auth {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: var(--space-8) var(--space-6);
+}
+.auth__body {
+  margin-top: var(--space-12);
+}
+.auth__title {
+  text-wrap: wrap;
+  font: var(--text-h1-lg);
+  letter-spacing: var(--letter-spacing-tight);
+}
+.auth__lead {
+  max-width: var(--layout-overlay-max);
+  margin-top: var(--space-4);
+  color: var(--color-fg-muted);
+}
+.auth__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+}
+.auth__stage {
+  width: 100%;
+  height: var(--layout-globe-phone-height);
+  flex: none;
+  padding-bottom: var(--space-16);
+}
+.auth__footer {
+  margin-top: var(--space-10);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.auth__footer a {
+  font-weight: var(--font-weight-semibold);
+}
+@media (min-width: 36rem) {
+  .auth__form {
+    padding: var(--space-8) var(--space-10);
+  }
+  .auth__title {
+    font: var(--text-display);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+  .auth__stage {
+    height: var(--layout-globe-tablet-height);
+  }
+}
+@media (min-width: 62rem) {
+  .auth {
+    flex-direction: row;
+    height: 100dvh;
+  }
+  .auth__form {
+    width: var(--layout-join-form-width);
+    flex: none;
+    overflow-y: auto;
+    padding-block: var(--space-10);
+  }
+  .auth__body {
+    margin-top: auto;
+  }
+  .auth__footer {
+    margin-top: auto;
+    padding-top: var(--space-10);
+  }
+  .auth__stage {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding-bottom: 0;
+    border-left: var(--border-width-hairline) solid var(--color-border-default);
+  }
+}
+.icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+}
+.icon--sm {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+.icon--spin {
+  animation: spin var(--duration-deliberate) linear infinite;
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .icon--spin {
+    animation: none;
+  }
+}
+.auth__title:focus {
+  outline: none;
+}
+.auth__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}

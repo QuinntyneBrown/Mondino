@@ -22,8 +22,8 @@ import {
   Toast,
   Wordmark,
 } from '@mondino/components';
-import { stillPlacements } from '@mondino/domain';
-import { type CreateTeamField, CreateTeamStore, emailLimit, nameLimit } from './create-team-store';
+import { emailLimit, stillPlacements } from '@mondino/domain';
+import { type CreateTeamField, CreateTeamStore, nameLimit } from './create-team-store';
 
 /** The words under a field that is missing or wrong (L2-053). */
 const messages: Record<CreateTeamField, Record<string, string>> = {
