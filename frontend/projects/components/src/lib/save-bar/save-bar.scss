@@ -1,0 +1,52 @@
+// The bar for unsaved changes (docs/design-system/components/save-bar.html).
+:host {
+  display: contents;
+}
+.save-bar {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-16);
+  z-index: var(--z-sticky);
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: calc(100% - var(--space-8));
+  max-width: var(--layout-overlay-max);
+  min-height: var(--control-height-lg);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  border-radius: var(--radius-2xl);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  box-shadow: var(--shadow-4);
+  font: var(--text-body-sm);
+}
+.save-bar__text {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+.icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon--spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .icon--spin {
+    animation: none;
+  }
+}

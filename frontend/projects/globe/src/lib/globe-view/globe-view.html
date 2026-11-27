@@ -24,11 +24,13 @@
       <div class="globe__pins" aria-hidden="true">
         @if (markers.you; as you) {
           <span class="globe__pin globe__pin--lifted" [style.--x.%]="you.x" [style.--y.%]="you.y"
-            ><span class="pin-dot pin-dot--you pin-dot--new"></span
-            ><span class="pin-label pin-label--lifted pin-label--right"
-              ><span class="pin-label__name">{{ you.label }}</span></span
-            ></span
-          >
+            ><span class="pin-dot pin-dot--you" [class.pin-dot--new]="!you.still"></span>
+            @if (you.label) {
+              <span class="pin-label pin-label--lifted pin-label--right"
+                ><span class="pin-label__name">{{ you.label }}</span></span
+              >
+            }
+          </span>
         }
         @for (pin of markers.pins; track $index) {
           <span

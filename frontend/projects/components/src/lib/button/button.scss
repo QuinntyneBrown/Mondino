@@ -80,3 +80,12 @@
 :host([aria-busy='true']) {
   cursor: progress;
 }
+:host(.btn--on-inverse) {
+  border-color: var(--color-bg-canvas);
+  background: var(--color-bg-canvas);
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-semibold);
+}
+:host(.btn--on-inverse:hover) {
+  background: var(--color-bg-subtle);
+}

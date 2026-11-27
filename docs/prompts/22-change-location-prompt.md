@@ -84,7 +84,7 @@ Builds on: journeys 3, 6 and 8.
   mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- The rate limit on a teammate's own postal code lookup is `<TO SUPPLY>`: choose it and write it into the
+- The rate limit on a teammate’s own postal code lookup is 10 a minute for the teammate (ADR 0022), written into the
   design and L2-032.
 
 ## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)

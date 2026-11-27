@@ -57,12 +57,20 @@ not exist yet; each part below is introduced by this design.
 - **`LookupState`** (`@mondino/api`) — the union the Join screen uses: `Idle`, `Locating`,
   `Found` (with its `PostalCodeResult`), `NotFound`, `Unavailable`, `RateLimited`. `ProfileStore`
   maps `postal_code_not_found`, `postal_code_unavailable` and `rate_limited` to the last three.
-- **The small globe** — `ProfilePage` imports `GlobeView` from `@mondino/globe` dynamically and
-  renders `mo-globe` with one pin, the viewer's own, and `interactive` set to `false`. A globe
-  that is not interactive does not turn on its own and cannot be dragged (L2-031). While the
-  draft holds a found city that is not saved, the globe shows the pin there, marked as new
-  ("New · Toronto"); the city and local time beside it stay the saved ones until the save.
-  `GlobeScene` is disposed when the page is destroyed.
+- **The small globe** — `ProfilePage`, a lazy route, renders `mo-globe` from `@mondino/globe`
+  with no bare pins, the viewer's own pin as its `you` (a `NewPin` with no label and no pulse,
+  as `profile/default` draws it) and `interactive` left `false`, facing the pin. A globe that is
+  not interactive does not turn on its own and cannot be dragged (L2-031, ADR 0013); it only
+  turns to the pin it faces. While the draft holds a found city that is not saved, the globe
+  shows the pin there, labelled "New · Toronto", and faces it; the city and local time beside
+  it stay the saved ones until the save. Where the globe cannot be drawn, `GlobeFallback`
+  stands in with the same pin. `GlobeScene` is disposed when the page is destroyed.
+- **The save bar** — `SaveBar` (`@mondino/components`, block `save-bar`): "You have unsaved
+  changes" and "Save changes" while `ProfileStore.canSave` is true, and "Saving…" with its button
+  disabled while the save is answered. On success the store holds the new profile, the bar
+  goes and `TeamStore` reads the pins and moments again, so the Globe shows the pin at the new
+  city. Its confirmation, its failure, its timing and "Leave without saving?" are journey 23's
+  ([Choose display and sharing](../choose-display-and-sharing/README.md), L2-035).
 
 ### Frontend — libraries
 
@@ -70,27 +78,31 @@ not exist yet; each part below is introduced by this design.
   uses `getProfile(teamId)`, `lookUpPostalCode(teamId, countryCode, postalCode)` and
   `updateProfile(teamId, update)`. `HttpProfileApi` implements it. The postal code travels in
   the request body, never in a URL.
-- **`Profile`** — type holding `teamName`, the viewer's own `pin` (a `Pin`), `countryCode`,
-  `postalCode` and `settings`. It is the only type in the frontend that carries a postal code
+- **`Profile`** — type holding `teamName`, the viewer's own `pin` (a `Pin`), `countryCode` and
+  `postalCode`; the `settings` join it with journey 23. It is the only type in the frontend that carries a postal code
   after joining. `ProfileStore` keeps it in memory only; `SettingsCache` never receives it.
-- **`ProfileUpdate`** — feature-local type sent on save: `countryCode`, `postalCode`, `settings`.
+- **`ProfileUpdate`** — type sent on save: `countryCode` and `postalCode`; `settings` join it with
+  journey 23.
 - **`ApiError`** — error with a `code`. `ProfileStore` branches on `postal_code_not_found`,
   `postal_code_unavailable` and `rate_limited`; the page shows its own message for each.
-- **`PostalCodeField`** (`@mondino/components`) — the postal code field that Join also uses, in
-  the same shape: inputs `value`, `country`, `lookupState`, `disabled` and `mode`, outputs
-  `valueChange`, `blurred` and `retry`. It injects nothing. Here the mode is `Move`: the line
-  under the row is empty while idle, and the states carry this screen's own copy:
+- **`TextField` and `LookupMessage`** (`@mondino/components`) — the postal code field and the
+  line under it that Join and Create Team use, in the same shape. `LookupMessage` takes a `mode`:
+  `Join`, the default, or `Move`, with `stays` (the saved city's name). In `Move` the line is
+  empty while idle, and the states carry this screen's own copy:
   - `Locating`: "Finding M5V 2T6 in Canada…".
   - `Found`: "Toronto, Canada. Your pin moves here when you save.", with the city and country
     in bold. The line names no weather.
   - `NotFound`: the alert of L2-004, ending "Your pin stays in Milan." ("We couldn’t find
     “M5V 2T” in Canada. Canadian postal codes look like A1A 1A1. Your pin stays in Milan."),
     with `aria-invalid` on the input.
+
+  `ProfilePage` shows the last two states as an `Alert` (`tone="warning"`) under the line:
   - `Unavailable` (mock `profile/lookup-unavailable`): "We couldn’t check M5V 2T6 right now.
     Your postal code may be fine — nothing is wrong with what you typed. Your pin stays in
-    Milan.", with "Try again", which emits `retry` and runs `lookUp()` again.
+    Milan.", with "Try again", which runs `lookUp()` again.
   - `RateLimited` (mock `profile/rate-limited`): "That was a lot of tries in a short time. Wait
-    a moment, then try again. Your pin stays in Milan."
+    a moment, then try again. Your pin stays in Milan." There is no countdown here and "Look up"
+    stays offered, as the mock draws it.
 
   In the last three states what the viewer typed is kept, the postal code has not been looked
   up, so there is nothing to save and no save bar for it, and the pin stays where it was.
@@ -117,8 +129,8 @@ not exist yet; each part below is introduced by this design.
   it; a postal code in the wrong form is refused without a call to the `Postal code source`.
   `IPostalCodeLookup.FindCityAsync` answers a `PostalCodeLookupOutcome` (found with a `City`,
   not found, or unavailable), and `IWeatherSource` gives the weather at a found city. The handler returns a `PostalCodeResultDto` and changes nothing.
-- **`UpdateProfileCommand` / `UpdateProfileCommandHandler`** — carries `TeamId`, `CountryCode`,
-  `PostalCode` and `Settings`. The command has no teammate id: the handler changes the teammate
+- **`UpdateProfileCommand` / `UpdateProfileCommandHandler`** — carries `TeamId`, `CountryCode` and
+  `PostalCode` (journey 23 adds `Settings`). The command has no teammate id: the handler changes the teammate
   that `ICurrentTeammate` names, so a request cannot change another teammate's location
   (L2-032). When the country or postal code differs from the stored one, the handler resolves
   the city again through `IPostalCodeLookup.FindCityAsync` and, when the outcome is found, calls
@@ -126,9 +138,10 @@ not exist yet; each part below is introduced by this design.
   saves in one unit of work through `IAppDbContext` and returns the new `ProfileDto`. A postal
   code that cannot be found or checked is refused and nothing is stored.
 - **`UpdateProfileCommandValidator`** — refuses a country outside the supported list and a
-  postal code over 12 characters with `validation_failed`.
+  postal code empty or over 12 characters with `validation_failed`. Fields the body does not
+  define (a teammate id, a position) are ignored (L2-044).
 - **`ProfileDto`** — `TeamName`, the teammate's own `PinDto`, `CountryCode`, `PostalCode` and
-  `Settings`. The `PostalCode` is null for a teammate whose pin was placed through the city
+  (journey 23 adds `Settings`). The `PostalCode` is null for a teammate whose pin was placed through the city
   search (`join-team`), and the field is then empty. The own `PinDto` always carries the weather, whatever the sharing switches say.
 - **`PostalCodeResultDto`** — city name, region and weather, or weather as null when
   `IWeatherSource` fails.
@@ -143,14 +156,14 @@ not exist yet; each part below is introduced by this design.
 
 ### Backend — `Mondino.Infrastructure`
 
-- **`CachedPostalCodeLookup`** — decorator over `PostalCodeLookupClient` with a cache, a
-  5 second timeout and a circuit breaker. `PostalCodeLookupClient` calls the `Postal code
-  source`; the provider is `<TO SUPPLY>`. The request carries the country and the postal code
+- **`CachedPostalCodeLookup`** — decorator over `GeoNamesPostalCodeLookup` with a cache, a
+  5 second timeout and a circuit breaker. `GeoNamesPostalCodeLookup` calls the `Postal code
+  source`, GeoNames (ADR 0006). The request carries the country and the postal code
   and nothing about the teammate or the team.
 - **`CachedWeatherSource`** — decorator over `OpenMeteoWeatherSource`. It receives the city's
   position only.
 - **`AppDbContext`** — EF Core implementation of `IAppDbContext`. The database engine is
-  `<TO SUPPLY>`.
+  PostgreSQL (ADR 0004, ADR 0017).
 
 ### Errors
 
@@ -162,8 +175,10 @@ not exist yet; each part below is introduced by this design.
 | Too many lookups | 429 | `rate_limited` | A request to wait a moment and try again, and "Your pin stays in Milan." |
 | `teamId` is not the teammate's own team | 404 | none | The screen is not shown |
 
-The lookup limit for a teammate, per minute, is `<TO SUPPLY>`; L2-045 sets 10 per minute for
-the lookup made while joining.
+A teammate may look up 10 postal codes a minute on this screen, counted for the teammate whose
+session asks rather than for the client's address (ADR 0022); L2-045 sets the same 10 per minute
+per client for the lookup made while joining. Over it the lookup is refused with 429, a
+`Retry-After` header and `rate_limited`, and the source is not called.
 
 Other teammates see the move at their next read of `GET /api/teams/{teamId}/pins` and
 `GET /api/teams/{teamId}/moments`: `GetPinsQueryHandler` and `GetMomentsQueryHandler` read the

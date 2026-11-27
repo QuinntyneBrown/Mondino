@@ -119,14 +119,15 @@ public sealed class TeamScopeTests
         var marco = await api.JoinNorthwindAsync(client, "Marco Rossi");
         var before = await api.TeammateAsync(marco.TeammateId);
 
-        // When Sofia sends requests to change or remove Marco's pin or settings, naming him by id
+        // When Sofia sends requests to change or remove Marco's pin or settings, naming him by id.
+        // (A save of her own location, `PUT /me`, ignores a teammate id in its body and moves only
+        // her pin: ChangeLocationTests.)
         var change = new { name = "Changed", countryCode = "CA", postalCode = "M5V 2T6", teammateId = marco.TeammateId };
         var attempts = new[]
         {
             sofia.Request(HttpMethod.Put, $"/api/teams/{sofia.TeamId}/teammates/{marco.TeammateId}", change),
             sofia.Request(HttpMethod.Patch, $"/api/teams/{sofia.TeamId}/teammates/{marco.TeammateId}/settings", change),
             sofia.Request(HttpMethod.Delete, $"/api/teams/{sofia.TeamId}/teammates/{marco.TeammateId}"),
-            sofia.Request(HttpMethod.Put, $"/api/teams/{sofia.TeamId}/me", change),
             sofia.Request(HttpMethod.Delete, $"/api/teams/{sofia.TeamId}/me/{marco.TeammateId}"),
         };
 

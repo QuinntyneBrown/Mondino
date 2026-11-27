@@ -30,9 +30,12 @@ export class GlobeFallback {
   readonly pins = input<readonly StillPlacement[] | null>(null);
   /**
    * The person's own new pin, lifted, labelled ("You · Milan") and pulsing once, drawn with the
-   * pins; or null. Its label is text.
+   * pins; or null. Its label is text. A saved pin on Profile & Settings has no label and, `still`,
+   * does not pulse.
    */
-  readonly you = input<(StillPlacement & { readonly label: string }) | null>(null);
+  readonly you = input<
+    (StillPlacement & { readonly label: string | null; readonly still?: boolean }) | null
+  >(null);
 
   /**
    * The width of the picture's box in CSS px, as it is first drawn and each time it changes, so
