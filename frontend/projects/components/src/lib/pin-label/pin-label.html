@@ -1,0 +1,7 @@
+@if (lifted()) {
+  <span class="pin-label__name">{{ nameAndCity() }}</span><span class="pin-label__line"
+    ><strong>{{ pin().localTime }}</strong></span
+  >
+} @else {
+  <strong>{{ pin().localTime }}</strong>
+}

@@ -1,0 +1,49 @@
+<ul class="globe__pins">
+  @for (placement of placements(); track placement.key) {
+    <li
+      class="globe__pin"
+      [class.globe__pin--far]="placement.far"
+      [class.globe__pin--lifted]="lifted(placement)"
+      [style.--x.%]="placement.x"
+      [style.--y.%]="placement.y"
+      [style.--depth]="placement.depth < 1 ? placement.depth : null"
+    >
+      @if (placement.kind === 'group') {
+        <button
+          class="pin pin--group"
+          type="button"
+          [attr.aria-pressed]="pressed(placement)"
+          [attr.aria-label]="placement.description"
+          (click)="choose(placement)"
+          (pointerenter)="point(placement.key)"
+          (pointerleave)="leave(placement.key)"
+          (focus)="focus(placement.key)"
+          (blur)="focus(null)"
+        >
+          {{ placement.pins.length }}
+        </button>
+      } @else {
+        <button
+          type="button"
+          [class]="'pin ' + hue(placement.pins[0].colour)"
+          [class.pin--you]="placement.pins[0].isViewer"
+          [class.pin--new]="placement.pins[0].isNew"
+          [attr.aria-pressed]="pressed(placement)"
+          [attr.aria-label]="placement.description"
+          (click)="choose(placement)"
+          (pointerenter)="point(placement.key)"
+          (pointerleave)="leave(placement.key)"
+          (focus)="focus(placement.key)"
+          (blur)="focus(null)"
+        >
+          <span aria-hidden="true">{{ placement.pins[0].initials }}</span>
+        </button>
+        @if (lifted(placement)) {
+          <mo-pin-label lifted [pin]="placement.pins[0]" [side]="placement.labelSide ?? 'below'" />
+        } @else if (placement.labelSide) {
+          <mo-pin-label [pin]="placement.pins[0]" [side]="placement.labelSide" />
+        }
+      }
+    </li>
+  }
+</ul>

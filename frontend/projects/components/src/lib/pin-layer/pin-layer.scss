@@ -1,0 +1,164 @@
+// The pins over a globe, as the mocks draw them (docs/design-system/components/pin.html,
+// pin-label.html). The globe's box is the `globe` container: under 31.25 rem the globe is
+// compact (ADR 0014).
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.globe__pins {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.globe__pin {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: var(--z-raised);
+  opacity: var(--depth, 1);
+}
+.globe__pin:focus-within,
+.globe__pin:hover,
+.globe__pin--lifted {
+  opacity: 1;
+}
+.globe__pin--lifted {
+  z-index: var(--z-pin-lifted);
+}
+
+// A pin: a person, their clock and their sky.
+.pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
+  width: var(--pin-size);
+  height: var(--pin-size);
+  padding: 0;
+  border: var(--border-width-thick) solid var(--color-pin-ring);
+  border-radius: var(--radius-full);
+  background: var(--teammate, var(--color-people));
+  color: var(--color-on-teammate);
+  font: var(--text-pin);
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    width var(--duration-fast) var(--ease-standard),
+    height var(--duration-fast) var(--ease-standard),
+    translate var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+// The hit area is 44 px whatever the pin's drawn size.
+.pin::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--target-comfortable);
+  height: var(--target-comfortable);
+  translate: -50% -50%;
+  border-radius: var(--radius-full);
+}
+// The viewer's own pin: an ink ring twice as thick, more than colour (L2-011).
+.pin--you {
+  border: var(--border-width-pin) solid var(--color-fg-default);
+}
+// Lifted: pointed at, focused or selected (L2-012).
+.globe__pin--lifted > .pin {
+  width: var(--pin-size-lifted);
+  height: var(--pin-size-lifted);
+  translate: -50% calc(-50% - var(--space-1));
+  box-shadow: var(--shadow-lift);
+  font-size: var(--font-size-xs);
+}
+.pin[aria-pressed='true'] {
+  border: var(--border-width-pin) solid var(--color-people);
+}
+.pin--new::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--space-2));
+  z-index: -1;
+  border-radius: var(--radius-full);
+  background: var(--color-people);
+  opacity: 0;
+  animation: pulse var(--duration-deliberate) var(--ease-standard) 1;
+}
+@keyframes pulse {
+  from {
+    scale: 0.6;
+    opacity: 0.6;
+  }
+  to {
+    scale: 1.6;
+    opacity: 0;
+  }
+}
+.pin--group {
+  box-sizing: border-box;
+  width: auto;
+  min-width: var(--space-8);
+  height: var(--space-8);
+  padding-inline: var(--space-1-5);
+  border: 0;
+  box-shadow: 0 0 0 var(--border-width-pin) var(--color-pin-ring);
+  background: var(--color-accent);
+  color: var(--color-fg-on-accent);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-bold);
+}
+.globe__pin--lifted > .pin--group {
+  width: auto;
+  height: var(--space-8);
+  min-width: var(--space-8);
+  font-size: 0.8125rem;
+}
+.pin--group[aria-pressed='true'] {
+  border: 0;
+  box-shadow:
+    0 0 0 var(--border-width-pin) var(--color-people),
+    var(--shadow-lift);
+}
+
+// On a compact globe pins are smaller, without initials, and only the lifted pin is labelled.
+@container globe (max-width: 31.249rem) {
+  .pin {
+    width: var(--pin-size-compact);
+    height: var(--pin-size-compact);
+    font-size: 0;
+  }
+  .globe__pin--lifted > .pin {
+    width: var(--pin-size-lifted);
+    height: var(--pin-size-lifted);
+    font-size: var(--font-size-xs);
+  }
+  .pin--group,
+  .globe__pin--lifted > .pin--group {
+    min-width: 1.375rem;
+    height: 1.375rem;
+    font-size: var(--font-size-3xs);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin {
+    transition: none;
+  }
+  .pin--new::after {
+    animation: none;
+  }
+}
+
+// The teammate colours of the palette.
+@for $hue from 1 through 13 {
+  .hue-#{$hue} {
+    --teammate: var(--palette-teammate-#{$hue});
+  }
+}

@@ -14,6 +14,9 @@
     <svg class="globe__frame" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
       <circle class="globe__outline" cx="300" cy="300" r="264" stroke-width="3.7" />
     </svg>
+    @if (state() === 'Ready') {
+      <ng-content select="[pins]" />
+    }
     @if (state() === 'Loading') {
       <div class="globe__loading"><ng-content select="[loading]" /></div>
     }

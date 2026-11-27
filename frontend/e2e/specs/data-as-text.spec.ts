@@ -2,6 +2,7 @@
 // Traces to: L2-044
 // Description: What a person types is shown as its literal characters wherever it appears, and the backend's own text is never shown
 
+import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
 import { expect, test } from '../fixtures/test';
 import {
   lookupAnswer,
@@ -33,6 +34,9 @@ test.describe('What a person types is data', () => {
     api.answer('GET', NORTHWIND_INVITE, northwindInvite({ teamName: markup }));
     api.answer('POST', NORTHWIND_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
     api.answer('POST', NORTHWIND_JOINS, SOFIA_JOINED);
+    const pins = northwindPinsOf('Sofia Bianchi', 'Lena Fischer');
+    (pins.json as { pins: { name: string }[] }).pins[1].name = markup;
+    api.answer('GET', NORTHWIND_PINS, pins);
 
     // When its invite link is opened, the team's name is its literal characters
     await joinPage.open('northwind-7Kq2');

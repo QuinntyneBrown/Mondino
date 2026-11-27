@@ -14,7 +14,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { CLOCK, type Position } from '@mondino/api';
+import { CLOCK, type GlobeViewport, type Position } from '@mondino/api';
 import {
   createGlobeScene,
   detailSteps,
@@ -77,6 +77,13 @@ export class GlobeView {
   readonly facing = input<Position | null>(null);
 
   readonly stateChange = output<GlobeState>();
+  /**
+   * Where things are on the globe (ADR 0014): once the first frame is drawn, on each frame after
+   * and when the box is resized, so the page can place the pins in the `[pins]` slot.
+   */
+  readonly viewChange = output<GlobeViewport>();
+  /** A tap on the globe that landed on no pin: it clears the selection (L2-012). */
+  readonly blankTap = output<void>();
 
   /** The globe's name: an interactive globe says how it is turned, as the mocks name it. */
   protected readonly name = computed(() =>
@@ -159,9 +166,14 @@ export class GlobeView {
     const box = this.host.querySelector<HTMLElement>('.globe');
     if (!box) return;
     scene.resize(box.clientWidth, box.clientHeight);
-    this.resizing = new ResizeObserver(([entry]) =>
-      scene.resize(entry.contentRect.width, entry.contentRect.height),
-    );
+    const reportView = () => {
+      const widthPx = box.clientWidth;
+      this.viewChange.emit({ widthPx, project: (position) => scene.project(position) });
+    };
+    this.resizing = new ResizeObserver(([entry]) => {
+      scene.resize(entry.contentRect.width, entry.contentRect.height);
+      if (this.state() === 'Ready') reportView();
+    });
     this.resizing.observe(box);
     const view = this.document.defaultView;
     view
@@ -197,13 +209,18 @@ export class GlobeView {
         scene.setOrientation(after);
         this.orientation.set(after);
       } else if (motion.isMoving()) scene.requestFrame();
+      reportView();
     });
     if (this.interactive()) {
       const turned = () => {
         scene.setOrientation(motion.orientation);
         this.orientation.set(motion.orientation);
       };
-      new GlobeGestures(motion, () => (box.clientWidth / 2) * DiscShare, turned).attach(
+      // A tap that lands on a pin is the pin's; one that lands anywhere else clears the selection.
+      const tapped = (target: EventTarget | null) => {
+        if (!(target instanceof Element) || !target.closest('button')) this.blankTap.emit();
+      };
+      new GlobeGestures(motion, () => (box.clientWidth / 2) * DiscShare, turned, tapped).attach(
         box,
         released,
       );

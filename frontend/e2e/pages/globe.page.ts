@@ -20,6 +20,15 @@ export class GlobePage {
   /** The line under the still picture, under 640 px. */
   readonly stillLine: Locator;
   readonly allPins: Locator;
+  /** The list of pins over the globe, a keyboard's and a screen reader's way to the teammates. */
+  readonly pinList: Locator;
+  readonly pinButtons: Locator;
+  /** The pins that are lifted, and the labels shown at rest and lifted. */
+  readonly liftedPins: Locator;
+  /** The pins placed just now, which pulse once. */
+  readonly newPins: Locator;
+  readonly restingLabels: Locator;
+  readonly liftedLabels: Locator;
   /** The new teammate's own pin, lifted, and its label. */
   readonly youPin: Locator;
   readonly youLabel: Locator;
@@ -47,11 +56,64 @@ export class GlobePage {
     this.legendEntries = this.legend.locator('li');
     this.stillLine = this.stage.locator('.globe-screen__still');
     this.allPins = this.stage.locator('.globe__pin');
-    this.youPin = this.stage.locator('.globe__pin--lifted .pin-dot--you');
+    this.pinList = this.stage.locator('ul.globe__pins');
+    this.pinButtons = this.pinList.locator('li.globe__pin > button.pin');
+    this.liftedPins = this.pinList.locator('li.globe__pin--lifted');
+    this.newPins = this.pinList.locator('.pin--new');
+    this.restingLabels = this.pinList.locator('.pin-label:not(.pin-label--lifted)');
+    this.liftedLabels = this.pinList.locator('.pin-label--lifted');
+    this.youPin = this.stage.locator('.globe__pin--lifted .pin--you');
     this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');
     this.toastRegion = page.locator('.toast-region');
     this.toast = this.toastRegion.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
+  }
+
+  /** A pin's button, by the start of its accessible name: a teammate's name, or a group's count. */
+  pin(name: string): Locator {
+    return this.pinList.getByRole('button', { name: named(name) });
+  }
+
+  /** The item a pin's button is in, which carries where it is and whether it is lifted or far. */
+  pinItem(name: string): Locator {
+    return this.pinList
+      .locator('li.globe__pin')
+      .filter({ has: this.page.getByRole('button', { name: named(name) }) });
+  }
+
+  /** A pin's label, beside its button. */
+  labelOf(name: string): Locator {
+    return this.pinItem(name).locator('.pin-label');
+  }
+
+  /** The accessible names of the pins in the list, in its order. */
+  async pinNames(): Promise<string[]> {
+    return this.pinButtons.evaluateAll((buttons) =>
+      buttons.map((button) => button.getAttribute('aria-label') ?? ''),
+    );
+  }
+
+  /** Where a pin is drawn, in % of the globe's box. */
+  async pinPlace(name: string): Promise<{ x: number; y: number }> {
+    return this.pinItem(name).evaluate((item: HTMLElement) => ({
+      x: parseFloat(item.style.getPropertyValue('--x')),
+      y: parseFloat(item.style.getPropertyValue('--y')),
+    }));
+  }
+
+  /** A pin's hit area: the box that takes the pointer, in CSS px. */
+  async hitArea(name: string): Promise<{ width: number; height: number }> {
+    return this.pin(name).evaluate((button) => {
+      const area = getComputedStyle(button, '::before');
+      return { width: parseFloat(area.width), height: parseFloat(area.height) };
+    });
+  }
+
+  /** Taps the globe where no pin is: its box's top-left corner, outside the disc. */
+  async tapOffThePins(): Promise<void> {
+    const box = await this.globe.boundingBox();
+    if (!box) throw new Error('The globe is not drawn');
+    await this.page.mouse.click(box.x + 8, box.y + box.height / 2);
   }
 
   async open(): Promise<void> {
@@ -109,10 +171,10 @@ export class GlobePage {
     return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
   }
 
-  /** Where the new pin's centre is on the page, in CSS px. */
-  async youPinAt(): Promise<{ x: number; y: number }> {
-    const box = await this.youPin.boundingBox();
-    if (!box) throw new Error('The new pin is not on the globe');
+  /** Where the centre of Sofia's own pin is on the page, in CSS px. */
+  async sofiaAt(): Promise<{ x: number; y: number }> {
+    const box = await this.pin('Sofia Bianchi (you)').boundingBox();
+    if (!box) throw new Error('Sofia’s pin is not on the globe');
     const round = (value: number) => Math.round(value * 10) / 10;
     return { x: round(box.x + box.width / 2), y: round(box.y + box.height / 2) };
   }
@@ -121,4 +183,13 @@ export class GlobePage {
   pulse(): Promise<string> {
     return this.youPin.evaluate((pin) => getComputedStyle(pin, '::after').animationName);
   }
+}
+
+/** An accessible name that starts with `name`. */
+function named(name: string): RegExp {
+  return new RegExp(`^${escape(name)}`);
+}
+
+function escape(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

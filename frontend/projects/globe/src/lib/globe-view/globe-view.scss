@@ -14,6 +14,8 @@
 }
 .globe {
   position: relative;
+  // The pins inside measure the globe's own box (ADR 0014).
+  container: globe / inline-size;
   width: min(100cqw, 100cqh);
   aspect-ratio: 1;
   flex: none;
