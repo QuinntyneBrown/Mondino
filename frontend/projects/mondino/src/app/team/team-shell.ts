@@ -1,8 +1,10 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
   signal,
 } from '@angular/core';
@@ -67,7 +69,18 @@ export class TeamShell {
     const subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) this.screen.set(pathOf(event.urlAfterRedirects));
     });
-    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+    const destroyed = inject(DestroyRef);
+    destroyed.onDestroy(() => subscription.unsubscribe());
+
+    // The toast regions are children of the body, as the invite dialog is: an open dialog hides
+    // the rest of the page from assistive technology, but not a live region beside it, so a toast
+    // over the dialog is still announced (L2-054). They go with the shell.
+    const host: HTMLElement = inject(ElementRef).nativeElement;
+    afterNextRender(() => {
+      const regions = [...host.querySelectorAll<HTMLElement>(':scope > .toast-region')];
+      host.ownerDocument.body.append(...regions);
+      destroyed.onDestroy(() => regions.forEach((region) => region.remove()));
+    });
   }
 
   protected goHome(): void {

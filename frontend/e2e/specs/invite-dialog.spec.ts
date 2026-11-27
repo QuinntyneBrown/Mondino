@@ -138,7 +138,12 @@ test.describe('Invite teammates', () => {
     await expect(inviteDialog.dialog).toBeVisible();
     await expect(inviteDialog.link).toBeFocused();
     expect(await inviteDialog.selectedText()).toBe('127.0.0.1:4310/join/northwind-7Kq2');
+    // The alert is above the dialog and its scrim, and assistive technology is told of it
+    await expect(globePage.alert).toHaveText(/Couldn’t copy the link\./);
     await page.clock.runFor(10_000);
     await expect(globePage.alertToast).toBeVisible();
+    await globePage.dismiss.click();
+    await expect(globePage.toast).toHaveCount(0);
+    await expect(inviteDialog.dialog).toBeVisible();
   });
 });

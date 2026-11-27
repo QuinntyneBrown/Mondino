@@ -88,6 +88,8 @@ export class GlobePage {
   readonly navigationLinks: Locator;
   readonly currentScreen: Locator;
   readonly inviteTeammate: Locator;
+  /** The words beside the icon of "Invite teammate", shown from 768 px. */
+  readonly inviteTeammateLabel: Locator;
   readonly profile: Locator;
   readonly profileAvatar: Locator;
   /** The heading over the globe: the number of teammates, and the counts under it. */
@@ -104,6 +106,8 @@ export class GlobePage {
   /** A toast in the status region, and one in the alert region. */
   readonly statusToast: Locator;
   readonly alertToast: Locator;
+  /** The alert as assistive technology finds it: none while it is hidden from it. */
+  readonly alert: Locator;
   readonly toastRegion: Locator;
   readonly toast: Locator;
   readonly dismiss: Locator;
@@ -183,6 +187,7 @@ export class GlobePage {
     this.navigationLinks = this.navigation.getByRole('link');
     this.currentScreen = this.navigation.locator('[aria-current="page"]');
     this.inviteTeammate = this.header.getByRole('button', { name: 'Invite teammate' });
+    this.inviteTeammateLabel = this.inviteTeammate.locator('.app-header__invite-label');
     this.profile = this.header.getByRole('link', { name: 'Profile & Settings' });
     this.profileAvatar = this.profile.locator('.avatar');
     this.title = this.stage.locator('.globe-screen__heading h1');
@@ -197,6 +202,7 @@ export class GlobePage {
     this.toast = page.locator('.toast-region .toast');
     this.statusToast = this.toastRegion.locator('.toast');
     this.alertToast = this.alertRegion.locator('.toast');
+    this.alert = page.getByRole('alert');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
   }
 
@@ -211,6 +217,22 @@ export class GlobePage {
       Object.defineProperty(navigator, 'clipboard', {
         value: { writeText: () => Promise.reject(new DOMException('Refused', 'NotAllowedError')) },
       });
+    });
+  }
+
+  /**
+   * The size of the area that takes a touch on "Invite teammate": the button, grown by the
+   * transparent `::after` that widens a small drawn button to the touch target.
+   */
+  inviteTeammateTarget(): Promise<{ width: number; height: number }> {
+    return this.inviteTeammate.evaluate((button) => {
+      const drawn = button.getBoundingClientRect();
+      const grown = getComputedStyle(button, '::after');
+      const out = (side: string) => Math.max(0, -parseFloat(side) || 0);
+      return {
+        width: drawn.width + out(grown.left) + out(grown.right),
+        height: drawn.height + out(grown.top) + out(grown.bottom),
+      };
     });
   }
 
