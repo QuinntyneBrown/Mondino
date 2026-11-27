@@ -113,20 +113,51 @@ test.describe('Globe: the week around the world', () => {
     await expect(globePage.week).toHaveCount(0);
   });
 
-  test('a moment’s title written as markup is shown as text', async ({ api, globePage }) => {
-    api.answer('GET', NORTHWIND_PINS, northwindPins());
+  test('a moment’s title, and its teammate’s name, written as markup are shown as text', async ({
+    api,
+    globePage,
+  }) => {
+    // Given Liam is named as markup, and his moment today is titled as markup
+    const markup = '<img src=x onerror=alert(1)>';
+    api.answer(
+      'GET',
+      NORTHWIND_PINS,
+      northwindPinsWhere((pin) => (pin.name === 'Liam O’Connor' ? { ...pin, name: markup } : pin)),
+    );
     api.answer(
       'GET',
       NORTHWIND_MOMENTS,
       northwindMoments([
-        momentOf('Liam O’Connor', 'holiday', '2025-10-27', '<b>Bank</b> Holiday', '<i>x</i>'),
+        {
+          ...momentOf('Liam O’Connor', 'holiday', '2025-10-27', '<b>Bank</b> Holiday', '<i>x</i>'),
+          teammateName: markup,
+        },
         ...CAST_MOMENTS.slice(1),
       ]),
     );
     await globePage.open();
 
+    // Then the row gives both as their literal characters, his first word as the row names a
+    // teammate, and no script runs (a page error fails the spec) (L2-044)
     await expect(globePage.weekRow('<b>Bank</b> Holiday')).toHaveCount(1);
-    expect((await globePage.weekRowParts())[0].title).toBe('<b>Bank</b> Holiday');
+    const [first] = await globePage.weekRowParts();
+    expect(first.title).toBe('<b>Bank</b> Holiday');
+    expect(first.meta).toBe('Holiday, <img · Dublin');
+  });
+
+  test('moments that cannot be read leave the week saying there are none, and the rest as it was', async ({
+    api,
+    globePage,
+  }) => {
+    // Given the moments are refused (L2-049)
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
+    api.refuse('GET', NORTHWIND_MOMENTS, 503, 'unavailable');
+    await globePage.open();
+
+    // Then the week says "No moments this week.", and who is working is listed as ever
+    await expect(globePage.weekEmpty).toHaveText('No moments this week.');
+    await expect(globePage.workingRows).toHaveCount(6);
+    await expect(globePage.counts).toContainText('12 time zones');
   });
 
   test('a row selects its teammate’s pin; closing the panel or a group’s returns to the week', async ({
