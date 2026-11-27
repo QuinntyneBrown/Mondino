@@ -125,6 +125,15 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
   `TeamCreationController`. Each is marked as open and carries a policy of
   `RateLimitPolicies` (`protect-team-data`), but for making a team (`POST /api/teams`), the one
   open request with no rate limit (ADR 0016).
+- `GET /api/teams/{teamId}/moments` answers a list of `MomentDto` (`Moment` in `@mondino/api`),
+  one for each teammate a moment belongs to, in date order: its `kind` (`holiday`, `formula-1`,
+  `local-event`, `sport`), `title` (at most 80 characters), `date` (`2025-11-01`, local to its
+  place), `detail` (at most 160), `emblemKey` (null: no emblem is held, ADR 0019), and the
+  teammate's id and name, the city's name, country code and time zone id. A pin carries no
+  moments: the browser joins them to pins by `teammateId` from `TeamStore.moments`, which is
+  empty until they answer and stays empty when they fail. Holidays come from OpenHolidays and
+  Mondino's own calendar, Formula 1, local events and sport from Mondino's own calendar
+  (ADR 0019); a failing calendar never fails the read.
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
   15 minutes. Open-Meteo is given a city's position rounded to two decimal places and nothing
@@ -197,8 +206,6 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
 
 The designs mark these as `<TO SUPPLY>`:
 
-- The providers of the holiday, race and event calendars. (The postal code source and the city
-  search's data set are ADR 0006's; the email source is ADR 0011's.)
 - Signing in (`joining/sign-in`): how a teammate who joined by invite link signs in again,
   since Join asks for no email and only Create Team collects one; what is shown when an
   emailed link has expired or was already used, and while one is being opened (until then
@@ -212,7 +219,8 @@ The designs mark these as `<TO SUPPLY>`:
 - On Join: the words of the found line when a city is chosen through "Your city", the words
   for a name over 60 characters, and whether the lookup's rate limit window lengthens to match
   the mock's countdown ("9:42").
-- Which emblems Mondino holds the right to use.
+- Where the attributions of Open-Meteo (CC BY 4.0, ADR 0015) and OpenHolidays (ODbL, ADR 0019)
+  are shown; no mock draws them.
 - What becomes of a team when its last teammate leaves.
 - Numbers the requirements do not give: the circuit breaker's threshold,
   the globe's turning rate, the rate limit on a teammate's own postal code

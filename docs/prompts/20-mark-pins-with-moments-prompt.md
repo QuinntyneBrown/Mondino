@@ -110,6 +110,11 @@ until then all four are on.
 - A count on a marker is not drawn in the mocks (no teammate in the cast has two moments in a week): draw it
   in a mock first, as `AGENTS.md` requires, then build it.
 
+## Built by journey 19
+- A pin carries no moments: they are `TeamStore.moments`, joined to pins by `teammateId` (`find-moments`).
+  `daysUntil`, `whenLabel` and `MomentIcon` exist; Mondino holds no emblem (ADR 0019), so every marker shows
+  the kind's icon.
+
 ## Done means
 - The cast's seven moments this week mark their pins as `pages/globe/default` draws them.
 - With every kind off, no pin is marked and the panel says so.

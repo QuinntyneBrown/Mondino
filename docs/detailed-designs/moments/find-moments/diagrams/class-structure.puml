@@ -26,7 +26,7 @@ class Moment {
   +DateOnly Date
   +string Detail
   +string? EmblemKey
-  +{static} Create(entry: CalendarEntry, emblemKey: string?): Moment
+  +{static} Create(kind, title, date, detail, emblemKey: string?): Moment
 }
 
 class CalendarEntry <<record>> {
@@ -38,11 +38,12 @@ class CalendarEntry <<record>> {
   +string? Region
   +Position? Position
   +string? Subject
+  +BelongsTo(city: City): bool
 }
 
 class City <<value object>> {
   +string Name
-  +string Region
+  +string? Region
   +string CountryCode
   +Position Position
   +string TimeZoneId
@@ -55,20 +56,19 @@ class Position <<value object>> {
 }
 
 interface IHolidayCalendar {
-  +HolidaysIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+  +HolidaysInAsync(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
 }
 interface IRaceCalendar {
-  +RaceCalendarIn(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+  +RaceCalendarInAsync(countryCode: string, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
 }
 interface IEventCalendar {
-  +EventsNear(position: Position, radiusKm: double, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
+  +EventsNearAsync(position: Position, radiusKm: double, from: DateOnly, to: DateOnly): Task<IReadOnlyList<CalendarEntry>>
 }
 
 class MomentFinder {
   +{static} RadiusKm = 100
   +{static} DaysAhead = 90
-  +FindFor(city: City): Task<IReadOnlyList<Moment>>
-  -BelongsTo(entry: CalendarEntry, city: City): bool
+  +FindForAsync(city: City): Task<IReadOnlyList<Moment>>
 }
 
 class EmblemCatalogue {
@@ -96,7 +96,10 @@ class MomentDto {
   +string TimeZoneId
 }
 
-class CachedMomentCalendars
+class MondinoCalendar
+class HolidayCalendar
+class CachedOpenHolidays
+class OpenHolidaysCalendar
 
 GetMomentsQueryHandler ..> GetMomentsQuery : handles
 GetMomentsQueryHandler --> MomentFinder : asks per city
@@ -106,12 +109,15 @@ MomentFinder --> IRaceCalendar
 MomentFinder --> IEventCalendar
 MomentFinder --> EmblemCatalogue
 MomentFinder ..> City : reads
-MomentFinder ..> CalendarEntry : filters
+MomentFinder ..> CalendarEntry : keeps those that BelongsTo
 MomentFinder ..> Moment : creates
 Moment --> MomentKind
 CalendarEntry --> MomentKind
 City *-- Position
-CachedMomentCalendars ..|> IHolidayCalendar
-CachedMomentCalendars ..|> IRaceCalendar
-CachedMomentCalendars ..|> IEventCalendar
+HolidayCalendar ..|> IHolidayCalendar
+MondinoCalendar ..|> IRaceCalendar
+MondinoCalendar ..|> IEventCalendar
+HolidayCalendar --> MondinoCalendar : own holidays
+HolidayCalendar --> CachedOpenHolidays : public holidays
+CachedOpenHolidays --> OpenHolidaysCalendar : on a miss
 @enduml

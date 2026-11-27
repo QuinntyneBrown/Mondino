@@ -26,43 +26,43 @@ box "Backend — Mondino Application and Domain" #ECFDF3
   participant "EmblemCatalogue" as emblems
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
-  participant "CachedMomentCalendars" as cache
+  participant "HolidayCalendar" as holidays
+  participant "MondinoCalendar" as own
+  participant "CachedOpenHolidays" as cache
   database "Mondino database" as db
 end box
-participant "Holiday calendar source" as holidays
-participant "Race calendar source" as races
-participant "Event source" as events
+participant "OpenHolidays API" as source
 
 client -> controller : GET /api/teams/{teamId}/moments
 controller -> handler : Send GetMomentsQuery
-handler -> db : Load the team of the current teammate
+handler -> db : Load the team's teammates and their cities
 db --> handler : Teammates and their cities
-loop each distinct city
-  handler -> finder : FindFor(city)
+loop each distinct city, in parallel
+  handler -> finder : FindForAsync(city)
   finder -> finder : Today in the city's time zone (TimeProvider),\nwindow of today to 90 days ahead
-  finder -> cache : HolidaysIn(country, window)
-  alt answer cached
-    cache --> finder : Cached entries
-  else cache miss
-    cache -> holidays : Holidays of the country
-    holidays --> cache : Entries
-    cache --> finder : Entries
+  finder -> holidays : HolidaysInAsync(country, window)
+  holidays -> own : Mondino's own holidays of the country
+  own --> holidays : Entries
+  holidays -> cache : Public holidays of the country, by year
+  alt year kept
+    cache --> holidays : Kept entries
+  else not kept, breaker closed
+    cache -> source : PublicHolidays and Subdivisions of a country and year
+    alt answers in 5 s
+      source --> cache : Holidays and subdivision names
+      cache --> holidays : Entries
+    else timeout, failure or open breaker
+      cache --> holidays : No entries
+    end
   end
-  finder -> cache : RaceCalendarIn(country, window)
-  cache -> races : Race weekends of the country, and dated\nhappenings in those races' calendars
-  races --> cache : Entries
-  cache --> finder : Entries
-  finder -> cache : EventsNear(city position, 100 km, window)
-  cache -> events : Events and fixtures near the position
-  alt source answers in time
-    events --> cache : Entries
-    cache --> finder : Entries
-  else 5 s timeout, failure or open circuit
-    cache --> finder : No entries
-  end
-  finder -> finder : Keep entries that belong to the city (L2-020 table)
+  holidays --> finder : Own entries, then public ones on other dates
+  finder -> own : RaceCalendarInAsync(country, window)
+  own --> finder : Race weekends and dated happenings
+  finder -> own : EventsNearAsync(city position, 100 km, window)
+  own --> finder : Events and fixtures
+  finder -> finder : Keep entries in the window that belong\nto the city (L2-020 table); a calendar\nthat throws gives none
   finder -> emblems : KeyFor(subject)
-  emblems --> finder : Emblem key or none
+  emblems --> finder : None (ADR 0019)
   finder -> finder : Create each Moment, title cut to 80\nand detail to 160 characters (L2-020)
   finder --> handler : Moments of the city
 end

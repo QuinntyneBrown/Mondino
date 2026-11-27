@@ -26,5 +26,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0016](0016-no-limit-on-making-a-team.md) | Making a team has no rate limit, the one open request without one | Accepted; supersedes part of 0009 |
 | [0017](0017-azure-postgresql.md) | The deployed database is an Azure PostgreSQL Flexible Server, reached without a password and migrated by the deployment | Accepted |
 | [0018](0018-initial-bundle-budget.md) | The initial budget (290 kB warning, 300 kB error) pays for Angular's runtime, which lazy screens put in the main chunk | Accepted; supersedes the budgets of 0005 and 0007 |
+| [0019](0019-moment-calendars.md) | Holidays come from OpenHolidays and Mondino's own calendar; races, events and sport from Mondino's own calendar | Accepted |
 
-Not decided yet, by the journey that first needs it: the providers of the calendars (journey 19).
+Not decided yet: nothing a journey has reached.

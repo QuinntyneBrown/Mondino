@@ -129,6 +129,7 @@ Burstable `Standard_B1ms`, 32 GiB, backups kept 7 days).
 | `SignInEmail__AppAddress` | the app's own address, for example `https://mondino-app-27660.azurewebsites.net` | the start of every sign-in link; never taken from the request's `Host`, so a forged `Host` cannot send a teammate a link to another site (ADR [0011](../adr/0011-signing-in-with-an-emailed-link.md)) |
 | `WeatherSource__BaseAddress` | `https://api.open-meteo.com/` (the default), or `https://customer-api.open-meteo.com/` with a commercial subscription | where the pins' weather is read from; Open-Meteo learns only a city's position, rounded (ADR [0015](../adr/0015-weather-source.md)) |
 | `WeatherSource__ApiKey` | the Open-Meteo subscription's key, as an App Service setting or a Key Vault reference; none for the free API | the free API is for non-commercial use; without the key a commercial deployment must not call it (ADR [0015](../adr/0015-weather-source.md)) |
+| `HolidaySource__BaseAddress` | `https://openholidaysapi.org/` (the default) | where public holidays are read from; OpenHolidays learns only a country and a year. Formula 1, local events and sport come from Mondino's own calendar, built in, with no setting (ADR [0019](../adr/0019-moment-calendars.md)) |
 
 `EmailProtection__Key` and `PostalCodeSource__Username` are required: the deploy workflow checks
 that both are set on the App Service (by name; it never reads a value) and refuses to deploy
