@@ -19,3 +19,4 @@ export * from './lib/globe/viewport';
 export * from './lib/pins/pin-placement';
 export * from './lib/teams/http-team-api';
 export * from './lib/teams/team-pins';
+export * from './lib/weather/weather';
