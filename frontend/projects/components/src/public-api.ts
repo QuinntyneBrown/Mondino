@@ -23,6 +23,7 @@ export * from './lib/overlap-bar/overlap-bar';
 export * from './lib/weather-icon/weather-icon';
 export * from './lib/moment-icon/moment-icon';
 export * from './lib/emblem/emblem';
+export * from './lib/moment-pill/moment-pill';
 export * from './lib/status/status';
 export * from './lib/teammate-panel/teammate-panel';
 export * from './lib/group-panel/group-panel';

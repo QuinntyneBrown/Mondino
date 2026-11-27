@@ -1,6 +1,7 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import type { Status, TeamRow } from '@mondino/api';
 import { Avatar } from '../avatar/avatar';
+import { MomentPill } from '../moment-pill/moment-pill';
 import { WeatherIcon } from '../weather-icon/weather-icon';
 
 const words: Record<Status, string> = {
@@ -22,12 +23,12 @@ const dots: Record<Status, string> = {
  * Person, Location, Local time, Compared to you, Weather and Coming up; below it each row gives the
  * name, the status in words, the local time, the city with the offset and the next moment. Each row
  * is one link over the name that covers the row; a plain click is handed to the page as an output,
- * any other follows the link. Names and cities are data. The next moment comes with the moments
- * (journey 19); until then "Coming up" is a dash, said in words.
+ * any other follows the link. Names, cities and a moment's title are data. "Coming up" is the next
+ * moment's kind icon, title and when, or with none a dash, said in words.
  */
 @Component({
   selector: 'mo-team-table',
-  imports: [Avatar, WeatherIcon],
+  imports: [Avatar, MomentPill, WeatherIcon],
   templateUrl: './team-table.html',
   styleUrl: './team-table.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

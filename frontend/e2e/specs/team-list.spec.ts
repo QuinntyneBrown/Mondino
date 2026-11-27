@@ -1,10 +1,11 @@
 // Acceptance Test
-// Traces to: L2-026, L2-007, L2-016, L2-018, L2-019, L2-054, L2-025
-// Description: The Team screen lists everyone west to east as pages/team/default does, each row with its city, local time, offset and weather, and a row opens the Globe with that teammate selected
+// Traces to: L2-026, L2-007, L2-016, L2-018, L2-019, L2-020, L2-054, L2-025
+// Description: The Team screen lists everyone west to east as pages/team/default does, each row with its city, local time, offset, weather and next moment, and a row opens the Globe with that teammate selected
 
 import { expect, test } from '../fixtures/test';
 import { idOf, NORTHWIND_PINS, northwindPins, northwindPinsWhere } from '../fixtures/pins';
-import { mockMarkup, mockTeamRows } from '../support/mocks';
+import { NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
+import { mockComingUp, mockMarkup, mockTeamRows } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
 import { fitsItsWidth } from '../support/layout';
 
@@ -16,8 +17,9 @@ test.describe('Team: everyone, west to east', () => {
   });
 
   test('reads as the default mock does, row by row, from 768 px', async ({ api, teamPage }) => {
-    // Given Northwind's thirteen at 14:05 UTC, seen by Sofia in Milan
+    // Given Northwind's thirteen at 14:05 UTC, seen by Sofia in Milan, and the cast's moments
     api.answer('GET', NORTHWIND_PINS, northwindPins());
+    api.answer('GET', NORTHWIND_MOMENTS, northwindMoments());
 
     // When the Team screen is opened
     await teamPage.open();
@@ -41,6 +43,7 @@ test.describe('Team: everyone, west to east', () => {
 
     // And every row is the mock's, in its order: Mexico City, Austin, São Paulo, Dublin, … Tokyo, Melbourne
     const expected = mockTeamRows('pages/team/default.html');
+    const comingUp = mockComingUp('pages/team/default.html');
     await expect(teamPage.rows).toHaveCount(expected.length);
     for (const [index, mock] of expected.entries()) {
       const row = teamPage.rows.nth(index);
@@ -55,8 +58,13 @@ test.describe('Team: everyone, west to east', () => {
       await expect(icon).toHaveAttribute('role', 'img');
       await expect(icon).toHaveAccessibleName(mock.weatherName!);
       expect(await teamPage.weatherIconShapes(row)).toEqual(mock.weatherIcon);
-      // Until the moments come, nothing is coming up, said in words
-      await expect(teamPage.cells(row).nothingComingUp).toHaveAccessibleName('Nothing coming up');
+      // "Coming up" is the next moment's kind icon, named by its kind, its title and when: "Today",
+      // "In 5 days", "In 7 days" for Noah's Melbourne Cup, then "9 Nov" (L2-020, L2-026)
+      const next = comingUp.get(mock.name)!;
+      await expect(teamPage.cells(row).momentIcon).toHaveAccessibleName(next.iconName!);
+      expect(await teamPage.momentIconShapes(row)).toEqual(next.icon);
+      await expect(teamPage.cells(row).momentTitle).toHaveText(next.title);
+      await expect(teamPage.cells(row).momentWhen).toHaveText(next.when);
     }
 
     // And the viewer's row says "(you)" and gives no offset, named "You"
@@ -73,9 +81,10 @@ test.describe('Team: everyone, west to east', () => {
     teamPage,
     page,
   }) => {
-    // Given a phone 390 px wide
+    // Given a phone 390 px wide, and the cast's moments
     await page.setViewportSize({ width: 390, height: 844 });
     api.answer('GET', NORTHWIND_PINS, northwindPins());
+    api.answer('GET', NORTHWIND_MOMENTS, northwindMoments());
     await teamPage.open();
 
     // Then Tomás's row reads "Tomás Herrera", "Early morning", "08:05" and "Mexico City · 7h behind" (L2-016)
@@ -86,8 +95,13 @@ test.describe('Team: everyone, west to east', () => {
     await expect(tomas.phone).toHaveText('Mexico City · 7h behind');
     await expect(teamPage.cells(teamPage.row('Sofia Bianchi')).phone).toHaveText('Milan');
 
-    // And the table's other columns, and a "Coming up" with nothing in it, are not shown
-    for (const hidden of [tomas.location, tomas.offset, tomas.weather, tomas.moment])
+    // And his next moment, "Día de Muertos · In 5 days", under them
+    await expect(tomas.moment).toBeVisible();
+    await expect(tomas.momentTitle).toHaveText('Día de Muertos');
+    await expect(tomas.momentWhen).toHaveText('· In 5 days');
+
+    // And the table's other columns are not shown
+    for (const hidden of [tomas.location, tomas.offset, tomas.weather])
       await expect(hidden).toBeHidden();
     await expect(teamPage.columns.first()).toBeHidden();
 
@@ -107,6 +121,11 @@ test.describe('Team: everyone, west to east', () => {
     // A row is one link, to the Globe with that pin selected
     const tomas = teamPage.link(teamPage.row('Tomás Herrera'));
     await expect(tomas).toHaveAttribute('href', `/globe?teammate=${idOf('Tomás Herrera')}`);
+
+    // With no moment found for him, "Coming up" is a dash named in words (L2-026 criterion 4)
+    await expect(
+      teamPage.cells(teamPage.row('Tomás Herrera')).nothingComingUp,
+    ).toHaveAccessibleName('Nothing coming up');
 
     // When Tomás's row is clicked anywhere, the Globe opens with his panel
     await teamPage.row('Tomás Herrera').click();
