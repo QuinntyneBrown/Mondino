@@ -25,6 +25,7 @@ public sealed partial class OpenEndpointsTests
         "POST api/postal-code-lookups",
         "POST api/city-searches",
         "POST api/teams",
+        "POST api/sign-in-links",
         "ANY /health/live",
         "ANY /api/{**rest}",
         "ANY {*path:nonfile}",
@@ -79,6 +80,7 @@ public sealed partial class OpenEndpointsTests
     [InlineData("POST", "/api/city-searches", 30)]
     [InlineData("POST", "/api/invites/northwind-7Kq2/teammates", 5)]
     [InlineData("POST", "/api/teams", 5)]
+    [InlineData("POST", "/api/sign-in-links", 5)]
     public async Task Each_open_endpoint_refuses_one_client_past_its_limit_with_429_and_Retry_After(string method, string path, int limit)
     {
         // Given one client that has used an open endpoint as often as its limit allows

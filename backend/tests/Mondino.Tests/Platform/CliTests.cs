@@ -89,6 +89,8 @@ public sealed class CliTests
 
         public DbSet<City> Cities => throw new NotSupportedException();
 
+        public DbSet<Mondino.Domain.SignIn.SignInLink> SignInLinks => throw new NotSupportedException();
+
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken) => Task.FromResult(0);
     }
 

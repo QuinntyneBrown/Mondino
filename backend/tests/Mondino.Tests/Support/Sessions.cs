@@ -53,14 +53,15 @@ public static class Sessions
     }
 
     /// <summary>Makes a team named <paramref name="teamName"/> from M5V 2T6 in Canada, so its maker is in Toronto.</summary>
-    public static async Task<Session> MakeTeamAsync(this MondinoApi api, HttpClient client, string teamName = "Southwind")
+    public static async Task<Session> MakeTeamAsync(
+        this MondinoApi api, HttpClient client, string teamName = "Southwind", string email = "liam@southwind.co")
     {
         api.PostalCodes.Knows("CA", "M5V 2T6", KnownCities.Toronto);
         using var response = await client.PostAsJsonAsync("/api/teams", new
         {
             teamName,
             name = "Liam O’Connor",
-            email = "liam@southwind.co",
+            email,
             countryCode = "CA",
             postalCode = "M5V 2T6",
             createRequestId = Guid.NewGuid(),

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
+using Mondino.Application.SignIn;
 using Mondino.Application.Teammates;
 using Mondino.Domain.Teams;
 using Mondino.Infrastructure.Persistence;
@@ -54,6 +55,12 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>The key of the email fingerprint (<c>EmailProtection:Key</c>); null leaves it unset.</summary>
     public string? EmailKey { get; set; } = Convert.ToBase64String(new byte[32]);
 
+    /// <summary>The outbox sign-in mails leave through, recording each one instead of sending it.</summary>
+    public FakeSignInMailOutbox SignInMails { get; } = new();
+
+    /// <summary>The app's own address, the start of every sign-in link (<c>SignInEmail:AppAddress</c>).</summary>
+    public const string AppAddress = "https://mondino.test";
+
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
 
@@ -72,6 +79,8 @@ public class MondinoApi : WebApplicationFactory<Program>
         {
             builder.UseSetting("EmailProtection:Key", EmailKey);
         }
+
+        builder.UseSetting("SignInEmail:AppAddress", AppAddress);
 
         if (UsesPostalCodeSource && PostalCodeSourceUsername is not null)
         {
@@ -104,6 +113,9 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.RemoveAll<IPostalCodeLookup>();
                 services.AddSingleton<IPostalCodeLookup>(PostalCodes);
             }
+
+            services.RemoveAll<ISignInMailOutbox>();
+            services.AddSingleton<ISignInMailOutbox>(SignInMails);
 
             if (DatabaseFails)
             {
