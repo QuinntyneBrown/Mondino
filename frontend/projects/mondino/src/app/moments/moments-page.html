@@ -39,11 +39,13 @@
             (actionChosen)="filter.set('everything')"
           />
         } @else {
-          <mo-moment-list
-            [groups]="groups()"
-            [address]="addressOf"
-            (teammateChosen)="choose($event)"
-          />
+          <div class="moments__window" [style.--before.px]="before()" [style.--after.px]="after()">
+            <mo-moment-list
+              [groups]="shown()"
+              [address]="addressOf"
+              (teammateChosen)="choose($event)"
+            />
+          </div>
         }
       }
     </main>

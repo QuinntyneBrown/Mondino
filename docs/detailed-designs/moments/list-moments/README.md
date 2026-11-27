@@ -81,7 +81,7 @@ filters them.
   up", "No Formula 1 moments coming up" and "No local event moments coming up".
 - **`MomentRow`** — presentation component for one moment (`moment-row`): the date, kind icon
   and `when` label, title, detail, and the teammate's `Avatar` with their first name and city
-  ("Jordan · Austin"). The prominent form (`today-moment`) is used for each moment today: "Today
+  ("Jordan · Austin"). **`TodayMoment`**, its prominent form (`today-moment`), is used for each moment today: "Today
   in" and its city, the kind ("Today in Dublin · Holiday"), the moment's large `Emblem`, title,
   detail and the teammate's first name ("Office closed in Ireland today · Liam"), and "On the
   globe". Title, detail and names are rendered as text, never as HTML. The whole row is one link
@@ -91,11 +91,12 @@ filters them.
   follows the address (`team/view-teammate-panel`).
 - **`momentWindow(total, start)`** — pure function in `domain`'s `moments/` (ADR 0021). Up to 60
   moments, every row is in the page. Past 60 it gives the 60 moments from `start`, counted across
-  today's cards and both groups, and how many lie before and after them. **`moveWindow(total,
-  start, towards)`** moves the start 20 rows towards the top or the bottom, never past either end.
-  The page watches a sentinel above and below the rows with one `IntersectionObserver` (800 px
-  margin), moves the window when one comes near, and pads the list by the rows out of the window
-  times the measured height of a row in it. The observer is disconnected when the page goes.
+  today's cards and both groups, and how many lie before and after them; `windowGroups` cuts the
+  groups to it. **`followWindow(total, start, first, last)`** keeps the window while the moments
+  the viewport shows, `first` to `last`, are 10 or more inside it, and otherwise starts it 20 above
+  the first shown, never past either end. The page listens to the scroll and resize at most once a
+  frame, finds `first` and `last` from the measured height of a row, and pads the list by the rows
+  out of the window times that height. The listeners go when the page goes.
 - **`TeamsController`**, **`GetMomentsQuery`**, **`GetMomentsQueryHandler`** — the backend
   endpoint and handler, described in `find-moments`. The handler returns the moments of the next
   90 days only for a teammate of the team.

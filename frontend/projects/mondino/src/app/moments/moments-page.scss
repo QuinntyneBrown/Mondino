@@ -59,3 +59,8 @@
   width: min(18rem, 100%);
   height: var(--space-3);
 }
+// A long list holds a window of its moments; the space of the rest is kept before and after it
+// (ADR 0021).
+.moments__window {
+  padding-block: var(--before, 0) var(--after, 0);
+}

@@ -173,3 +173,44 @@ export function northwindMoments(moments: MomentJson[] = CAST_MOMENTS): Answer {
 
 /** No moment where any teammate lives, as `pages/globe/no-moments` draws the week. */
 export const NO_MOMENTS: Answer = { json: [] };
+
+/**
+ * Three moments for every teammate of a team of 500 (`teamOf500`), dated in their city's time
+ * zone: 1,500, more than the Moments screen holds in the page at once. The first is today in
+ * Honolulu, "The first of the 500", and the last, "The last of the 500", 89 days ahead in Auckland.
+ */
+export function momentsOf500(
+  pins: { teammateId: string; name: string; cityName: string; timeZoneId: string }[],
+): MomentJson[] {
+  const dates = ['2025-10-29', '2025-11-20', '2025-12-15'];
+  const moments = pins.flatMap((pin, index) =>
+    dates.map((date, each): MomentJson => ({
+      teammateId: pin.teammateId,
+      teammateName: pin.name,
+      cityName: pin.cityName,
+      countryCode: '',
+      timeZoneId: pin.timeZoneId,
+      kind: (['holiday', 'formula-1', 'local-event', 'sport'] as const)[(index + each) % 4],
+      title: `Moment ${each + 1} of ${pin.name}`,
+      date,
+      detail: `In ${pin.cityName}`,
+      emblemKey: null,
+    })),
+  );
+  const first = pins.find((pin) => pin.cityName === 'Honolulu')!;
+  const last = pins.find((pin) => pin.cityName === 'Auckland')!;
+  return [
+    { ...moments[0], ...pick(first), title: 'The first of the 500', date: '2025-10-27' },
+    ...moments,
+    { ...moments[0], ...pick(last), title: 'The last of the 500', date: '2026-01-24' },
+  ];
+}
+
+function pick(pin: { teammateId: string; name: string; cityName: string; timeZoneId: string }) {
+  return {
+    teammateId: pin.teammateId,
+    teammateName: pin.name,
+    cityName: pin.cityName,
+    timeZoneId: pin.timeZoneId,
+  };
+}

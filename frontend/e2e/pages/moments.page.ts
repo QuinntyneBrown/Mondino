@@ -155,6 +155,16 @@ export class MomentsPage {
     await this.page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   }
 
+  /** Waits two frames, so what a scroll set off has been drawn. */
+  async settle(): Promise<void> {
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((done) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => done())),
+        ),
+    );
+  }
+
   /** Scrolls the window to the top of the page. */
   async scrollToTop(): Promise<void> {
     await this.page.evaluate(() => window.scrollTo(0, 0));

@@ -81,7 +81,8 @@ class "moments/ (domain)" as moments <<functions>> {
   +daysAheadLabel(daysAhead: number): string
   +daysUntil(date: string, timeZoneId: string, now: number): number
   +momentWindow(total: number, start: number): MomentWindowView
-  +moveWindow(total: number, start: number, towards: 'top' | 'bottom'): number
+  +followWindow(total: number, start: number, first: number, last: number): number
+  +windowGroups(groups: MomentGroups, view: MomentWindowView): MomentGroups
 }
 
 class MomentsPage {
@@ -107,7 +108,12 @@ class MomentList {
 
 class MomentRow {
   +moment: DatedMoment
-  +prominent: boolean
+  +address: string
+  +chosen: Output<void>
+}
+
+class TodayMoment {
+  +moment: DatedMoment
   +address: string
   +chosen: Output<void>
 }
@@ -127,6 +133,7 @@ MomentsPage --> FilterChips
 MomentsPage --> MomentList
 MomentsPage --> TeamStore : reads moments, pins and momentsState
 MomentList "1" --> "*" MomentRow
+MomentList "1" --> "*" TodayMoment
 moments ..> MomentGroups : returns
 moments ..> MomentWindowView : returns
 MomentGroups "1" --> "*" DatedMoment

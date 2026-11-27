@@ -21,13 +21,15 @@ rather than a box of its own. The strategy for items of varying height is in
 
 - **Up to 60 moments, every row is in the page**, as the mocks draw them; the cast has 15.
 - **Past 60, the page holds a window of 60 rows** (today's cards counted among them), worked out by
-  `momentWindow` in `domain`'s `moments/` from the number of moments and where the window starts. It
-  moves 20 rows at a time towards whichever end of the list comes within 800 px of the viewport,
-  seen by one `IntersectionObserver` on two sentinels, and never past either end.
+  `momentWindow` in `domain`'s `moments/` from the number of moments and where the window starts.
+  The page listens to the window's scroll and resize, at most once a frame, works out which moments
+  the viewport shows from the measured height of a row, and `followWindow` moves the window once
+  they come within 10 moments of either end of it: it then starts 20 moments above the first shown,
+  never past either end. A jump of the scroll bar is followed as a step is.
 - **The rows out of the window keep their space**, as padding before and after the groups: their
   number times the height of a row in the window, measured as it is drawn, so the scroll bar and the
   position stay true. A group with no row in the window is not drawn.
-- The observer is the page's and is disconnected when the teammate leaves it.
+- The listeners and any pending frame are the page's, removed when the teammate leaves it.
 
 ## Consequences
 
@@ -35,6 +37,9 @@ rather than a box of its own. The strategy for items of varying height is in
   scrolled (L2-047).
 - A heading out of the window is estimated as a row; the scroll position may shift by a few pixels
   as the window moves, which the browser's scroll anchoring absorbs.
+- An `IntersectionObserver` on two edges of the window was tried first: once the scroll bar jumps
+  into the space kept for the rows out of the window, neither edge is near the viewport and the
+  window never moves. Following the scroll position covers both.
 - Rejected: CDK virtual scrolling (fixed heights, a scroll box of its own, or an experimental
   package), paging with "Show more" (no mock, and the rows would still grow), and listing a moment
   once per city with a count (a change to L2-020 and to the mocks).

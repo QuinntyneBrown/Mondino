@@ -106,3 +106,14 @@ export interface MomentGroups {
   readonly thisWeek: readonly DatedMoment[];
   readonly later: readonly DatedMoment[];
 }
+
+/**
+ * The part of a long Moments list held in the page (ADR 0021): the moments from `from` to before
+ * `to`, counted across today's, this week's and later's, and how many lie before and after them.
+ */
+export interface MomentWindowView {
+  readonly from: number;
+  readonly to: number;
+  readonly before: number;
+  readonly after: number;
+}
