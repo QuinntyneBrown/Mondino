@@ -107,6 +107,8 @@ Builds on: journeys 6 and 22.
 ## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 22 built `/profile` without "Leave Northwind" (`settings__leave`, `pages/profile/default`): add it
+  under the sections there.
 - Set journey 24 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

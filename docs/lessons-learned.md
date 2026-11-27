@@ -1350,3 +1350,63 @@ waits for Profile & Settings, journey 22), L2-007 criterion 2's Moments part (jo
 90), L2-022 criterion 3 (journey 20, 11 of 13, still 80), the Moments part of L2-054 criterion 1 and
 L2-025 criterion 7 (journey 16 stays at 50 until Profile & Settings proves the fourth screen), and
 Moments' part of L2-047 criterion 5, which with Team's completes it (journey 29, 1 of 14: 10).
+
+## Journey 22: Change location
+
+**What slowed it**
+
+- The design drew a `PostalCodeField` with a `mode`, but Join and Create Team build the field from
+  `TextField` with `LookupMessage` under it. `LookupMessage` took the `mode` (`Move`, with the city the pin
+  stays in), the page shows the two warnings as `Alert`s (which gained projected actions and an hourglass),
+  and the design, its diagrams and the shared contracts were brought to that before any code.
+- The rate limiter ran before authentication, so no policy could count a teammate's own lookups for the
+  teammate. ADR 0022 sets 10 a minute per teammate and moves `UseRateLimiter` after `UseAuthentication`;
+  the open endpoints still count by address.
+- Journey 6's scope test listed `PUT /me` among the requests that must be refused, because it did not
+  exist. Once it moved the asker's own pin, the test failed on a 422. The attempt left that list; the new
+  test sends Marco's id in the body of `PUT /me` and proves only Sofia moves.
+- The first slice the prompt suggests (`GET /me` with the teammate's own postal code) was built by journey
+  6; its tests stood as the proof.
+- The small globe turns to face the pin. Under the whole suite's load the spec read the pin mid-turn
+  (49.94%) and compared it with the settled place; it now waits for the exact facing (50%, 50%) first.
+- The page slice built the Location section with it, so the lookup and save specs were green on arrival;
+  each was broken (the `Move` mode dropped, the team's re-read dropped, the globe made interactive) and
+  seen to fail.
+- The mocks draw Display, Moments on the globe, What teammates see and "Leave Northwind" on this screen;
+  they are journeys 23 and 24, and a line was added to each prompt.
+
+**Lessons**
+
+1. **A limit counted per user needs the limiter after authentication.** Before it, the user is nobody and
+   every partition falls back to the address; authentication refuses nothing, so moving it costs the open
+   endpoints nothing.
+2. **A test of an endpoint's absence breaks when the endpoint arrives.** Assert what must never happen
+   (another teammate's pin changed), not the status an unmapped route happens to give.
+3. **Wait for a turning globe to settle on the exact place.** "Within 1%" is still a frame of the turn.
+4. **A time zone's name beside a clock is `longGeneric`.** `long` names the season ("Central European
+   Standard Time"); the generic name is the mock's, and a zone with no generic name keeps its standard one.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): the design, its seven diagrams, the shared contracts, L2-032 and ADR 0022 were
+  one commit before any code.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit code,
+  written to a log; it stopped three commits (the scope test, a selector in a spec, the mid-turn read).
+- *Measure the initial bundle* (journey 2, lesson 1): 273.16 kB before, 273.29 kB after, the route's own
+  entry; the screen is a 19 kB lazy chunk with `PROFILE_API` bound at its route.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5): three times.
+- *One value per text interpolation in a lazy component* (journey 18, lesson 2): the local time line and
+  the warnings are each one computed string.
+- *A design-system block gets its own component* (journey 19, lesson 4): `SaveBar` holds `save-bar`.
+- *Read what a store already loads before a page loads it again* (journey 21, lesson 2): the page uses
+  `TeamStore` only to read the team again after a save, so the Globe shows the pin at the new city.
+- *Default an e2e fixture to the state earlier specs assumed* (journey 19, lesson 3): only the profile
+  specs and "Choose moments" answer `GET /me`.
+
+**Progress:** 14 of 14 criteria proven (100%). Proven here for earlier journeys: L2-025 criterion 7 and
+L2-054 criterion 1 on Profile & Settings, the last of the four screens (journey 15, 21 of 21: 100; journey
+16, with L2-054 criterion 6 proven by journey 17, 9 of 15: 60); L2-022 criterion 4's "Choose moments"
+reaching Profile & Settings (journey 20, 12 of 13: 90); L2-045 criterion 6, the 429 message on Profile &
+Settings, and the limit on its lookup (journey 6, 36 of 40, still 90); Profile & Settings joining
+`TeamShell` with its header link current. Total: 76.
