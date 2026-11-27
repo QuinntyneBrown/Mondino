@@ -220,3 +220,56 @@ apply the lessons that fit.
 - *The browser logs every refused request* (journey 2, lesson 4): the 409, 429 and 500 answers
   given on purpose passed the guard.
 
+
+## Journey 5: Create a team
+
+**What slowed it**
+
+- The mocks' manifest says Create Team "reads nothing before it is shown", while the design read
+  the countries from a new `GET /api/countries`, which needs a loading state no mock draws. The mock
+  won: the countries are bundled with the screen (ADR 0009), and the endpoint was never built.
+- Create Team's lookup states, and its 429, were not drawn (open question 9, L2-045). Five mocks were
+  drawn first, generated from `create-team/default` with Join's fragments, before any code.
+- "Create team" pressed straight from the postal code field arrives after the blur has started the
+  lookup, so the press found it `Locating` and did nothing. The store now waits for the running lookup
+  and makes the team when it answers; the spec holds the lookup to prove it.
+- The validation specs filled the postal code, so leaving it started a lookup no fixture answered,
+  and the guard failed the spec. They answer the lookup like every other Create Team spec.
+- A presentation component's output named `copy` is a DOM event name and fails angular-eslint; it is
+  `copyLink`, and the design was renamed with it.
+- The backend's lookup actions were written with the controller of slice 1, so slice 3's spec would
+  have passed before it was written. The actions were held back, the spec run red, then restored.
+
+**Lessons**
+
+1. **Read the manifest's notes as part of the mock.** A `not_applicable` reason ("reads nothing
+   before it is shown") is a design decision as binding as a drawn state.
+2. **Keep only what the feature needs of a secret.** Sign-in is given the address it sends to, so a
+   keyed fingerprint recognises a teammate and the address need never be stored.
+3. **A submit can arrive mid-lookup.** When leaving a field starts a request, the button pressed next
+   must wait for it rather than be ignored; hold the request in the spec to prove it.
+4. **Generate a new mock from its screen's own default and a neighbour's fragments.** Five states
+   were drawn in one script, with the globe and chrome exactly the screen's own, and the checker
+   regenerated the index and coverage.
+5. **Write a controller one action at a time when its slices are separate.** Otherwise hold the later
+   actions back so their specs can be seen to fail.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the mocks, L2-053, L2-044, L2-045, ADR 0009
+  and the design were one commit before any code; the design was touched again only for two names
+  the code chose (`copyLink`, `selectRequest`).
+- *Read the prompt against the mock too* (journey 3, lesson 1): the prompt's design had
+  `GET /api/countries`; the manifest's note won.
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6): 258.72 kB before and
+  258.88 kB after; `afterRenderEffect` was already in the initial chunk through `Alert`, so the
+  focus and the copy field's selection cost nothing there, and no budget moved.
+- *Run the spec before the page exists* (journey 1, lesson 5): all 25 Create Team specs and every
+  backend test were run red first, on the missing route, endpoint or action.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc`; it caught three lint
+  errors (a selector in a spec, an unused fixture, the `copy` output) before the commit.
+- *The browser logs every refused request* (journey 2, lesson 4): the 422, 503, 429 and 500 answers
+  given on purpose passed the guard; the unanswered lookup in the validation specs did not.
+- *Check the shape of navigation state and storage* (journey 4, lesson 3): the membership is written
+  through `TeamMembership`, and a spec reads everything the browser keeps for the postal code and
+  the email.
