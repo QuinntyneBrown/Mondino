@@ -107,17 +107,19 @@ behind them.
 
 **An email never reaches another teammate, and is never confirmed (L2-043, L2-045).**
 
-- `Teammate.Email` is in no DTO but the request bodies that carry it in: `PinDto`,
-  `MomentDto`, `ProfileDto`, `InviteDto` and `CreatedTeamDto` have no email property.
-  `SignInResultDto` returns the email to the browser that opened the link sent to it.
+- A teammate's email is kept only as `Teammate.EmailFingerprint` (ADR 0009) and is in no DTO:
+  `PinDto`, `MomentDto`, `ProfileDto`, `InviteDto` and `CreatedTeamDto` have no email property.
+  `SignInResultDto` returns the email, unsealed with the link's own token (ADR 0011), to the
+  browser that opened the link sent to it, and only when the email is on no team.
 - `POST /api/sign-in-links` answers 202 with no body for every email in the right form, and
   `RequestSignInLinkCommandHandler` does the same work for each, so neither the answer nor
   its timing says whether the email is on a team. The Sign In screen reads "Check your inbox"
   in every case (`sign-in`, L2-052).
 - `POST /api/teams` never refuses because an email is already on a team.
 - An email travels in a request body, never in a URL. In the browser it lives in the form
-  state of `SignInPage` and `CreateTeamPage` and in the navigation state for
-  `InviteNeededPage`; `TeamMembership` and `SettingsCache` never hold one.
+  state of `SignInPage` and `CreateTeamPage` and, for one navigation, in the navigation state
+  for `InviteNeededPage`, which reads it once and takes it out of history; `TeamMembership` and
+  `SettingsCache` never hold one.
 - A sign-in token is stored as a hash, is used once and expires after 15 minutes by
   `TimeProvider`. It travels in the fragment of the emailed address and then in a request
   body.
@@ -179,7 +181,8 @@ For a lookup or a join request, `JoinPage` shows "Too many tries from this devic
 again in 9:42.", counts down from `Retry-After`, disables its button until the countdown ends
 and keeps what was typed. For an open of an invite link, nothing has been typed yet, and
 `JoinPage` shows "We couldn’t open this invite" with "Try again" (L2-001). Create Team shows
-Join's countdown (ADR 0009); what Sign In shows is not drawn yet. Beside the limit per client,
+Join's countdown (ADR 0009); what Sign In shows is not drawn yet, and until it is, Sign In
+shows its drawn failure, "We couldn’t send the link." (ADR 0011). Beside the limit per client,
 `RequestSignInLinkCommandHandler` sends no further mail once more than 3 sign-in links were
 asked for one email in 15 minutes, from any number of clients, and answers as for any other
 request, so nobody's inbox can be flooded and nothing is learned about the email. `LookUpPostalCodeQueryHandler` finds the team by its invite token before it calls
@@ -194,7 +197,9 @@ journey 22.
 Otherwise the same address matches `InviteNeededPage` in place
 (`pages/invite-needed/default`): "You need an invite link", with "Start a team" and "Use a
 different email". With no email known, its text reads "Mondino teams are invite-only, and you
-aren’t on one yet." The email a sign-in link was sent to joins it with journey 7.
+aren’t on one yet." Opened from a sign-in link whose email is on no team, it names the
+email as text: "Mondino teams are invite-only, and **sofia@northwind.co** isn’t on one yet."
+(`sign-in`, L2-038 criterion 6).
 
 ## Requirements
 

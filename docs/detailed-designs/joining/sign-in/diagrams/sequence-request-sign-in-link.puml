@@ -30,7 +30,9 @@ end box
 box "Backend — Mondino Infrastructure" #FFF4E5
   participant "SignInTokens" as tokens
   database "Mondino database" as db
-  participant "SignInEmailSender" as sender
+  participant "SignInMailOutbox" as outbox
+  participant "SignInMailDispatcher" as dispatcher
+  participant "PostmarkSignInEmailSender" as sender
 end box
 actor -> page : Type a work email, choose "Email me a sign-in link"
 page -> store : requestLink()
@@ -43,22 +45,32 @@ else
   client -> controller : POST /api/sign-in-links, email in the body
   controller -> controller : Apply the SignInLink rate limit policy (L2-045)
   controller -> handler : Send RequestSignInLinkCommand (validated in the pipeline)
-  handler -> tokens : Create()
-  tokens --> handler : Token and its hash
-  handler -> db : Add SignInLink: hash, email, ExpiresAt = now + 15 minutes
-  db --> handler : Committed
-  handler -> sender : SendAsync(email, link)
-  sender --> handler : Sent
+  handler -> handler : Fingerprint the email (ADR 0009)
+  handler -> db : Delete this email's expired links; count those of the last 15 minutes
+  alt more than 3 for this email (L2-045)
+    handler -> handler : Store nothing, mail nothing
+  else
+    handler -> tokens : Create(), Hash(token), Seal(token, email)
+    tokens --> handler : Token, its hash, the sealed email
+    handler -> db : Add SignInLink: hash, fingerprint, sealed email, ExpiresAt = now + 15 minutes
+    db --> handler : Committed
+    opt the email is a teammate's
+      handler -> outbox : Enqueue(email, AppAddress/sign-in#token)
+    end
+  end
   handler --> controller : Done, the same for an email on a team and on none
   controller --> client : 202 Accepted, no body
   client --> store : Accepted
   store --> page : state Sent
   page --> actor : "Check your inbox", the same whatever the email (L2-052)
 end
+dispatcher -> outbox : Read the next mail
+dispatcher -> sender : SendAsync(email, link)
+sender -> sender : POST to Postmark: the address and the link only, 5 s timeout
 note over page, client
-  A request that gets no answer and a 503 set the state Failed. The page says
+  A request that gets no answer, and any refusal, set the state Failed. The page says
   "We couldn’t send the link." and the button reads "Try again"; the email typed is kept.
-  What the page shows for a 429 is TO SUPPLY. Past 3 links for one email in 15 minutes
-  no mail is sent and the answer is the same (L2-045).
+  A 429 shows the same until Sign In's own state for it is drawn (ADR 0011). The answer
+  never waits for the Email source, so it is the same whatever the email.
 end note
 @enduml

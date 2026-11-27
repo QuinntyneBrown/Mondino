@@ -149,7 +149,7 @@ upright to sideways keeps the selected pin, any filter and anything typed (L2-03
 | Screen | Under the breakpoint | From the breakpoint |
 |--------|----------------------|---------------------|
 | Join | under 992 px: form above the globe, one column | 992 px: form beside the globe |
-| Sign In, Create Team (`AuthLayout`, block `auth`) | under 992 px: form above the globe, one column | 992 px: form beside the globe, each filling the height of the viewport |
+| Sign In, Create Team (block `auth`, drawn by each page from one Sass partial, ADR 0011) | under 992 px: form above the globe, one column | 992 px: form beside the globe, each filling the height of the viewport |
 | Invite Needed, Left Team, Not Found (`NoticePage`) | one centred column at every width; the two actions stack on a phone | 576 px: wider side padding |
 | Globe | under 992 px: globe, then panel, one scrolling column; the heading is above the globe under 576 px and over its top corner from 576 px | 992 px: panel to the right of the globe, scrolling on its own |
 | Team | under 768 px: name, status, local time with city and offset, next moment | 768 px: `TeamTable` with all its columns |

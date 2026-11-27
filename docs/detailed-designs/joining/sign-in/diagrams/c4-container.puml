@@ -7,12 +7,12 @@ Person(teammate, "Teammate", "Has come back on a new browser or device")
 System_Boundary(mondino, "Mondino") {
   Container(web, "Mondino web app", "Angular", "Sign In screen, then the Globe screen")
   Container(api, "Mondino API", "ASP.NET Core", "Issues and redeems sign-in links; issues the session cookie")
-  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams, teammates and sign-in links")
+  ContainerDb(db, "Mondino database", "PostgreSQL (ADR 0004)", "Teams, teammates and sign-in links")
 }
-System_Ext(email, "Email source", "Provider TO SUPPLY")
+System_Ext(email, "Email source", "Postmark (ADR 0011)")
 
 Rel(teammate, web, "Gives a work email; opens the emailed link", "HTTPS")
 Rel(web, api, "POST /api/sign-in-links and POST /api/sign-in-links/redemptions", "JSON/HTTPS, email and token in the body")
-Rel(api, db, "Writes the link's hash and expiry; reads the teammate by email", "EF Core")
-Rel(api, email, "The address and the sign-in link only", "HTTPS, 5 s timeout")
+Rel(api, db, "Writes the link's hash, the email's fingerprint and its sealed form; reads the teammate by fingerprint", "EF Core")
+Rel(api, email, "The address and the sign-in link only", "HTTPS, from an outbox, 5 s timeout")
 @enduml
