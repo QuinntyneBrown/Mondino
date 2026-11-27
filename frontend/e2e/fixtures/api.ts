@@ -1,6 +1,8 @@
 import type { Page, Route } from '@playwright/test';
 
 export interface Answer {
+  /** No answer at all: the connection is refused, as when the backend is down. */
+  unanswered?: boolean;
   status?: number;
   json?: unknown;
   headers?: Record<string, string>;
@@ -53,6 +55,10 @@ export class ApiFixture {
         return;
       }
       const answer = typeof found === 'function' ? await found(route) : found;
+      if (answer.unanswered) {
+        await route.abort('connectionrefused');
+        return;
+      }
       await route.fulfill({
         status: answer.status ?? 200,
         headers: { 'content-type': 'application/json', ...answer.headers },

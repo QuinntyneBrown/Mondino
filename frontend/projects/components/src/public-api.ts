@@ -5,6 +5,7 @@ export * from './lib/button/button';
 export * from './lib/globe-fallback/globe-fallback';
 export * from './lib/globe-placeholder/globe-placeholder';
 export * from './lib/lookup-message/lookup-message';
+export * from './lib/notice/notice';
 export * from './lib/notice-page/notice-page';
 export * from './lib/select-field/select-field';
 export * from './lib/skeleton/skeleton';

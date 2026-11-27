@@ -72,6 +72,37 @@
           <p class="visually-hidden" role="status">Opening your invite link…</p>
         </div>
       }
+      @case ('NotFound') {
+        <div class="join__body">
+          <mo-notice
+            icon="link-off"
+            title="This invite link no longer works"
+            text="Someone on the team reset it, so it can’t be used to join. Ask whoever sent it for the new link."
+          >
+            <a slot="actions" mo-button size="lg" routerLink="/new">Start your own team</a>
+          </mo-notice>
+        </div>
+      }
+      @case ('Failed') {
+        <div class="join__body">
+          <mo-notice
+            icon="offline"
+            title="We couldn’t open this invite"
+            text="Mondino didn’t answer. Check your connection and try the link again — it hasn’t been used up."
+          >
+            <button
+              slot="actions"
+              mo-button
+              variant="primary"
+              size="lg"
+              type="button"
+              (click)="tryAgain()"
+            >
+              Try again
+            </button>
+          </mo-notice>
+        </div>
+      }
     }
     <p class="join__footer">Already on Mondino? <a routerLink="/sign-in">Sign in</a></p>
   </section>

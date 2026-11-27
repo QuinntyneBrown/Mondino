@@ -7,6 +7,7 @@ import {
   GlobeFallback,
   GlobePlaceholder,
   LookupMessage,
+  Notice,
   SelectField,
   type SelectOption,
   Skeleton,
@@ -30,6 +31,7 @@ import { JoinStore } from './join-store';
     GlobeFallback,
     GlobePlaceholder,
     LookupMessage,
+    Notice,
     RouterLink,
     SelectField,
     Skeleton,
@@ -64,6 +66,11 @@ export class JoinPage {
         void this.router.navigateByUrl('/globe', { replaceUrl: true });
       }
     });
+  }
+
+  /** Opens the invite link again: it has not been used up. */
+  protected tryAgain(): void {
+    void this.store.open(this.inviteToken);
   }
 
   /** The form does nothing yet: placing a pin is the postal code lookup's (journey 3). */
