@@ -1704,3 +1704,74 @@ and 6 seconds for a lookup or a saved location that asks two), 6 (the weather's 
 stalled reads sharing one call per city), 8 (the Globe's placeholders and polite "Loading your team…") and
 9 (the Globe's error with "Try again" and nothing of the team); L2-050 criterion 4 (Sign In, Team, Moments
 and Profile & Settings call no outside source). No other journey's count changes. Total: 86.
+
+## Journey 27: Adapt to every width
+
+**What slowed it**
+
+- L2-037 and the design system's pages put the Globe's panel and the pin's card beside their
+  screens from 992 px and the Globe's heading over its corner from 576 px; the CSS the mocks render
+  through does it at `64rem` and `40rem`, the prototype's own widths, and the code followed the CSS.
+  The requirement, five design-system pages, the tokens and the designs were brought to 640 and
+  1024 px (ADR 0027) before any spec was written, or the specs would have measured a layout no mock
+  draws.
+- The design drew `sessionExpiredInterceptor`, an `HttpInterceptorFn`, but the clients call `fetch`
+  (ADR 0005); `TeamStore` had been deciding on a 401 instead. ADR 0028 records that each store
+  decides, and `ProfileStore` now does for a read, a save and a leave.
+- Almost every layout was right on arrival, so most specs were green before any code; each was
+  broken with a copy of the stylesheet (a breakpoint moved) and seen to fail. One break, the pin's
+  card moved to 1200 px, still passed: 1024 px is not one of the seven widths L2-037 names. The
+  spec now measures either side of each breakpoint as well.
+- A layout probe written first found what the specs then proved: the mark alone and the Team tab
+  were narrower than 44 px under 576 px, and the Globe's globe had been capped at 40 rem since
+  journey 4, so it never grew from 1200 px.
+- Comparing lines of text for overlap first reported every ellipsis in the Team table as text over
+  the next column: a range's client rects are the whole text, not what its box shows. They are now
+  clipped to the box that hides their overflow, and tightly set lines may share a third of a line.
+
+**Lessons**
+
+1. **Measure a layout either side of its breakpoint, not only at the named widths.** A list of
+   widths can straddle a breakpoint by a wide margin; a broken breakpoint then passes.
+2. **Read the CSS the mocks render through, not only the words about it.** The design system's
+   pages had a breakpoint the stylesheet never used; the mock's behaviour is the stylesheet's.
+3. **Probe every screen at every width before writing the specs.** One throwaway spec that reports
+   what sticks out, is cut off or overlaps found the two real defects in a minute, and became the
+   shared `cutOff` check.
+4. **A text range reports the text, not what is drawn of it.** Clip its rects to the box that hides
+   its overflow before calling it an overlap.
+5. **Resize the window in one page to prove a turned phone keeps its state.** One component serves
+   every width, so `setViewportSize` without a reload is the turn.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built
+  since* (journey 14, lesson 1): ADRs 0027 and 0028, L2-037, the design system, four designs, three
+  diagrams and the prompt were one commit before any code.
+- *Read the prompt against the mock too* (journey 3, lesson 1): the prompt's "panel beside the
+  globe from 992 px" was corrected to 1024.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit
+  code, written to a log; it stopped one (a selector in a spec).
+- *Measure the initial bundle* (journey 2, lesson 1): 274.26 kB before, 274.32 kB after: two tokens
+  in `tokens.css` and the header's targets. The Sass module emits no CSS.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5) and
+  *break a slice with a copy, not with git* (journey 23, lesson 1): the header's `aria-current` and
+  wordmark, and the breakpoints of the auth form, the Team table, the pin's card and the leave
+  dialog, each copied aside, moved and seen to fail.
+- *Search the specs by a criterion's words before writing one* (journey 26, lesson 3): L2-037
+  criteria 9 (the invite dialog) and 10, and L2-038 criteria 5, 6, 7, 10 and 11 were already proven;
+  criterion 8's spec reached `/globe` but did not read "You need an invite link", and now does.
+- *Close a dialog yourself when its screen goes* (journey 24, lesson 2): "Leave Northwind?" goes
+  with Profile & Settings when a leave finds the session ended.
+
+**Progress:** 21 of 21 criteria proven (100, from 0). L2-037: the form beside the globe from 992 px
+(1), the Globe's panel, heading and globe (2), Team's rows and table (3), the pin's card (4), the
+measure and the growing globe (5), nothing cut off, overlapped or scrolling sideways on every screen
+at the seven widths and either side of each breakpoint (6), a turned phone (7), the pages that say
+one thing (8), both dialogs as sheets (9, the leave dialog here) and the still picture's line (10,
+journey 8). L2-038: criteria 1 to 4 and 9 here; 5, 6, 7, 10 and 11 by earlier journeys' specs; 8
+now read through to "You need an invite link". Journey 23's and 24's questions are answered and
+proven: a 401 on saving, leaving or reading Profile & Settings shows "You need an invite link" in
+place, without "Leave without saving?" (ADR 0028); both stay 100. Only a sweep, run when a person
+asks, proves the look of each state at each width in both themes; every criterion's behaviour is
+in the behaviour specs. Total: 89.
