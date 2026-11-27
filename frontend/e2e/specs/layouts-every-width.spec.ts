@@ -105,6 +105,27 @@ test.describe('Layouts at every width', () => {
     });
   });
 
+  test('Moments, and the Globe with the week beside it, fit every width with nothing cut off', async ({
+    page,
+    globePage,
+    momentsPage,
+  }) => {
+    await rememberTeam(page);
+    await page.setViewportSize({ width: 320, height: 800 });
+    await momentsPage.open();
+    await expect(momentsPage.rows.first()).toBeVisible();
+    await atEveryWidth(page, [640], async (width) => {
+      await expect(momentsPage.rows.first(), `${width} px`).toBeVisible();
+    });
+
+    await page.setViewportSize({ width: 320, height: 800 });
+    await globePage.open();
+    await expect(globePage.panel).toBeVisible();
+    await atEveryWidth(page, [640, 1024], async (width) => {
+      await expect(globePage.panel, `${width} px`).toBeVisible();
+    });
+  });
+
   test('from 1024 px the panel scrolls on its own while the globe stays in view', async ({
     page,
     globePage,
