@@ -1,13 +1,13 @@
 import type { Locator, Page } from '@playwright/test';
 
 /** The selector of a still globe's picture, on the screen and in a mock. */
-const globeArt = '.notice-page .globe svg.globe__art';
+export const globeArt = '.notice-page .globe svg.globe__art';
 
 /**
  * Every shape of a still globe, in order: its tag and its attributes, with the ids made the same
  * whichever page draws them. Runs in the browser.
  */
-function shapesOf(art: Element | null): string[] {
+export function shapesOf(art: Element | null): string[] {
   if (!art) return [];
   const neutral = (value: string) =>
     value.replace(/mo-globe-fallback-/g, '').replace(/(^|#)g-/g, '$1');

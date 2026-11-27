@@ -65,8 +65,15 @@ export class JoinPage {
   readonly youPin: Locator;
   readonly youLabel: Locator;
 
+  /** Every image element on the page: a name rendered as markup would make one. */
+  readonly images: Locator;
+  /** Everything the page shows. */
+  readonly everything: Locator;
+
   constructor(readonly page: Page) {
     this.main = page.locator('main.join');
+    this.images = page.locator('img');
+    this.everything = page.locator('body');
     this.wordmark = this.main.locator('.brand .wordmark');
     this.title = this.main.locator('.join__title');
     this.lead = this.main.locator('.join__lead');
