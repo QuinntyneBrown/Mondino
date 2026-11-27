@@ -1,6 +1,14 @@
 /** A moment's kind (L2-020): a holiday, Formula 1, a local event or sport. */
 export type MomentKind = 'holiday' | 'formula-1' | 'local-event' | 'sport';
 
+/** The four kinds, in the order Profile & Settings lists their switches (L2-022). */
+export const ALL_MOMENT_KINDS: readonly MomentKind[] = [
+  'holiday',
+  'formula-1',
+  'local-event',
+  'sport',
+];
+
 /**
  * A moment where a teammate lives, as GET /api/teams/{teamId}/moments answers it (L2-020): one for
  * each teammate it belongs to, naming them. Its date is the date in its own place, "2025-11-01".
@@ -38,4 +46,24 @@ export interface MomentView {
 export interface WeekMoment extends MomentView {
   /** "Liam · Dublin". */
   readonly who: string;
+}
+
+/**
+ * A pin's moment marker (L2-021): the moments of its teammate today or in the next 7 days, of the
+ * kinds the viewer chose, nearest first. One shows its kind's icon, two or more their count.
+ */
+export interface MarkerView {
+  /** The nearest moment's kind, whose icon the marker shows for one moment. */
+  readonly kind: MomentKind;
+  /** The nearest moment's title and when it is: "Today", "Tomorrow", "In 5 days". */
+  readonly title: string;
+  readonly when: string;
+  readonly count: number;
+  /** Whether the nearest moment is today: the marker is then larger and ringed. */
+  readonly today: boolean;
+  /**
+   * What the pin's accessible name ends with: "October Bank Holiday, today", or "2 moments this
+   * week: Día de Muertos, in 5 days; Clásico Nacional, in 6 days".
+   */
+  readonly spoken: string;
 }
