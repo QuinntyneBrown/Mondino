@@ -37,6 +37,15 @@
   position: absolute;
   inset: 0;
 }
+.globe-loading__disc {
+  display: block;
+  width: min(78%, 40rem);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: var(--color-border-default);
+  animation: shimmer var(--duration-deliberate) ease-in-out infinite alternate;
+}
 @keyframes shimmer {
   from {
     opacity: 1;
@@ -46,7 +55,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .globe__art {
+  .globe__art,
+  .globe-loading__disc {
     animation: none;
   }
 }

@@ -34,14 +34,8 @@ test.describe('Globe: just joined', () => {
     // When Sofia joins Northwind
     await join(joinPage);
 
-    // Then the Globe opens with her pin lifted and labelled, pulsing once
+    // Then the Globe opens, and a toast, in a region that announces it once, says she is on the map
     await expect(globePage.page).toHaveURL('/globe');
-    await expect(globePage.youLabel).toHaveText('Sofia Bianchi (you) · Milan');
-    await expect(globePage.youPin).toHaveClass(/pin-dot--new/);
-    expect(await globePage.pulse()).not.toBe('none');
-    await expect(globePage.globe).toHaveAccessibleName('The globe, with your new pin in Milan');
-
-    // And a toast, in a region that announces it once, says she is on the map
     await expect(globePage.toastRegion).toHaveAttribute('role', 'status');
     await expect(globePage.toast).toHaveText(
       'You’re on the map. Northwind can now see your pin in Milan.',
@@ -52,6 +46,12 @@ test.describe('Globe: just joined', () => {
     await expect(globePage.toast).toBeVisible();
     await globePage.page.clock.runFor(200);
     await expect(globePage.toast).toHaveCount(0);
+
+    // And her pin is on the globe, lifted and labelled, pulsing once
+    await expect(globePage.youLabel).toHaveText('Sofia Bianchi (you) · Milan');
+    await expect(globePage.youPin).toHaveClass(/pin-dot--new/);
+    expect(await globePage.pulse()).not.toBe('none');
+    await expect(globePage.globe).toHaveAccessibleName('The globe, with your new pin in Milan');
   });
 
   test('the toast can be dismissed', async ({ joinPage, globePage }) => {

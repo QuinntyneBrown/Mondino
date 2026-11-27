@@ -1,8 +1,21 @@
 <main id="main" class="globe-screen" tabindex="-1">
   <section class="globe-screen__stage" aria-label="The team on the globe">
-    <div class="globe-screen__globe">
-      <mo-globe-fallback [label]="globeLabel" [pins]="you() ? [] : null" [you]="you()" />
-    </div>
+    @if (globeState() === 'Fallback') {
+      <div class="globe-screen__globe">
+        <mo-globe-fallback [label]="globeLabel" [pins]="you() ? [] : null" [you]="you()" />
+      </div>
+    } @else {
+      <div class="globe-screen__globe">
+        <mo-globe
+          [label]="globeLabel"
+          [pins]="newPin() ? [] : null"
+          [you]="newPin()"
+          (stateChange)="globeState.set($event)"
+        >
+          <mo-globe-placeholder loading variant="disc" />
+        </mo-globe>
+      </div>
+    }
   </section>
 </main>
 <div class="toast-region" role="status" aria-live="polite">
