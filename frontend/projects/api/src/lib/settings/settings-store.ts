@@ -30,6 +30,8 @@ export interface SettingsStore {
   readonly clockFormat: Signal<ClockFormat | null>;
   /** Replaces them with the backend's copy, from a read or a save of the profile. */
   replace(settings: Settings): void;
+  /** Forgets them, in the browser too, when the viewer leaves the team (L2-036). */
+  clear(): void;
 }
 
 export const SETTINGS_STORE = new InjectionToken<SettingsStore>('SettingsStore');

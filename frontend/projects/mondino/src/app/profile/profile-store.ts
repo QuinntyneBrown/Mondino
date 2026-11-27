@@ -14,6 +14,7 @@ import {
   TEAM_MEMBERSHIP,
   type TemperatureUnit,
 } from '@mondino/api';
+import { Router } from '@angular/router';
 import type { SaveBarState } from '@mondino/components';
 
 /** Loading until the viewer's own profile is read; Failed when it could not be. */
@@ -38,6 +39,7 @@ export class ProfileStore {
   private readonly membership = inject(TEAM_MEMBERSHIP);
   private readonly clock = inject(CLOCK);
   private readonly settingsStore = inject(SETTINGS_STORE);
+  private readonly router = inject(Router);
   private savedTimer: ReturnType<typeof setTimeout> | undefined;
   private pendingRead: AbortController | null = null;
   private pendingLookup: AbortController | null = null;
@@ -232,8 +234,11 @@ export class ProfileStore {
   }
 
   /**
-   * Leaves the team (L2-036). One request at a time; while it is pending the dialog is busy. A
-   * failure, whatever the answer, changes nothing and is reported for "Try again".
+   * Leaves the team (L2-036). One request at a time; while it is pending the dialog is busy. Once
+   * left, the draft is discarded, so "Leave without saving?" is not asked, the browser forgets the
+   * settings and the team, and Left Team replaces this screen with the team's name in the
+   * navigation state, never in the address. A failure, whatever the answer, changes nothing and is
+   * reported for "Try again".
    */
   async leave(): Promise<void> {
     const teamId = this.membership.current()?.teamId;
@@ -244,6 +249,12 @@ export class ProfileStore {
     this.leavingValue.set(true);
     try {
       await this.api.leaveTeam(teamId, pending.signal);
+      const teamName = this.profile()?.teamName ?? null;
+      const saved = this.profile();
+      if (saved) this.saved(saved, false);
+      this.settingsStore.clear();
+      this.membership.forget();
+      void this.router.navigateByUrl('/left', { replaceUrl: true, state: { teamName } });
     } catch {
       if (!pending.signal.aborted) this.leaveFailedValue.set(true);
     } finally {
@@ -252,13 +263,16 @@ export class ProfileStore {
     }
   }
 
-  /** The backend's copy: on the screen as saved, and on every screen through `SETTINGS_STORE`. */
-  private saved(profile: Profile): void {
+  /**
+   * The backend's copy: on the screen as saved, and on every screen through `SETTINGS_STORE`
+   * unless `share` is false.
+   */
+  private saved(profile: Profile, share = true): void {
     this.profileValue.set(profile);
     this.countryCodeValue.set(profile.countryCode);
     this.postalCodeValue.set(profile.postalCode ?? '');
     this.settingsValue.set(profile.settings);
-    this.settingsStore.replace(profile.settings);
+    if (share) this.settingsStore.replace(profile.settings);
     this.clearLookup();
   }
 

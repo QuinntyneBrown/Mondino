@@ -17,6 +17,12 @@ export const routes: Routes = [
     path: 'sign-in',
     loadChildren: () => import('./sign-in/sign-in.routes').then((m) => m.signInRoutes),
   },
+  // After leaving a team: not behind the guard, since the browser then remembers no team.
+  {
+    path: 'left',
+    title: 'You’ve left · Mondino',
+    loadComponent: () => import('./left/left-page').then((m) => m.LeftPage),
+  },
   // The teammate screens, under one shell that holds the header and the team they share. An
   // address the shell has no screen for yet falls through to the routes after it.
   {

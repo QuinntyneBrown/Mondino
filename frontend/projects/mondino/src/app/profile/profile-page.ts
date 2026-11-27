@@ -98,6 +98,7 @@ export class ProfilePage {
   private dialogs: { readonly service: Dialog; readonly injector: EnvironmentInjector } | null =
     null;
   private asking: Promise<boolean> | null = null;
+  private leaveDialog: { close(): void } | null = null;
   private leaveDialogOpen = false;
   private destroyed = false;
 
@@ -220,6 +221,8 @@ export class ProfilePage {
     void this.store.load();
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
+      // "Leave Northwind?" goes with the screen it was asked on, as once the team is left.
+      this.leaveDialog?.close();
       // Destroying the dialogs' injector closes a dialog still open.
       this.dialogs?.injector.destroy();
     });
@@ -303,7 +306,11 @@ export class ProfilePage {
       maxWidth: '100%',
       maxHeight: '100%',
     });
-    dialog.closed.subscribe(() => (this.leaveDialogOpen = false));
+    this.leaveDialog = dialog;
+    dialog.closed.subscribe(() => {
+      this.leaveDialog = null;
+      this.leaveDialogOpen = false;
+    });
   }
 
   /** The screen's CDK Dialog, drawn in the page's own layers, made on first use. */

@@ -49,6 +49,7 @@ const settingsStore: SettingsStore = {
   temperatureUnit: signal(null),
   clockFormat: signal(null),
   replace: (settings) => replaced.push(settings),
+  clear: () => undefined,
 };
 const toronto: PostalCodeResult = {
   city: {
