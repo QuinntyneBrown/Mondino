@@ -27,3 +27,4 @@ export * from './lib/group-panel/group-panel';
 export * from './lib/week-panel/week-panel';
 export * from './lib/app-header/app-header';
 export * from './lib/invite-card/invite-card';
+export * from './lib/team-table/team-table';

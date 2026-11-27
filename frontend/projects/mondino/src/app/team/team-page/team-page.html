@@ -1,0 +1,17 @@
+<main id="main" class="page" tabindex="-1">
+  <h1>Where everyone is in their day</h1>
+  @if (lead(); as lead) {
+    <p class="page__lead tnum">{{ lead }}</p>
+  }
+  <div class="section-head">
+    <h2>Everyone, west to east</h2>
+  </div>
+  <div id="team-list">
+    <mo-team-table
+      caption="Everyone, west to east"
+      [rows]="rows()"
+      [address]="addressOf"
+      (teammateChosen)="choose($event)"
+    />
+  </div>
+</main>

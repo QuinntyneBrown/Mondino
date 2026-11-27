@@ -1,0 +1,37 @@
+// The Team screen's page (docs/design-system/components/team-table, day-ribbon).
+:host {
+  display: block;
+}
+.page {
+  width: 100%;
+  max-width: var(--layout-container-max);
+  margin-inline: auto;
+  padding: var(--space-8) var(--layout-margin) var(--space-24);
+}
+.page > h1 {
+  font: var(--text-h1);
+  text-wrap: wrap;
+}
+.page__lead {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-12);
+}
+@media (min-width: 40rem) {
+  .page > h1 {
+    font: var(--text-h1-lg);
+  }
+}
+@media (min-width: 62rem) {
+  .page {
+    padding-top: var(--space-10);
+  }
+}

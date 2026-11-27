@@ -8,6 +8,7 @@ import { InviteNeededPage } from '../pages/invite-needed.page';
 import { JoinPage } from '../pages/join.page';
 import { NotFoundPage } from '../pages/not-found.page';
 import { SignInPage } from '../pages/sign-in.page';
+import { TeamPage } from '../pages/team.page';
 
 interface Options {
   /**
@@ -31,6 +32,7 @@ interface Fixtures {
   createTeamPage: CreateTeamPage;
   inviteNeededPage: InviteNeededPage;
   signInPage: SignInPage;
+  teamPage: TeamPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -121,6 +123,10 @@ export const test = base.extend<Options & Fixtures>({
 
   signInPage: async ({ page }, use) => {
     await use(new SignInPage(page));
+  },
+
+  teamPage: async ({ page }, use) => {
+    await use(new TeamPage(page));
   },
 });
 

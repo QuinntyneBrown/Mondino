@@ -24,3 +24,4 @@ export * from './lib/pins/team-counts';
 export * from './lib/pins/west-to-east';
 export * from './lib/pins/working-now';
 export * from './lib/pins/invite-link';
+export * from './lib/pins/team-rows';
