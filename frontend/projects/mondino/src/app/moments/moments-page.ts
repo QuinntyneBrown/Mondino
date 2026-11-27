@@ -21,7 +21,6 @@ import {
   Skeleton,
 } from '@mondino/components';
 import {
-  BrowserClock,
   countMoments,
   groupMoments,
   momentWindow,
@@ -41,8 +40,7 @@ import { TeamStore } from '../team/team-store';
 @Component({
   selector: 'mo-moments-page',
   imports: [Button, EmptyState, FilterChips, ListNote, MomentList, RouterLink, Skeleton],
-  // One clock for the screen, released with it; the team and its moments are the shell's.
-  providers: [{ provide: CLOCK, useClass: BrowserClock }],
+  // The clock, the team and its moments are the shell's (ADR 0025).
   templateUrl: './moments-page.html',
   styleUrl: './moments-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

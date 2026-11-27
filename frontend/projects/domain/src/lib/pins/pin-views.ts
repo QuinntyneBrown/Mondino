@@ -22,12 +22,13 @@ import { initialsOf } from './initials';
  * (L2-014, L2-015), its weather in the viewer's unit with the night form of a clear sky while
  * the city is probably asleep (L2-018, L2-019), its moment marker from the team's `moments` of the
  * chosen `kinds` (L2-021, L2-022), and its accessible name. Worked out once a minute, every pin in
- * one pass, the moments grouped by teammate once.
+ * one pass, the moments grouped by teammate once. The pins of `newIds` (the teammate who has just
+ * joined, and those a refresh brought) are new, and pulse once (L2-005, L2-048).
  */
 export function pinViews(
   pins: readonly Pin[],
   now: number,
-  newId: string | null = null,
+  newIds: readonly string[] = [],
   clockFormat: ClockFormat = '24-hour',
   unit: TemperatureUnit = 'celsius',
   moments: readonly Moment[] = [],
@@ -67,7 +68,7 @@ export function pinViews(
       marker,
       description: describePin(name, pin.cityName, localTime, status, weather, marker),
       isViewer: pin.isViewer,
-      isNew: pin.teammateId === newId,
+      isNew: newIds.includes(pin.teammateId),
     });
   }
   return views;

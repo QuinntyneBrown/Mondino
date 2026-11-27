@@ -40,7 +40,6 @@ import {
   TextField,
 } from '@mondino/components';
 import {
-  BrowserClock,
   formatTime,
   localTime,
   stillPlacements,
@@ -78,12 +77,8 @@ import { ProfileStore } from './profile-store';
     Switch,
     TextField,
   ],
-  // The screen's state, its client and one clock, released with it.
-  providers: [
-    ProfileStore,
-    { provide: PROFILE_API, useClass: HttpProfileApi },
-    { provide: CLOCK, useClass: BrowserClock },
-  ],
+  // The screen's state and its client, released with it; the clock is the shell's (ADR 0025).
+  providers: [ProfileStore, { provide: PROFILE_API, useClass: HttpProfileApi }],
   templateUrl: './profile-page.html',
   styleUrl: './profile-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

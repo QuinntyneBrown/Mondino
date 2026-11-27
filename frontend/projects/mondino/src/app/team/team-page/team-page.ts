@@ -25,7 +25,6 @@ import {
   TeamTable,
 } from '@mondino/components';
 import {
-  BrowserClock,
   citySections,
   defaultClockFormat,
   defaultTemperatureUnit,
@@ -84,8 +83,6 @@ const notes: Record<StatusFilter, { title: string; text: string } | null> = {
     Skeleton,
     TeamTable,
   ],
-  // One clock for the screen, released with it; the team is the shell's.
-  providers: [{ provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './team-page.html',
   styleUrl: './team-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

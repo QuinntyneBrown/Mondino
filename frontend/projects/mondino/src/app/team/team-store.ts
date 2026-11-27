@@ -1,5 +1,16 @@
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
-import { ApiError, TEAM_API, TEAM_MEMBERSHIP, type Moment, type TeamPins } from '@mondino/api';
+import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import {
+  ApiError,
+  CLOCK,
+  TEAM_API,
+  TEAM_MEMBERSHIP,
+  type Moment,
+  type TeamPins,
+} from '@mondino/api';
+
+/** How often an open screen reads the team again, while its tab is visible (L2-048). */
+export const refreshIntervalMinutes = 15;
+const refreshIntervalMs = refreshIntervalMinutes * 60_000;
 
 /** Loading until the pins are read; Forgotten when the session no longer has the team. */
 export type TeamState = 'Loading' | 'Ready' | 'Failed' | 'Forgotten';
@@ -14,11 +25,16 @@ export type MomentsState = 'Loading' | 'Ready' | 'Failed';
  * moments (find-moments) are read beside the pins and never hold them up: until they answer, and
  * when they fail, there are none.
  * Provided by `TeamShell`, so the teammate screens share it and it goes when the teammate leaves them.
+ *
+ * The team is read again quietly (keep-team-fresh, ADR 0025): at a minute tick of the shell's one
+ * clock 15 minutes or more after the last good read, so never while the tab is hidden, when the
+ * clock rests, and at once when it is shown after longer. The store has no timer of its own.
  */
 @Injectable()
 export class TeamStore {
   private readonly api = inject(TEAM_API);
   private readonly membership = inject(TEAM_MEMBERSHIP);
+  private readonly clock = inject(CLOCK);
   private readonly releasing = new AbortController();
 
   readonly team = signal<TeamPins | null>(null);
@@ -34,9 +50,20 @@ export class TeamStore {
     const [first] = this.heldIds();
     return first ? `group:${first}` : null;
   });
+  /** The teammates whose pins the last refresh brought, which pulse once; none after the first read. */
+  readonly arrivedIds = signal<readonly string[]>([]);
+  /** The minute the pins held were read; null until they are. */
+  readonly refreshedAt = signal<number | null>(null);
+  /** Whether a refresh is pending, and whether the last one failed (the banner, L2-048). */
+  readonly refreshing = signal(false);
+  readonly refreshFailed = signal(false);
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.releasing.abort());
+    effect(() => {
+      const minute = this.clock.minute();
+      untracked(() => this.refreshIfDue(minute));
+    });
   }
 
   async load(): Promise<void> {
@@ -49,14 +76,65 @@ export class TeamStore {
     void this.loadMoments();
     try {
       this.team.set(await this.api.getPins(teamId, this.releasing.signal));
+      this.refreshedAt.set(this.clock.minute());
       this.state.set('Ready');
     } catch (error) {
       if (this.releasing.signal.aborted) return;
-      if (error instanceof ApiError && (error.status === 401 || error.status === 404)) {
-        this.membership.forget();
-        this.state.set('Forgotten');
-      } else this.state.set('Failed');
+      if (!this.forgetsTheTeam(error)) this.state.set('Failed');
     }
+  }
+
+  /**
+   * Reads the pins and the moments again, quietly: the screen keeps what it shows and its
+   * selection, a teammate who was not held before is noted as arrived, and moments that fail keep
+   * the last ones. When the pins fail, `refreshFailed` brings the banner; the next minute tick, or
+   * its "Try again", reads again.
+   */
+  async refresh(): Promise<void> {
+    const teamId = this.membership.current()?.teamId;
+    if (!teamId || this.refreshing()) return;
+    this.refreshing.set(true);
+    const signal = this.releasing.signal;
+    const moments = this.api.getMoments(teamId, signal).then(
+      (each) => each,
+      () => null,
+    );
+    try {
+      const next = await this.api.getPins(teamId, signal);
+      const held = new Set(this.team()?.pins.map((pin) => pin.teammateId));
+      this.arrivedIds.set(
+        next.pins.filter((pin) => !held.has(pin.teammateId)).map((pin) => pin.teammateId),
+      );
+      this.team.set(next);
+      this.refreshedAt.set(this.clock.minute());
+      this.refreshFailed.set(false);
+      const read = await moments;
+      if (read && !signal.aborted) {
+        this.moments.set(read);
+        this.momentsState.set('Ready');
+      }
+    } catch (error) {
+      if (signal.aborted) return;
+      if (!this.forgetsTheTeam(error)) this.refreshFailed.set(true);
+    } finally {
+      this.refreshing.set(false);
+    }
+  }
+
+  /** Refreshes when the last good read is 15 minutes old or more, or the last refresh failed. */
+  private refreshIfDue(minute: number): void {
+    const readAt = this.refreshedAt();
+    if (this.state() !== 'Ready' || readAt === null) return;
+    if (this.refreshFailed() || minute - readAt >= refreshIntervalMs) void this.refresh();
+  }
+
+  /** A session that has ended (401) or a team that is not the session's (404) forgets the team. */
+  private forgetsTheTeam(error: unknown): boolean {
+    if (!(error instanceof ApiError) || (error.status !== 401 && error.status !== 404))
+      return false;
+    this.membership.forget();
+    this.state.set('Forgotten');
+    return true;
   }
 
   /**
