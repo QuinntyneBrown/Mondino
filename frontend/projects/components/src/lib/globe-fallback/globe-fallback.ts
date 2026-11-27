@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -14,7 +15,9 @@ import type { StillPlacement } from '@mondino/api';
  * The still picture of the globe, in the cartoon look the 3D globe aims for. It needs neither
  * WebGL nor the `globe` library. It is not focusable. Given `pins`, it draws a bare pin at each
  * placement (`stillPlacements` in `domain`), in the pin colour, hidden from assistive technology:
- * the label says what they are.
+ * the label says what they are. Holding pins a person can choose (`pinned`, the Globe's pin
+ * buttons in its `[pins]` slot), it is a labelled group, so the list of pins is reached as text
+ * (L2-040); otherwise it is one picture.
  * The picture is transcribed from the mocks (docs/mocks/pages/not-found/default.html).
  */
 @Component({
@@ -26,6 +29,8 @@ import type { StillPlacement } from '@mondino/api';
 export class GlobeFallback {
   /** What the picture is, for someone who cannot see it. */
   readonly label = input('A still picture of the globe');
+  /** Whether its `[pins]` slot holds pin buttons: then it is a group, not a picture. */
+  readonly pinned = input(false, { transform: booleanAttribute });
   /** Bare pins to draw, or none: `null` draws no pin layer at all. */
   readonly pins = input<readonly StillPlacement[] | null>(null);
   /**

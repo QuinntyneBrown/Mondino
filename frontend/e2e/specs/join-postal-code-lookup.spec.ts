@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-003, L2-006, L2-007, L2-019
+// Traces to: L2-003, L2-006, L2-007, L2-019, L2-040
 // Description: Leaving the postal code field looks it up; the city found is named with its weather, in the unit of the country chosen, and the new pin is placed there
 
 import type { Request } from '@playwright/test';
@@ -10,6 +10,7 @@ import {
   NORTHWIND_LOOKUPS,
   northwindInvite,
 } from '../fixtures/invites';
+import { announcements, listenForAnnouncements } from '../support/accessibility';
 
 test.describe('Join: look up the postal code', () => {
   const lookups: Request[] = [];
@@ -32,6 +33,7 @@ test.describe('Join: look up the postal code', () => {
     // Given Italy and the postal code 20121, with the lookup's answer held
     const answer = api.hold('POST', NORTHWIND_LOOKUPS);
     await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
+    await listenForAnnouncements(joinPage.page);
 
     // When the postal code field is left
     await joinPage.leavePostalCode();
@@ -46,6 +48,15 @@ test.describe('Join: look up the postal code', () => {
     answer.release(lookupAnswer({ countryCode: 'IT', postalCode: '20121' }));
     await expect(joinPage.submit).toHaveText('Join Northwind');
     await expect(joinPage.submit).toBeEnabled();
+
+    // And the wait and the city found were each announced once, politely
+    expect(await announcements(joinPage.page)).toEqual([
+      { politeness: 'polite', text: 'Finding 20121…' },
+      {
+        politeness: 'polite',
+        text: 'Milan, Lombardy — pinned at city level. 13° and foggy right now.',
+      },
+    ]);
   });
 
   test('the city found is named, its new pin is placed and the button reads "Join Northwind"', async ({

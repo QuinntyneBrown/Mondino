@@ -79,7 +79,10 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 - **The still picture keeps its pins.** Where the still picture stands in for the globe
   (`draw-globe`), `GlobeFallback` draws the same list of pins over it, placed by
   `stillPlacements` and named by the same `descriptions`: each pin is still a button, lifts,
-  and opens its panel through the outputs `select` and `selectGroup`. The group is named "A still picture of the
+  and opens its panel through the outputs `select` and `selectGroup`. Given `pinned`, as
+  the Globe gives it, `GlobeFallback` is a `group` rather than an `img`, so its pins are
+  reached as text; on Join, Create Team and Profile & Settings, whose pins are bare, it stays
+  one picture. The group is named "A still picture of the
   globe, with 13 teammates’ pins." and is not a Tab stop itself, since it does not turn and
   is not dragged. The legend says why it is still, in words: "Still view — 3D isn’t available
   in this browser"; on a phone a line under the globe reads the same and adds "Pins still

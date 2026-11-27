@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-005, L2-042, L2-012, L2-013
+// Traces to: L2-005, L2-042, L2-012, L2-013, L2-040
 // Description: Straight after joining, the Globe shows the new pin pulsing once and a toast that says so and dismisses itself
 
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
@@ -13,6 +13,7 @@ import {
   SOFIA_JOINED,
 } from '../fixtures/invites';
 import { letTimePass, pauseTheClock } from '../support/turning';
+import { announcements, listenForAnnouncements } from '../support/accessibility';
 
 test.describe('Globe: just joined', () => {
   test.beforeEach(({ api }) => {
@@ -41,6 +42,7 @@ test.describe('Globe: just joined', () => {
     await joinPage.leavePostalCode();
     await expect(joinPage.submit).toHaveText('Join Northwind');
     await pauseTheClock(joinPage.page);
+    await listenForAnnouncements(joinPage.page);
     await joinPage.submit.click();
 
     // Then the Globe opens, and a toast, in a region that announces it once, says she is on the map
@@ -55,12 +57,23 @@ test.describe('Globe: just joined', () => {
     await expect(globePage.toast).toHaveText(
       'You’re on the map. Northwind can now see your pin in Milan.',
     );
+    const toasts = async () =>
+      (await announcements(globePage.page)).filter((said) => said.text.startsWith('You’re on'));
+    expect(await toasts()).toEqual([
+      {
+        politeness: 'polite',
+        text: expect.stringMatching(
+          /^You’re on the map\. Northwind can now see your pin in Milan\./,
+        ),
+      },
+    ]);
 
     // And the toast dismisses itself after 4 seconds
     await letTimePass(globePage.page, 3_000);
     await expect(globePage.toast).toBeVisible();
     await letTimePass(globePage.page, 1_000);
     await expect(globePage.toast).toHaveCount(0);
+    expect(await toasts()).toHaveLength(1);
 
     // And her pin is on the globe, lifted and labelled, pulsing once; the clock stays stopped so
     // the globe does not turn her pin out of view while it is looked at

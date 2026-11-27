@@ -414,12 +414,12 @@ export function mockBanner(path: string): {
   icons: string[][];
 } {
   const markup = mockMarkup(path);
-  const banner = /<div class="banner" role="(\w+)">([\s\S]*?)<\/button><\/div>/.exec(markup);
+  const banner = /<div class="banner">([\s\S]*?)<\/button><\/div>/.exec(markup);
   if (!banner) throw new Error(`No banner in ${path}`);
   return {
-    role: banner[1],
+    role: /<p class="banner__text" role="(\w+)">/.exec(banner[1])?.[1] ?? '',
     text: textOf(banner[0] + '</div>', 'banner__text') ?? '',
-    button: (/<button[^>]*>([\s\S]*)$/.exec(banner[2])?.[1] ?? '')
+    button: (/<button[^>]*>([\s\S]*)$/.exec(banner[1])?.[1] ?? '')
       .replace(/<svg[\s\S]*?<\/svg>/g, '')
       .replace(/\s+/g, ' ')
       .trim(),

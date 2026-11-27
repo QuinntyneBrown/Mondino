@@ -37,6 +37,11 @@ the axe sweep only when a person asks.
   reduced motion; an animation that repeats or pulses (the new pin's pulse, the shimmer of a
   skeleton or the globe's placeholder) is `animation: none` in a
   `@media (prefers-reduced-motion: reduce)` block in its component's stylesheet.
+- **A live region holds only what it announces.** The refresh banner was one `role="status"`
+  with its "Try again" button inside, so each automatic retry ("Trying…", then "Try again")
+  announced the whole banner again. The status is now its words alone. A failed refresh is
+  announced politely, as the mock draws it: the screen keeps what it shows, so nothing has to
+  stop the person (L2-040 criterion 8 says so).
 - **No text on the globe fades under 4.5:1.** The mocks faded every pin with its depth, so a
   labelled pin near the rim drew its initials and its label under AA. A labelled pin is now
   drawn at full strength; a far pin (ADR 0014) still fades, unlabelled, and draws no initials
