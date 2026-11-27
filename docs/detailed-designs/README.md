@@ -178,15 +178,16 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - `workingNow(pins, now, limit)` returns a `WorkingNow` (`count`, `teammates`, `more`), and
   the Globe's panel lists at most six moments and six teammates. A `MomentMarker` holds its
   `moments`, an `emblem`, a `count` and `today`.
-- `GlobeScene.setPalette` takes a `GlobePalette` read from the `--color-globe-*` tokens, and
+- `GlobeScene.setPalette` takes a `GlobePalette` read from the `--color-globe-*` tokens; the
+  globe is drawn by three.js from `globe.glb` and two mask textures built in Blender
+  (ADR 0012), and its outline and shadow are SVG circles around the canvas. `CLOCK`'s
+  `minute` signal ticks once a minute (`BrowserClock`, bound at the root), and
   `TeamStore.refreshing` is true while a refresh is pending.
 
 ## Not decided yet
 
 The designs mark these as `<TO SUPPLY>`:
 
-- The globe's renderer and the format its Blender-built assets are exported to; an ADR decides
-  both before the Globe is built.
 - The hosting platform, and with it how the API learns a client's own address behind the
   platform's proxy (forwarded headers), which the rate limits count by.
 - The providers of the holiday, race and event calendars. (The postal code source and the city
@@ -206,5 +207,5 @@ The designs mark these as `<TO SUPPLY>`:
 - Which emblems Mondino holds the right to use.
 - What becomes of a team when its last teammate leaves.
 - Numbers the requirements do not give: the circuit breaker's threshold,
-  the globe's turning rate and detail steps, the rate limit on a teammate's own postal code
+  the globe's turning rate, the rate limit on a teammate's own postal code
   lookup.

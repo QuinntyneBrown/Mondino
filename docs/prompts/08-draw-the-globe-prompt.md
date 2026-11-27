@@ -102,7 +102,7 @@ Builds on: journeys 1 and 6 (the Globe route and the team's pins).
      unit tests for 12:00 UTC on 21 March and an hour's movement).
   5. The still picture (`GlobeFallback` in `components`) where WebGL is missing or the assets or the chunk
      fail to load, with the mock's notice in place of the legend.
-  6. The legend at 576 px and wider; the lower level of detail a low-power device steps down to (the stepping
+  6. The legend at 640 px and wider (the mock's breakpoint); the lower level of detail a low-power device steps down to (the stepping
      itself is journey 29).
   7. Join's stage uses the same `GlobeView`, not interactive, with the bare pins as plain markers until
      journey 10.
