@@ -1236,3 +1236,59 @@ in light and in dark. A colour change only: no criterion was added or removed, a
 - *Make a shared fixture count as the mock does* (journey 15, lesson 3): `CAST_MOMENTS` is the backend
   test's cast, moment for moment, and the specs compare the screens with the mocks' markup.
 - *Fix the mock, not the rule* (journey 18, lesson 4): Luca's Monza moment.
+
+## Journey 20: Mark pins with moments
+
+**What slowed it**
+
+- The design drew the markers through a `GlobeView` input and an `emblemFor` over held emblems, but
+  `GlobePage` projects `PinLayer` itself, over the 3D globe and the still picture, and ADR 0019 holds no
+  emblem. The marker became part of `PinView`, worked out in `pinViews`' one pass a minute, and the design
+  and its four diagrams were redrawn before any code. Its `<TO SUPPLY>` (two moments on one day) is by title.
+- The prompt deferred the count on a marker as undrawn; `pages/globe/default` draws Tomás's "2" and the
+  mocks' decision 8 settles it, so it was built.
+- Nothing held the viewer's chosen kinds: the switches are journey 23's. `SETTINGS_STORE`, read from the
+  browser by `SettingsCache` for the teammate the membership names (ADR 0020), lets the Globe follow them
+  now and the specs set what a save would leave.
+- The still picture leaves Tomás and Jordan on the far side, where the mock draws them faint by the rim, so
+  the mock comparison found no "2". The still picture is compared for the pins it draws, and Tomás's count
+  on the 3D globe through his address, as `pages/globe/selected` draws it.
+- The narrow-globe spec read a lifted pin mid-transition (18 px of its 34) and found the marker over the
+  initials; under reduced motion it measured the settled pin and passed.
+
+**Lessons**
+
+1. **Check which of a mock's elements the screen draws before comparing them.** A mock and the screen can
+   agree on every element they share and still differ in which they show; filter the mock by what is drawn,
+   then name the ones you expect.
+2. **Measure a pin's size under reduced motion.** Lifting animates its width; a box read straight after
+   the class changes is a frame of the transition.
+3. **A setting whose switch comes later is read through its token now.** Bind the contract, keep it in the
+   browser for its owner, and let the spec set what a save leaves; the later journey only writes it.
+4. **A criterion with a clause nothing can reach yet is not proven by its other clauses.** L2-021
+   criterion 4 waits for an emblem Mondino holds; say so in the count rather than call it done.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): the design, its diagrams, ADR 0020 and the prompt were one commit before any code.
+- *Measure the initial bundle* (journey 2, lesson 1; journey 10, lesson 1): 273.05 kB before and after
+  every slice; the settings token is bound in `TeamShell`, not `app.config.ts`.
+- *One value per text interpolation in a lazy component* (journey 18, lesson 2): the label's moment line
+  is one computed string.
+- *A design-system block gets its own component* (journey 19, lesson 4): `MomentMarker` holds the
+  `moment-marker` block, so `PinLayer`'s stylesheet stays under its budget.
+- *Default an e2e fixture to the state earlier specs assumed* (journey 19, lesson 3): only specs that
+  answer the cast's moments see markers, and no earlier spec changed.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5): the Luca case
+  passed before the cache existed; dropping its teammate check failed it. The narrow-globe spec failed
+  with the marker moved inward.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit code;
+  two lint failures (a `type`, selectors in a spec) stopped commits as they should.
+- *Look at an overlay once* (journey 16, lesson 3): one screenshot at 1280 and 375 px of Tomás's count and
+  the lifted label.
+
+**Progress:** 10 of 13 criteria proven (80%). Not proven: L2-021 criterion 4's held emblem (Mondino holds
+none, ADR 0019); L2-022 criterion 3 (the Moments screen, journey 21) and criterion 4's "Choose moments"
+arriving on Profile & Settings (journey 22), each added to that journey's prompt. Built here for journey
+23: the week's note and the legend with every kind off.

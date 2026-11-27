@@ -119,6 +119,9 @@ Builds on: journeys 14 and 19.
   `CAST_MOMENTS`, `momentOf()` and `northwindMoments()` (`e2e/fixtures/moments.ts`), which answer Northwind
   with no moment by default; build `groupMoments` on them rather than again. The mocks' Moments list now has
   Luca's "Monza tickets on sale" beside Sofia's (`docs/mocks/README.md`).
+- Journey 20 waits for this screen to prove that a kind the viewer turned off is still listed here and can be
+  filtered (L2-022 criterion 3): with `chooseKinds(page, [...])` (`e2e/support/membership.ts`, ADR 0020) leaving
+  a kind off, Moments still lists its moments; raise journey 20's % when it is proven.
 - Set journey 21 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
