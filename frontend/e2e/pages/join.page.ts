@@ -174,6 +174,13 @@ export class JoinPage {
     return this.country.locator('option').allTextContents();
   }
 
+  /** Where the person's own pin is drawn, as a percentage of the globe's width and height. */
+  async youPinPlace(): Promise<{ x: number; y: number }> {
+    const [place] = await this.stage.locator('.globe__pin--lifted').evaluateAll(placesOf);
+    if (!place) throw new Error('The person’s own pin is not on the globe');
+    return place;
+  }
+
   /** Where each pin is drawn, as a percentage of the globe's width and height, west to east. */
   pinPlaces(): Promise<{ x: number; y: number }[]> {
     return this.stage.locator('.globe__pin').evaluateAll(placesOf);

@@ -73,6 +73,8 @@ export class GlobeView {
    * still (ADR 0013).
    */
   readonly interactive = input(false, { transform: booleanAttribute });
+  /** The position to turn to and hold, or null to let the globe go (L2-009). */
+  readonly facing = input<Position | null>(null);
 
   readonly stateChange = output<GlobeState>();
 
@@ -88,6 +90,7 @@ export class GlobeView {
   private readonly clock = inject(CLOCK);
   private readonly releasing = new AbortController();
   private readonly scene = signal<GlobeScene | null>(null);
+  private readonly motion = signal<GlobeMotion | null>(null);
   /** Where the globe faces, so the markers move with it. */
   private readonly orientation = signal<GlobeOrientation>(STARTING_ORIENTATION);
   private resizing: ResizeObserver | undefined;
@@ -115,6 +118,17 @@ export class GlobeView {
       this.clock.minute();
       const scene = this.scene();
       scene?.setSun(subsolarPoint(untracked(() => this.clock.now())));
+    });
+    // Told to face a position, the globe turns to it and holds; let go, it rests and goes on.
+    let holding = false;
+    effect(() => {
+      const facing = this.facing();
+      const motion = this.motion();
+      if (!motion) return;
+      if (facing) motion.hold(facing);
+      else if (holding) motion.release();
+      holding = facing !== null;
+      untracked(() => this.scene())?.requestFrame();
     });
   }
 
@@ -176,9 +190,10 @@ export class GlobeView {
     }
     scene.onFrame((elapsedMs) => {
       if (this.state() === 'Loading') this.moveTo('Ready');
-      const before = motion.orientation;
       const after = motion.advance(elapsedMs);
-      if (after !== before) {
+      // Compared with what is drawn, so a turn made between frames (a hold under reduced
+      // motion) is drawn too.
+      if (after !== this.orientation()) {
         scene.setOrientation(after);
         this.orientation.set(after);
       } else if (motion.isMoving()) scene.requestFrame();
@@ -194,6 +209,7 @@ export class GlobeView {
       );
     }
     this.scene.set(scene);
+    this.motion.set(motion);
     if (!this.document.hidden) scene.start();
   }
 
@@ -223,5 +239,6 @@ export class GlobeView {
     this.resizing = undefined;
     this.scene()?.dispose();
     this.scene.set(null);
+    this.motion.set(null);
   }
 }

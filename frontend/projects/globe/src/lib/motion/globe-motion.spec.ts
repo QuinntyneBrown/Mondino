@@ -4,6 +4,7 @@ import {
   StepDegrees,
   TiltLimitDegrees,
   TurnRateDegreesPerSecond,
+  TurnToPinMs,
 } from './globe-motion';
 
 const facingEurope = { longitude: 10, tilt: 17 };
@@ -126,5 +127,90 @@ describe('GlobeMotion: arrow keys', () => {
     motion.step('Down');
     motion.step('Down');
     expect(motion.orientation.tilt).toBe(TiltLimitDegrees);
+  });
+});
+
+describe('GlobeMotion: turning to a pin and holding', () => {
+  const tokyo = { latitude: 35.7, longitude: 139.7 };
+  const frames = (motion: GlobeMotion, ms: number) => {
+    for (let time = 0; time < ms; time += 16) motion.advance(16);
+  };
+
+  it('turns to face the position within a second, and holds there', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.hold(tokyo);
+    expect(motion.motionMode).toBe('TurningToPin');
+    frames(motion, TurnToPinMs / 2);
+    expect(motion.orientation.longitude).toBeGreaterThan(10);
+    expect(motion.orientation.longitude).toBeLessThan(139.7);
+    frames(motion, TurnToPinMs / 2 + 16);
+    expect(TurnToPinMs).toBeLessThanOrEqual(1000);
+    expect(motion.orientation).toEqual({ longitude: 139.7, tilt: 35.7 });
+    expect(motion.motionMode).toBe('Holding');
+    frames(motion, 60_000);
+    expect(motion.orientation).toEqual({ longitude: 139.7, tilt: 35.7 });
+    expect(motion.isMoving()).toBe(false);
+  });
+
+  it('turns the shorter way round, across the date line', () => {
+    const motion = new GlobeMotion(true, { longitude: 170, tilt: 0 });
+    motion.hold({ latitude: 0, longitude: -170 });
+    frames(motion, TurnToPinMs / 2);
+    const { longitude } = motion.orientation;
+    expect(longitude > 170 || longitude < -170).toBe(true);
+  });
+
+  it('faces the position at once under reduced motion', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.setReducedMotion(true);
+    motion.hold(tokyo);
+    expect(motion.orientation).toEqual({ longitude: 139.7, tilt: 35.7 });
+    expect(motion.motionMode).toBe('Holding');
+  });
+
+  it('finishes a turn under way at once when reduced motion is turned on', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.hold(tokyo);
+    frames(motion, 100);
+    motion.setReducedMotion(true);
+    expect(motion.orientation).toEqual({ longitude: 139.7, tilt: 35.7 });
+  });
+
+  it('keeps a far north position within the tilt limit', () => {
+    const motion = new GlobeMotion(false, facingEurope);
+    motion.setReducedMotion(true);
+    motion.hold({ latitude: 78, longitude: 15 });
+    expect(motion.orientation.tilt).toBe(TiltLimitDegrees);
+  });
+
+  it('stays where a drag leaves it while the position is held', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.hold(tokyo);
+    frames(motion, 1000);
+    motion.dragStart();
+    motion.dragBy(-40, 0);
+    motion.dragEnd();
+    frames(motion, 10_000);
+    expect(motion.orientation.longitude).toBeCloseTo(99.7, 6);
+    expect(motion.orientation.tilt).toBe(35.7);
+    expect(motion.motionMode).toBe('Still');
+  });
+
+  it('turns on its own again 5 seconds after the position is released', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.hold(tokyo);
+    frames(motion, 1000);
+    motion.release();
+    motion.advance(IdleDelayMs);
+    expect(motion.motionMode).toBe('TurningOnItsOwn');
+  });
+
+  it('stays still after the release where the globe does not turn on its own', () => {
+    const motion = new GlobeMotion(false, facingEurope);
+    motion.hold(tokyo);
+    frames(motion, 1000);
+    motion.release();
+    frames(motion, 10_000);
+    expect(motion.orientation).toEqual({ longitude: 139.7, tilt: 35.7 });
   });
 });
