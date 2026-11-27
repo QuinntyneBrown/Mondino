@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Mondino.Api.Errors;
+using Mondino.Api.RateLimiting;
 using Mondino.Application;
 using Mondino.Infrastructure;
 
@@ -14,12 +15,14 @@ builder.Services.AddControllers();
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemCodes.Customize);
 builder.Services.AddExceptionHandler<RefusalHandler>();
 builder.Services.AddHealthChecks();
+builder.Services.AddRateLimitPolicies();
 
 var app = builder.Build();
 
 // Every error is ProblemDetails with a code. No migration is applied here: `Mondino.Cli migrate` does.
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseRateLimiter();
 
 // Liveness: the process is running. It checks nothing else, so it never fails with a dependency.
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });

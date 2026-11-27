@@ -185,7 +185,8 @@ The designs mark these as `<TO SUPPLY>`:
 
 - The globe's renderer and the format its Blender-built assets are exported to; an ADR decides
   both before the Globe is built.
-- The hosting platform.
+- The hosting platform, and with it how the API learns a client's own address behind the
+  platform's proxy (forwarded headers), which the rate limits count by.
 - The providers of the postal code source, of the holiday, race and event calendars and of
   the email source, and the data set behind the city search.
 - Signing in (`joining/sign-in`): how a teammate who joined by invite link signs in again,
