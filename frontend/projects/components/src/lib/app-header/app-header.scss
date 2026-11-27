@@ -13,9 +13,16 @@
   background: var(--color-bg-canvas);
 }
 .app-header__home {
+  position: relative;
   display: inline-flex;
   border-radius: var(--radius-md);
   text-decoration: none;
+}
+// Under 576 px the mark alone is 32 px wide: a 44 px touch target around it.
+.app-header__home::after {
+  content: '';
+  position: absolute;
+  inset: 0 min(0px, calc((100% - var(--target-comfortable)) / 2));
 }
 .segmented {
   display: inline-flex;

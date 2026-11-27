@@ -230,6 +230,11 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .app-header .segmented__option { padding: 0 var(--space-1-5); font-size: var(--font-size-xs); }
   .app-header .mark { width: var(--space-6); height: var(--space-6); }
 }
+/* Every target in the header is at least 44 px: a tab is never narrower, and the mark alone is
+   grown by a transparent ::after. */
+.app-header .segmented__option { min-width: var(--target-comfortable); }
+.app-header > .brand { position: relative; }
+.app-header > .brand::after { content: ""; position: absolute; inset: 0 min(0px, calc((100% - var(--target-comfortable)) / 2)); }
 .app-header--bare { justify-content: flex-start; }
 .app-header--bare .wordmark { display: inline; }
 
