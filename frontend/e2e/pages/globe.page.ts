@@ -206,6 +206,24 @@ export class GlobePage {
     );
   }
 
+  /** The panel's fade: its animation's name and duration, "none" when it has none. */
+  fade(): Promise<{ name: string; duration: string }> {
+    return this.person.evaluate((person) => {
+      const style = getComputedStyle(person);
+      return { name: style.animationName, duration: style.animationDuration };
+    });
+  }
+
+  /** Marks the panel's teammate as drawn now, to tell afterwards whether it was drawn afresh. */
+  async markPanel(): Promise<void> {
+    await this.person.evaluate((person) => person.setAttribute('data-spec-seen', ''));
+  }
+
+  /** Whether the panel's teammate is the one drawn when it was marked. */
+  panelIsMarked(): Promise<boolean> {
+    return this.person.evaluate((person) => person.hasAttribute('data-spec-seen'));
+  }
+
   /** The accessible names of the pins in the list, in its order. */
   async pinNames(): Promise<string[]> {
     return this.pinButtons.evaluateAll((buttons) =>

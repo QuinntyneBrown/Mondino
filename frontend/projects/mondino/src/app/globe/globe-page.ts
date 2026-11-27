@@ -1,10 +1,13 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
+  Injector,
   signal,
   untracked,
 } from '@angular/core';
@@ -70,6 +73,7 @@ export const toastLifetime = 4000;
   templateUrl: './globe-page.html',
   styleUrl: './globe-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:keydown.escape)': 'escape()' },
 })
 export class GlobePage {
   private readonly membership = inject(TEAM_MEMBERSHIP);
@@ -77,6 +81,10 @@ export class GlobePage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly store = inject(TeamStore);
+  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
+  /** Whether the open panel was opened from the keyboard: it then takes focus, and gives it back. */
+  private openedFromKeyboard = false;
 
   /**
    * The teammate the address selects: `/globe?teammate={teammateId}`, an opaque id and nothing
@@ -171,6 +179,23 @@ export class GlobePage {
       : `The globe${pins}`;
   });
 
+  /** The panel as a list of one, so another teammate's is drawn afresh and fades in. */
+  protected readonly panels = computed(() => {
+    const panel = this.panel();
+    return panel ? [panel] : [];
+  });
+
+  /**
+   * What was selected, said once in a polite live region as the mocks word it: "Tomás Herrera,
+   * Mexico City, selected.". It changes with the selection only, not as the minute passes.
+   */
+  protected readonly announcement = computed(() => {
+    const id = this.store.selectedId();
+    const pin = this.store.team()?.pins.find((each) => each.teammateId === id);
+    if (!pin) return '';
+    return `${pin.name}${pin.isViewer ? ', you' : ''}, ${pin.cityName}, selected.`;
+  });
+
   protected readonly toast = signal<{ strong: string; text: string } | null>(null);
 
   constructor() {
@@ -227,21 +252,60 @@ export class GlobePage {
   }
 
   /** Selects a teammate's pin through the address, or clears the selection. */
-  private show(teammateId: string | null): void {
-    void this.router.navigate([], {
+  private show(teammateId: string | null): Promise<boolean> {
+    return this.router.navigate([], {
       relativeTo: this.route,
       queryParams: teammateId ? { teammate: teammateId } : {},
       replaceUrl: true,
     });
   }
 
-  protected select(teammateId: string): void {
-    this.show(teammateId);
+  /** Whether what was just chosen has keyboard focus: a pin, or a row of a group's panel. */
+  private chosenByKeyboard(): boolean {
+    const chosen = document.activeElement;
+    return !!chosen && this.host.contains(chosen) && chosen.matches(':focus-visible');
   }
 
+  protected select(teammateId: string): void {
+    const keyboard = this.chosenByKeyboard();
+    this.openedFromKeyboard = keyboard;
+    void this.show(teammateId).then(() => {
+      if (keyboard) afterNextRender(() => this.focusHeading(), { injector: this.injector });
+    });
+  }
+
+  /** A tap off the pins: the selection is cleared and focus is left where it is. */
   protected clear(): void {
+    this.openedFromKeyboard = false;
     this.store.clear();
-    this.show(null);
+    void this.show(null);
+  }
+
+  /** The close button or Escape: the panel closes, and focus returns to the pin if it came from it. */
+  protected close(): void {
+    const teammateId = this.store.selectedId() ?? this.store.heldIds()[0];
+    const keyboard = this.openedFromKeyboard;
+    this.clear();
+    if (keyboard && teammateId)
+      afterNextRender(() => this.focusPin(teammateId), { injector: this.injector });
+  }
+
+  protected escape(): void {
+    if (this.store.selectedId() !== null || this.store.heldIds().length > 0) this.close();
+  }
+
+  private focusHeading(): void {
+    this.host.querySelector<HTMLElement>('.globe-screen__panel h2')?.focus();
+  }
+
+  /** Focus on the pin, or the group pin, that stands for a teammate. */
+  private focusPin(teammateId: string): void {
+    const placements =
+      (this.globeState() === 'Fallback' ? this.stillPinPlacements() : this.placements()) ?? [];
+    const index = placements.findIndex((placement) =>
+      placement.pins.some((pin) => pin.teammateId === teammateId),
+    );
+    this.host.querySelectorAll<HTMLElement>('.globe__pins button.pin')[index]?.focus();
   }
 
   protected showView(viewport: GlobeViewport): void {

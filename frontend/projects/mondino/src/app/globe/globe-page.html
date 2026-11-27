@@ -45,13 +45,15 @@
     }
     <mo-globe-legend [still]="globeState() === 'Fallback'" />
   </section>
-  @if (panel(); as panel) {
+  @for (panel of panels(); track panel.teammateId) {
+    <!-- One teammate at a time: another is drawn afresh, so it fades in. -->
     <aside class="globe-screen__panel" [attr.aria-label]="panel.name">
       <div class="panel">
-        <mo-teammate-panel [content]="panel" [clockFormat]="clockFormat()" (closed)="clear()" />
+        <mo-teammate-panel [content]="panel" [clockFormat]="clockFormat()" (closed)="close()" />
       </div>
     </aside>
   }
+  <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
 </main>
 <div class="toast-region" role="status" aria-live="polite">
   @if (toast(); as toast) {
