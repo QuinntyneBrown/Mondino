@@ -60,17 +60,10 @@ test.describe('Globe: the team’s pins', () => {
     await expect(globePage.pin('Priya Raman')).toBeVisible();
     await expect(globePage.pinItem('Priya Raman')).not.toHaveClass(/globe__pin--far/);
 
-    // When the globe is dragged east, a little at a time, Bengaluru moves towards the rim
+    // When the globe is dragged east by 52 px, about 25°, Bengaluru is near the rim
+    // (it is near the rim from 40 px to 64 px at this size, and turned away from 72 px)
     const priya = globePage.pinItem('Priya Raman');
-    await expect
-      .poll(async () => {
-        await globePage.dragWithTheMouse(8, 0);
-        return (
-          (await priya.count()) === 0 ||
-          /globe__pin--far/.test((await priya.getAttribute('class')) ?? '')
-        );
-      })
-      .toBe(true);
+    await globePage.dragWithTheMouse(52, 0);
 
     // Then Priya's pin is drawn fainter, without its label, until it is lifted
     await expect(priya).toHaveClass(/globe__pin--far/);
