@@ -108,6 +108,10 @@ the shell and what is left.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 23 left a save or a leave on Profile & Settings with an ended session (401) to
+  `sessionExpiredInterceptor`: until it exists the save bar says "Couldn’t save." Prove that a 401 on
+  `PUT /api/teams/{teamId}/me` shows "You need an invite link" in place, and decide in the design whether
+  `unsavedChangesGuard` asks "Leave without saving?" first.
 - Set journey 27 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

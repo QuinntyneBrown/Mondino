@@ -105,6 +105,10 @@ Builds on: journeys 10, 15 and 19.
 - Journey 15 waits for this journey to prove the second half of L2-025 criterion 10: a teammate who joins
   while the viewer's Globe is open appears at the next refresh with a pulse and no toast (the toast after
   joining is proven). Raise journey 15's % when it is.
+- Journey 23 keeps the viewer's display settings and kinds in the browser and replaces them only when
+  Profile & Settings reads or saves the profile (ADR 0023), so a browser that has never opened Profile &
+  Settings draws the country's defaults. If the quiet refresh reads anything of the viewer's own, consider
+  carrying the backend's copy to `SETTINGS_STORE` there, and record it in ADR 0023.
 - Set journey 25 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
