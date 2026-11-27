@@ -38,6 +38,10 @@
   background: var(--color-bg-subtle);
   color: var(--color-fg-muted);
 }
+.field__help {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
 .field__error {
   display: flex;
   align-items: flex-start;

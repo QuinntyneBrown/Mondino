@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { ApiFixture } from './api';
 import { NOW } from './now';
+import { CreateTeamPage } from '../pages/create-team.page';
 import { GlobePage } from '../pages/globe.page';
 import { JoinPage } from '../pages/join.page';
 import { NotFoundPage } from '../pages/not-found.page';
@@ -15,6 +16,7 @@ interface Fixtures {
   notFoundPage: NotFoundPage;
   joinPage: JoinPage;
   globePage: GlobePage;
+  createTeamPage: CreateTeamPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -75,6 +77,10 @@ export const test = base.extend<Fixtures>({
 
   globePage: async ({ page }, use) => {
     await use(new GlobePage(page));
+  },
+
+  createTeamPage: async ({ page }, use) => {
+    await use(new CreateTeamPage(page));
   },
 });
 
