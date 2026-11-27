@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-008, L2-010, L2-037
+// Traces to: L2-008, L2-010, L2-037, L2-012, L2-013
 // Description: Where the 3D globe cannot be drawn the still picture stands in its place, and the legend, or a line under it on a phone, says why
 
 import type { Page } from '@playwright/test';
@@ -101,6 +101,26 @@ test.describe('Globe: the still picture', () => {
       await expect(globePage.stillPicture).toBeVisible();
       await expect(globePage.stillLine).toHaveText(`${still}. Pins still open.`);
       await expect(globePage.legend).toBeHidden();
+    });
+
+    test('the team’s pins are on the still picture, and lift and are selected there', async ({
+      api,
+      page,
+      globePage,
+    }) => {
+      await rememberTeam(page);
+      api.answer('GET', NORTHWIND_PINS, northwindPins());
+
+      await globePage.open();
+
+      await expect(globePage.stillPicture).toBeVisible();
+      await expect(globePage.pin('2 teammates close together')).toHaveText('2');
+      await expect(globePage.labelOf('Lena Fischer')).toHaveText('15:05');
+      await expect(globePage.pin('Aiko Tanaka')).toHaveCount(0);
+      await globePage.pin('Lena Fischer').hover();
+      await expect(globePage.labelOf('Lena Fischer')).toHaveText('Lena Fischer · Berlin15:05');
+      await globePage.pin('Lena Fischer').click();
+      await expect(globePage.pin('Lena Fischer')).toHaveAttribute('aria-pressed', 'true');
     });
 
     test('the new pin is on the still picture straight after joining', async ({
