@@ -18,8 +18,11 @@ enum DatabaseAuthentication {
   AzureCli
 }
 
-class DatabaseConnection <<static>> {
-  +{static} Create(configuration: IConfiguration): NpgsqlDataSource
+class DatabaseConnection {
+  -string connectionString
+  -DatabaseAuthentication authentication
+  +{static} Read(configuration: IConfiguration): DatabaseConnection
+  +CreateDataSource(): NpgsqlDataSource
   -{static} AuthenticationOf(configuration): DatabaseAuthentication
 }
 
@@ -27,6 +30,7 @@ class EntraDatabaseTokens {
   +{static} string Scope = "https://ossrdbms-aad.database.windows.net/.default"
   -TokenCredential credential
   +{static} For(authentication: DatabaseAuthentication): EntraDatabaseTokens
+  +Get(): string
   +GetAsync(ct): ValueTask<string>
 }
 

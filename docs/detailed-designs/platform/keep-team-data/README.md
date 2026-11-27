@@ -44,12 +44,15 @@ firewall rules on this server, and assigns it to `mondino-deploy`.
 The administrator is a member of `mondino_migrator`, so an operator can apply the migrations by
 hand as that role and the tables keep one owner.
 
-**`DatabaseConnection`** — static class in `Mondino.Infrastructure` (`Persistence`).
-`AddInfrastructure` calls it when `Database:Provider` is `PostgreSQL`.
+**`DatabaseConnection`** — class in `Mondino.Infrastructure` (`Persistence`).
+`AddInfrastructure` uses it when `Database:Provider` is `PostgreSQL`.
 
-- `Create(configuration)` reads `ConnectionStrings:Mondino` and `Database:Authentication` and
-  returns the `NpgsqlDataSource` every `AppDbContext` opens its connections from. The data
-  source is a singleton, so its pool is shared and is disposed with the host.
+- `Read(configuration)` reads and checks `ConnectionStrings:Mondino` and
+  `Database:Authentication` as the services are registered, so a wrong setting stops the
+  process at startup. It connects to nothing and asks for no token.
+- `CreateDataSource()` returns the `NpgsqlDataSource` every `AppDbContext` opens its
+  connections from. The data source is a singleton, made on first use, so its pool is shared
+  and is disposed with the host.
 - `Database:Authentication` is a `DatabaseAuthentication`: `Password` (the default),
   `ManagedIdentity` or `AzureCli`. Another value stops the process at startup.
 - With `Password` the connection string is used as it is given, as on a laptop.
@@ -65,7 +68,8 @@ token for the database's audience, `https://ossrdbms-aad.database.windows.net/.d
 - `For(ManagedIdentity)` holds a `ManagedIdentityCredential` for the system-assigned identity;
   `For(AzureCli)` holds an `AzureCliCredential`, which answers as whoever `az login` signed in.
   The credential is named by the setting and never discovered.
-- `GetAsync` is called when a physical connection is opened. The token is never logged.
+- `Get` and `GetAsync` are called when a physical connection is opened. The token is never
+  logged.
 
 **Retries.** `AppDbContext` is configured with the provider's retrying execution strategy
 (`EnableRetryOnFailure`), so a transient failure is tried again. No handler opens a transaction

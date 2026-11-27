@@ -15,7 +15,7 @@ Container_Boundary(api, "Mondino API and Mondino.Cli") {
 ContainerDb(db, "Mondino database", "PostgreSQL Flexible Server", "Entra authentication only")
 System_Ext(entra, "Microsoft Entra ID", "Issues tokens")
 
-Rel(di, connection, "Create(configuration)")
+Rel(di, connection, "Read(configuration) at startup, CreateDataSource() on first use")
 Rel(connection, tokens, "Password provider, when Database:Authentication is ManagedIdentity or AzureCli")
 Rel(tokens, entra, "Token for the database audience")
 Rel(context, connection, "Opens connections from the data source")
