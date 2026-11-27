@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
@@ -73,6 +74,11 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>The app's own address, the start of every sign-in link (<c>SignInEmail:AppAddress</c>).</summary>
     public const string AppAddress = "https://mondino.test";
 
+    /// <summary>Every log line, at every level, once <see cref="CapturesLogs"/> is set before the first request.</summary>
+    public CapturedLogs Logs { get; } = new();
+
+    public bool CapturesLogs { get; set; }
+
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
 
@@ -102,6 +108,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         if (UsesPostalCodeSource && PostalCodeSourceUsername is not null)
         {
             builder.UseSetting("PostalCodeSource:Username", PostalCodeSourceUsername);
+        }
+
+        if (CapturesLogs)
+        {
+            builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs).AddFilter<CapturedLogs>(null, LogLevel.Trace));
         }
 
         builder.ConfigureTestServices(services =>
