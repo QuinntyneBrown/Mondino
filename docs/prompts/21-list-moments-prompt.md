@@ -108,6 +108,9 @@ Builds on: journeys 14 and 19.
 - Journey 15 links "All moments" to `/moments` and waits for this screen to prove that it leads to the Moments
   screen (L2-024 criterion 5, with journey 19's six rows); add Moments to `TeamShell`'s children, so the
   header's "Moments" link reaches it. Raise journey 15's % by the criterion proven here.
+- Journey 16 waits for this screen to prove, in Playwright, that "Invite teammate" in its header opens the
+  invite dialog (L2-054 criterion 1, L2-025 criterion 7, with Team and Profile & Settings); raise journey 16's
+  and journey 15's % when all four screens are proven.
 - Set journey 21 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

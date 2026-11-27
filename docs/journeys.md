@@ -52,7 +52,10 @@ markup on a pin shown as text, and the Globe's answer to a session that has ende
 and shows "You need an invite link"; neither completes a criterion, so it stays at 34. Journey 14 proved
 the panel's part of L2-044 criterion 1 (a name of markup in a teammate's panel shown as text) and of L2-007
 criterion 2 (the panel gives the city and country, no postal code); the Team row and the moments complete
-them, so it stays at 34.
+them, so it stays at 34. Journey 16 proved the invite dialog's part of L2-044 criterion 10 (a team named
+as markup in the dialog's title, as text) and of L2-043 criterion 12 (any teammate, not only the team's
+maker, reads its invite link; another team's teammate and no session are refused); the leave dialog,
+Left Team and the link's reset complete them, so it stays at 34.
 Journey 7 stands at 100: every criterion of L2-052 is proven by an acceptance test, the backend's
 through the API and the screen's in Playwright, by keyboard and by touch at 320 px. The Globe it opens
 is the arrival journey 4 left; an expired or used link, and the wait while one opens, show Sign In's
@@ -148,7 +151,23 @@ themselves (L2-024 criteria 1, 2, 5 and 7; journeys 19 and 21), "2 more on the T
 "Working now" chosen (criterion 3; journey 17), "Invite teammate" opening the invite dialog (L2-025
 criterion 7; journey 16), and a teammate who joins while the Globe is open appearing at the next refresh
 (criterion 10's second half; journey 25). The note shown with every kind of moment off comes with journey
-23.
+23. Journey 16 proved criterion 7 on the Globe: "Invite teammate" opens the invite dialog and nothing is
+copied until "Copy link" is used. The criterion names the headers of Team, Moments and Profile & Settings
+too, which come with journeys 17, 21 and 22, so it is not yet counted and journey 15 stays at 70.
+Journey 16 stands at 50 (7 of the 15 criteria of L2-054 and L2-055): "Invite teammate" in `TeamShell`'s
+header opens the invite dialog, a CDK Dialog loaded on first open, as `dialogs/invite/default` draws it
+but for "Reset link", which is left out until it is designed. Proven in Playwright: focus starts on "Copy
+link", stays inside and returns to the button on Escape or Close (L2-054 criterion 2); "Copy link" puts
+the link on the clipboard, closes the dialog and shows the toast, which goes after 4 seconds and whose
+time stands still while it is pointed at or focused (criteria 3 and 4); a refused copy keeps the dialog
+with the link selected and focused and an alert over it, announced and kept until dismissed (criterion
+5); the card's "Copy" of journey 15 (criterion 7); an icon alone with its name and a 44 px target under
+768 px and a sheet from the bottom under 576 px (criterion 8); and, through the API, that only a team's
+own teammates read its invite link, with the dialog showing it, and a team named as markup, as text
+(criterion 9). Not yet proven: the header on Team, Moments and Profile & Settings and "Reset link" in
+the dialog (criterion 1; journeys 17, 21 and 22, and the reset's design), "Invite teammates" on Team for
+a team of one (criterion 6; journey 17), and every criterion of L2-055, which waits for the design of
+what "Reset link" asks before it acts (`mocks/README.md`, open question 3).
 
 Journey 30 stands at 20 before its own run: one of the six criteria of L2-051 is proven by acceptance tests
 through the API, criterion 4, liveness and readiness reported to anyone as one word with no configuration,
@@ -173,7 +192,7 @@ ADR 0017). The telemetry, its redaction and the correlation id are journey 30's 
 | 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 70 |
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 80 |
 | 15 | [View the week around the world](prompts/15-view-the-week-around-the-world-prompt.md) | See this week's moments, who is working, and team counts. | L2-024, L2-025 | 4 | 70 |
-| 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 0 |
+| 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 50 |
 | 17 | [View the team through the day](prompts/17-view-the-team-through-the-day-prompt.md) | See everyone west to east on a day ribbon. | L2-026, L2-027, L2-028 | 6 | 0 |
 | 18 | [Find a teammate in a large team](prompts/18-find-a-teammate-in-a-large-team-prompt.md) | Search a team past 40, listed in a section per city. | L2-027, L2-056 | 3 | 0 |
 | 19 | [Find moments](prompts/19-find-moments-prompt.md) | Holidays, races, events and sport found where teammates live. | L2-020 | 8 | 0 |
@@ -188,4 +207,4 @@ ADR 0017). The telemetry, its redaction and the correlation id are journey 30's 
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 20 |
-| | **Total** | | | **147** | **52** |
+| | **Total** | | | **147** | **53** |

@@ -117,6 +117,11 @@ Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then
 - Journey 15 links "2 more on the Team page" to `/team?filter=working` and waits for this screen to prove
   that it opens the Team screen with "Working now" chosen (L2-024 criterion 3); add Team to `TeamShell`'s
   children, so the header's "Team" link reaches it. Raise journey 15's % by the criterion proven here.
+- Journey 16 built the invite dialog (`InviteDialogOpener`, provided by `TeamShell`) and waits for this screen
+  to prove, in Playwright, that "Invite teammate" in the header opens it on Team (L2-054 criterion 1, L2-025
+  criterion 7, with Moments and Profile & Settings) and that "Invite teammates" on the card of a team of one
+  opens the same dialog (L2-054 criterion 6); open it through `InviteDialogOpener.open(trigger)`. Raise
+  journey 16's and journey 15's % by the criteria proven here.
 - Journey 11 waits for this screen to prove that a teammate who does not share their status is listed under
   All only, not under Working now nor Asleep nor in their counts (L2-015 criterion 4; the Globe's half is
   proven by journey 15); raise journey 11's % when it is.

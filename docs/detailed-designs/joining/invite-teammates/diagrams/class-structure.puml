@@ -23,16 +23,22 @@ package "mondino application" {
     +inviteLink: Signal<string>
     +teammateCount: Signal<number>
     +copy(): Promise<void>
-    +reset(): Promise<void>
+    +reset(): Promise<void> (not built until designed)
   }
   class InviteLinkCopier {
-    +result: Signal<CopyResult | null>
-    +copy(): Promise<CopyResult>
+    +link(): string
+    +copy(): Promise<boolean>
+  }
+  class Toaster {
+    +current: Signal<ToastMessage | null>
+    +show(toast: ToastMessage): void
+    +hold(): void
+    +release(): void
     +dismiss(): void
   }
-  enum CopyResult {
-    Copied
-    Refused
+  class TeamStore {
+    +team: Signal<TeamPins | null>
+    +replaceInviteToken(inviteToken: string): void
   }
 }
 package "@mondino/components" {
@@ -42,21 +48,19 @@ package "@mondino/components" {
   class CopyField {
     +value: string
     +label: string
+    +inputId: string | null
     +copied: boolean
-    +copy: Output<void>
-    +select(): void
+    +selectRequest: number
+    +copyLink: Output<void>
   }
-  class Toast
-}
-package "@mondino/domain" {
-  class TeamStore {
-    +teamName: Signal<string>
-    +inviteToken: Signal<string>
-    +pins: Signal<Pin[]>
-    +replaceInviteToken(inviteToken: string): void
+  class Toast {
+    +held: Output<boolean>
   }
 }
 package "@mondino/api" {
+  interface Clipboard {
+    +write(text: string): Promise<void>
+  }
   interface TeamApi {
     +resetInviteLink(teamId: string): Promise<InviteLink>
   }
@@ -96,13 +100,14 @@ package "Mondino.Domain" {
 
 AppHeader ..> TeamShell : invite
 TeamShell ..> InviteDialogOpener
-TeamShell ..> Toast : renders from InviteLinkCopier.result
+TeamShell ..> Toast : renders from Toaster.current
 InviteDialogOpener ..> InviteDialog : imports and opens
 InviteDialog ..> CopyField
 InviteDialog ..> InviteLinkCopier
 InviteDialog ..> TeamStore
 InviteDialog ..> TeamApi : TEAM_API
-InviteLinkCopier --> CopyResult
+InviteLinkCopier ..> Toaster
+InviteLinkCopier ..> Clipboard : CLIPBOARD
 InviteLinkCopier ..> TeamStore : reads the invite token
 TeamApi ..> InviteLink
 TeamsController ..> ResetInviteLinkCommand : sends

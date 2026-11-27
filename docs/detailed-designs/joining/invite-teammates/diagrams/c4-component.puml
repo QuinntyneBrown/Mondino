@@ -10,7 +10,7 @@ Container_Boundary(web, "Mondino web app") {
   Component(opener, "InviteDialogOpener", "Service of the mondino application", "Imports the dialog on demand and opens it with the CDK Dialog")
   Component(dialog, "InviteDialog", "CDK Dialog, lazy chunk", "The link, Copy link and Reset link")
   Component(field, "CopyField", "mo-copy-field, @mondino/components", "The read-only link and its button")
-  Component(copier, "InviteLinkCopier", "Service of the mondino application", "Copies through the CDK Clipboard; holds the CopyResult")
+  Component(copier, "InviteLinkCopier", "Service of the mondino application", "Copies through navigator.clipboard and says how it went with a toast")
   Component(store, "TeamStore", "@mondino/domain, pins/", "The team's name, invite token and count")
   Component(client, "HttpTeamApi", "TeamApi, @mondino/api", "resetInviteLink(teamId)")
 }

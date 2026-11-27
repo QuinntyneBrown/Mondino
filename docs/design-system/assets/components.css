@@ -10,7 +10,7 @@
    in a still mock. Extend this file; never fork it per mock.
 
    Breakpoints (repeated literally, a media query cannot read a token):
-     36rem  576px  phone ends: wordmark
+     36rem  576px  phone ends: wordmark, a dialog is a sheet below it
      40rem  640px  the Globe's stage: legend and heading over the globe, still line hidden
      48rem  768px  the Team table, "Invite teammate"
      62rem  992px  panel beside the globe, form beside the globe
@@ -781,7 +781,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .dialog__title { flex: 1; font: var(--text-h2); }
 .dialog__body { display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-2); color: var(--color-fg-muted); font: var(--text-body-sm); }
 .dialog__footer { display: flex; flex-direction: column-reverse; gap: var(--space-3); margin-top: var(--space-6); }
-@media (min-width: 40rem) {
+@media (min-width: 36rem) {
   .dialog { align-items: center; justify-items: center; padding: var(--space-6); }
   .dialog__panel { max-width: var(--layout-overlay-max); padding: var(--space-6); border-radius: var(--radius-2xl); }
   .dialog__footer { flex-direction: row; justify-content: flex-end; }
@@ -1109,14 +1109,14 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 
 .backdrop { background: color-mix(in srgb, var(--palette-night) 45%, transparent); }
 
-@media (min-width: 40rem) { .dialog__panel { max-width: 27.5rem; box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-default), 0 24px 60px rgb(0 0 0 / .3); } }
+@media (min-width: 36rem) { .dialog__panel { max-width: 27.5rem; box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-default), 0 24px 60px rgb(0 0 0 / .3); } }
 
 .dialog__body { margin-top: var(--space-3); }
 .dialog__body:has(.copy-field) { gap: var(--space-5); }
 .dialog__label + .copy-field { margin-top: calc(var(--space-1-5) - var(--space-5)); }
 .dialog__meta { padding-top: var(--space-4); }
 
-@media (max-width: 39.999rem) { .dialog__panel { padding: var(--space-6) var(--space-6) max(var(--space-6),env(safe-area-inset-bottom)); } }
+@media (max-width: 35.999rem) { .dialog__panel { padding: var(--space-6) var(--space-6) max(var(--space-6),env(safe-area-inset-bottom)); } }
 
 [data-chrome="off"] .toast-region { bottom: var(--space-5); }
 

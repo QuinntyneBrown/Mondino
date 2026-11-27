@@ -7,7 +7,7 @@ import { Toaster } from './toaster';
 /**
  * Copies the team's invite link and says how it went (L2-025, L2-054): "Invite link copied." for 4
  * seconds, or, where the browser refuses, an alert that stays until dismissed. "Copy" on the
- * Globe's invite card calls it, and the invite dialog's "Copy link" with journey 16. Provided by
+ * Globe's invite card calls it, and the invite dialog's "Copy link". Provided by
  * `TeamShell`.
  */
 @Injectable()
