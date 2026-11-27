@@ -11,6 +11,7 @@ import {
   northwindInvite,
   SOFIA_JOINED,
 } from '../fixtures/invites';
+import { pauseTheClock } from '../support/turning';
 
 test.describe('Globe: just joined', () => {
   test.beforeEach(({ api }) => {
@@ -41,19 +42,27 @@ test.describe('Globe: just joined', () => {
       'You’re on the map. Northwind can now see your pin in Milan.',
     );
 
-    // And it dismisses itself after 4 seconds
-    await globePage.page.clock.runFor(3_900);
-    await expect(globePage.toast).toBeVisible();
-    await globePage.page.clock.runFor(200);
-    await expect(globePage.toast).toHaveCount(0);
-
-    // And her pin is on the globe, lifted and labelled, pulsing once
+    // And her pin is on the globe, lifted and labelled, pulsing once; the clock is stopped so the
+    // globe does not turn her pin out of view while it is looked at
+    await pauseTheClock(globePage.page);
+    await expect
+      .poll(async () => {
+        await globePage.page.clock.runFor(16);
+        return globePage.youLabel.count();
+      })
+      .toBe(1);
     await expect(globePage.youLabel).toHaveText('Sofia Bianchi (you) · Milan');
     await expect(globePage.youPin).toHaveClass(/pin-dot--new/);
     expect(await globePage.pulse()).not.toBe('none');
     await expect(globePage.globe).toHaveAccessibleName(
       'The globe, with your new pin in Milan. Drag to spin, or use the arrow keys.',
     );
+
+    // And the toast dismisses itself after 4 seconds
+    await globePage.page.clock.runFor(3_400);
+    await expect(globePage.toast).toBeVisible();
+    await globePage.page.clock.runFor(600);
+    await expect(globePage.toast).toHaveCount(0);
   });
 
   test('the toast can be dismissed', async ({ joinPage, globePage }) => {
