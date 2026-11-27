@@ -20,13 +20,27 @@
             <p class="join__lead">
               Your pin shows teammates your local time, weather and what’s happening where you are.
             </p>
-            <form class="join__fields" novalidate (submit)="hold($event)">
+            <form class="join__fields" novalidate (submit)="submit($event)">
+              @if (summary(); as summary) {
+                <mo-alert
+                  tone="danger"
+                  focusable
+                  [focusRequest]="summaryFocus()"
+                  [title]="summary.title"
+                  [items]="summary.items"
+                  (follow)="focusField($event)"
+                />
+              }
               <mo-text-field
                 fieldId="name"
                 name="name"
                 label="Your name"
                 autocomplete="name"
                 [maxlength]="60"
+                [value]="store.name()"
+                [invalid]="nameError() !== null"
+                [error]="nameError()"
+                (valueChange)="store.name.set($event)"
               />
               <div class="join__field-row">
                 <mo-select-field
@@ -35,6 +49,8 @@
                   label="Country"
                   autocomplete="country-name"
                   [options]="countries()"
+                  [value]="store.countryCode()"
+                  (valueChange)="store.countryCode.set($event)"
                 />
                 <mo-text-field
                   fieldId="postal"
@@ -44,9 +60,17 @@
                   [maxlength]="12"
                   tabular
                   describedBy="lookup"
+                  [value]="store.postalCode()"
+                  [invalid]="postalCodeError() !== null"
+                  [error]="postalCodeError()"
+                  (valueChange)="store.postalCode.set($event)"
                 />
               </div>
-              <mo-lookup-message messageId="lookup" />
+              <mo-lookup-message
+                messageId="lookup"
+                [country]="store.country()"
+                [quiet]="postalCodeError() !== null"
+              />
               <button mo-button variant="primary" size="lg" block type="submit">
                 Place my pin
               </button>
