@@ -46,6 +46,8 @@ export class ProfilePage {
   readonly saveBar: Locator;
   readonly saveChanges: Locator;
   readonly saveBarButton: Locator;
+  readonly saveBarText: Locator;
+  readonly trySavingAgain: Locator;
   /** While the profile is read, and when it fails. */
   readonly loadingAnnouncement: Locator;
   readonly skeletons: Locator;
@@ -92,6 +94,8 @@ export class ProfilePage {
     this.saveBar = page.locator('.save-bar');
     this.saveChanges = this.saveBar.getByRole('button', { name: 'Save changes' });
     this.saveBarButton = this.saveBar.getByRole('button');
+    this.saveBarText = this.saveBar.locator('.save-bar__text');
+    this.trySavingAgain = this.saveBar.getByRole('button', { name: 'Try again' });
     this.loadingAnnouncement = this.main.getByRole('status');
     this.skeletons = this.main.locator('.skeleton');
     this.errorTitle = this.main.locator('.empty__title');

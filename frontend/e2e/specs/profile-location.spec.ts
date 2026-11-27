@@ -88,7 +88,7 @@ test.describe('Profile & Settings: change your location', () => {
     await expect(profilePage.city).toHaveText('Toronto, Canada');
     await expect(profilePage.time).toHaveText('10:05 local · Eastern Time');
     await expect(profilePage.youLabel).toHaveCount(0);
-    await expect(profilePage.saveBar).toHaveCount(0);
+    await expect(profilePage.saveBarText).toHaveText('Saved — your pin is up to date');
     await expect(profilePage.postalCode).toHaveValue('M5V 2T6');
     await expect.poll(() => teamReads.length).toBe(1);
   });

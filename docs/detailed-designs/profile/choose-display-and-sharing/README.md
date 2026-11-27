@@ -103,7 +103,7 @@ kept is [ADR 0023](../../../adr/0023-settings-kept-by-the-backend.md).
   "Clock"; each option is a `radio`, and the chosen one is exposed through `aria-checked` and
   carries a tick (`segmented__check`) besides its fill (L2-033). Left and Right move and choose
   in both modes.
-- **`Switch`** (`@mondino/components`, `button[mo-switch]`, block `switch-row`) — a button with
+- **`Switch`** (`@mondino/components`, `mo-switch`, block `switch-row`) — a button with
   `role="switch"` and `aria-checked`, operated by Space and Enter, at least 44 px tall (L2-034).
   It projects an optional leading emblem, takes its `label` and an optional `hint`, and shows
   "On" or "Off" beside the track, hidden from assistive technology.
