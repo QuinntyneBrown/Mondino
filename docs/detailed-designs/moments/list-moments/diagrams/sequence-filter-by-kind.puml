@@ -32,16 +32,16 @@ page -> page : Keep the loaded moments whose kind is sport
 note right of page : No request is sent: the filter\nworks on the moments already loaded
 page -> group : groupMoments(filtered moments, TeamStore pins, clock.now())
 group --> page : MomentGroups
-page -> list : groups, filtered = true
+page -> list : groups
 alt at least one sport moment
   list --> actor : Sport moments only, grouped as before (L2-030)
 else no upcoming sport moment
-  list --> actor : "No sport moments coming up" and "Show everything"
+  page --> actor : "No sport moments coming up" and "Show everything"\nin a status region, the filters kept
 end
 actor -> chips : Choose "Everything"
 chips --> page : selectedChange("everything")
 page -> group : groupMoments(all moments, TeamStore pins, clock.now())
 group --> page : MomentGroups
-page -> list : groups, filtered = false
+page -> list : groups
 list --> actor : All upcoming moments
 @enduml
