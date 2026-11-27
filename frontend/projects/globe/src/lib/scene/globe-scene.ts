@@ -61,9 +61,6 @@ export const STARTING_ORIENTATION: GlobeOrientation = { longitude: 10.1, tilt: 1
 /** The share of the box the globe's disc fills, as the mocks' circle of radius 264 in 600 does. */
 export const DiscShare = 0.88;
 
-/** The most time one frame reports, so a frame after a pause never jumps the globe (ADR 0013). */
-export const MaxFrameMs = 100;
-
 /**
  * The 3D globe: the renderer, the Blender-built model, its masks and the drawing, behind one
  * interface. Nothing else imports the renderer or reads the asset format.
@@ -81,8 +78,7 @@ export interface GlobeScene {
   requestFrame(): void;
   /**
    * Called after each frame is drawn, with the time since the frame before it: 0 for the first
-   * frame after a rest or after a frame not asked for by a frame listener, and never more than
-   * `MaxFrameMs`.
+   * frame after a rest or after a frame not asked for by a frame listener.
    */
   onFrame(listener: (elapsedMs: number) => void): void;
   start(): void;

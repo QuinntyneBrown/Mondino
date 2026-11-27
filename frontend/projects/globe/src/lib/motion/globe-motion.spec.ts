@@ -68,6 +68,14 @@ describe('GlobeMotion: dragging', () => {
     expect(motion.orientation.longitude).toBeCloseTo(-TurnRateDegreesPerSecond, 6);
   });
 
+  it('spends the time past the rest turning, however long the frame', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.dragStart();
+    motion.dragEnd();
+    motion.advance(IdleDelayMs + 1000);
+    expect(motion.orientation.longitude).toBeCloseTo(10 - TurnRateDegreesPerSecond, 6);
+  });
+
   it('ends still after a drag where it does not turn on its own', () => {
     for (const motion of [
       new GlobeMotion(false, facingEurope),

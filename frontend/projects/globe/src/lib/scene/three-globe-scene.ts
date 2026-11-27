@@ -29,7 +29,6 @@ import {
   type GlobeScene,
   type GlobeSceneOptions,
   GlobeUnavailableError,
-  MaxFrameMs,
   type ProjectedPoint,
   STARTING_ORIENTATION,
 } from './globe-scene';
@@ -380,8 +379,7 @@ export class ThreeGlobeScene implements GlobeScene {
       this.frame = undefined;
       const now = performance.now();
       const previous = this.previousFrameAt;
-      const elapsed =
-        previous === undefined ? 0 : Math.min(MaxFrameMs, Math.max(0, now - previous));
+      const elapsed = previous === undefined ? 0 : Math.max(0, now - previous);
       this.previousFrameAt = now;
       this.renderer.render(this.scene, this.camera);
       this.inFrame = true;

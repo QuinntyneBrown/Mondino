@@ -3,11 +3,9 @@
 // Description: The globe is dragged to spin by mouse or by one finger, rests for 5 seconds after, and a vertical drag it cannot follow scrolls the page on a phone
 
 import { expect, test } from '../fixtures/test';
-import { joinFromMilan, pauseTheClock } from '../support/turning';
+import { joinFromMilan, letTimePass, pauseTheClock } from '../support/turning';
 
 test.describe('Globe: dragged to spin', () => {
-  test.use({ viewport: { width: 800, height: 600 } });
-
   test('a mouse drag spins the globe, which turns on its own again 5 seconds after', async ({
     page,
     api,
@@ -28,10 +26,10 @@ test.describe('Globe: dragged to spin', () => {
     expect(dragged.x - before.x).toBeLessThan(-60);
 
     // And it does not turn on its own until 5 seconds after the drag ends
-    await page.clock.runFor(4_800);
+    await letTimePass(page, 4_800);
     expect(await globePage.youPinAt()).toEqual(dragged);
-    await page.clock.runFor(400);
-    expect((await globePage.youPinAt()).x).toBeGreaterThan(dragged.x);
+    await letTimePass(page, 1_200);
+    expect((await globePage.youPinAt()).x - dragged.x).toBeGreaterThan(10);
   });
 });
 

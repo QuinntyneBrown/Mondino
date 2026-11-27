@@ -11,7 +11,7 @@ import {
   northwindInvite,
   SOFIA_JOINED,
 } from '../fixtures/invites';
-import { pauseTheClock } from '../support/turning';
+import { letTimePass, pauseTheClock } from '../support/turning';
 
 test.describe('Globe: just joined', () => {
   test.beforeEach(({ api }) => {
@@ -59,9 +59,9 @@ test.describe('Globe: just joined', () => {
     );
 
     // And the toast dismisses itself after 4 seconds
-    await globePage.page.clock.runFor(3_400);
+    await letTimePass(globePage.page, 3_400);
     await expect(globePage.toast).toBeVisible();
-    await globePage.page.clock.runFor(600);
+    await letTimePass(globePage.page, 600);
     await expect(globePage.toast).toHaveCount(0);
   });
 

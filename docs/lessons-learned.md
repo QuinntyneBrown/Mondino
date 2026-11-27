@@ -482,9 +482,12 @@ apply the lessons that fit.
   browser's next rendering, which a paused fake clock never brings; a one-pixel screenshot does.
 - The Globe screen is no taller than a phone until its panel is built, so a vertical drag left to
   the page had nothing to scroll; the spec makes room, as the panel will.
-- Each faked frame of the 3D globe takes about 25 ms in SwiftShader whatever the window's size, so
-  a spec that runs 5 seconds of turning takes about 8 seconds. The turning specs share their
-  frames: one auto-turn spec, and the rest assert within a second of frames.
+- Each faked frame of the 3D globe takes about 25 ms in SwiftShader locally whatever the window's
+  size, and about 150 ms on CI: the first push ran 5 seconds of turning a frame at a time, and
+  three specs timed out at 30 seconds. Playwright's clock yields a real task after every fake
+  timer, so frames cannot be merged. The frame's time is now uncapped (ADR 0013) and the specs
+  move the clock with `fastForward`, one frame for any length of time: the turning specs went
+  from 8 seconds to under 1.
 - Holding at once under reduced motion changed the orientation between frames, and the frame loop
   compared the orientation before and after `advance`, so it never drew it. It compares with what
   is drawn.
@@ -503,6 +506,10 @@ apply the lessons that fit.
    have moved the model between frames.
 5. **When a feature makes the screen move on its own, list the specs that look at it still.** Hold
    them still on purpose (reduced motion, a paused clock), rather than relying on their speed.
+6. **Measure animation in time, and let a spec jump the time.** A frame that reports the real
+   time since the one before (0 after a rest) turns at the same speed on any device, and lets
+   `clock.fastForward` show seconds of motion in one frame; a spec that runs a 3D animation a
+   frame at a time costs its frames times the CI machine's slowness.
 
 **Earlier lessons applied**
 

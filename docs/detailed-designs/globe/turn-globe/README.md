@@ -54,8 +54,8 @@ selected pin.
   `isMoving()` is true while it turns on its own, turns to a pin or waits out the 5 seconds:
   the states that need the next frame. The numbers are named constants (ADR 0013):
   `TurnRateDegreesPerSecond` 6, `StepDegrees` 15, `TiltLimitDegrees` 60, `IdleDelayMs` 5000,
-  `TurnToPinMs` 800 eased out (`1 − (1 − t)³`, the shape of `--ease-standard`), and
-  `MaxFrameMs` 100, the most one frame may advance it.
+  and `TurnToPinMs` 800 eased out (`1 − (1 − t)³`, the shape of `--ease-standard`). The time
+  past the 5 seconds' rest in a frame is spent turning.
 - **`GlobeOrientation`** — `longitude` and `tilt`, in degrees: the longitude and the latitude
   at the centre of the view. Turning eastward lowers the longitude, so pins move right.
 - **`GlobeGestures`** — class that listens on the globe's element and turns input into calls on
@@ -142,8 +142,9 @@ teammate's own movement.
 it calls `GlobeScene.stop()`, which cancels the pending animation frame; with no frames,
 `GlobeMotion` does not advance and nothing is drawn. When the tab is shown again it calls
 `start()`. The scene reports the first frame after a rest, or after a frame that was not
-chained to the one before, as 0 ms, and any frame as at most `MaxFrameMs`, so the globe
-continues from where it rested and does not jump. When `isMoving()` is false, as in `Holding` or under reduced motion,
+chained to the one before, as 0 ms, so the globe continues from where it rested and does not
+jump; a frame in the loop reports the real time since the one before, so the globe turns at the
+same speed however often frames come. When `isMoving()` is false, as in `Holding` or under reduced motion,
 the scene should draw only when something changes (a new orientation, a new sun position, a
 resize) and not on every frame.
 

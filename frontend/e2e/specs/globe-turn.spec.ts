@@ -6,15 +6,13 @@ import { expect, test } from '../fixtures/test';
 import {
   changeReducedMotion,
   joinFromMilan,
+  letTimePass,
   makeTheTabHideable,
   pauseTheClock,
   setTheTabHidden,
 } from '../support/turning';
 
 test.describe('Globe: it turns on its own', () => {
-  // A small window, so the frames the spec runs through are quick to draw in software.
-  test.use({ viewport: { width: 800, height: 600 } });
-
   test('left alone for 5 seconds, the globe has turned eastward', async ({
     page,
     api,
@@ -28,7 +26,7 @@ test.describe('Globe: it turns on its own', () => {
     const before = await globePage.youPinAt();
 
     // When 5 seconds pass
-    await page.clock.runFor(5_000);
+    await letTimePass(page, 5_000);
 
     // Then the globe has turned eastward: her pin has moved east, to the right
     const after = await globePage.youPinAt();
@@ -49,14 +47,15 @@ test.describe('Globe: it turns on its own', () => {
     const before = await globePage.youPinAt();
 
     // When 10 seconds pass on the Globe screen
-    await page.clock.runFor(10_000);
+    await letTimePass(page, 10_000);
 
     // Then the globe has not turned
     expect(await globePage.youPinAt()).toEqual(before);
 
     // And the setting is followed without a reload: turned off, the globe turns on its own
     await changeReducedMotion(page, false);
-    await page.clock.runFor(1_000);
+    await page.clock.runFor(32);
+    await letTimePass(page, 1_000);
     const turning = await globePage.youPinAt();
     expect(turning.x - before.x).toBeGreaterThan(5);
 
@@ -64,7 +63,7 @@ test.describe('Globe: it turns on its own', () => {
     await changeReducedMotion(page, true);
     await page.clock.runFor(100);
     const stopped = await globePage.youPinAt();
-    await page.clock.runFor(2_000);
+    await letTimePass(page, 2_000);
     expect(await globePage.youPinAt()).toEqual(stopped);
   });
 
@@ -84,14 +83,15 @@ test.describe('Globe: it turns on its own', () => {
     const hidden = await globePage.youPinAt();
 
     // When it stays hidden for 20 seconds
-    await page.clock.runFor(20_000);
+    await letTimePass(page, 20_000);
 
     // Then the globe has not turned
     expect(await globePage.youPinAt()).toEqual(hidden);
 
     // And shown again, it turns on from where it rested, a second's turn in a second
     await setTheTabHidden(page, false);
-    await page.clock.runFor(1_000);
+    await page.clock.runFor(32);
+    await letTimePass(page, 1_000);
     const shown = await globePage.youPinAt();
     expect(shown.x - hidden.x).toBeGreaterThan(10);
     expect(shown.x - hidden.x).toBeLessThan(40);
