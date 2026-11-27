@@ -33,16 +33,21 @@ to the maker's city (criterion 9) comes with journeys 8 and 9, and the Globe of 
 (criterion 11) opens as journey 4 left it until journey 15 draws "Just you, for now". The links to
 Create Team from "You need an invite link" and "You’ve left" come with the screens of journeys 7
 and 24.
-Journey 6 stands at 70: 28 of the 40 criteria of L2-007 and L2-043 to L2-045 are proven by acceptance
+Journey 6 stands at 90: 34 of the 40 criteria of L2-007 and L2-043 to L2-045 are proven by acceptance
 tests, the backend's through the API and the screens' in Playwright, among them every endpoint refused
 without a session unless marked open, another team answered as no team, a left teammate's session refused,
 the antiforgery token, the security headers and the app served under a nonce-based CSP. The rest name
-screens and endpoints of later journeys, which prove them there: Sign In's link and its limits (L2-043
-criteria 9 and 10, L2-044 criterion 9, L2-045 criteria 7 to 9; journey 7), names shown as text on the pins,
+screens and endpoints of later journeys, which prove them there. Journey 7 proved Sign In's six (L2-043
+criteria 9 and 10, L2-044 criterion 9, L2-045 criteria 7 to 9), which brought it from 28 to 34. The six
+left are names shown as text on the pins,
 the panel, the Team rows and search and the moments (L2-007 criterion 2, L2-044 criteria 1 and 12; journeys
 10, 14, 17, 18 and 21), the team's name in the invite and leave dialogs and on Left Team with the link's
 reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profile & Settings' 429
 (L2-045 criterion 6; journey 22).
+Journey 7 stands at 100: every criterion of L2-052 is proven by an acceptance test, the backend's
+through the API and the screen's in Playwright, by keyboard and by touch at 320 px. The Globe it opens
+is the arrival journey 4 left; an expired or used link, and the wait while one opens, show Sign In's
+form until their screens are designed (ADR 0011).
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -51,8 +56,8 @@ reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profil
 | 3 | [Place a pin from a postal code](prompts/03-place-a-pin-from-a-postal-code-prompt.md) | Give name, country and postal code; the city is found. | L2-002, L2-003, L2-004, L2-006 | 5 | 100 |
 | 4 | [Join the team](prompts/04-join-the-team-prompt.md) | Join and land on the Globe with your new pin. | L2-005 | 4 | 100 |
 | 5 | [Create a team](prompts/05-create-a-team-prompt.md) | Name a team, place your own pin and get its invite link. | L2-053 | 5 | 100 |
-| 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 70 |
-| 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 0 |
+| 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 90 |
+| 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 100 |
 | 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 0 |
 | 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 0 |
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 0 |
@@ -76,4 +81,4 @@ reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profil
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **17** |
+| | **Total** | | | **147** | **22** |

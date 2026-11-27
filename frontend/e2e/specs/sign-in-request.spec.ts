@@ -87,9 +87,11 @@ test.describe('Sign In: asking for a link', () => {
     await signInPage.askForLink('sofia@northwind.co');
     await expect(signInPage.noticeTitle).toHaveText('Check your inbox');
 
+    await expect(signInPage.useAnotherEmail).toHaveAttribute('href', '/sign-in');
     await signInPage.useAnotherEmail.click();
 
     await expect(signInPage.title).toHaveText('Welcome back.');
+    await expect(signInPage.page).toHaveURL('/sign-in');
     await expect(signInPage.email).toBeFocused();
     await expect(signInPage.submit).toHaveText('Email me a sign-in link');
     await expect(signInPage.notice).toHaveCount(0);
