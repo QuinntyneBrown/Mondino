@@ -152,7 +152,7 @@ designed, and none of them is built.
 | Case | Status | `code` | The screen says |
 |------|--------|--------|-----------------|
 | `teamId` is not the teammate's own team | 404 | `team_not_found` | `<TO SUPPLY>` |
-| No session, or the teammate has left | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows "You need an invite link" in place |
+| No session, or the teammate has left | 401 | none | The membership is forgotten and the address shows "You need an invite link" in place, as for any request an ended session refuses (ADR 0028) |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | `<TO SUPPLY>` |
 
 **Open points**

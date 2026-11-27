@@ -3,7 +3,7 @@
 ## Goal
 
 Every screen works from a 320 px phone to a 1920 px display with nothing cut off and no sideways scroll: one
-column on a phone, the form beside the globe on Join and the panel beside the globe from 992 px, the Team
+column on a phone, the form beside the globe on Join from 992 px and the panel beside the globe from 1024 px, the Team
 table from 768 px, the pin's card beside the settings on a desktop. The header carries Globe, Team, Moments
 and the viewer's avatar for Profile & Settings, with the mark alone on a phone and the lowercase wordmark from
 576 px.

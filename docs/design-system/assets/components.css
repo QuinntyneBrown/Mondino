@@ -13,8 +13,9 @@
      36rem  576px  phone ends: wordmark, a dialog is a sheet below it
      40rem  640px  the Globe's stage: legend and heading over the globe, still line hidden
      48rem  768px  the Team table, "Invite teammate"
-     62rem  992px  panel beside the globe, form beside the globe
-     75rem  1200px text keeps its measure, the globe grows
+     62rem  992px  form beside the globe on Join, Sign In and Create Team
+     64rem  1024px panel beside the globe, the pin card beside the settings
+     75rem  1200px text keeps its measure (the containers' max-widths), the globe grows
    ========================================================================== */
 
 /* ---------- Component tokens: scoped to one component, always an alias ------ */

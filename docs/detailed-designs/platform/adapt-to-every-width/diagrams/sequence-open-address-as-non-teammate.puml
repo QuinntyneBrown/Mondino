@@ -20,7 +20,8 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "teammateGuard" as guard
   participant "TeamMembership" as membership
   participant "InviteNeededPage" as needed
-  participant "sessionExpiredInterceptor" as expired
+  participant "TeamStore" as store
+  participant "GlobePage" as page
   participant "HttpTeamApi" as client
 end box
 box "Backend — Mondino API" #D1FADF
@@ -40,14 +41,16 @@ alt No membership on this device
 else Membership held, session no longer valid
   membership --> guard : Membership for this device
   guard --> router : true
-  router -> client : GlobePage reads pins through TeamStore
+  router -> store : TeamShell reads the pins
+  store -> client : getPins(teamId)
   client -> controller : GET /api/teams/{teamId}/pins
   controller -> session : Authenticate the session cookie
   session --> controller : No valid session
   controller --> client : 401 ProblemDetails, no team data (L2-043)
-  client --> expired : 401 response
-  expired -> membership : forget()
-  expired -> router : Navigate to the current address again
+  client --> store : ApiError 401
+  store -> membership : forget()
+  store --> page : state Forgotten (ADR 0028)
+  page -> router : Navigate to the current address again, replacing it
   router -> needed : teammateGuard refuses; create InviteNeededPage
   needed --> actor : An invite link is needed
 end

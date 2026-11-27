@@ -122,7 +122,7 @@
 </section>
 
 <section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
-<p>With markers, the ribbon always fits the width; it never scrolls sideways. Under 768 px markers are 26 px and the “Morning” and “Evening” labels are dropped, keeping “Night” and “Working hours”. Under 576 px the scale shows every six hours. Markers within about two and a half hours of each other stack in rows, and the track grows to hold them.</p><p>As a bar chart the track is <code>--ribbon-density-height</code> tall plus room for the band labels. Forty-eight bars need room: the chart keeps a minimum width of 720 px inside its own scrolling group (<code>.day-ribbon__scroll</code>), so on a phone the chart scrolls sideways and the page does not. The summary line above it never scrolls.</p>
+<p>Markers or bars, the ribbon keeps a width of at least 45 rem inside its own focusable box: narrower, that box scrolls sideways and the page does not. Under 768 px markers are 26 px and the “Morning” and “Evening” labels are dropped, keeping “Night” and “Working hours”. Under 576 px the scale shows every six hours. Markers within about two and a half hours of each other stack in rows, and the track grows to hold them.</p><p>As a bar chart the track is <code>--ribbon-density-height</code> tall plus room for the band labels. Forty-eight bars need room: the chart keeps a minimum width of 720 px inside its own scrolling group (<code>.day-ribbon__scroll</code>), so on a phone the chart scrolls sideways and the page does not. The summary line above it never scrolls.</p>
 </section>
 
 <section class="ds-section" id="theming"><h2><a href="#theming">Theming</a></h2>
