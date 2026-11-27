@@ -1853,3 +1853,98 @@ criterion 4, the axe scan, which only the sweep proves; it is written for every 
 state in light and dark and runs when a person asks. Journey 6's L2-045 criterion 5 is now proven
 ("You can try again in" read in the alert, announced once while the countdown runs): 38 of 40,
 still 90. Total: 93.
+
+## Journey 29: Stay fast and light
+
+**What slowed it**
+
+- A phone on 4G cannot be timed in a spec: Chromium's throttling runs on the wall clock, the specs
+  on a fake one, and CI's machines vary. The load is worked out from what the browser fetched
+  instead (ADR 0030): each request one round trip after the deepest one that had arrived before
+  it was sent, every earlier byte at 1.6 Mbps. Counting every byte that had arrived when the
+  screen was asserted first gave 3.6 s, because the renderer and a font, sent alongside the pins,
+  had arrived too; the model now stops at the request the screen waits on and shares the last
+  trip's connection.
+- Measured, the Globe could not draw within 5 seconds: one 521 kB model (317 kB gzipped) held
+  all three meshes, and the still picture's 116 kB of SVG came with every Globe screen. The model
+  is now two files, the low one drawn first and the high one fetched after the first frame, and
+  the still picture is deferred.
+- `@defer` deferred nothing at first: a deferred component that shares its import statement with
+  eager ones, or comes through a library's own barrel, stays eager, and deferring the barrel put
+  the whole library in the initial bundle (562 kB). A second entry of the library,
+  `@mondino/components/globe-fallback`, in an import of its own, made it lazy.
+- The step-down spec failed at first because the globe really stepped down: SwiftShader at two
+  device pixels to the CSS pixel draws under 30 frames a second, and the scene timed its frames
+  with `performance.now()`, which the fake clock moves in real time. The scene now takes the
+  frame's own time from `requestAnimationFrame`, and the spec gives each frame the time a slow or
+  a quick device would.
+- On CI the step-down spec drew 49 frames in 15 seconds: SwiftShader on the runner draws about
+  three a second at two device pixels to the CSS pixel. A slow device is now given 4 frames a
+  second, so 3 seconds of them are a dozen frames, on a 320 px screen; the quick case, which needs
+  90 frames to prove anything, is `DetailLevel`'s unit tests.
+- The 95th percentile of the team of 500 was 2 to 3 ms alone and 313 ms in `verify.mjs`, beside
+  the e2e workers and xUnit's parallel classes: the thread pool, not the read, was timed. The
+  test runs in a collection of its own with parallelisation off.
+
+**Lessons**
+
+1. **Prove a load time by bytes and round trips, not a stopwatch.** Place each request one trip
+   after the deepest one that had arrived before it was sent; stop at the request the screen
+   waits on. The number is the same on every run and on every machine.
+2. **Measure what a screen's first visit fetches before deciding what to defer.** One probe spec
+   that listed every response with its gzipped size found the still picture on the Globe's path
+   and the model three times the size it needed to be.
+3. **Defer a component through an import of its own, from an entry that holds only it.** Angular
+   keeps a deferred dependency eager when its import statement names anything else.
+4. **Time an animation by the frame's own time.** A spec can then give each frame the time a slow
+   device would, whatever the machine running it can draw.
+5. **Keep a wall-clock time out of the always-run suite.** The 500 read was timed in a
+   collection of its own after parallel tests timed each other's thread pool, which only lowered
+   the odds; and on EF Core InMemory it proved nothing about the real database. The suite now
+   proves what does not depend on the clock (compressed, at most 24 kB, every pin, the weather
+   once per city), and the timing is a `Performance` trait that verify and CI filter out.
+6. **Hold the globe still in a spec whose clock jumps.** A turning globe draws a frame for every
+   16 ms that `runFor` passes; the hidden-tab refresh spec took 12 s on CI for frames it never
+   looked at.
+7. **Count the frames a spec needs, and keep them few.** CI's software WebGL draws a few frames a
+   second; give each frame the time you need it to stand for, and leave long runs of frames to
+   unit tests.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0030, the design (the `@defer` it
+  drew around the globe, the clock bound in `app.config.ts`, CDK virtual scrolling for moments
+  and four `<TO SUPPLY>`s), two other designs and three diagrams, before the first commit of code.
+- *Measure a lazy boundary before choosing it* (journey 8, lesson 1): the still picture's `@defer`
+  costs 6.75 kB raw in the initial bundle and saves 44 kB compressed on the Globe's first visit.
+- *Count what a screen holds through the browser, not the app* (journey 8, lesson 3): timers,
+  frames and draw calls are counted by init scripts; the product has no hook for a spec.
+- *Search the specs by a criterion's words before writing one* (journey 26, lesson 3): L2-047
+  criterion 5 was proven by journeys 10, 15, 18 and 21; `globe-week-panel` now names L2-047.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5) and
+  *break a slice with a copy, not with git* (journey 23, lesson 1): the clock's catch-up on
+  showing, a second clock on the Globe and `TeamStore`'s abort were each broken from a copy and
+  seen to fail; the step-down without `setDetail`; the load model against journey 28's build
+  (5.45 s to the globe).
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit
+  code, written to a log; it stopped two (a boundary of exactly 30 frames a second in the unit
+  tests, and the 500 read timed beside the e2e run).
+- *A flaky spec is fixed at its root*: every new and changed spec ran three times in a row; the
+  cancel spec counted the globe's own aborted fetches and now counts the backend's.
+- *Measure the initial bundle* (journey 2, lesson 1): 274.41 kB before, 281.16 kB after (the
+  `@defer` runtime), 88 kB compressed; the budget is tightened to 285 and 290 kB.
+
+**Progress:** 9 of 14 criteria proven (60, from 10). L2-046: the screen within 2.5 s and the
+globe within 5 s on the phone's connection, by the model, with the screen usable before the
+globe and no layout shift (1, 2); the initial bundle 88 kB of 150 compressed without the renderer,
+which arrives with the first globe (5); the step down after 3 seconds under 30 frames a second
+(6); content-hashed addresses cached for a year (7). L2-047: one clock for 13 or 500 pins
+on Globe and Team (3); a tab hidden for an hour draws nothing and is right at once (4); bounded
+rows, pins and panel lists (5, journeys 10, 15, 18 and 21); requests cancelled on leaving (6).
+Not proven, and in the `performance` sweep, run when a person asks: the frame rate while a team
+of 100 is dragged (L2-046 criterion 3), the response to an interaction (4), the 300 ms read of a
+team of 500 (8; `dotnet test --filter Category=Performance`), and the heap after 8
+simulated hours and after 20 enters and leaves (L2-047 criteria 1 and 2; what criterion 2 also
+asks of contexts, loops and listeners is proven for three visits by `globe-release`). The model
+leaves the phone's processor out; the sweep measures the largest contentful paint on a throttled
+connection. Total: 94 (94.9, rounded down).

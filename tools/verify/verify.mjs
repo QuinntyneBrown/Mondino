@@ -3,8 +3,9 @@
 // The frontend and the backend run side by side; inside each, the steps run in order and stop
 // at the first failure. Run it before pushing.
 //
-// It runs only the behaviour specs. The visual, responsive and accessibility sweeps run when a
-// person asks for them (frontend/package.json: e2e:visual, e2e:responsive, e2e:accessibility).
+// It runs only the behaviour specs. The visual, responsive, accessibility and performance sweeps
+// run when a person asks for them (frontend/package.json: e2e:visual, e2e:responsive,
+// e2e:accessibility, e2e:performance).
 
 import { spawn } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
@@ -31,7 +32,7 @@ const tracks = [
     steps: [
       ['format', 'dotnet format --verify-no-changes'],
       ['build', 'dotnet build --nologo'],
-      ['tests', 'dotnet test --no-build --nologo'],
+      ['tests', 'dotnet test --no-build --nologo --filter "Category!=Performance"'],
     ],
   },
 ];

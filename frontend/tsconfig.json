@@ -6,6 +6,7 @@
     "paths": {
       "@mondino/api": ["./projects/api/src/public-api.ts"],
       "@mondino/components": ["./projects/components/src/public-api.ts"],
+      "@mondino/components/globe-fallback": ["./projects/components/src/globe-fallback.ts"],
       "@mondino/domain": ["./projects/domain/src/public-api.ts"],
       "@mondino/globe": ["./projects/globe/src/public-api.ts"]
     },

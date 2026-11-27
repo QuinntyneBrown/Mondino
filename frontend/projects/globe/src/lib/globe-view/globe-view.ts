@@ -24,6 +24,7 @@ import {
   type ProjectedPoint,
   STARTING_ORIENTATION,
 } from '../scene/globe-scene';
+import { DetailLevel } from '../scene/detail-level';
 import { subsolarPoint } from '../sun/sun-position';
 import { GlobeMotion, type GlobeOrientation } from '../motion/globe-motion';
 import { GlobeGestures } from '../motion/globe-gestures';
@@ -146,6 +147,8 @@ export class GlobeView {
 
   private async begin(): Promise<void> {
     const { signal: released } = this.releasing;
+    // The finest step first, and a lower one while the frame rate stays under 30 (L2-046).
+    const detail = new DetailLevel(detailSteps(window.devicePixelRatio || 1));
     let scene: GlobeScene;
     try {
       // Read from the rendered view rather than through a view query, whose runtime would join
@@ -153,7 +156,7 @@ export class GlobeView {
       const canvas = this.host.querySelector('canvas');
       if (!canvas) return;
       scene = await createGlobeScene(canvas, {
-        detail: detailSteps(window.devicePixelRatio || 1)[0],
+        detail: detail.current,
         signal: released,
         onContextLost: () => this.unavailable(),
       });
@@ -207,6 +210,8 @@ export class GlobeView {
     }
     scene.onFrame((elapsedMs) => {
       if (this.state() === 'Loading') this.moveTo('Ready');
+      const lower = detail.record(elapsedMs);
+      if (lower) scene.setDetail(lower);
       const after = motion.advance(elapsedMs);
       // Compared with what is drawn, so a turn made between frames (a hold under reduced
       // motion) is drawn too.

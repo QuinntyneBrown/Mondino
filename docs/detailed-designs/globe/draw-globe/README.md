@@ -109,9 +109,10 @@ any other origin.
   `GlobeUnavailableError` whose `reason` is `NoWebGL`, `AssetsFailed` or `ContextLost`. Its
   other methods are `resize`, `setSun`, `setDetail`, `setOrientation`, `project`, `onFrame`,
   `start`, `stop`, `setPalette` and `dispose`. Renderer: three.js on WebGL 2, imported only
-  once a WebGL 2 context has been obtained. Asset format: `globe.glb` (glTF binary from
-  Blender: `GlobeHigh`, `GlobeLow` and the `Clouds` shell), `surface.png` (land, forest, sand
-  and ice masks) and `clouds.png` (ADR 0012). It draws on demand: a frame only when something
+  once a WebGL 2 context has been obtained. Asset format: glTF binary from Blender in
+  two files, `globe-low.glb` (`GlobeLow` and the `Clouds` shell), which the first frame is drawn
+  from, and `globe-high.glb` (`GlobeHigh`), fetched after it while the step asks for it;
+  `surface.png` (land, forest, sand and ice masks) and `clouds.png` (ADR 0012, ADR 0030). It draws on demand: a frame only when something
   has changed, and none while stopped.
 - **`GlobePalette`** — the globe's colours as the scene needs them: ocean, deep ocean, land,
   deep land, sand, ice, cloud and night. The outline and the drop shadow are SVG circles over

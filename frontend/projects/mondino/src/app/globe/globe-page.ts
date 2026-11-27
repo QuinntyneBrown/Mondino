@@ -24,7 +24,6 @@ import {
 import {
   Button,
   EmptyState,
-  GlobeFallback,
   GlobeLegend,
   GlobePlaceholder,
   GroupPanel,
@@ -34,6 +33,8 @@ import {
   TeammatePanel,
   WeekPanel,
 } from '@mondino/components';
+// Its own import, so the still picture is deferred: it arrives only where the globe cannot be drawn.
+import { GlobeFallback } from '@mondino/components/globe-fallback';
 import { GlobeView, type GlobeState } from '@mondino/globe';
 import {
   countsWords,

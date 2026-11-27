@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-008
+// Traces to: L2-008, L2-046
 // Description: The Globe screen draws a lit 3D globe from assets served by the app itself, after a placeholder that holds its place
 
 import { expect, test } from '../fixtures/test';
@@ -59,9 +59,15 @@ test.describe('Globe: the 3D globe', () => {
     // The model and its masks come from the app itself, under content-hashed names
     expect(record.origins()).toEqual(['http://127.0.0.1:4310']);
     const paths = record.requests.map((url) => new URL(url).pathname);
-    expect(paths).toContainEqual(expect.stringMatching(/^\/media\/globe-[A-Z0-9]{8}\.glb$/));
+    expect(paths).toContainEqual(expect.stringMatching(/^\/media\/globe-low-[A-Z0-9]{8}\.glb$/));
     expect(paths).toContainEqual(expect.stringMatching(/^\/media\/surface-[A-Z0-9]{8}\.png$/));
     expect(paths).toContainEqual(expect.stringMatching(/^\/media\/clouds-[A-Z0-9]{8}\.png$/));
+
+    // And the finer model follows the first frame, from the same origin (ADR 0030)
+    await expect
+      .poll(() => record.requests.map((url) => new URL(url).pathname))
+      .toContainEqual(expect.stringMatching(/^\/media\/globe-high-[A-Z0-9]{8}\.glb$/));
+    expect(record.origins()).toEqual(['http://127.0.0.1:4310']);
   });
 
   test('the globe is lit and coloured, with the sea blue and the land not', async ({

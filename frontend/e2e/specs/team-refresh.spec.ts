@@ -88,6 +88,8 @@ test.describe('Keep the team fresh', () => {
     globePage,
   }) => {
     await makeTheTabHideable(page);
+    // The globe holds still, so the hour that passes draws no frame (ADR 0013).
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await rememberTeam(page);
     const reads = answerAsJordanJoins(api);
     await globePage.open();
