@@ -747,3 +747,35 @@ apply the lessons that fit.
   with `&&`.
 - *Put a type where its lowest reader can import it* (journey 12, lesson 2): `PinWeather`, `FoundWeather`
   and `WeatherCondition` are in `api`, so `PinLabel`, `LookupMessage` and `WeatherIcon` read them.
+
+## Change: Remove the limit on making a team
+
+Not a journey of its own: the product owner asked for the `create-team` limit (5 teams an hour for
+one client) to be removed from `POST /api/teams` (ADR 0016). No criterion was added or removed, and
+no journey's % complete moved.
+
+**What slowed it**
+
+- The prompt named ADR 0015 as the next free record, but 0015 was already the weather source; the
+  record is 0016.
+- Besides the test the plan named, `OpenEndpointsTests` had a theory row for `POST /api/teams` that
+  proved the old limit. Only the whole backend suite found it.
+- The container had neither .NET nor PlantUML. .NET came from `apt` (journey 1, lesson 8); the
+  PlantUML jar from `repo1.maven.org` (`repo.maven.apache.org` answered 429) and Graphviz from `apt`.
+
+**Lessons**
+
+1. **When a behaviour is removed, search the tests for its endpoint, not only its test's name.** A
+   table of cases elsewhere may hold a row for it.
+2. **Check the next free number in `docs/adr/` before writing it into the mocks and the specs.**
+3. **A departure from a rule names the rule and stays narrow.** ADR 0016, `AGENTS.md`, L1-014 and
+   L2-045 name making a team as the one exception, so no other open endpoint can cite it.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the mocks, L1 and L2, ADR 0016, `AGENTS.md`
+  and both designs, with their diagrams rendered again, were one commit before any code.
+- *Run the spec before the page exists* (journey 1, lesson 5): the backend test failed first on the
+  sixth request's 429, and the e2e spec on the countdown shown in place of the failure.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): each commit was made
+  only after reading the exit code.
