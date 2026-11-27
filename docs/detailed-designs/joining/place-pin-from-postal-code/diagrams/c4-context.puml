@@ -5,7 +5,7 @@ title System Context — Place a pin from a postal code
 
 Person(person, "Person with an invite link", "Gives a name, a country and a postal code")
 System(mondino, "Mondino", "Finds the postal code's city and places a pin there")
-System_Ext(postal, "Postal code source", "Resolves a postal code to its city; provider TO SUPPLY")
+System_Ext(postal, "Postal code source", "Resolves a postal code to its city; GeoNames postal code search (ADR 0006)")
 System_Ext(meteo, "Open-Meteo", "Current weather at a position")
 
 Rel(person, mondino, "Gives a postal code and sees the city, its weather and a new pin")

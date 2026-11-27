@@ -20,13 +20,27 @@
             <p class="join__lead">
               Your pin shows teammates your local time, weather and what’s happening where you are.
             </p>
-            <form class="join__fields" novalidate (submit)="hold($event)">
+            <form class="join__fields" novalidate (submit)="submit($event)">
+              @if (summary(); as summary) {
+                <mo-alert
+                  tone="danger"
+                  focusable
+                  [focusRequest]="summaryFocus()"
+                  [title]="summary.title"
+                  [items]="summary.items"
+                  (follow)="focusField($event)"
+                />
+              }
               <mo-text-field
                 fieldId="name"
                 name="name"
                 label="Your name"
                 autocomplete="name"
                 [maxlength]="60"
+                [value]="store.name()"
+                [invalid]="nameError() !== null"
+                [error]="nameError()"
+                (valueChange)="store.name.set($event)"
               />
               <div class="join__field-row">
                 <mo-select-field
@@ -35,6 +49,8 @@
                   label="Country"
                   autocomplete="country-name"
                   [options]="countries()"
+                  [value]="store.countryCode()"
+                  (valueChange)="store.setCountry($event)"
                 />
                 <mo-text-field
                   fieldId="postal"
@@ -43,13 +59,89 @@
                   autocomplete="postal-code"
                   [maxlength]="12"
                   tabular
-                  describedBy="lookup"
+                  [describedBy]="lookupDown() ? null : 'lookup'"
+                  [disabled]="lookupDown()"
+                  [value]="store.postalCode()"
+                  [invalid]="postalCodeError() !== null || store.lookup().kind === 'NotFound'"
+                  [error]="postalCodeError()"
+                  (valueChange)="store.setPostalCode($event)"
+                  (blurred)="store.leavePostalCode()"
                 />
               </div>
-              <mo-lookup-message messageId="lookup" />
-              <button mo-button variant="primary" size="lg" block type="submit">
-                Place my pin
-              </button>
+              @if (lookupDown()) {
+                <mo-city-field
+                  [text]="store.cityText()"
+                  [results]="store.cityResults()"
+                  [countryName]="store.country()?.name ?? ''"
+                  (textChange)="store.setCityText($event)"
+                  (choose)="store.chooseCity($event)"
+                />
+              }
+              @if (!lookupDown() || store.lookup().kind === 'Found') {
+                <mo-lookup-message
+                  messageId="lookup"
+                  [state]="store.lookup()"
+                  [country]="store.country()"
+                  [quiet]="postalCodeError() !== null"
+                />
+              }
+              @if (store.lookup().kind === 'RateLimited') {
+                <mo-alert
+                  tone="warning"
+                  icon="clock"
+                  strong="Too many tries from this device."
+                  text="You can try again in"
+                  [figure]="countdown()"
+                  [figureSpoken]="countdownSpoken()"
+                  end="."
+                />
+              }
+              @switch (store.lookup().kind) {
+                @case ('Locating') {
+                  <button
+                    mo-button
+                    variant="primary"
+                    size="lg"
+                    block
+                    type="submit"
+                    aria-busy="true"
+                    disabled
+                  >
+                    <svg
+                      class="icon icon--sm icon--spin"
+                      aria-hidden="true"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
+                    >Placing your pin…
+                  </button>
+                }
+                @case ('Found') {
+                  <button mo-button variant="primary" size="lg" block type="submit">
+                    Join {{ invite.teamName }}
+                  </button>
+                }
+                @case ('RateLimited') {
+                  <button mo-button variant="primary" size="lg" block type="submit" disabled>
+                    Place my pin
+                  </button>
+                }
+                @case ('Unavailable') {
+                  <button mo-button variant="primary" size="lg" block type="submit">
+                    @if (store.chosenCity(); as chosen) {
+                      Place my pin in {{ chosen.city.name }}
+                    } @else {
+                      Place my pin
+                    }
+                  </button>
+                }
+                @default {
+                  <button mo-button variant="primary" size="lg" block type="submit">
+                    Place my pin
+                  </button>
+                }
+              }
             </form>
           </div>
         }
@@ -110,7 +202,7 @@
     @if (store.inviteState() === 'Loading') {
       <mo-globe-placeholder />
     } @else {
-      <mo-globe-fallback [label]="globeLabel()" [pins]="pins()" />
+      <mo-globe-fallback [label]="globeLabel()" [pins]="pins()" [you]="you()" />
     }
   </section>
 </main>

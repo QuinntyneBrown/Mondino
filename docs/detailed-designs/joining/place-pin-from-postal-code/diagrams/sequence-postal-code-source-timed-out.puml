@@ -31,7 +31,7 @@ box "Backend — Mondino Application and Domain" #ECFDF3
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
   participant "CachedPostalCodeLookup" as lookup
-  participant "PostalCodeLookupClient" as lookupClient
+  participant "GeoNamesPostalCodeLookup" as lookupClient
   participant "BundledCityDirectory" as directory
 end box
 participant "Postal code source" as postal

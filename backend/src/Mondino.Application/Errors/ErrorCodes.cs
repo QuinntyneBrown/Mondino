@@ -17,6 +17,15 @@ public static class ErrorCodes
     /// <summary>An invite token that matches no team: never issued, mistyped or reset.</summary>
     public const string InviteNotFound = "invite_not_found";
 
+    /// <summary>A request whose values break a rule of its own: an unsupported country, a value too long.</summary>
+    public const string ValidationFailed = "validation_failed";
+
+    /// <summary>A postal code that does not fit its country's form, or that the source does not know.</summary>
+    public const string PostalCodeNotFound = "postal_code_not_found";
+
+    /// <summary>The postal code source did not answer in time, or its breaker is open.</summary>
+    public const string PostalCodeUnavailable = "postal_code_unavailable";
+
     /// <summary>The code for a status that no handler gave a code of its own.</summary>
     public static string? ForStatus(int status) => status switch
     {

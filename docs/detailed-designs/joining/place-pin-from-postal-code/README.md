@@ -52,10 +52,14 @@ source and Open-Meteo. The browser calls only the Mondino API.
 
 - **`JoinPage`** — renders the form beside the globe from 992 px, and in one column under
   it. It lists `Invite.countries` in the Country field in alphabetical order. It passes the
-  found city to `GlobeView` as the selected pin labelled "You".
-- **`JoinStore`** — route-scoped service. It holds the writable signals `name`, `countryCode`
-  and `postalCode`, and the signals `lookupState`, `found`, `nameProblem` and
-  `postalCodeMissing`.
+  found city to the globe as the new pin labelled "You · Milan"; until the 3D globe
+  (journey 8) that is `GlobeFallback`'s `you` input, a lifted pin at the city's still
+  placement that pulses once. The globe turning to the city is journeys 8 and 9's.
+- **`JoinStore`** — route-scoped service. It holds the writable signal `name`, the signals
+  `countryCode` and `postalCode` (changed through `setCountry()` and `setPostalCode()`, which
+  call `clearFound()`), `lookup` (a `LookupState`), `submitted`, `nameProblem` and
+  `postalCodeMissing`. `leavePostalCode()` looks an untried postal code up when the field is
+  left. The postal code lives in its signal and the request body and nowhere else.
   - `lookUp()` sets `Locating`, calls `InviteApi.lookUpPostalCode`, and maps the answer or the
     `ApiError` code to a `LookupState`; the code `invite_not_found` sets `inviteState` to
     `NotFound` instead, which replaces the form. One lookup runs at a time: a new lookup aborts the
@@ -66,49 +70,61 @@ source and Open-Meteo. The browser calls only the Mondino API.
   - `nameProblem` reports a name that is empty, only spaces, or longer than 60 characters. A
     submit with a name problem places no pin, marks the name field `aria-invalid` and shows
     "Add your name so teammates know whose pin this is." A name over 60 characters gets the
-    same message with the limit; its exact wording is `<TO SUPPLY>`.
+    message with the limit: "Add your name so teammates know whose pin this is, in 60
+    characters or fewer."
   - `postalCodeMissing` reports an empty postal code. A submit with it makes no lookup, marks
     the postal code field `aria-invalid` and shows "Enter a postal code."
-  - A submit with either problem makes `JoinPage` show a summary alert above the fields
-    ("Two things are missing") that links to each field ("Add your name", "Enter a postal
-    code") and takes focus.
+  - A submit with either problem makes `JoinPage` show a summary alert (`Alert`) above the fields
+    ("Two things are missing", or "One thing is missing") that links to each field ("Add your
+    name", or "Shorten your name" for a name over 60 characters, and "Enter a postal code") and
+    takes focus. A link moves focus to its field and leaves the address alone.
   - A submit with no problem and no found city runs `lookUp()` first.
   - While `lookupState` is `Unavailable`, the store holds the city search: the writable signal
-    `cityText`, the signals `cityResults` and `chosenCity`, `searchCities()`, which runs when
-    typing stops and aborts the search before it, and `placeAtCity()`, which sets `Found` with
-    the chosen city. The interval after typing stops is `<TO SUPPLY>`; unit tests advance a
-    fake clock. The state stays `Unavailable` for the life of the store, so the lookup is tried
+    `cityText`, the signals `cityResults` and `chosenCity`, `searchCities()`, which runs 300 ms after
+    typing stops and aborts the search before it, `chooseCity()`, and `placeAtCity()`, which sets
+    `Found` with the chosen city. Unit tests advance a fake clock. The state stays `Unavailable` for the life of the store, so the lookup is tried
     again when the screen is next opened. What was typed in the postal code field is kept.
-  - While `lookupState` is `RateLimited`, the store holds `retryAt`, worked out from the
-    refusal's `Retry-After` and the injected `CLOCK`, and one timer that counts down to it. The
-    timer is cleared at zero and when the store is destroyed.
+  - While `lookup` is `RateLimited`, it holds `retryAt`, worked out from the refusal's
+    `Retry-After` and the injected `CLOCK` (`@mondino/api`, bound in `app.config.ts`), and the
+    store runs one timer that ticks `secondsToWait` down to it. The timer is cleared at zero and
+    when the store is destroyed; editing the postal code does not stop it.
 - **`LookupState`** — union in `@mondino/api` of `Idle`, `Locating`, `Found` (with its
-  `PostalCodeResult`), `NotFound`, `Unavailable` and `RateLimited`. Profile & Settings uses the
-  same type.
-- **`PostalCodeField`** — presentation component, the same on Join, on Create Team and on
-  Profile & Settings. Its inputs are `value`, `country` (the chosen `Country`), `lookupState`
-  (a `LookupState`), `disabled` and `mode` (`Join` or `Move`), and it emits `valueChange`,
-  `blurred` and `retry`. It renders the field and, under the row, the mocks' `lookup` line in
-  a polite live region. In the mode `Join` the line shows "Only your city is shown. Your postal
-  code stays private." while idle, "Finding 20121…" while locating, the found city, region and
-  weather, and the not-found message with `role="alert"` and `aria-invalid` on the input. It
-  renders the postal code and the country's form as text. In the mode `Join` it shows nothing
-  of its own for `Unavailable` and `RateLimited`: `JoinPage` sets `disabled` and renders
-  `CityField` for the first and an alert for the second. The mode `Move` is described in
-  `change-location`.
+  `PostalCodeResult`), `NotFound` (with the postal code as typed), `Unavailable` and
+  `RateLimited`. Profile & Settings uses the same type.
+- **The postal code field and `LookupMessage`.** The mocks put the postal code's input in the
+  field row beside the country and its `lookup` line under the row, so they are two
+  presentation components, the same on Join, on Create Team and on Profile & Settings: the
+  postal code is a `TextField` (`value`, `invalid`, `error`, `disabled`; it emits `valueChange`
+  and `blurred`), and `LookupMessage` (`messageId`, `state`, a `LookupState`, and `country`, the
+  chosen `Country`) renders the line in a polite live region. On Join the line shows "Only your
+  city is shown. Your postal code stays private." while idle, "Finding 20121…" while locating,
+  the found city, region and weather, and the not-found message with `role="alert"`, while
+  `JoinPage` sets `aria-invalid` on the input. It renders the postal code and the country's
+  form as text. It shows nothing for `Unavailable` and `RateLimited`: `JoinPage` sets
+  `disabled` on the postal code and renders `CityField` for the first and an alert for the
+  second. Profile & Settings' line is described in `change-location`.
 - **`CityField`** (`mo-city-field`) — presentation component in `@mondino/components`: the
   field "Your city", a text input with `role="combobox"`, `aria-autocomplete="list"`,
-  `aria-expanded` and `aria-controls` naming its list of matching cities, built on the CDK
-  listbox. Its inputs are `text`, `results` and `chosen`; it emits `textChange` and `choose`.
+  `aria-expanded`, `aria-controls` naming its list of matching cities and
+  `aria-activedescendant` naming the active one: the WAI-ARIA combobox pattern with a listbox,
+  written in the component, as `pages/join/choosing-city` draws it. Up and Down move through
+  the list, Enter or a tap chooses, Escape closes it. Its inputs are `text`, `results` and `chosen`; it emits `textChange` and `choose`.
   Its help, in a `role="status"` element linked with `aria-describedby`, reads "Postal code
   lookup is down right now, so pick your city instead. Your pin goes to its centre." Each
   result shows the city's name and region as text. It injects nothing.
 - **The button.** It reads "Place my pin" until a city is found; "Placing your pin…", disabled
   and `aria-busy`, while locating; "Place my pin in Milan" once a city is chosen in
   `CityField`; and "Join Northwind" once the pin is placed.
-- **The rate limit alert.** For `RateLimited`, `JoinPage` shows a warning alert, "Too many
+- **`Alert`** (`mo-alert`) — presentation component in `@mondino/components`, the design
+  system's Alert: a danger or warning tone, a title, a line with a bold start, and the links of
+  a form's error summary, which it emits as `follow` so the screen moves focus to the field and
+  leaves the address alone. Given `focusRequest`, it moves focus to itself once it is drawn, each
+  time the number rises: one for each submit with a problem (ADR 0007).
+- **The rate limit alert.** For `RateLimited`, `JoinPage` shows a warning `Alert`, "Too many
   tries from this device. You can try again in 9:42.", and disables the button until the
-  countdown ends. The alert is announced once, not at each second, and what was typed is kept.
+  countdown ends. The ticking figure is hidden from assistive technology, which reads the wait
+  as it was when the alert appeared, so the alert is announced once, not at each second. What
+  was typed is kept.
   The same alert serves a join refused with `rate_limited` (`join-team`).
 - **`InviteApi.lookUpPostalCode(inviteToken, countryCode, postalCode, signal)`** — sends
   `POST /api/invites/{inviteToken}/postal-code-lookups` with the country and postal code in the
@@ -118,12 +134,15 @@ source and Open-Meteo. The browser calls only the Mondino API.
   and returns a list of `CityResult`: a `cityId` and the `city`.
 - **`PostalCodeResult`** — the `city` (name, region, country code, position, time zone id) and
   the `weather`, or null. A city chosen in `CityField` gives a `PostalCodeResult` with that
-  city and no weather; the words of the found line without weather are `<TO SUPPLY>`.
-- **`Country`** — feature-local type: `code`, `name`, `postalCodeForm` ("Italian postal codes
-  have five digits") and `postalCodeExample` ("20121"). The not-found message is made of the
-  postal code, the `name`, the `postalCodeForm` and the example: "We couldn’t find “2012” in
-  Italy. Italian postal codes have five digits, like 20121." The list arrives on the `Invite`,
-  so the frontend holds no second copy of the formats.
+  city and no weather. Without weather the found line ends at the city: "Milan, Lombardy —
+  pinned at city level." Until journey 13 adds `IWeatherSource`, every lookup answers no
+  weather and the line ends there.
+- **`Country`** — `code`, `name`, `nameInText` (the name as a sentence uses it: "the United
+  States") and `postalCodeForm`, a sentence with its example ("Italian postal codes have five
+  digits, like 20121.", "Canadian postal codes look like A1A 1A1."). The not-found message is
+  made of the postal code as typed, `nameInText` and `postalCodeForm`: "We couldn’t find “2012”
+  in Italy. Italian postal codes have five digits, like 20121." The list arrives on the
+  `Invite`, so the frontend holds no second copy of the formats.
 
 **Backend**
 
@@ -133,11 +152,11 @@ source and Open-Meteo. The browser calls only the Mondino API.
   any outside source is called (L2-045). It sends one `LookUpPostalCodeQuery`.
 - **`InvitesController`** — `POST /api/invites/{inviteToken}/city-searches`. The action is
   marked as open to an invite link's holder and carries the `CitySearch` policy of
-  `RateLimitPolicies`, whose limit is `<TO SUPPLY>`. It sends one `SearchCitiesQuery`.
+  `RateLimitPolicies`: 30 searches a minute for one client. It sends one `SearchCitiesQuery`.
 - **`LookUpPostalCodeQuery`** — `InviteToken`, `CountryCode`, `PostalCode`. The invite token is
   absent when Create Team sends the query (`make-team`).
-- **`LookUpPostalCodeQueryValidator`** — refuses a country outside the supported list or a
-  postal code over 12 characters with 400 and the code `validation_failed`.
+- **`LookUpPostalCodeQueryValidator`** — refuses a country outside the supported list, or a
+  postal code that is empty or over 12 characters, with 400 and the code `validation_failed`.
 - **`LookUpPostalCodeQueryHandler`** — runs four steps in order.
   1. It confirms a team holds the invite token, and refuses with `invite_not_found` otherwise.
   2. It calls `PostalCodeFormats.TryNormalise`. A postal code that does not fit the country's
@@ -145,14 +164,19 @@ source and Open-Meteo. The browser calls only the Mondino API.
   3. It calls `IPostalCodeLookup.FindCityAsync`. `NotFound` is refused with
      `postal_code_not_found`; `Unavailable` is refused with `postal_code_unavailable`.
   4. It calls `IWeatherSource.GetCurrentAsync` with the city's position. A failure there yields
-     a null weather, and the lookup still succeeds.
+     a null weather, and the lookup still succeeds. `IWeatherSource` is journey 13's; until it
+     exists the weather is null.
 - **`PostalCodeFormats`** — holds one `PostalCodeFormat` for each supported country. To begin
   with these are thirteen: Australia, Brazil, Canada, Germany, Ghana, India, Ireland, Italy,
   Japan, Mexico, Sweden, United Arab Emirates and United States. `TryNormalise` trims the value, removes spaces and
   hyphens, upper-cases it, tests it against the country's pattern, and returns a `PostalCode` in
   the country's canonical spelling. "l5b3c1" and "L5B 3C1" normalise to the same `PostalCode`.
-- **`PostalCodeFormat`** — feature-local type: `CountryCode`, `CountryName`, `Pattern`, `Form`
-  and `Example`. `GetInviteQueryHandler` projects the list to `CountryDto` on the `InviteDto`.
+- **`PostalCodeFormat`** — feature-local type: `CountryCode`, `CountryName`, `NameInText`,
+  `Pattern`, `Form` (the sentence, with its example), how the canonical spelling is written,
+  and the part sent to the source (`ForSource`: Canada's forward sortation area, Ireland's
+  routing key, a US ZIP's five digits, the whole code elsewhere). `GetInviteQueryHandler`
+  projects the list to `CountryDto` on the `InviteDto`. The thirteen forms are listed under
+  *Postal code forms* below.
 - **`IPostalCodeLookup`** — `FindCityAsync(postalCode, ct)` returns a
   `PostalCodeLookupOutcome`: a `PostalCodeLookupStatus` of `Found`, `NotFound` or `Unavailable`,
   and the `City` when found. The contract fixes two rules. The `City` is the municipality the
@@ -169,14 +193,23 @@ source and Open-Meteo. The browser calls only the Mondino API.
   with the text, largest first, and `Find(cityId)` returns one `City` or none. Each `City`
   carries the city's own position and its IANA `TimeZoneId`, as a looked-up city does.
   `BundledCityDirectory` in `Mondino.Infrastructure` reads a data set shipped with the API and
-  loaded once. The data set, its smallest city and `max` are `<TO SUPPLY>`.
-- **`CachedPostalCodeLookup`** — decorator over `PostalCodeLookupClient`. It caches `Found` and
+  loaded once: GeoNames' cities of 15,000 people or more in the thirteen countries, and `max`
+  is 8 (ADR 0006).
+- **`PostalCodeCityResolver`** — in `Mondino.Infrastructure`, beside the client: turns the
+  source's place (name, region, coordinates) into a `City` of `ICityDirectory`: the city of the
+  country whose name matches the place's, nearest the place if several do, or else the city
+  nearest the place. The source's coordinates choose the city and are never a pin's position
+  (L2-006).
+- **`CachedPostalCodeLookup`** — decorator over `GeoNamesPostalCodeLookup`. It caches `Found` and
   `NotFound` outcomes by normalised postal code, applies the 5 s timeout of L2-049, and opens a
   circuit breaker after repeated failures. It does not cache `Unavailable`. The cache lifetimes
-  and the breaker thresholds are `<TO SUPPLY>`.
-- **`PostalCodeLookupClient`** — calls the Postal code source and maps its answer to a `City`
-  with its IANA `TimeZoneId`. The provider is `<TO SUPPLY>`, and so is the means by which the
-  city's own position is obtained from that provider.
+  and the breaker thresholds are those of ADR 0006: `Found` is kept 30 days and `NotFound`
+  1 day, at most 10,000 entries, and 5 failures in a row open the breaker for 30 seconds.
+- **`GeoNamesPostalCodeLookup`** — calls the Postal code source, the GeoNames postal code
+  search (ADR 0006), with the country and the postal code's `ForSource` part, and maps its first
+  place through `PostalCodeCityResolver` to a `City` with its IANA `TimeZoneId`. An empty answer
+  is `NotFound`; an error, a status other than 200 or a time-out is `Unavailable`. Ghana and the
+  United Arab Emirates, which the source does not cover, are `Unavailable` without a call.
 - **`CachedWeatherSource`** over **`OpenMeteoWeatherSource`** — current weather at a position,
   with the same 5 s timeout, a cache that keeps the weather for 15 minutes (L2-018) and a
   circuit breaker.
@@ -201,9 +234,33 @@ Open-Meteo receives a position. Neither receives a name, a team or an invite tok
 search leaves the backend for no one. No log, metric or span carries the postal code, the
 position or the text of a city search.
 
-**Open point.** The mock's countdown, "9:42", is longer than the one-minute window of the
-lookup policy (L2-045). The alert counts down from whatever `Retry-After` the refusal carries;
-whether the window lengthens is `<TO SUPPLY>`.
+**Postal code forms.** Spaces and hyphens are removed and letters upper-cased before the
+pattern is tested; the canonical spelling puts them back.
+
+| Country | Pattern (after normalising) | Canonical | Form |
+|---|---|---|---|
+| Australia | four digits | `2000` | Australian postal codes have four digits, like 2000. |
+| Brazil | eight digits | `01310-100` | Brazilian postal codes have eight digits, like 01310-100. |
+| Canada | letter, digit, letter, digit, letter, digit, from the letters Canada Post uses | `L5B 3C1` | Canadian postal codes look like A1A 1A1. |
+| Germany | five digits | `10115` | German postal codes have five digits, like 10115. |
+| Ghana | two letters and three or four digits | `GA543` | Ghanaian postal codes are two letters and three or four digits, like GA543. |
+| India | six digits, the first not 0 | `560001` | Indian PIN codes have six digits, like 560001. |
+| Ireland | an Eircode: a routing key and four characters | `D02 X285` | Irish Eircodes look like D02 X285. |
+| Italy | five digits | `20121` | Italian postal codes have five digits, like 20121. |
+| Japan | seven digits | `100-0001` | Japanese postal codes have seven digits, like 100-0001. |
+| Mexico | five digits | `06000` | Mexican postal codes have five digits, like 06000. |
+| Sweden | five digits | `111 22` | Swedish postal codes have five digits, like 111 22. |
+| United Arab Emirates | one to six digits (a P.O. Box) | `12345` | UAE addresses use a P.O. Box number of up to six digits, like 12345. |
+| United States | five digits, or nine | `78701`, `78701-1234` | US ZIP codes have five digits, like 78701. |
+
+**The countdown.** The mock's countdown, "9:42", is longer than the one-minute window of the
+lookup policy (L2-045). The window stays one minute; the alert counts down from whatever
+`Retry-After` the refusal carries, announced once.
+
+**Open question.** In Ghana and the United Arab Emirates the lookup is always `Unavailable`
+(ADR 0006), so Join offers "Your city" with the words "Postal code lookup is down right now",
+which is not quite true there. Whether Join says something of its own for a country the source
+does not cover is not designed.
 
 ## Requirements
 

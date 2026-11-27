@@ -27,7 +27,13 @@ public sealed record PositionDto(double Latitude, double Longitude);
 /// <summary>A teammate's initials and colour: the most a holder of an invite link learns of them.</summary>
 public sealed record InviteAvatarDto(string Initials, string Colour);
 
-public sealed record CountryDto(string Code, string Name);
+/// <summary>A country a teammate can join from, with the form its postal codes take.</summary>
+public sealed record CountryDto(string Code, string Name, string NameInText, string PostalCodeForm)
+{
+    internal static IReadOnlyList<CountryDto> All { get; } = PostalCodeFormats.All
+        .Select(format => new CountryDto(format.CountryCode, format.CountryName, format.NameInText, format.Form))
+        .ToList();
+}
 
 internal sealed class GetInviteQueryHandler(IAppDbContext database, ICurrentTeammate currentTeammate)
     : IRequestHandler<GetInviteQuery, InviteDto>
@@ -53,7 +59,7 @@ internal sealed class GetInviteQueryHandler(IAppDbContext database, ICurrentTeam
 
         if (currentTeammate.IsAuthenticated && currentTeammate.TeamId == team.Id)
         {
-            return new InviteDto(team.Name, count, [], [], AlreadyJoined: true, SupportedCountries.All);
+            return new InviteDto(team.Name, count, [], [], AlreadyJoined: true, CountryDto.All);
         }
 
         var positions = await teammates
@@ -73,6 +79,6 @@ internal sealed class GetInviteQueryHandler(IAppDbContext database, ICurrentTeam
             positions,
             recent.Select(t => new InviteAvatarDto(Domain.Teams.TeammateInitials.Of(t.Name), t.Colour)).ToList(),
             AlreadyJoined: false,
-            SupportedCountries.All);
+            CountryDto.All);
     }
 }

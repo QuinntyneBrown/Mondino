@@ -34,3 +34,25 @@
 .tnum {
   font-variant-numeric: tabular-nums;
 }
+.input:disabled {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+}
+.field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1-5);
+  font: var(--text-body-sm);
+  color: var(--color-danger-fg);
+}
+.icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex: none;
+  margin-top: var(--space-0-5);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
