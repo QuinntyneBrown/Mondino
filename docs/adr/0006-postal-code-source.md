@@ -18,8 +18,9 @@ covers Ghana or the United Arab Emirates, which has no postal codes.
 
 - **Mondino holds its cities itself.** `BundledCityDirectory` reads `cities.tsv.gz`, an embedded
   resource of `Mondino.Infrastructure`, loaded once: the GeoNames `cities15000` export (every
-  place of 15,000 people or more) for the thirteen countries, with each city's GeoNames id, name,
-  region (`admin1CodesASCII`), position, IANA time zone and population, about 14,000 cities.
+  place of 15,000 people or more, less the sections of a city such as Milan's Brera) for the
+  thirteen countries, with each city's GeoNames id, name,
+  region (`admin1CodesASCII`), position, IANA time zone and population, about 13,200 cities.
   `tools/cities/build-cities.mjs` rebuilds it from the GeoNames dumps. The data is CC BY 4.0;
   `tools/cities/README.md` carries the attribution. It serves the city search of "Your city"
   (prefix of the name, accents and case ignored, largest first, at most 8) and the resolution of
@@ -61,7 +62,7 @@ covers Ghana or the United Arab Emirates, which has no postal codes.
 
 ## Consequences
 
-- The API ships about 300 kB of city data and holds it in memory, once.
+- The API ships about 310 kB of compressed city data and holds it in memory, once.
 - A postal code whose place is not in the directory resolves to the nearest city of 15,000 or
   more; a smaller town is pinned at its larger neighbour.
 - The rate limits of the free account are shared by every team. A deployment that outgrows them

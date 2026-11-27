@@ -3,6 +3,13 @@
     <ProjectReference Include="..\Mondino.Application\Mondino.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The city directory (docs/adr/0006), built by tools/cities/build-cities.mjs. -->
+    <EmbeddedResource Include="Cities\cities.tsv.gz" LogicalName="Mondino.Infrastructure.Cities.cities.tsv.gz" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mondino.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
