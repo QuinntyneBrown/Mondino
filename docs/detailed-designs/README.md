@@ -56,7 +56,8 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - **Mondino API** is an ASP.NET Core service in four layers: `Mondino.Domain`,
   `Mondino.Application`, `Mondino.Infrastructure` and `Mondino.Api`. It is the only thing that
   calls an outside source.
-- **Mondino database** holds teams and teammates through EF Core.
+- **Mondino database** holds teams and teammates through EF Core, in PostgreSQL
+  ([ADR 0004](../adr/0004-database-engine.md)).
 - **Outside sources** are the postal code source, Open-Meteo for the weather, the holiday,
   race and event calendars, and the email source that delivers sign-in links.
 - **The screens** are Join (`/join/{inviteToken}`), Sign In (`/sign-in`), Create Team (`/new`),
@@ -184,7 +185,7 @@ The designs mark these as `<TO SUPPLY>`:
 
 - The globe's renderer and the format its Blender-built assets are exported to; an ADR decides
   both before the Globe is built.
-- The database engine and the hosting platform.
+- The hosting platform.
 - The providers of the postal code source, of the holiday, race and event calendars and of
   the email source, and the data set behind the city search.
 - Signing in (`joining/sign-in`): how a teammate who joined by invite link signs in again,

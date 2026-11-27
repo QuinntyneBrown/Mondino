@@ -129,7 +129,8 @@ team and an unknown invite token, which replace the form with a notice.
 
 - Two different people who join at the same moment when the team has 499 teammates can both
   pass the limit check. The guard that makes the limit exact under concurrency (a concurrency
-  token on `Team`) depends on the database engine: `<TO SUPPLY>`.
+  token on `Team`, which PostgreSQL ([ADR 0004](../../../adr/0004-database-engine.md)) can
+  give as its `xmin` system column) is `<TO SUPPLY>`.
 - The protection of this pre-session, state-changing request against cross-site request forgery
   follows the session design: `<TO SUPPLY>`.
 

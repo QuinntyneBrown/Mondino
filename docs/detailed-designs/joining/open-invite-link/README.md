@@ -53,7 +53,7 @@ source.
     it can’t be used to join. Ask whoever sent it for the new link.", with the link "Start
     your own team", which leads to `/new` (`make-team`). The same notice serves a link that was
     reset, withdrawn or mistyped.
-  - `Full` shows the team's name, as text, in "Northwind is full" and "The team has all 500 of
+  - `Full` is built with `join-team` (L2-005), which holds the rule of 500 places. It shows the team's name, as text, in "Northwind is full" and "The team has all 500 of
     its places taken. Ask a teammate at Northwind to tell you when a place opens, then open
     this link again." It offers no action. `join-team` sets the same state when a join is
     refused with `team_full`.
@@ -80,9 +80,20 @@ source.
   and `countries`. The `countries` list serves the Join form and is described in
   `place-pin-from-postal-code`.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's
-  avatar.
+  avatar (`mo-avatar`, block `avatar`). A colour is the name of a teammate colour of the
+  palette, `teammate-1` to `teammate-13`.
 - **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block. `JoinPage` passes
   it the bare pins and sets it not interactive. The globe's renderer is `<TO SUPPLY>`.
+- **Until the globe is drawn** (`draw-globe`, journey 8) the stage shows the still picture,
+  `GlobeFallback`, as the mocks draw it. In the ready state it carries the bare pins: `JoinPage`
+  places each position with `stillPlacements(positions)` from `domain`'s `pins/`, which projects
+  it onto the still picture's hemisphere (centred on 10° E, 17.4° N) and keeps those on the near
+  side, each with its `depth`. The picture is named "The globe, with 12 pins: one for each
+  teammate already in Northwind" whichever pins are on the near side. In the three notices it
+  carries no pins and is named "The globe, with no pins". While loading, the stage shows
+  `GlobePlaceholder` (`mo-globe-placeholder`), named "The globe is loading".
+- **A bare pin** is the design system's `pin-dot`, in the pin colour. It never takes a
+  teammate's colour, so it cannot be tied to the initials beside the team's name.
 
 **Backend**
 
@@ -111,6 +122,12 @@ source.
   404 with `invite_not_found`, 429 with `rate_limited`.
 - **`MondinoTelemetry`** — records the route as its template, `/api/invites/{inviteToken}`, so
   no log, metric or span carries an invite token.
+
+**How a team comes to exist here.** Until `make-team` (journey 5) a team and its invite link
+are made only by `Mondino.Cli seed`: `NorthwindSeed` adds the sample team, Northwind, its
+invite token `northwind-7Kq2` and its twelve teammates with their cities when they are missing
+([ADR 0004](../../../adr/0004-database-engine.md)). No screen or endpoint makes a team in this
+feature.
 
 **Rules the slice applies**
 
