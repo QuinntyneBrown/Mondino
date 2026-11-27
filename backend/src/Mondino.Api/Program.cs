@@ -18,6 +18,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers(options => options.Filters.Add<AntiforgeryFilter>());
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemCodes.Customize);
 builder.Services.AddExceptionHandler<RefusalHandler>();
+builder.Services.AddExceptionHandler<UnhandledExceptionHandler>();
 builder.Services.AddMondinoHealth();
 // Traces, metrics and logs that carry no teammate (L2-051, docs/adr/0031).
 builder.Services.AddMondinoTelemetry(builder.Configuration);

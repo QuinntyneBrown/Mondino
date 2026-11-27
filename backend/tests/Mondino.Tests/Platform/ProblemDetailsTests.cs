@@ -44,7 +44,7 @@ public sealed class ProblemDetailsTests
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
         using var problem = JsonDocument.Parse(body);
         Assert.Equal("unexpected", problem.RootElement.GetProperty("code").GetString());
-        Assert.False(string.IsNullOrWhiteSpace(problem.RootElement.GetProperty("traceId").GetString()));
+        Assert.Matches("^[0-9a-f]{32}$", problem.RootElement.GetProperty("correlationId").GetString());
 
         // And it carries neither the error's text nor a stack trace
         Assert.DoesNotContain(TestOnlyController.Secret, body, StringComparison.Ordinal);
