@@ -72,7 +72,8 @@ internal sealed class UpdateProfileCommandHandler(
     ICurrentTeammate currentTeammate,
     IPostalCodeLookup lookup,
     ICityDirectory directory,
-    IWeatherSource weatherSource)
+    IWeatherSource weatherSource,
+    TimeProvider time)
     : IRequestHandler<UpdateProfileCommand, ProfileDto>
 {
     public async Task<ProfileDto> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
@@ -83,6 +84,9 @@ internal sealed class UpdateProfileCommandHandler(
         var teammate = await database.Teammates.Include(t => t.City)
             .SingleOrDefaultAsync(t => t.Id == currentTeammate.TeammateId && t.TeamId == request.TeamId, cancellationToken)
             ?? throw RefusedException.NotFound(ErrorCodes.TeamNotFound);
+
+        // The lookup and the weather of the answer wait 6 seconds at most between them (docs/adr/0026).
+        using var deadline = new SourceDeadline(time, cancellationToken);
 
         // 2. A location that differs from the stored one is found again by the backend, never taken
         //    from the browser; one that cannot be found or checked is refused and nothing is stored,
@@ -109,6 +113,6 @@ internal sealed class UpdateProfileCommandHandler(
 
         // 4. One unit of work.
         await database.SaveChangesAsync(cancellationToken);
-        return await OwnProfiles.ReadAsync(database, weatherSource, teammate.Id, request.TeamId, cancellationToken);
+        return await OwnProfiles.ReadAsync(database, weatherSource, teammate.Id, request.TeamId, cancellationToken, deadline);
     }
 }

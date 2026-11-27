@@ -14,6 +14,8 @@ public sealed class FakePostalCodeSource : HttpMessageHandler
     private readonly Dictionary<string, (string Place, string Region, double Latitude, double Longitude)> places = [];
     private readonly List<HttpRequestMessage> requests = [];
     private TaskCompletionSource called = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private TimeSpan answerDelay;
+    private TimeProvider clock = TimeProvider.System;
 
     /// <summary>How the source answers a postal code it does not know a place for.</summary>
     public SourceBehaviour Behaviour { get; set; } = SourceBehaviour.Answers;
@@ -28,6 +30,12 @@ public sealed class FakePostalCodeSource : HttpMessageHandler
             }
         }
     }
+
+    /// <summary>
+    /// The source takes <paramref name="delay"/> by <paramref name="time"/> before it answers, so a
+    /// test that advances the clock decides when; never a sleep.
+    /// </summary>
+    public void AnswersAfter(TimeSpan delay, TimeProvider time) => (answerDelay, clock) = (delay, time);
 
     /// <summary>The source knows <paramref name="postalCode"/> (as it is sent: "L5B") in a country to be a place.</summary>
     public void Knows(string country, string postalCode, string place, string region, double latitude, double longitude) =>
@@ -56,6 +64,11 @@ public sealed class FakePostalCodeSource : HttpMessageHandler
         var wasCalled = called;
         called = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         wasCalled.TrySetResult();
+
+        if (answerDelay > TimeSpan.Zero)
+        {
+            await Task.Delay(answerDelay, clock, cancellationToken);
+        }
 
         switch (Behaviour)
         {

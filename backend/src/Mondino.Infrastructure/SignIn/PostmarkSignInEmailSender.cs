@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Mondino.Application.SignIn;
+using Mondino.Infrastructure.OutsideSources;
 
 namespace Mondino.Infrastructure.SignIn;
 
@@ -9,26 +10,23 @@ namespace Mondino.Infrastructure.SignIn;
 /// The Email source: Postmark's HTTP API (docs/adr/0011). It is given the address and the link and
 /// nothing else (L2-050), as plain text, with open and link tracking off so the link is never
 /// rewritten through Postmark's domain. A call has 5 seconds; after 5 failures in a row the breaker
-/// opens for 30 seconds and nothing is sent. Its client logs nothing: its body carries the link.
+/// opens for 30 seconds (<c>OutsideSources:*</c>, docs/adr/0026) and nothing is sent. Its client logs nothing: its body carries the link.
 /// </summary>
 internal sealed class PostmarkSignInEmailSender(
     IHttpClientFactory clients,
     IOptions<SignInEmailOptions> options,
+    IOptions<OutsideSourceOptions> breakerOptions,
     TimeProvider time) : ISignInEmailSender
 {
     public const string ClientName = "email-source";
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
-    public static readonly TimeSpan BreakerOpenFor = TimeSpan.FromSeconds(30);
-    public const int FailuresToOpen = 5;
 
     public const string Subject = "Your Mondino sign-in link";
 
     /// <summary>Postmark's fields are named as written: <c>From</c>, <c>To</c>, <c>TextBody</c>.</summary>
     private static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = null };
 
-    private readonly Lock gate = new();
-    private int failures;
-    private DateTimeOffset openUntil = DateTimeOffset.MinValue;
+    private readonly SourceBreaker breaker = new(breakerOptions, time);
 
     public async Task<bool> SendAsync(SignInMail mail, CancellationToken cancellationToken)
     {
@@ -39,12 +37,9 @@ internal sealed class PostmarkSignInEmailSender(
             return false;
         }
 
-        lock (gate)
+        if (breaker.IsOpen)
         {
-            if (time.GetUtcNow() < openUntil)
-            {
-                return false;
-            }
+            return false;
         }
 
         var accepted = false;
@@ -80,7 +75,15 @@ internal sealed class PostmarkSignInEmailSender(
             }
         }
 
-        Record(accepted);
+        if (accepted)
+        {
+            breaker.Succeeded();
+        }
+        else
+        {
+            breaker.Failed();
+        }
+
         return accepted;
     }
 
@@ -89,22 +92,6 @@ internal sealed class PostmarkSignInEmailSender(
         "Here is your link to sign in to Mondino. It works once, for the next 15 minutes.\n\n"
         + link.AbsoluteUri
         + "\n\nIf you didn’t ask for it, you can ignore this email.\n";
-
-    private void Record(bool accepted)
-    {
-        lock (gate)
-        {
-            if (accepted)
-            {
-                failures = 0;
-            }
-            else if (++failures >= FailuresToOpen)
-            {
-                openUntil = time.GetUtcNow() + BreakerOpenFor;
-                failures = 0;
-            }
-        }
-    }
 
     /// <summary>Postmark's message: these fields and no others.</summary>
     private sealed record Message(

@@ -33,7 +33,12 @@ internal sealed class GetProfileQueryHandler(
 internal static class OwnProfiles
 {
     public static async Task<ProfileDto> ReadAsync(
-        IAppDbContext database, IWeatherSource weatherSource, Guid teammateId, Guid teamId, CancellationToken cancellationToken)
+        IAppDbContext database,
+        IWeatherSource weatherSource,
+        Guid teammateId,
+        Guid teamId,
+        CancellationToken cancellationToken,
+        SourceDeadline? deadline = null)
     {
         var own = await database.Teammates.AsNoTracking()
             .Where(t => t.Id == teammateId && t.TeamId == teamId)
@@ -58,9 +63,12 @@ internal static class OwnProfiles
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw RefusedException.NotFound(ErrorCodes.TeamNotFound);
 
-        // A teammate sees their own weather, whatever they share.
-        var weather = WeatherDto.From(
-            await weatherSource.GetCurrentAsync(WeatherPlaces.Of(own.Latitude, own.Longitude), cancellationToken));
+        // A teammate sees their own weather, whatever they share; after a lookup, within what is
+        // left of its deadline.
+        var place = WeatherPlaces.Of(own.Latitude, own.Longitude);
+        var weather = WeatherDto.From(deadline is null
+            ? await weatherSource.GetCurrentAsync(place, cancellationToken)
+            : await deadline.WeatherAtAsync(weatherSource, place));
         return new ProfileDto(
             own.TeamName,
             new PinDto(
