@@ -50,7 +50,7 @@ else the browser refuses the copy
   toast --> actor : "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself." (L2-054)
 end
 note over header, toast
-  Escape, Close and the backdrop close the dialog and return focus to the control that opened it.
+  Escape and Close close the dialog and return focus to the control that opened it.
   No request is sent to the Mondino API: the link is built from the invite token TeamStore holds.
 end note
 @enduml

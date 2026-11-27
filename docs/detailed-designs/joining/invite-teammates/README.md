@@ -53,7 +53,10 @@ designed, and none of them is built.
 - **`TeamShell`** — provides `InviteDialogOpener` beside `TeamStore`, `Toaster` and
   `InviteLinkCopier` (`view-week-around-the-world`). On the header's `invite` it calls
   `InviteDialogOpener.open(trigger)`. It renders the `Toast` from `Toaster.current`, so the
-  toast outlives the dialog and is the same on all four screens.
+  toast outlives the dialog and is the same on all four screens. Its two toast regions are
+  moved to the body once drawn, and removed with the shell: an open CDK Dialog hides the
+  page's other content from assistive technology but leaves live regions beside it alone, so a
+  toast over the dialog is still announced.
 - **`TeamPage`** — for a team of one it shows `InvitePrompt`, the card "It’s just you on
   Northwind so far" (`view-team-through-the-day`), whose button "Invite teammates" calls the
   same `InviteDialogOpener.open(trigger)`.
@@ -63,7 +66,11 @@ designed, and none of them is built.
   `TeamShell`'s injector, so the dialog shares the shell's `TeamStore` and `InviteLinkCopier`.
   It opens one dialog at a time, starts focus on "Copy link" (`autoFocus`), and returns focus
   to `trigger` when the dialog closes (`restoreFocus`). The dialog it opens is released when it
-  closes, and closed when the shell is destroyed.
+  closes, and closed when the shell is destroyed. Its `Dialog` is provided in an injector of its
+  own with `OVERLAY_DEFAULT_CONFIG` set to `usePopover: false`, so the dialog is drawn in the
+  page's layers rather than the browser's top layer and the toast (`--z-toast`) is over it, as
+  `dialogs/invite/copy-failed` draws it. Both are imported by name from a small module, so the
+  build keeps no more of `@angular/cdk/overlay` than the dialog uses.
 - **`InviteDialog`** — component of the `mondino` application, opened as a CDK Dialog whose
   container has `role="dialog"`, `aria-modal`, the title as its name and the paragraph as its
   description; its block is `dialog`, with the design system's `backdrop` under it. The CDK
@@ -73,8 +80,8 @@ designed, and none of them is built.
     the link, without its scheme, from `InviteLinkCopier.link()`. The team's name is rendered
     as text. The line under the link (`dialog__meta`) reads the count and "link never
     expires".
-  - Focus starts on "Copy link" and stays inside the dialog. Escape, the "Close" button and a
-    click on the backdrop close it.
+  - Focus starts on "Copy link" and stays inside the dialog. Escape and the "Close" button close
+    it.
   - "Copy link" calls `InviteLinkCopier.copy()`. When it resolves true the dialog closes. When
     it resolves false the dialog stays open and raises `CopyField`'s `selectRequest`, which
     selects the link and moves focus to it.
