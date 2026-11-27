@@ -140,7 +140,11 @@ export function mockWeekMoments(path: string): MockWeekMoment[] {
     solid: /class="emblem emblem--solid"/.test(row),
     icon: shapesOf(row),
     title: textOf(row, 'row__title') ?? '',
-    meta: textOf(row, 'row__meta') ?? '',
+    // The meta holds the kind for assistive technology in a span of its own, so it ends at its row
+    meta: (/<span class="row__meta">([\s\S]*?)<\/span><\/span>/.exec(row)?.[1] ?? '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim(),
     when: textOf(row, 'row__trail') ?? '',
   }));
 }

@@ -77,6 +77,36 @@ section {
 .row__name strong {
   font-weight: var(--font-weight-medium);
 }
+.row-list:has(.row__trail) {
+  margin-top: var(--space-4);
+}
+.row:has(.row__trail) {
+  padding-block: 0.625rem;
+}
+.row__body {
+  flex: 1;
+  min-width: 0;
+}
+.row__title,
+.row__meta {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row__title {
+  font: var(--text-label-strong);
+}
+.row__meta {
+  font: var(--text-caption);
+  color: var(--color-fg-muted);
+}
+.row__trail {
+  flex: none;
+  font: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-muted);
+}
 .row__clock {
   flex: none;
   font: var(--text-label-strong);
