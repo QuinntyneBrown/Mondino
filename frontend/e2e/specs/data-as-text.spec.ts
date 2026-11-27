@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-044
+// Traces to: L2-044, L2-054
 // Description: What a person types is shown as its literal characters wherever it appears, and the backend's own text is never shown
 
 import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
@@ -29,6 +29,7 @@ test.describe('What a person types is data', () => {
     api,
     joinPage,
     globePage,
+    inviteDialog,
   }) => {
     // Given a team named as markup
     api.answer('GET', NORTHWIND_INVITE, northwindInvite({ teamName: markup }));
@@ -36,6 +37,7 @@ test.describe('What a person types is data', () => {
     api.answer('POST', NORTHWIND_JOINS, SOFIA_JOINED);
     const pins = northwindPinsOf('Sofia Bianchi', 'Lena Fischer');
     (pins.json as { pins: { name: string }[] }).pins[1].name = markup;
+    (pins.json as { teamName: string }).teamName = markup;
     api.answer('GET', NORTHWIND_PINS, pins);
 
     // When its invite link is opened, the team's name is its literal characters
@@ -54,6 +56,11 @@ test.describe('What a person types is data', () => {
     await expect(globePage.toast).toHaveText(
       `You’re on the map. ${markup} can now see your pin in Milan.`,
     );
+    await expect(globePage.images).toHaveCount(0);
+    // And the invite dialog names the team as text
+    await globePage.inviteTeammate.click();
+    await expect(inviteDialog.title).toHaveText(`Invite teammates to ${markup}`);
+    await expect(inviteDialog.dialog).toHaveAccessibleName(`Invite teammates to ${markup}`);
     await expect(globePage.images).toHaveCount(0);
   });
 
