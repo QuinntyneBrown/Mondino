@@ -77,6 +77,8 @@ test.describe('Globe: it turns on its own', () => {
 
     // Given the tab is hidden
     await setTheTabHidden(page, true);
+    // The pins drawn for the last frame are rendered before they are read
+    await page.clock.runFor(32);
     const hidden = await globePage.sofiaAt();
 
     // When it stays hidden for 20 seconds
