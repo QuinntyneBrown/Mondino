@@ -4,6 +4,9 @@ import { ApiError, TEAM_API, TEAM_MEMBERSHIP, type Moment, type TeamPins } from 
 /** Loading until the pins are read; Forgotten when the session no longer has the team. */
 export type TeamState = 'Loading' | 'Ready' | 'Failed' | 'Forgotten';
 
+/** Whether the team's moments have answered: only the Moments screen waits for them (L2-029). */
+export type MomentsState = 'Loading' | 'Ready' | 'Failed';
+
 /**
  * The team on the Globe screen (show-pins): its pins, read once for the remembered team, and the
  * selection, a teammate or a group pin. A session that has ended (401) or a team that is not the
@@ -22,6 +25,7 @@ export class TeamStore {
   readonly state = signal<TeamState>('Loading');
   /** The team's moments, one for each teammate a moment belongs to; none until they answer. */
   readonly moments = signal<readonly Moment[]>([]);
+  readonly momentsState = signal<MomentsState>('Loading');
   /** The selected teammate, whose pin stands alone; or null. */
   readonly selectedId = signal<string | null>(null);
   /** The teammates of the selected group pin, the anchor's first; or none. */
@@ -42,7 +46,7 @@ export class TeamStore {
       return;
     }
     this.state.set('Loading');
-    void this.loadMoments(teamId);
+    void this.loadMoments();
     try {
       this.team.set(await this.api.getPins(teamId, this.releasing.signal));
       this.state.set('Ready');
@@ -55,11 +59,20 @@ export class TeamStore {
     }
   }
 
-  private async loadMoments(teamId: string): Promise<void> {
+  /**
+   * Reads the team's moments, as the screens open and when Moments' "Try again" is used. Moments are
+   * a highlight: without them the Globe and Team still show every pin (L2-049); only the Moments
+   * screen says they did not load.
+   */
+  async loadMoments(): Promise<void> {
+    const teamId = this.membership.current()?.teamId;
+    if (!teamId) return;
+    this.momentsState.set('Loading');
     try {
       this.moments.set(await this.api.getMoments(teamId, this.releasing.signal));
+      this.momentsState.set('Ready');
     } catch {
-      // Moments are a highlight: without them the screens still show every pin (L2-049).
+      if (!this.releasing.signal.aborted) this.momentsState.set('Failed');
     }
   }
 

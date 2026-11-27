@@ -15,3 +15,14 @@
   background: var(--color-moment);
   color: var(--color-fg-on-moment);
 }
+// Today's moment on the Moments screen: larger, in ink, the icon in the moment colour.
+:host(.emblem--lg) {
+  width: var(--emblem-size-lg);
+  height: var(--emblem-size-lg);
+  background: var(--palette-ink);
+  color: var(--color-moment);
+}
+:host(.emblem--lg) .icon {
+  width: var(--space-6);
+  height: var(--space-6);
+}

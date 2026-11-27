@@ -67,3 +67,42 @@ export interface MarkerView {
    */
   readonly spoken: string;
 }
+
+/** What the Moments screen is filtered by (L2-030): every kind, or one. */
+export type MomentFilter = 'everything' | MomentKind;
+
+/**
+ * A moment as the Moments screen lists it (L2-029): its kind, when it is and on which day, and its
+ * teammate named by first name and city, with their initials in their colour.
+ */
+export interface DatedMoment {
+  /** What tells one listed moment from another: its teammate, date, kind and title. */
+  readonly key: string;
+  readonly teammateId: string;
+  readonly kind: MomentKind;
+  /** "Holiday", "Formula 1", "Local event", "Sport". */
+  readonly kindName: string;
+  readonly title: string;
+  readonly detail: string;
+  readonly cityName: string;
+  /** "Today", "Tomorrow", "In 13 days". */
+  readonly when: string;
+  /** "Fri", 31, "Oct": the date in its own place. */
+  readonly weekday: string;
+  readonly day: number;
+  readonly month: string;
+  /** The first word of the teammate's name: "Jordan". */
+  readonly firstName: string;
+  readonly initials: string;
+  /** The teammate's colour, `teammate-1` to `teammate-13`. */
+  readonly colour: string;
+  /** "Jordan · Austin". */
+  readonly who: string;
+}
+
+/** The Moments screen's groups (L2-029): today, 1 to 7 days ahead, and 8 to 90. */
+export interface MomentGroups {
+  readonly today: readonly DatedMoment[];
+  readonly thisWeek: readonly DatedMoment[];
+  readonly later: readonly DatedMoment[];
+}

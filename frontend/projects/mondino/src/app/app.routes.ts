@@ -34,6 +34,11 @@ export const routes: Routes = [
         title: 'Team · Mondino',
         loadComponent: () => import('./team/team-page/team-page').then((m) => m.TeamPage),
       },
+      {
+        path: 'moments',
+        title: 'Moments · Mondino',
+        loadComponent: () => import('./moments/moments-page').then((m) => m.MomentsPage),
+      },
     ],
   },
   // Someone on no team who opens a team's screen is told, in place, that an invite link is needed.

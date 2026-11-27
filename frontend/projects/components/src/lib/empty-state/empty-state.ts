@@ -14,5 +14,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 export class EmptyState {
   readonly title = input.required<string>();
   readonly text = input.required<string>();
-  readonly tone = input<'error'>('error');
+  /** `error` draws a warning; `calendar` an empty calendar, as Moments does with nothing ahead. */
+  readonly tone = input<'error' | 'calendar'>('error');
+  /** The title's heading level: 1 when it is the screen's heading, 2 under a screen's own. */
+  readonly level = input<1 | 2>(1);
 }

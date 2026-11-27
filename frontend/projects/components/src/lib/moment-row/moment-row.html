@@ -1,0 +1,18 @@
+<a class="moment-row" [attr.href]="address()" (click)="choose($event)">
+  <span class="date-block"
+    ><span class="date-block__weekday">{{ moment().weekday }}</span
+    ><span class="date-block__day tnum">{{ moment().day }}</span
+    ><span class="date-block__month">{{ moment().month }}</span></span
+  >
+  <span
+    ><span class="moment-row__kind"
+      ><svg mo-moment-icon decorative size="xs" [kind]="moment().kind"></svg>{{ kind() }}</span
+    ><span class="moment-row__title">{{ moment().title }}</span
+    ><span class="moment-row__detail">{{ moment().detail }}</span></span
+  >
+  <span class="moment-row__who"
+    ><mo-avatar size="xs" [initials]="moment().initials" [colour]="moment().colour" />{{
+      moment().who
+    }}</span
+  >
+</a>

@@ -7,6 +7,7 @@ import { GlobePage } from '../pages/globe.page';
 import { InviteDialogPage } from '../pages/invite-dialog.page';
 import { InviteNeededPage } from '../pages/invite-needed.page';
 import { JoinPage } from '../pages/join.page';
+import { MomentsPage } from '../pages/moments.page';
 import { NotFoundPage } from '../pages/not-found.page';
 import { SignInPage } from '../pages/sign-in.page';
 import { TeamPage } from '../pages/team.page';
@@ -34,6 +35,7 @@ interface Fixtures {
   inviteNeededPage: InviteNeededPage;
   signInPage: SignInPage;
   teamPage: TeamPage;
+  momentsPage: MomentsPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -130,6 +132,10 @@ export const test = base.extend<Options & Fixtures>({
 
   teamPage: async ({ page }, use) => {
     await use(new TeamPage(page));
+  },
+
+  momentsPage: async ({ page }, use) => {
+    await use(new MomentsPage(page));
   },
 });
 

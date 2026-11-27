@@ -1,0 +1,39 @@
+@for (moment of groups().today; track moment.key) {
+  <mo-today-moment
+    [moment]="moment"
+    [address]="address()(moment.teammateId)"
+    (chosen)="teammateChosen.emit(moment.teammateId)"
+  />
+}
+@if (groups().thisWeek.length) {
+  <section class="moment-group" aria-labelledby="group-this-week">
+    <h2 class="moment-group__title" id="group-this-week">This week</h2>
+    <ul>
+      @for (moment of groups().thisWeek; track moment.key) {
+        <li>
+          <mo-moment-row
+            [moment]="moment"
+            [address]="address()(moment.teammateId)"
+            (chosen)="teammateChosen.emit(moment.teammateId)"
+          />
+        </li>
+      }
+    </ul>
+  </section>
+}
+@if (groups().later.length) {
+  <section class="moment-group" aria-labelledby="group-later">
+    <h2 class="moment-group__title" id="group-later">Later</h2>
+    <ul>
+      @for (moment of groups().later; track moment.key) {
+        <li>
+          <mo-moment-row
+            [moment]="moment"
+            [address]="address()(moment.teammateId)"
+            (chosen)="teammateChosen.emit(moment.teammateId)"
+          />
+        </li>
+      }
+    </ul>
+  </section>
+}
