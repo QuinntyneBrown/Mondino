@@ -19,11 +19,15 @@ internal static class RateLimitPolicies
     /// <summary>Looking a postal code up: 10 a minute, before any outside source is asked.</summary>
     public const string Lookup = "lookup";
 
+    /// <summary>Searching the cities for "Your city": 30 a minute, as the person types.</summary>
+    public const string CitySearch = "city-search";
+
     public static IServiceCollection AddRateLimitPolicies(this IServiceCollection services) =>
         services.AddRateLimiter(options =>
         {
             options.AddPolicy(Invite, context => PerClient(context, permits: 30, window: TimeSpan.FromMinutes(1)));
             options.AddPolicy(Lookup, context => PerClient(context, permits: 10, window: TimeSpan.FromMinutes(1)));
+            options.AddPolicy(CitySearch, context => PerClient(context, permits: 30, window: TimeSpan.FromMinutes(1)));
             options.OnRejected = RefuseAsync;
         });
 
