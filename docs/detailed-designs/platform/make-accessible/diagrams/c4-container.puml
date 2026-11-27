@@ -8,7 +8,7 @@ Person(teammate, "Teammate", "Uses a keyboard, touch or a screen reader")
 System_Boundary(mondino, "Mondino") {
   Container(spa, "Mondino web app", "Angular", "Carries every accessibility rule: focus, text equivalents, live regions, contrast and motion")
   Container(api, "Mondino API", "ASP.NET Core", "Gives each pin's city, time zone, weather and moments, which the text equivalent reads")
-  ContainerDb(db, "Mondino database", "EF Core, engine TO SUPPLY", "Teams, teammates and pins")
+  ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Teams, teammates and pins")
 }
 
 Rel(teammate, spa, "Operates by keyboard, touch and assistive technology", "HTTPS")

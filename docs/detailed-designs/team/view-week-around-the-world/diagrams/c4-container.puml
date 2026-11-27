@@ -7,7 +7,7 @@ Person(teammate, "Teammate", "A person on a team")
 System_Boundary(mondino, "Mondino") {
   Container(web, "Mondino web app", "Angular", "Single-page application; every screen and the globe")
   Container(api, "Mondino API", "ASP.NET Core", "Teams, pins, weather and moments")
-  ContainerDb(db, "Mondino database", "Relational, EF Core; engine TO SUPPLY", "Teams and teammates")
+  ContainerDb(db, "Mondino database", "Relational, EF Core, PostgreSQL", "Teams and teammates")
 }
 System_Ext(sources, "Open-Meteo and the calendar sources", "Weather and moments at a city")
 

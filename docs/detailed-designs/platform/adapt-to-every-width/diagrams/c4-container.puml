@@ -9,7 +9,7 @@ Person(visitor, "Person who is not a teammate", "Not a teammate of any team on t
 System_Boundary(mondino, "Mondino") {
   Container(spa, "Mondino web app", "Angular", "Shell, navigation, lazy routes and the layout of each screen per breakpoint")
   Container(api, "Mondino API", "ASP.NET Core", "Answers a screen's requests for a teammate's session only")
-  ContainerDb(db, "Mondino database", "EF Core, engine TO SUPPLY", "Teams, teammates and pins")
+  ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Teams, teammates and pins")
 }
 
 Rel(teammate, spa, "Uses at any width", "HTTPS")

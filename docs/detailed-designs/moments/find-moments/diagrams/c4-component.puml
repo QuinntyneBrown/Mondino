@@ -10,7 +10,7 @@ Container_Boundary(api, "Mondino API") {
   Component(emblems, "EmblemCatalogue", "Application service", "Gives an emblem key where Mondino holds the right")
   Component(cache, "CachedMomentCalendars", "Infrastructure decorator", "Caches answers by place, with a 5 s timeout and a circuit breaker")
   Component(clients, "Calendar clients", "HolidayCalendarClient, RaceCalendarClient, EventCalendarClient", "Call the outside sources")
-  ComponentDb(db, "Mondino database", "EF Core; engine TO SUPPLY", "Teams, teammates and their cities")
+  ComponentDb(db, "Mondino database", "EF Core, PostgreSQL", "Teams, teammates and their cities")
 }
 System_Ext(sources, "Calendar sources", "Holiday calendar source, Race calendar source, Event source")
 

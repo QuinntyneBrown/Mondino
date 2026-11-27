@@ -8,7 +8,10 @@ Each journey realises the L2 requirements beside it ([`specs/L2.md`](specs/L2.md
 design ([`detailed-designs/`](detailed-designs/)) and its mocks ([`mocks/`](mocks/), the source of truth).
 Journey 1 is scored against L2-038 criterion 7 (Not Found); the rest of L2-038 is journey 27's. Journey 18
 also builds the day ribbon's bar chart for a large team (L2-027 criteria 8 to 10). Every requirement, L2-001
-to L2-056, belongs to a journey.
+to L2-056, belongs to a journey. L2-057, that a deployed Mondino keeps what a team stores, belongs to none: it
+is about the deployed system and is proven on it by the deployment
+([`detailed-designs/platform/keep-team-data/`](detailed-designs/platform/keep-team-data/),
+[ADR 0017](adr/0017-azure-postgresql.md)).
 
 Effort is days for one intermediate developer. % complete is counted, never estimated: the share of a
 journey's acceptance criteria that is wholly built and proven by a passing acceptance test (for journey 1,
@@ -147,6 +150,12 @@ criterion 7; journey 16), and a teammate who joins while the Globe is open appea
 (criterion 10's second half; journey 25). The note shown with every kind of moment off comes with journey
 23.
 
+Journey 30 stands at 20 before its own run: one of the six criteria of L2-051 is proven by acceptance tests
+through the API, criterion 4, liveness and readiness reported to anyone as one word with no configuration,
+version or teammate data, readiness unhealthy while the database cannot be reached and nothing of the
+failure in the answer or a log. The health endpoints were built with the deployed database (L2-057,
+ADR 0017). The telemetry, its redaction and the correlation id are journey 30's own.
+
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
 | 1 | [Scaffold the workspace](prompts/01-scaffold-the-workspace-prompt.md) | Angular workspace, .NET solution, test harnesses, verify script and CI. | L2-038 | 5 | 100 |
@@ -180,3 +189,5 @@ criterion 7; journey 16), and a teammate who joins while the Globe is open appea
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
 | | **Total** | | | **147** | **51** |
+| 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 20 |
+| | **Total** | | | **147** | **49** |

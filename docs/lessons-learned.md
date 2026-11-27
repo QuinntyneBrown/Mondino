@@ -893,3 +893,73 @@ no journey's % complete moved.
   `WorkingTeammate` are in `api`, so `WeekPanel` reads them.
 - *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit followed a
   verify read as `rc=0`.
+## Change: Keep team data in Azure PostgreSQL
+
+Not a journey of its own: the deployed Mondino ran on `InMemory` and lost every team at each
+restart. L2-057 and ADR 0017 put it on an Azure Database for PostgreSQL Flexible Server, reached
+with Microsoft Entra tokens and no password, migrated by the deployment before it publishes and
+proven by `/health/ready`. Journey 30 moved from 0 to 20: the health endpoints prove L2-051
+criterion 4.
+
+**What slowed it**
+
+- `main` moved twice during the run and took ADR 0016 for another decision; the record became
+  0017 in the rebase, in the files and in a commit message. A blanket replace of "ADR 0016" also
+  rewrote `main`'s own reference in `docs/detailed-designs/README.md`, which was put back.
+- Rendering the whole tree of diagrams rewrote every PNG, changed or not. Only the PNGs whose
+  `.puml` had changed were kept.
+- The first sabotage of the readiness log test did not compile, so the test "passed" against the
+  old binary (journey 7, lesson 2, again). The build's own result was read the second time.
+- On this Windows checkout `dotnet format --verify-no-changes` fails on every file (`autocrlf`
+  gives CRLF, the `.editorconfig` asks for LF), and `DOTNET_ROOT` pointed at a .NET without the
+  runtime the formatter needs. The verify script was run in a second worktree checked out with
+  LF, where it passed.
+- The server's firewall rules are written one at a time by the template, about a minute each:
+  31 addresses took half an hour.
+- The first check of a team's survival ran the API over plain HTTP on a laptop, where making a
+  team answers 500 after storing it: the antiforgery cookie needs HTTPS. The team was found in
+  the database by its name instead.
+- The removal of the verification team first named a column `SignInLinks` does not have; the
+  transaction rolled back and nothing was removed, after the invite token's file had already
+  been deleted. The token was read again from the database before the second, correct removal.
+- The deployment's first run could not be watched: the app lacked `PostalCodeSource__Username`,
+  which only the product owner holds, so the deployment stops before its migration step.
+
+**Lessons**
+
+1. **Check an ADR's number again after every rebase, and replace it by its file name.**
+   "ADR 0016" is also someone else's record; `0016-azure-postgresql` is only this one.
+2. **Create a database role yourself when you must act as it later.** `CREATE ROLE` with the
+   `pgaadauth` security label gives the administrator the right to grant itself the role, so an
+   operator migrates as the role that owns the tables (`Options=-c role=mondino_migrator`) and
+   proves what the app's role may not do, without that identity's token.
+3. **Prove a role's limits by trying them.** Acting as `mondino_app`, `CREATE TABLE`, `ALTER`,
+   `DROP` and `TRUNCATE` were each refused, and a read of `__EFMigrationsHistory` too.
+4. **Run the real migrations on the real engine before the release needs them.** Six migrations
+   that had only ever met EF Core InMemory applied cleanly to PostgreSQL 18; had one failed, the
+   first deployment would have found it.
+5. **Check a deployment's readiness by its answer, not its status.** The version before had no
+   `/health/ready`, and its fallback answers any path with the app's page and 200. The
+   deployment compares the body with "Healthy".
+6. **Keep a token you will need until the step that needs it is done.** Delete the working files
+   last, after the removal is seen to have worked.
+7. **Take a federated sign-in's second token at once.** The OpenID Connect assertion lasts
+   minutes; the workflow asks for the database token right after `azure/login`, and the Azure
+   CLI keeps it for the migration.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): L2-057, ADR 0017, the `keep-team-data`
+  design and its diagrams were one commit before any code; the design was touched again for the
+  names the code chose (`Read`, `CreateDataSource`).
+- *Run the spec before the page exists* (journey 1, lesson 5): the readiness tests failed first on
+  404, and the settings tests on a start that should have been refused.
+- *Prove a log test can fail, and check the sabotage built* (journey 7, lesson 2): the readiness
+  check was made to report its error; the test failed, once the sabotage compiled.
+- *Prove "closed by default" by calling every mapped endpoint* (journey 6, lesson 2):
+  `/health/ready` failed that test until it was added to the open list on purpose.
+- *A record that carries what a person typed overrides `ToString`* (journey 7, lesson 4), in its
+  spirit: a refusal of a database setting names the setting and never its value, and a test
+  searches the refusal for the password and the host.
+- *Check the verify script's own exit code* (journey 2, lesson 6) and *never chain a commit after
+  it with `;`* (journey 11, lesson 4): `rc` was read as 0 before the pull request.

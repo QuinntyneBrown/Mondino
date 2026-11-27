@@ -28,6 +28,7 @@ public sealed partial class OpenEndpointsTests
         "POST api/sign-in-links",
         "POST api/sign-in-links/redemptions",
         "ANY /health/live",
+        "ANY /health/ready",
         "ANY /api/{**rest}",
         "ANY {*path:nonfile}",
         "GET api/test-only/unhandled",

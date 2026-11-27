@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Deploy a version that changes the database
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Commit to main, CI green" as actor
+box "Deployment — GitHub Actions, deploy.yml" #EDE9FE
+  participant "Build and deploy job" as job
+  participant "Mondino.Cli migrate" as cli
+end box
+box "Azure" #FFF4E5
+  participant "Microsoft Entra ID" as entra
+  participant "PostgreSQL firewall" as firewall
+  participant "App Service settings" as settings
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "Version running" as old
+  participant "New version" as new
+end box
+database "Mondino database" as db
+actor -> job : workflow_run
+job -> job : Build the frontend, publish the API, publish Mondino.Cli
+job -> entra : Sign in as mondino-deploy (OpenID Connect, no secret)
+job -> settings : The required settings are set, by name
+job -> firewall : Allow this runner's address
+job -> cli : migrate, Database:Authentication AzureCli, role mondino_migrator
+cli -> entra : Token for the database
+cli -> db : Apply pending migrations, each in its own transaction (L2-057)
+alt a migration fails
+  db --> cli : error; the schema stays at the last migration that succeeded
+  cli --> job : non-zero exit
+  job -> firewall : Remove the runner's rule
+  job --> actor : The deployment stops; the version running goes on serving (L2-057)
+else applied, or nothing to apply
+  cli --> job : "The database is at the latest migration."
+  job -> firewall : Remove the runner's rule
+  job -> settings : Set Database__Provider, Database__Authentication and\nConnectionStrings__Mondino, only where they differ
+  job -> new : Publish
+  note over old, new
+    The version running served throughout,
+    on the schema the migration left.
+  end note
+  job -> new : GET /health/live, GET /health/ready
+  new -> db : Can the database be reached?
+  alt Healthy from both
+    new --> job : 200 Healthy
+    job --> actor : Deployed
+  else not ready within 5 minutes
+    new --> job : 503 Unhealthy
+    job --> actor : The deployment fails (L2-057)
+  end
+end
+@enduml

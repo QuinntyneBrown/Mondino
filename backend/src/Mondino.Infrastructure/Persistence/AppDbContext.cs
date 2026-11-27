@@ -16,6 +16,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<SignInLink> SignInLinks => Set<SignInLink>();
 
+    public Task<bool> CanConnectAsync(CancellationToken cancellationToken) => Database.CanConnectAsync(cancellationToken);
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

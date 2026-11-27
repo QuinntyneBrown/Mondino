@@ -7,7 +7,7 @@ Person(person, "Person starting a team", "Chooses Create team")
 System_Boundary(mondino, "Mondino") {
   Container(web, "Mondino web app", "Angular", "Create Team screen, then the invite link and the Globe")
   Container(api, "Mondino API", "ASP.NET Core", "Makes the team once and issues the session cookie")
-  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams, teammates and their pins")
+  ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Teams, teammates and their pins")
 }
 System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
 System_Ext(weather, "Open-Meteo", "Weather")

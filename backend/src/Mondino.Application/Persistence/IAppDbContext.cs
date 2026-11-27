@@ -19,4 +19,7 @@ public interface IAppDbContext
     DbSet<SignInLink> SignInLinks { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
+    /// <summary>Whether the database can be reached, for readiness (L2-051).</summary>
+    Task<bool> CanConnectAsync(CancellationToken cancellationToken);
 }

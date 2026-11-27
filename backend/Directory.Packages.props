@@ -2,6 +2,8 @@
   <ItemGroup>
     <!-- MediatR 12 is the last version under the Apache 2.0 licence (docs/adr/0003). -->
     <PackageVersion Include="MediatR" Version="12.5.0" />
+    <!-- The Microsoft Entra tokens the deployed database accepts in place of a password (docs/adr/0017). -->
+    <PackageVersion Include="Azure.Identity" Version="1.21.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.15" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.15" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />

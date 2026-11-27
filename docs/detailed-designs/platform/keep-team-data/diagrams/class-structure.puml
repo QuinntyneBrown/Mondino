@@ -1,0 +1,71 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+title Class structure — Keep team data
+
+enum DatabaseAuthentication {
+  Password
+  ManagedIdentity
+  AzureCli
+}
+
+class DatabaseConnection {
+  -string connectionString
+  -DatabaseAuthentication authentication
+  +{static} Read(configuration: IConfiguration): DatabaseConnection
+  +CreateDataSource(): NpgsqlDataSource
+  -{static} AuthenticationOf(configuration): DatabaseAuthentication
+}
+
+class EntraDatabaseTokens {
+  +{static} string Scope = "https://ossrdbms-aad.database.windows.net/.default"
+  -TokenCredential credential
+  +{static} For(authentication: DatabaseAuthentication): EntraDatabaseTokens
+  +Get(): string
+  +GetAsync(ct): ValueTask<string>
+}
+
+interface IAppDbContext {
+  +Teams: DbSet<Team>
+  +Teammates: DbSet<Teammate>
+  +Cities: DbSet<City>
+  +SignInLinks: DbSet<SignInLink>
+  +SaveChangesAsync(ct): Task<int>
+  +CanConnectAsync(ct): Task<bool>
+}
+
+class AppDbContext {
+}
+
+class DatabaseReadyCheck {
+  +CheckHealthAsync(context, ct): Task<HealthCheckResult>
+}
+
+class HealthEndpoints <<static>> {
+  +{static} AddMondinoHealth(services): IServiceCollection
+  +{static} MapMondinoHealth(app): void
+  GET /health/live
+  GET /health/ready
+}
+
+class DatabaseMigrator {
+  +MigrateAsync(ct): Task<MigrationOutcome>
+}
+
+DatabaseConnection ..> DatabaseAuthentication : reads
+DatabaseConnection ..> EntraDatabaseTokens : password provider
+AppDbContext ..|> IAppDbContext
+AppDbContext ..> DatabaseConnection : data source
+DatabaseReadyCheck ..> IAppDbContext : CanConnectAsync
+HealthEndpoints ..> DatabaseReadyCheck : readiness
+DatabaseMigrator ..> AppDbContext : MigrateAsync
+@enduml
