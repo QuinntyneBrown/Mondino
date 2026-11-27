@@ -163,6 +163,9 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("character varying(12)");
 
+                    b.Property<bool>("SharesStatus")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");
 

@@ -20,8 +20,9 @@ public sealed record TeamPinsDto(
 
 /// <summary>
 /// A teammate's pin as their teammates see it: at their city, never at their postal code, which is
-/// in no part of it (L2-007), and with no email (L2-043). Weather, moments and the status's sharing
-/// join with journeys 13, 19 and 23.
+/// in no part of it (L2-007), and with no email (L2-043). It carries the city's IANA time zone and
+/// no local time: the browser works the time and the status out (L2-014), and shows no status for a
+/// teammate who does not share it (L2-015). Weather and moments join with journeys 13 and 19.
 /// </summary>
 public sealed record PinDto(
     Guid TeammateId,
@@ -31,6 +32,7 @@ public sealed record PinDto(
     string Country,
     PositionDto Position,
     string TimeZoneId,
+    bool SharesStatus,
     bool IsViewer);
 
 internal sealed class GetPinsQueryHandler(IAppDbContext database, ICurrentTeammate currentTeammate)
@@ -57,6 +59,7 @@ internal sealed class GetPinsQueryHandler(IAppDbContext database, ICurrentTeamma
                 t.City.Latitude,
                 t.City.Longitude,
                 t.City.TimeZoneId,
+                t.SharesStatus,
             })
             .ToListAsync(cancellationToken);
 
@@ -74,6 +77,8 @@ internal sealed class GetPinsQueryHandler(IAppDbContext database, ICurrentTeamma
                 CountryNames.Of(t.CountryCode),
                 new PositionDto(t.Latitude, t.Longitude),
                 t.TimeZoneId,
+                // A teammate still sees their own status, whatever they share.
+                t.SharesStatus || t.Id == viewer,
                 t.Id == viewer)).ToList());
     }
 }

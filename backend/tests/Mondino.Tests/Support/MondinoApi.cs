@@ -228,6 +228,16 @@ public class MondinoApi : WebApplicationFactory<Program>
         await database.SaveChangesAsync(CancellationToken.None);
     }
 
+    /// <summary>Turns off a teammate's "Share whether I’m working or asleep", as stored (journey 23 adds the switch).</summary>
+    public async Task HideStatusAsync(Guid teammateId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var teammate = await database.Teammates.SingleAsync(t => t.Id == teammateId);
+        database.Entry(teammate).Property(t => t.SharesStatus).CurrentValue = false;
+        await database.SaveChangesAsync(CancellationToken.None);
+    }
+
     /// <summary>The id of the team of the invite token.</summary>
     public async Task<Guid> TeamIdAsync(string inviteToken)
     {

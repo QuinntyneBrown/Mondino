@@ -67,6 +67,12 @@ public sealed class Teammate
         EmailFingerprint = fingerprint;
     }
 
+    /// <summary>
+    /// Whether the teammate shares if they are working or asleep ("Share whether I’m working or
+    /// asleep", L2-015, L2-034): on to begin with. Off, their teammates are shown no status for them.
+    /// </summary>
+    public bool SharesStatus { get; private set; } = true;
+
     /// <summary>The id the browser gave its join request, so a repeated request makes no second pin. Never returned.</summary>
     public Guid? JoinRequestId { get; private set; }
 

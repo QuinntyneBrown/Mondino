@@ -38,7 +38,7 @@ public sealed class PostalCodePrivacyTests
         Assert.Equal(45.46427, pin.GetProperty("position").GetProperty("latitude").GetDouble(), 5);
         Assert.Equal("Europe/Rome", pin.GetProperty("timeZoneId").GetString());
         Assert.Equal(
-            ["cityName", "colour", "country", "isViewer", "name", "position", "teammateId", "timeZoneId"],
+            ["cityName", "colour", "country", "isViewer", "name", "position", "sharesStatus", "teammateId", "timeZoneId"],
             pin.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
 
         // And no postal code, nor part or hash of one, is anywhere in the answer

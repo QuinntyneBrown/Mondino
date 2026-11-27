@@ -53,6 +53,7 @@ internal sealed class GetProfileQueryHandler(IAppDbContext database, ICurrentTea
                 CountryNames.Of(own.CountryCode),
                 new PositionDto(own.Latitude, own.Longitude),
                 own.TimeZoneId,
+                SharesStatus: true,
                 IsViewer: true),
             own.CountryCode,
             own.PostalCode);
