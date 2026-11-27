@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Button, GlobeFallback, TextField, Wordmark } from '@mondino/components';
+import { Alert, Button, GlobeFallback, Notice, TextField, Wordmark } from '@mondino/components';
 import { emailLimit } from '@mondino/domain';
 import { SignInStore } from './sign-in-store';
 
@@ -17,7 +17,7 @@ import { SignInStore } from './sign-in-store';
  */
 @Component({
   selector: 'mo-sign-in-page',
-  imports: [Button, GlobeFallback, RouterLink, TextField, Wordmark],
+  imports: [Alert, Button, GlobeFallback, Notice, RouterLink, TextField, Wordmark],
   providers: [SignInStore],
   templateUrl: './sign-in-page.html',
   styleUrl: './sign-in-page.scss',
@@ -29,18 +29,33 @@ export class SignInPage {
 
   protected readonly invalid = computed(() => this.store.state().kind === 'Invalid');
 
-  /** A request to move focus to the field after a submit with a problem; a new object each time. */
-  private readonly focusRequest = signal<object | null>(null);
+  /** The email a link was sent to, once it is: "Check your inbox". */
+  protected readonly sentTo = computed(() => {
+    const state = this.store.state();
+    return state.kind === 'Sent' ? state.email : null;
+  });
+
+  /** Where focus goes once the screen is drawn: a new object for each move. */
+  private readonly focusRequest = signal<{ id: string } | null>(null);
 
   constructor() {
     afterRenderEffect(() => {
-      if (this.focusRequest()) document.getElementById('email')?.focus();
+      const request = this.focusRequest();
+      if (request) document.getElementById(request.id)?.focus();
     });
   }
 
   protected async submit(event: Event): Promise<void> {
     event.preventDefault();
-    await this.store.requestLink();
-    if (this.store.state().kind === 'Invalid') this.focusRequest.set({});
+    const asking = this.store.requestLink();
+    if (this.store.state().kind === 'Invalid') this.focusRequest.set({ id: 'email' });
+    await asking;
+    // "Check your inbox" is announced, and its title takes focus so it is read at once.
+    if (this.store.state().kind === 'Sent') this.focusRequest.set({ id: 'sent-title' });
+  }
+
+  protected useAnotherEmail(): void {
+    this.store.useAnotherEmail();
+    this.focusRequest.set({ id: 'email' });
   }
 }

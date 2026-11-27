@@ -1,5 +1,5 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
-import { SIGN_IN_API } from '@mondino/api';
+import { ApiError, SIGN_IN_API } from '@mondino/api';
 import { isEmailAddress } from '@mondino/domain';
 import type { SignInState } from './sign-in-state';
 
@@ -27,11 +27,34 @@ export class SignInStore {
     if (this.state().kind === 'Invalid') this.state.set({ kind: 'Idle' });
   }
 
-  /** Asks for a link for the email typed, or marks it invalid and sends nothing. */
+  /**
+   * Asks for a link for the email typed, or marks it invalid and sends nothing. Pressed again while
+   * a request is out, it does nothing. Any refusal, and no answer, is `Failed`: the screen never
+   * says more, since the answer is the same whatever the email (L2-043).
+   */
   async requestLink(): Promise<void> {
-    if (!isEmailAddress(this.email())) {
+    if (this.state().kind === 'Sending') return;
+    const email = this.email().trim();
+    if (!isEmailAddress(email)) {
       this.state.set({ kind: 'Invalid' });
       return;
     }
+    this.state.set({ kind: 'Sending' });
+    const request = (this.pending = new AbortController());
+    try {
+      await this.api.requestLink(email, request.signal);
+      this.state.set({ kind: 'Sent', email: this.email() });
+    } catch (error) {
+      if (request.signal.aborted) return;
+      this.state.set({ kind: 'Failed' });
+      if (!(error instanceof ApiError)) throw error;
+    } finally {
+      if (this.pending === request) this.pending = null;
+    }
+  }
+
+  /** "Use another email": the form again, with what was typed. */
+  useAnotherEmail(): void {
+    this.state.set({ kind: 'Idle' });
   }
 }
