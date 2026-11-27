@@ -36,6 +36,9 @@ import {
 import { InviteDialogOpener } from '../invite-dialog-opener';
 import { TeamStore } from '../team-store';
 
+/** Past this many teammates, faces no longer fit on the ribbon and the rows in the page are capped. */
+const largeTeam = 40;
+
 const filterOf = (value: string | null): StatusFilter =>
   value === 'working' || value === 'asleep' ? value : 'all';
 
@@ -118,8 +121,13 @@ export class TeamPage {
     return pins ? teamRows(pins, this.now(), this.clockFormat(), this.unit()) : [];
   });
 
-  /** The rows the filter keeps, west to east. */
-  protected readonly rows = computed(() => filterByStatus(this.allRows(), this.filter()));
+  /**
+   * The rows the filter keeps, west to east, at most 40 of them: until journey 18 lists a large
+   * team city by city, the rows in the page stay bounded this way (L2-026, L2-047).
+   */
+  protected readonly rows = computed(() =>
+    filterByStatus(this.allRows(), this.filter()).slice(0, largeTeam),
+  );
 
   /** "All 13", "Working now 8", "Asleep 2": the team's counts. */
   protected readonly tabs = computed((): SegmentedOption[] => {
@@ -149,7 +157,11 @@ export class TeamPage {
   /** Each teammate on the day ribbon, at the hour they are living through (L2-027). */
   protected readonly ribbon = computed(() => {
     const pins = this.store.team()?.pins;
-    return pins ? ribbonMarkers(pins, this.now(), this.clockFormat()) : null;
+    if (!pins) return null;
+    // Past 40, faces no longer fit: the ribbon keeps its bands and scale, and journey 18 draws
+    // the bar chart in them.
+    if (pins.length > largeTeam) return { markers: [], rows: 1 };
+    return ribbonMarkers(pins, this.now(), this.clockFormat());
   });
 
   protected readonly scale = computed(() => ribbonScale(this.clockFormat()));
