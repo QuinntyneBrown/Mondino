@@ -1,8 +1,12 @@
 // Acceptance Test
-// Traces to: L2-044, L2-007, L2-043
-// Description: Through a full visit every request goes to the app's own origin, and no postal code or email is kept in storage, cookies or the address bar
+// Traces to: L2-044, L2-007, L2-043, L2-050
+// Description: Through a full visit every request goes to the app's own origin, and no postal code or email is kept in storage, cookies or the address bar; a teammate's visit to Sign In, Team, Moments and Profile & Settings calls no outside source
 
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
+import { NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
+import { NORTHWIND_ME, SOFIA_PROFILE } from '../fixtures/profile';
+import { LINK_ASKED, SIGN_IN_LINKS } from '../fixtures/sign-in';
+import { rememberTeam } from '../support/membership';
 import { expect, test } from '../fixtures/test';
 import {
   lookupAnswer,
@@ -81,5 +85,40 @@ test.describe('A full visit', () => {
       expect(everything.toLowerCase()).not.toContain('sofia@');
       expect(everything).not.toContain('northwind.co');
     }
+  });
+
+  test('signing in and reading Team, Moments and Profile & Settings call no outside source', async ({
+    api,
+    page,
+    signInPage,
+    teamPage,
+    momentsPage,
+    profilePage,
+  }) => {
+    // Given the backend answers with the team's weather and moments, as it read them itself
+    api.answer('POST', SIGN_IN_LINKS, LINK_ASKED);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
+    api.answer('GET', NORTHWIND_MOMENTS, northwindMoments());
+    api.answer('GET', NORTHWIND_ME, SOFIA_PROFILE);
+    const record = new BrowserRecord(page);
+
+    // When Sofia asks for a sign-in link
+    await signInPage.open();
+    await signInPage.askForLink('sofia@northwind.co');
+    await expect(signInPage.noticeTitle).toHaveText('Check your inbox');
+
+    // And, on her team, opens Team, Moments and Profile & Settings
+    await rememberTeam(page);
+    await teamPage.open();
+    await expect(teamPage.rows).toHaveCount(13);
+    await momentsPage.open();
+    await expect(momentsPage.rows.first()).toBeVisible();
+    await profilePage.open();
+    await expect(profilePage.city).toContainText('Milan');
+
+    // Then every request the browser made went to the app's own origin: none to a weather,
+    // postal code, calendar or map service
+    expect(record.requests.some((url) => new URL(url).pathname.startsWith('/api/'))).toBe(true);
+    expect(record.origins()).toEqual([new URL(page.url()).origin]);
   });
 });
