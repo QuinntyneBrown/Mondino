@@ -31,7 +31,7 @@ public sealed class SourceTelemetryTests
         await LookUpAsync(client, "20122", HttpStatusCode.ServiceUnavailable);
         api.PostalCodeSource.Behaviour = SourceBehaviour.Hangs;
         var pending = LookUpAsync(client, "20123", HttpStatusCode.ServiceUnavailable);
-        await api.PostalCodeSource.WaitForCallAsync();
+        await api.PostalCodeSource.WaitForRequestsAsync(3);
         api.Time.Advance(TimeSpan.FromSeconds(5));
         await pending.WaitAsync(TimeSpan.FromSeconds(10));
         await LookUpAsync(client, "20124", HttpStatusCode.ServiceUnavailable);
@@ -142,6 +142,7 @@ public sealed class SourceTelemetryTests
         await WaitForEmailAsync(api, "success");
         api.EmailSource.Behaviour = SourceBehaviour.Fails;
         await AskForLinkAsync(client);
+        await api.EmailSource.NextAsync();
         await WaitForEmailAsync(api, "failure");
         api.EmailSource.Behaviour = SourceBehaviour.Hangs;
         await AskForLinkAsync(client);

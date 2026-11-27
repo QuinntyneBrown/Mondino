@@ -54,6 +54,21 @@ public sealed class FakePostalCodeSource : HttpMessageHandler
         }
     }
 
+    /// <summary>Completes when at least <paramref name="count"/> requests have arrived, or fails naming how many did.</summary>
+    public async Task WaitForRequestsAsync(int count)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+        while (Requests.Count < count)
+        {
+            if (DateTime.UtcNow > deadline)
+            {
+                throw new TimeoutException($"The postal code source had {Requests.Count} requests, not {count}.");
+            }
+
+            await Task.Yield();
+        }
+    }
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         lock (requests)
