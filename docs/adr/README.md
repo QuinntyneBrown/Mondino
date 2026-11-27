@@ -11,9 +11,9 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0002](0002-e2e-harness.md) | The e2e harness: fixtures answer the API, a set time, localhost only | Accepted |
 | [0003](0003-backend-baseline.md) | The backend baseline: four layers, MediatR 12, InMemory until an engine is chosen | Accepted |
 | [0004](0004-database-engine.md) | The database engine: PostgreSQL through EF Core, migrations and seed by the CLI | Accepted |
-| [0005](0005-fetch-for-the-backend.md) | The browser calls the backend with `fetch`, so `HttpClient` stays out of the initial bundle | Accepted |
+| [0005](0005-fetch-for-the-backend.md) | The browser calls the backend with `fetch`, so `HttpClient` stays out of the initial bundle | Accepted; budget superseded by 0018 |
 | [0006](0006-postal-code-source.md) | The postal code source is GeoNames, and the city comes from Mondino's own list | Accepted |
-| [0007](0007-join-form-runtime-in-the-initial-bundle.md) | Join's form brings Angular's runtime for outputs and render effects into the initial bundle | Accepted |
+| [0007](0007-join-form-runtime-in-the-initial-bundle.md) | Join's form brings Angular's runtime for outputs and render effects into the initial bundle | Accepted; budget and signal-query rule superseded by 0018 |
 | [0004](0004-azure-hosting.md) | Hosted on one Azure App Service, deployed on every commit to main | Accepted |
 | [0008](0008-session-and-cross-site-requests.md) | The session is a year-long sliding cookie, and the open requests refuse other sites | Accepted |
 | [0009](0009-making-a-team.md) | Making a team keeps only a keyed fingerprint of the email, and reuses Join's lookup | Accepted |
@@ -25,5 +25,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0015](0015-weather-source.md) | The weather comes from Open-Meteo, asked once per city and kept 15 minutes | Accepted |
 | [0016](0016-no-limit-on-making-a-team.md) | Making a team has no rate limit, the one open request without one | Accepted; supersedes part of 0009 |
 | [0017](0017-azure-postgresql.md) | The deployed database is an Azure PostgreSQL Flexible Server, reached without a password and migrated by the deployment | Accepted |
+| [0018](0018-initial-bundle-budget.md) | The initial budget (290 kB warning, 300 kB error) pays for Angular's runtime, which lazy screens put in the main chunk | Accepted; supersedes the budgets of 0005 and 0007 |
 
 Not decided yet, by the journey that first needs it: the providers of the calendars (journey 19).

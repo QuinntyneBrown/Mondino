@@ -963,3 +963,34 @@ criterion 4.
   searches the refusal for the password and the host.
 - *Check the verify script's own exit code* (journey 2, lesson 6) and *never chain a commit after
   it with `;`* (journey 11, lesson 4): `rc` was read as 0 before the pull request.
+
+## Bundle headroom pass
+
+**What slowed it**
+
+- The initial bundle stood at 259.81 kB against a 260 kB warning, and journeys 3, 8, 10 and 15 had each
+  written around a platform feature (`viewChild`, `@defer`, `NgTemplateOutlet`, `@let`,
+  `RouterLinkActive`) to stay under it. The pass looked for code to move to lazy chunks and found
+  3.54 kB of Mondino's own in `main`, all of it needed before the first screen.
+- esbuild's metafile showed why: `@angular/core`, `@angular/router` and the `rxjs` barrel are reached from
+  `main`, so whatever any lazy screen uses of them is kept in the main chunk. The same app with an empty
+  route table is 221.26 kB; the 38.6 kB above it is Angular's runtime for features lazy screens use.
+- A build that fails its error budget writes no `browser-stats.json`; probes past the budget raised the
+  error limit in a scratch copy of `angular.json` to read the metafile.
+
+**Lessons**
+
+1. **Measure the floor before cutting code to fit a budget.** Build with an empty route table, then probe
+   each feature from one throwaway lazy route; the difference is what the budget must hold, and no code
+   of ours can move it. ADR 0018 records the table.
+2. **Diff two metafiles by input to see what a feature costs.** `ng build --stats-json` writes
+   `dist/mondino/browser-stats.json`; subtracting `outputs[main].inputs[*].bytesInOutput` of two builds
+   names the modules that grew.
+
+**Earlier lessons applied**
+
+- *Measure the initial bundle before choosing a platform service* (journey 2, lesson 1) and *measure the
+  initial chunk after importing anything new from a package already in it* (journey 15, lesson 1): turned
+  from a reason to avoid a feature into a table of what each costs, so the budget is set from measurement.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): the commit followed
+  `node tools/verify/verify.mjs &&`.
