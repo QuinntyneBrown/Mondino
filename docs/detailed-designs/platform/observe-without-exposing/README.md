@@ -60,7 +60,9 @@ first, before any exporter.
   `mondino.source` and `mondino.source.outcome`, and nothing else: the path, the query string,
   the outgoing URL, the client address, the user agent and each header are dropped, with the
   status description, the trace state and the baggage; no instrumentation records an exception
-  event. A server span is named by its method and route template. A request's body is never recorded, and an email, a sign-in token, a postal
+  event. A server span is named by its method and route template. The template is written from
+  the root with each parameter named and nothing else (`RouteTemplates`):
+  `api/teams/{teamId:guid}/pins` is `/api/teams/{teamId}/pins`. A request's body is never recorded, and an email, a sign-in token, a postal
   code and the text of a city search travel in a body only. The sign-in routes are recorded as
   `/api/sign-in-links` and `/api/sign-in-links/redemptions`; the sign-in token is in the
   fragment of the emailed address, which no server receives. An outside source's client span
@@ -73,7 +75,8 @@ first, before any exporter.
   templates that take only values from a closed set; today there is one, `UnhandledError`.
 - **Metrics.** A view on every instrument keeps the tags `http.request.method`,
   `http.response.status_code`, `http.route`, `error.type`, `server.address`, `source` and
-  `outcome`.
+  `outcome`. A metric's `http.route` is the template as ASP.NET Core declares it
+  (`api/teams/{teamId:guid}/pins`), since its meter sets it and no view can rewrite a value.
 
 **Errors and the correlation id.**
 

@@ -43,6 +43,11 @@ sign-in log line to redact. The product that receives the telemetry and the samp
     is kept. Scopes are not exported.
   - *Metric tags*: the span attributes' HTTP names, `server.address`, `source` and `outcome`,
     applied as a view on every instrument.
+- **A span's route is written from the root with each parameter named and nothing else**
+  (`RouteTemplates`): `api/teams/{teamId:guid}/pins` is `/api/teams/{teamId}/pins`, as L2-051
+  writes it. A metric's `http.route` is set by ASP.NET Core's own meter, which no processor can
+  rewrite, so it stays the template as declared, `api/teams/{teamId:guid}/pins`: a template
+  either way, with no value in it.
 - **The outside sources measure themselves, in `Mondino.Infrastructure`.** `SourceTelemetry`
   owns the `Meter` and the `ActivitySource`, both named `Mondino` (the meter from
   `IMeterFactory`). `CachedPostalCodeLookup`, `CachedWeatherSource`, `CachedOpenHolidays` and
