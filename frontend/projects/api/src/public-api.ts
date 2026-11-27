@@ -10,6 +10,7 @@ export * from './lib/sign-in/http-sign-in-api';
 export * from './lib/sign-in/sign-in';
 export * from './lib/time/clock';
 export * from './lib/time/status';
+export * from './lib/time/offset';
 export * from './lib/teams/http-team-creation-api';
 export * from './lib/teams/team-creation';
 export * from './lib/globe/viewport';
