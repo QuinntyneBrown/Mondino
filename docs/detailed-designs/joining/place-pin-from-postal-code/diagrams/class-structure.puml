@@ -22,8 +22,14 @@ package "mondino application" {
     +found: Signal<PostalCodeResult | null>
     +nameProblem: Signal<NameProblem | null>
     +postalCodeMissing: Signal<boolean>
+    +cityText: WritableSignal<string>
+    +cityResults: Signal<CityResult[]>
+    +chosenCity: Signal<CityResult | null>
+    +retryAt: Signal<Date | null>
     +lookUp(): void
     +clearFound(): void
+    +searchCities(): void
+    +placeAtCity(): void
   }
 }
 package "@mondino/components" {
@@ -31,9 +37,18 @@ package "@mondino/components" {
     +value: string
     +country: Country
     +lookupState: LookupState
+    +disabled: boolean
+    +mode: Join | Move
     +valueChange: string
     +blurred: void
     +retry: void
+  }
+  class CityField {
+    +text: string
+    +results: CityResult[]
+    +chosen: CityResult | null
+    +textChange: string
+    +choose: CityResult
   }
 }
 package "@mondino/api" {
@@ -47,6 +62,7 @@ package "@mondino/api" {
   }
   interface InviteApi {
     +lookUpPostalCode(inviteToken, countryCode, postalCode, signal): Promise<PostalCodeResult>
+    +searchCities(inviteToken, countryCode, text, signal): Promise<CityResult[]>
   }
   class PostalCodeResult {
     +city: City
@@ -96,6 +112,16 @@ package "Mondino.Application" {
     NotFound
     Unavailable
   }
+  class SearchCitiesQuery {
+    +string? InviteToken
+    +string CountryCode
+    +string Text
+  }
+  class SearchCitiesQueryHandler
+  interface ICityDirectory {
+    +Search(countryCode, text, max): IReadOnlyList<City>
+    +Find(cityId): City?
+  }
   interface IWeatherSource {
     +GetCurrentAsync(position: Position, ct): Task<Weather?>
   }
@@ -119,6 +145,7 @@ package "Mondino.Domain" {
   }
 }
 package "Mondino.Infrastructure" {
+  class BundledCityDirectory
   class CachedPostalCodeLookup
   class PostalCodeLookupClient
   class CachedWeatherSource
@@ -148,4 +175,8 @@ CachedPostalCodeLookup --> PostalCodeLookupClient : decorates
 CachedWeatherSource ..|> IWeatherSource
 OpenMeteoWeatherSource ..|> IWeatherSource
 CachedWeatherSource --> OpenMeteoWeatherSource : decorates
+SearchCitiesQueryHandler ..> SearchCitiesQuery : handles
+SearchCitiesQueryHandler ..> ICityDirectory : searches
+BundledCityDirectory ..|> ICityDirectory
+ICityDirectory ..> City : returns
 @enduml

@@ -152,11 +152,20 @@ weather is available, unavailable or not shared, so the web app can say which.
 When `pin.weather` is `null` no temperature and no condition is shown, and a pin's label and
 its accessible name leave the weather out; the local time and status are unaffected.
 `pin.weatherState` says why. When it is `Unavailable`, the source could not give the weather:
-in the weather's place the panel says "Weather is unavailable right now." with "Tomás’s local
-time is still right." under it, and a Team row shows a mark named "Weather unavailable"
-(L2-049). When it is `NotShared`, the panel says "Ahmed doesn’t share local weather.". The
-teammate is named by `firstName(name)` from `pins/`, the first word of their name; it is data
-and is rendered as text.
+in the weather's place the panel says "Weather for Mexico City isn’t available right now.
+We’ll try again in a few minutes.", naming the pin's city, and a Team row shows a mark named
+"Weather unavailable" (L2-049). The city's name is data and is rendered as text. The next
+refresh of the team (`team/keep-team-fresh`) asks again; the panel has no control of its own
+for it.
+
+When it is `NotShared`, the panel shows no weather section. A teammate who shares neither
+their weather nor their status gets one note in the panel, in place of both: "Ahmed keeps
+their weather and working hours private. You’ll still see their local time and city."
+(`team/view-teammate-panel`). Their pin's label and accessible name give the local time
+alone. The teammate is named by `firstName(name)` from `pins/`, the first word of their name;
+it is data and is rendered as text. What the panel says for a teammate who shares their
+status and not their weather is `<TO SUPPLY>`: the mocks draw only the teammate who shares
+neither.
 
 ## Requirements
 

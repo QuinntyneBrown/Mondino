@@ -53,12 +53,12 @@ alt moments returned
   alt at least one moment
     list --> actor : "Today in" and its city first, then "This week"\nand "Later"; a heading with no moments is absent
   else no upcoming moment
-    list --> actor : "Nothing is coming up for your team"
+    list --> actor : "Nothing coming up" and "Back to the globe"
   end
 else request refused or failed
   controller --> client : ProblemDetails with a code
   client --> page : ApiError
-  page --> actor : "We couldn’t load moments" and "Try again"
+  page --> actor : "Moments didn’t load" and "Try again"
 end
 actor -> list : Choose a moment
 list --> page : select(moment)

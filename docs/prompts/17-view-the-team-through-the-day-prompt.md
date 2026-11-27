@@ -113,8 +113,9 @@ Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- Past 40 teammates the day ribbon counts teammates at each half hour, and the list gains a search and a
-  section per city (L2-056, journey 18). This journey builds the team of 40 or fewer, with rows bounded.
+- Past 40 teammates the day ribbon is a bar chart of the teammates at each half hour (L2-027 AC8 to AC10), and
+  the list gains a search and a section per city (L2-056). Journey 18 builds both. This journey builds the team
+  of 40 or fewer, with rows bounded.
 - "Invite teammates" on the team of one opens journey 16's invite dialog.
 
 ## Done means

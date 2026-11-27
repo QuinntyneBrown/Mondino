@@ -111,6 +111,8 @@ kind's icon, darker pin text and control edges, all four kinds of moment on. Wha
 | Join and Create Team list six countries; Profile & Settings types the country. | One list of the supported countries on all three. | One field, one shape. |
 | Profile & Settings moves Sofia to "Berlin-Mitte". | A city: "Toronto, Canada." | Only the city is shown, and a pin is placed at the city (L2-006). |
 | The invite dialog's "Reset link", and the copy button on the empty Globe's card, do nothing when pressed. | "Reset link" is drawn and noted as not designed; the card's "Copy" ends in the invite toasts. | See the open questions. |
+| The globe calculates the night side from the clock at render time. | The default globe shows the night side at 14:05 UTC on 27 October 2025. | A fixed instant keeps the globe, local times and working-hour counts consistent across captures. |
+| Moments on the same date keep the prototype’s sample-team order. | On 1 November, Mexico City comes first, followed by Stockholm and Bengaluru. | Both the Globe panel and Moments order same-date entries from west to east, as required by the L2 acceptance criteria. |
 | The globe fetches its land from a CDN and is drawn live with d3-geo. | A still SVG of the same cartoon globe, drawn into each mock. | Mocks open from disk with no network. |
 | Fonts from Google Fonts. | Gabarito and Inter bundled in the design system. | Fonts are self-hosted, never from a CDN. |
 | White initials on every teammate colour. | Seven of the thirteen teammate colours darkened. | 4.5:1 for text (L2-041). |

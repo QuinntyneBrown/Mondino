@@ -11,7 +11,7 @@ Container_Boundary(web, "Mondino web app") {
   Component(store, "TeamStore", "domain, pins/", "Holds the team's pins as a signal")
   Component(clock, "BrowserClock", "domain, time/", "The one shared Clock; ticks on the minute, rests while hidden")
   Component(local, "localTime, formatTime", "domain, time/", "Wall-clock time in an IANA time zone, as 24-hour or 12-hour text")
-  Component(status, "statusAt, statusFor", "domain, time/", "Status from the local hour, hidden where the flag says so")
+  Component(status, "statusAt, statusFor", "domain, time/", "Status from the local hour; none for a teammate who does not share it")
   Component(views, "PinLabel, TeammatePanel, TeamTable, StatusBadge", "components", "Show the time as text and the status as words")
 }
 Rel(store, api, "Reads pins through TEAM_API", "JSON/HTTPS")

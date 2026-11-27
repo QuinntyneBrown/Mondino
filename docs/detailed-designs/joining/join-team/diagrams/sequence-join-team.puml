@@ -55,9 +55,10 @@ controller --> client : 201 JoinResultDto, Set-Cookie
 client --> store : JoinResult
 store --> page : Team id and teammate id
 page -> page : TeamMembership.remember(teamId, teammateId, teamName)
-page --> actor : Navigate to /globe with the new pin selected, pulsing once (L2-005)
+page --> actor : Navigate to /globe with the new pin selected, pulsing once, and the toast\n"You’re on the map. Northwind can now see your pin in Milan." (L2-005)
 note over page, client
   When the request fails, JoinStore sets joinState Failed, keeps what was typed
-  and keeps joinRequestId, and JoinPage offers to try again (L2-005).
+  and keeps joinRequestId, and JoinPage says "We couldn’t add you to Northwind." with
+  the button "Try joining again" (L2-005).
 end note
 @enduml

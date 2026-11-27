@@ -31,13 +31,13 @@ page -> local : localTime(minute, pin.timeZoneId)
 local --> page : LocalTime 09:00
 page -> status : statusFor(pin, localTime)
 status -> status : statusAt(9) by the table of L2-015
-alt status is working-hours, or pin.showsStatusOutsideWorkingHours
+alt pin.sharesStatus is true
   status --> page : working-hours
   page -> views : Bind status
   views --> actor : "Working hours", as words (L2-015)
-else outside 09:00 to 18:00 and the flag is false
+else pin.sharesStatus is false, at any hour
   status --> page : null
   page -> views : Bind no status
-  views --> actor : No status shown, not counted as asleep (L2-015)
+  views --> actor : No status shown; counted neither as working\nnor as asleep (L2-015)
 end
 @enduml

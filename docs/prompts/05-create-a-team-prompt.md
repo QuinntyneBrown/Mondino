@@ -79,7 +79,7 @@ stage, and the join handler's way of placing a pin at the city and issuing a ses
   `form-field.html`, `lookup-message.html`, `button.html`, `alert.html`, `globe.html`, `pin.html`,
   `toast.html`, `link.html`, and the tokens in `docs/design-system/tokens/`. Components are named as there and
   keep the mocks' BEM classes.
-- `docs/detailed-designs/README.md` ("Contracts the features share", "Designed in the mocks, not here yet",
+- `docs/detailed-designs/README.md` ("Contracts the features share",
   "Not decided yet") and the neighbouring designs this builds on.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock and the requirement disagree anywhere in this scope, the mock is right: bring the requirement
@@ -87,24 +87,19 @@ stage, and the join handler's way of placing a pin at the city and issuing a ses
   with `writing-html-mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Detailed design (`writing-software-design-documents`)
-- This feature has requirements and mocks and no detailed design yet. Write it in
-  `docs/detailed-designs/joining/create-team/`, in the house style of its neighbours: overview, parts, the L2
-  requirements it realises, C4 context, container and component, a class diagram, and a sequence diagram per
-  behaviour. Cover the `POST` that makes a team, its teammate, its invite token and the session in one
-  transaction; the postal code lookup for someone with no invite link yet; where the email is held and who may
-  read it; `CreateTeamPage` and its states; and the created state's copy button.
-- Render the diagrams with `python .claude/skills/writing-software-design-documents/scripts/render_puml.py
-  docs/detailed-designs`.
-- In `docs/detailed-designs/README.md`, move the feature from "Designed in the mocks, not here yet" into the
-  table of subsystems and features, add any contract other features share, and bring the neighbouring designs
-  it changes in line.
+- The design is `docs/detailed-designs/joining/make-team/README.md`. Read it, its diagrams and the neighbouring
+  designs it names before any code.
+- Where the work shows the design to be wrong or incomplete, change it before the code, render its diagrams with
+  `python .claude/skills/writing-software-design-documents/scripts/render_puml.py docs/detailed-designs`, and
+  bring the neighbouring designs it changes in line.
 
 ## Phase 3: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- How a postal code is looked up before any invite link exists: L2-045 criterion 4 ties the lookup to an
-  invite token. Choose the simplest safe option (an open, rate-limited lookup endpoint for Create Team that
-  shares Join's limit of 10 a minute per client) and record it in the design and in L2-045.
-- How the email is stored (normalised, unique per team or across teams) and protected at rest; record it in
-  the design. It is used only to send that teammate's sign-in links (journey 7).
+- Work through the design's open points and the `<TO SUPPLY>` marks this journey needs. L2-053 leaves two
+  things not designed: what Create Team does when its email already belongs to a teammate of another team, and
+  the longest name a team may have. What the screen shows for a 429 is not drawn either (L2-045). Do not build
+  a screen state that has no mock.
+- How the email is protected at rest; record it in the design. It is used only to send that teammate's sign-in
+  links (journey 7).
 - Create Team with a postal code that cannot be found, or with the lookup down, is not drawn
   (`docs/mocks/README.md`, open question 9): draw those states first with `writing-html-mocks`, using Join's
   messages.
@@ -112,20 +107,22 @@ stage, and the join handler's way of placing a pin at the city and issuing a ses
 ## Phase 4: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. Backend: `POST /api/teams` (marked open, 3 an hour per client): validation of team name, name, email,
-     country and postal code with ProblemDetails and a `code`; nothing stored on refusal (L2-053 AC8, AC9).
+  1. Backend: `POST /api/teams` (marked open, 5 teams an hour per client, L2-045 AC10): validation of team
+     name, name, email, country and postal code with ProblemDetails and a `code`; nothing stored on refusal
+     (L2-044 AC8, L2-053 AC15, AC16).
   2. Backend: one team, one teammate with a pin at the city, an invite token of at least 128 bits and a
-     session for the maker, made together or not at all; a double submit makes one team (AC4). The answer
-     carries no postal code and no email for anyone else (AC10).
-  3. Backend: the postal code lookup for Create Team, with the same answers and codes as Join's.
-  4. Frontend: the lazy route `/new` with `CreateTeamPage`: the five fields, the hints, "Create team", and the
-     link to Sign In (AC1).
-  5. Frontend: validation on submit with a message under each wrong field and focus on the first (AC2); the
-     lookup states shared with Join (AC3).
+     session for the maker, made together or not at all; a double submit makes one team (AC7, AC13). The answer
+     echoes no postal code and no email.
+  3. Backend: the postal code lookup for Create Team, which needs no invite token (L2-045 AC4), with the same
+     answers and codes as Join's.
+  4. Frontend: the lazy route `/new` with `CreateTeamPage`: the five fields, the countries, the hints, "Create
+     team", and "Sign in" (AC1, AC2, AC14).
+  5. Frontend: validation on submit with a message under each wrong field and focus on the first (AC4, AC5);
+     the lookup states shared with Join (AC3).
   6. Frontend: submitting ("Creating your team…", pressed once) and the error state with "Try again", keeping
-     what was typed (AC4, AC7); rate limited (AC9).
+     what was typed (AC6, AC12).
   7. Frontend: created: "Northwind is on the map", the invite link, "Copy link" reading "Copied", the refused
-     copy, "Go to the globe", the pulsing pin handed to the globe stage, focus on the title (AC5, AC6).
+     copy, "Go to the globe", the pulsing pin handed to the globe stage, focus on the title (AC8 to AC11).
      `TeamMembership` is stored with ids and the team's name, never the postal code or email.
   8. The links that lead here: "Start a team" on Join's unusable invite link, "You need an invite link" and
      "You’ve left".

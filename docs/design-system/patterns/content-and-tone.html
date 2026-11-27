@@ -36,6 +36,7 @@
       <li><a href="../components/select.html">Select</a></li>
       <li><a href="../components/form-field.html">Form field</a></li>
       <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/copy-field.html">Copy field</a></li>
       <li><a href="../components/switch.html">Switch</a></li>
       <li><a href="../components/chip.html">Chip</a></li>
       <li><a href="../components/avatar.html">Avatar</a></li>
@@ -51,6 +52,8 @@
       <li><a href="../components/empty-state.html">Empty state</a></li>
       <li><a href="../components/skip-link.html">Skip link</a></li>
       <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/auth.html">Auth</a></li>
+      <li><a href="../components/notice-page.html">Notice page</a></li>
       <li><a href="../components/logo.html">Logo</a></li>
       <li><a href="../components/globe.html">Globe</a></li>
       <li><a href="../components/pin.html">Pin</a></li>
@@ -63,6 +66,7 @@
       <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
       <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
       <li><a href="../components/team-table.html">Team table</a></li>
+      <li><a href="../components/city-section.html">City section</a></li>
     </ul></details>
     <details open><summary>Patterns</summary><ul>
       <li><a href="../patterns/forms.html">Forms</a></li>
@@ -88,37 +92,34 @@
 </section>
 
 <section class="ds-section" id="when"><h2><a href="#when">When to use</a></h2>
-<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Moment</th><th scope="col">Tone</th><th scope="col">Example</th></tr></thead><tbody><tr><td>Welcoming someone</td><td>Warm and brief</td><td>Put yourself on the map.</td></tr><tr><td>Asking for a postal code</td><td>Reassuring, before the question</td><td>Only your city is shown. Your postal code stays private.</td></tr><tr><td>Showing a teammate</td><td>Factual; the facts are the warmth</td><td>08:05 · Monday 27 Oct · 7 h behind you</td></tr><tr><td>Guessing</td><td>Honest about the guess</td><td>Probably asleep</td></tr><tr><td>A moment</td><td>A little delight, from the place itself</td><td>Ofrendas, marigolds and the big parade on Reforma</td></tr><tr><td>Nothing happening</td><td>Light</td><td>Nobody — it’s quiet everywhere.</td></tr><tr><td>Something failed</td><td>Calm, on our side, with a next step</td><td>We couldn’t load your team. Nothing is lost.</td></tr><tr><td>Leaving</td><td>Exact, and not clingy</td><td>Your pin is gone from the globe… To come back, open the team’s invite link again.</td></tr></tbody></table></div>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Moment</th><th scope="col">Tone</th><th scope="col">Example</th></tr></thead><tbody><tr><td>Welcoming someone</td><td>Warm and brief</td><td>Put yourself on the map.</td></tr><tr><td>Welcoming someone back</td><td>Warm, and plain about how it works</td><td>Welcome back. No passwords. We’ll email you a link that signs you straight in.</td></tr><tr><td>Asking for a postal code</td><td>Reassuring, before the question</td><td>Only your city is shown. Your postal code stays private.</td></tr><tr><td>Showing a teammate</td><td>Factual; the facts are the warmth</td><td>08:05 · Monday 27 Oct · 7h behind you</td></tr><tr><td>Guessing</td><td>Honest about the guess</td><td>Probably asleep</td></tr><tr><td>Respecting a choice</td><td>Says what is kept private, and what is still shown</td><td>Ahmed keeps their weather and working hours private. You’ll still see their local time and city.</td></tr><tr><td>A moment</td><td>A little delight, from the place itself</td><td>Ofrendas, marigolds and the big parade on Reforma</td></tr><tr><td>Nothing happening</td><td>Light</td><td>Nobody — it’s quiet everywhere.</td></tr><tr><td>Something failed</td><td>Calm, on our side, with a next step</td><td>The globe didn’t load. We couldn’t reach Mondino to fetch your team. Check your connection — nothing you set has been lost.</td></tr><tr><td>A wrong address</td><td>A small smile, then the way back</td><td>This page fell off the map</td></tr><tr><td>Leaving</td><td>Exact, and not clingy</td><td>Your pin is off Northwind’s globe and they can no longer see your time, weather or moments. To come back, ask a teammate for the team’s invite link.</td></tr></tbody></table></div>
 </section>
 
 <section class="ds-section" id="structure"><h2><a href="#structure">Structure</a></h2>
-<div class="ds-example"><div class="ds-example__canvas"><div class="panel" style="width: 100%; max-width: var(--layout-panel-width);">
-    <article class="person" aria-labelledby="person-name-80">
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9002">
       <div class="person__head">
-        <span class="avatar avatar--lg hue-8" aria-hidden="true">AT</span>
-        <p class="person__name" id="person-name-80" tabindex="-1">Aiko Tanaka</p>
-        <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Aiko Tanaka"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
+        <span class="avatar avatar--lg hue-9" aria-hidden="true">NW</span>
+        <p class="person__name" id="person-name-9002" tabindex="-1">Noah Williams</p>
+        <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Noah Williams"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
       </div>
       <div>
-        <p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Tokyo, Japan</p>
-        <p class="person__clock tnum">23:05</p>
-        <p class="person__day">Monday 27 Oct · <span class="tnum">8 h ahead of you</span></p>
+        <p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Melbourne, Australia</p>
+        <p class="person__clock tnum">01:05</p>
+        <p class="person__day">Tuesday 28 Oct · <span class="tnum">10h ahead of you</span></p>
         <span class="status status--asleep">Probably asleep</span>
       </div>
-      <div class="person__weather"><svg class="icon icon--lg" role="img" aria-label="Clear" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg><div><p class="person__temp tnum">14°C</p><p class="person__sky">Clear in Tokyo</p></div></div>
+      <div class="person__weather"><svg class="icon icon--lg" role="img" aria-label="Windy" viewBox="0 0 24 24"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></svg><div><p class="person__temp tnum">18°C</p><p class="person__sky">Windy in Melbourne</p></div></div>
       <div class="person__moments">
-        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg></span><div><p class="moment-card__kind">Holiday · In 7 days</p><p class="moment-card__title">Culture Day</p><p class="moment-card__detail">Bunka no Hi — public holiday in Japan</p></div></div>
+        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></span><div><p class="moment-card__kind">Sport · In 7 days</p><p class="moment-card__title">Melbourne Cup Day</p><p class="moment-card__detail">The race that stops a nation — public holiday</p></div></div>
       </div>
-      <section class="overlap" aria-labelledby="overlap-title-80">
-      <div class="overlap__head"><p class="overlap__title" id="overlap-title-80">Working-hours overlap</p><p class="overlap__when tnum">09:00–10:00 your time</p></div>
-      <div class="overlap__track" aria-hidden="true"><span class="overlap__theirs" style="--from: 4.17%; --span: 37.50%"></span><span class="overlap__both" style="--from: 37.50%; --span: 4.17%"></span><span class="overlap__you" style="--from: 37.50%; --span: 37.50%"></span><span class="overlap__now" style="--from: 62.85%"></span></div>
+      <section class="overlap" aria-labelledby="overlap-title-9002">
+      <div class="overlap__head"><p class="overlap__title" id="overlap-title-9002">Working-hours overlap</p><p class="overlap__when tnum">None today</p></div>
+      <div class="overlap__track" aria-hidden="true"><span class="overlap__theirs" style="--from: 95.83%; --span: 4.17%"></span><span class="overlap__theirs" style="--from: 0.00%; --span: 33.33%"></span><span class="overlap__you" style="--from: 37.50%; --span: 37.50%"></span><span class="overlap__now" style="--from: 62.85%"></span></div>
       <ul class="overlap__scale tnum" aria-hidden="true"><li>00:00</li><li>06:00</li><li>12:00</li><li>18:00</li><li>00:00</li></ul>
-      <ul class="overlap__legend" aria-hidden="true"><li><span class="swatch swatch--you"></span>You</li><li><span class="swatch swatch--theirs"></span>Aiko</li><li><span class="swatch swatch--both"></span>Both</li></ul>
-      <p class="overlap__text tnum">You and Aiko share 1 hour of working hours: 09:00 to 10:00 on your clock.</p>
+      <ul class="overlap__legend" aria-hidden="true"><li><span class="swatch swatch--you"></span>You</li><li><span class="swatch swatch--theirs"></span>Noah</li><li><span class="swatch swatch--both"></span>Both</li></ul>
+      <p class="overlap__text tnum">You and Noah share no working hours. Noah’s working day is 23:00 to 08:00 on your clock.</p>
     </section>
-      <button class="btn btn--primary btn--block" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>Message Aiko</button>
-    </article>
-  </div></div><div class="ds-example__caption"><span>A teammate at night: the facts, a guess marked as a guess, and one line from where she lives</span></div></div>
+    </article></div></div></div><div class="ds-example__caption"><span>A teammate at night: the facts, a guess marked as a guess, and one line from where he lives</span></div></div>
 </section>
 
 <section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
@@ -134,7 +135,7 @@
 </section>
 
 <section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
-<p>Mondino has no chat, no calendar, no presence and no feed, and its words must not suggest any: nothing is “online”, “active”, “available” or “busy”, and nothing is “scheduled”.</p>
+<p>Mondino has no chat, no calendar, no presence and no feed, and its words must not suggest any: nothing is “online”, “active”, “available” or “busy”, and nothing is “scheduled”. It has no roles and no plans either: nobody is an “admin” or an “owner”, and a team is “full”, never “over its limit”.</p><p>An offset is written tight, the way it is said: “7h behind”, “4h 30m ahead”, “Same time”; in a sentence about you, “7h behind you”, “10h ahead of you”, “same time as you”. An error’s title names the thing and what it did not do: “The globe didn’t load”, “The team didn’t load”, “Moments didn’t load”, “Your settings didn’t load”. A refusal is told from our side: “We couldn’t add you to Northwind.”, “We couldn’t send the link.”, “Couldn’t copy the link.”</p>
 </section>
 
 <section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
@@ -143,7 +144,7 @@
 </section>
 
 <section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
-<p>Composed from these mocks:</p><ul><li><a href="../../mocks/pages/join/default.html">pages/join/default</a></li><li><a href="../../mocks/pages/globe/selected-asleep.html">pages/globe/selected-asleep</a></li><li><a href="../../mocks/pages/globe/quiet.html">pages/globe/quiet</a></li><li><a href="../../mocks/pages/moments/default.html">pages/moments/default</a></li><li><a href="../../mocks/pages/left-team/default.html">pages/left-team/default</a></li><li><a href="../../mocks/pages/globe/error.html">pages/globe/error</a></li></ul>
+<p>Composed from these mocks:</p><ul><li><a href="../../mocks/pages/join/default.html">pages/join/default</a></li><li><a href="../../mocks/pages/sign-in/default.html">pages/sign-in/default</a></li><li><a href="../../mocks/pages/globe/selected.html">pages/globe/selected</a></li><li><a href="../../mocks/pages/globe/selected-asleep.html">pages/globe/selected-asleep</a></li><li><a href="../../mocks/pages/globe/sharing-off.html">pages/globe/sharing-off</a></li><li><a href="../../mocks/pages/globe/quiet.html">pages/globe/quiet</a></li><li><a href="../../mocks/pages/moments/default.html">pages/moments/default</a></li><li><a href="../../mocks/pages/left-team/default.html">pages/left-team/default</a></li><li><a href="../../mocks/pages/not-found/default.html">pages/not-found/default</a></li><li><a href="../../mocks/pages/globe/error.html">pages/globe/error</a></li></ul>
 </section>
     <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
   </main>

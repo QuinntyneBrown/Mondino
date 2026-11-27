@@ -2,12 +2,12 @@
 
 ## Overview
 
-Mondino holds little about a teammate: a name, a postal code, and the city, position and time
-zone found from it. This feature covers how the `Mondino API` is observed in production
+Mondino holds little about a teammate: a name, a postal code, the city, position and time
+zone found from it, and, for a teammate who made a team, an email. This feature covers how the `Mondino API` is observed in production
 without any of that reaching what it records. The backend emits OpenTelemetry traces, metrics
 and logs, enough to see its own health and the health of each outside source. None of it
-carries a name, a postal code, a position, a city, a token, a query string or a body, and a
-route is recorded as its template.
+carries a name, an email, a postal code, a position, a city, a token, a query string or a
+body, and a route is recorded as its template.
 
 The terms used below:
 
@@ -33,12 +33,12 @@ backend's own instruments.
 - `RecordSourceCall(source, outcome, duration)` adds one to the counter
   `mondino.source.calls` and records the duration in the histogram
   `mondino.source.duration`. Both are labelled by `source` (`postal_code`, `weather`,
-  `holiday_calendar`, `race_calendar`, `event_calendar`) and `outcome` (a `SourceOutcome`:
+  `holiday_calendar`, `race_calendar`, `event_calendar`, `email`) and `outcome` (a `SourceOutcome`:
   `Success`, `Failure`, `Timeout`, `CircuitOpen`), and by nothing else. Calls, failures and
   time-outs per source are read from the counter by outcome.
 - The caching decorators (`CachedWeatherSource`, `CachedPostalCodeLookup`,
-  `CachedMomentCalendars`) call `RecordSourceCall` once per call to a source
-  (`survive-source-failure`).
+  `CachedMomentCalendars`) and `SignInEmailSender` call `RecordSourceCall` once per call to a
+  source (`survive-source-failure`).
 
 **`TelemetryRedaction`** — span and log processor registered by `MondinoTelemetry`. It works
 from an allow-list, so an attribute that is not named is dropped, not kept.
@@ -46,16 +46,21 @@ from an allow-list, so an attribute that is not named is dropped, not kept.
 - **Incoming requests.** A server span keeps the method, the status code and `http.route`,
   the route template. The span's name is the method and the template. The processor drops the
   path, the query string, the client address, the user agent and each header. A request's
-  body is never recorded.
-- **Outgoing calls.** An outside source's URL can carry a postal code or a position. A client
-  span keeps the source's name, the method and the status code; the processor drops the URL
-  and its query string.
+  body is never recorded, and an email, a sign-in token, a postal code and the text of a city
+  search travel in a body only. The sign-in routes are recorded as `/api/sign-in-links` and
+  `/api/sign-in-links/redemptions`; the sign-in token is in the fragment of the emailed
+  address, which no server receives.
+- **Outgoing calls.** An outside source's URL can carry a postal code or a position, and the
+  call to the email source carries an address. A client span keeps the source's name, the
+  method and the status code; the processor drops the URL and its query string.
 - **Database calls.** The EF Core instrumentation is configured to record no statement text
   and no parameter values.
 - **Logs.** Each log message is a source-generated `LoggerMessage` in `LogMessages`, with a
   fixed template. A message takes only values from a closed set: a source's name, a
   `SourceOutcome`, an error's type, a status code, a correlation id. No message takes a name,
-  a postal code, a city, a position, a token or an id of a team or a teammate. The framework's
+  an email, a postal code, a city, a position, a token or an id of a team or a teammate. That
+  a sign-in link was asked for, sent, opened or refused is logged with no field that says for
+  whom. The framework's
   own request logging is set to a level that writes no path.
 
 **Errors and the correlation id.**
@@ -86,7 +91,9 @@ sampling rate is `<TO SUPPLY>`.
 **How it is proved.** An acceptance test joins as "Sofia Bianchi" with postal code "20121"
 against in-memory exporters and a fake postal code lookup, then searches every exported span,
 metric and log record for the name, the postal code, the city, its coordinates and the invite
-token. It finds none.
+token. It finds none. A second test makes a team with the email "sofia@northwind.co", asks
+for a sign-in link against a fake email sender and opens it, then searches the same exports
+for the email, the email's domain and the sign-in token. It finds none.
 
 ## Requirements
 
@@ -95,14 +102,15 @@ requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-051` | `L1-017` | The backend emits OpenTelemetry traces, metrics and logs, enough to see its health and the health of each outside source. None of it carries a name, a postal code, a position, a city, a token, a query string or a body, and a route is recorded as its template. |
+| `L2-051` | `L1-017` | The backend emits OpenTelemetry traces, metrics and logs, enough to see its health and the health of each outside source. None of it carries a name, an email, a postal code, a position, a city, a token, a query string or a body, and a route is recorded as its template. |
 
 ## Diagrams
 
 ### System context
 
 Mondino exports traces, metrics and logs to a telemetry backend and measures its calls to
-outside sources. Nothing about a teammate, or a person joining, is recorded.
+outside sources. Nothing about a teammate, a person joining, a person making a team or a
+person signing in is recorded.
 
 ![C4 system context for observing without exposing](diagrams/c4-context.png)
 

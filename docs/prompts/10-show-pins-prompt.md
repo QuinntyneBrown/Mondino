@@ -4,7 +4,7 @@
 
 Every teammate is a pin on the globe: their initials in their own colour, with a label for their local time
 and weather. The viewer's own pin is marked "(you)". A pin that is pointed at, focused or selected lifts out,
-grows, comes in front and shows its label. Pins close together fan out or become a group pin with a count,
+grows, comes in front and shows its label. Pins that would cover each other become one group pin with a count,
 whose teammates are listed in the panel. Pins on the far side are hidden; a newly placed pin pulses once.
 
 Journey 10 of `docs/journeys.md`. Requirements: L2-011, L2-012, L2-013 (`docs/specs/L2.md`).
@@ -95,8 +95,8 @@ label shows the name and city.
      select and tap elsewhere to clear; 44 × 44 px hit areas.
   5. `PinLabel` placement beside the pin, inside the globe, clear of other pins; under 400 px only the lifted
      pin is labelled.
-  6. `PIN_SPREADER` in `domain`'s `pins/`: fanning and the group pin with its count; `selectGroup`. Direct
-     tests per case.
+  6. `groupPins` in `domain`'s `pins/`, bound to `PIN_GROUPER`: the group pin with its count; `selectGroup`.
+     Direct tests per case.
   7. The pulse for an arrived pin (`arrivedIds`).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.

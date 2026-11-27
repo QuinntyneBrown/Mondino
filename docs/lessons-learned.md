@@ -10,7 +10,9 @@ apply the lessons that fit.
 
 - The docs were behind the mocks. The mocks' second transcription cited L2-052 to L2-056, which
   were not written, and the prompts still said sign-in and making a team were not designed. The
-  journeys, prompts and requirements were brought in line before any code.
+  journeys, prompts and requirements were brought in line before any code. A second branch wrote
+  the same requirements and their designs at the same time; its wording was kept when the two
+  merged, and the journeys and prompts were renumbered to match.
 - `ng add angular-eslint` installs the packages and writes no configuration in a workspace made
   with `--create-application=false`. The configuration was written by hand.
 - A library's public API pulled every component into the initial bundle (+55 kB) until each

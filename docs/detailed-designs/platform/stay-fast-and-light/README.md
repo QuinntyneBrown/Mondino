@@ -18,6 +18,7 @@ The terms used below:
 - **reference laptop** — laptop with integrated graphics
 - **detail step** — one level of resolution and model detail at which the globe's scene can be drawn
 - **windowed list** — list that keeps in the page only the rows near the visible part
+- **city section** — part of the Team list of a large team that holds one city's teammates and opens and closes
 
 The globe's renderer and the format its Blender-built assets are exported to are decided in an
 ADR before the Globe is built; both are `<TO SUPPLY>`. This design fixes what holds whichever
@@ -28,10 +29,19 @@ renderer is chosen.
 **Load only what is needed now (L2-046).**
 
 - **Lazy routes.** Each screen is loaded with `loadComponent` (`adapt-to-every-width`), so a
-  screen's code arrives when its address is opened.
+  screen's code arrives when its address is opened. Sign In (`/sign-in`), Create Team (`/new`)
+  and the pages that say one thing are routes of their own, so a teammate who opens the Globe
+  downloads none of them. Each of those routes binds its own API token (`SIGN_IN_API`,
+  `TEAM_CREATION_API`) and provides its own store, which keeps the clients out of the initial
+  bundle and lets the state go with the route.
+- **The invite dialog is loaded on demand.** `InviteDialogOpener` imports `InviteDialog`
+  dynamically when "Invite teammate" is first chosen (`invite-teammates`). The dialog, with
+  `CopyField`, is in a chunk of its own: it is in no screen's chunk and not in the initial
+  bundle, although the button that opens it is in the header of every teammate screen.
+  `LeaveTeamDialog` and `DiscardChangesDialog` arrive with the `/profile` route.
 - **The `globe` library is imported dynamically.** No file in the initial bundle imports
-  `@mondino/globe` statically. `GlobePage`, `JoinPage` and `ProfilePage` place `mo-globe`
-  inside a `@defer` block, which imports the library, its renderer and its map data when a
+  `@mondino/globe` statically. `GlobePage`, `JoinPage`, `SignInPage`, `CreateTeamPage` and
+  `ProfilePage` place `mo-globe` inside a `@defer` block, which imports the library, its renderer and its map data when a
   globe is first drawn. The block's placeholder reserves the globe's box, so the layout does
   not shift when the globe arrives.
 - **The screen is usable before the globe.** `GlobePage` renders its heading, counts and panel
@@ -51,7 +61,11 @@ renderer is chosen.
   model's detail and the drawing resolution; this repeats until the frame rate recovers. The
   steps and the interval are `<TO SUPPLY>` with the renderer's ADR.
 - **`GlobeFallback`** — component in `components`: the still picture shown when WebGL is
-  unavailable or the `globe` library fails to load. It allocates no renderer.
+  unavailable or the `globe` library fails to load. It allocates no renderer and runs no
+  animation frame. It keeps the team's pins, in place and working, drawn as HTML over the
+  picture (`draw-globe`, `show-pins`); it does not turn and is not dragged, so it holds no
+  pointer listener for dragging. `NoticePage` draws its small globe the same way, as a
+  picture.
 - **Interactions stay under 200 ms.** State is held in signals, every component is `OnPush`
   and the app is zoneless, so a selection or a filter re-renders only what reads the changed
   signal.
@@ -76,7 +90,12 @@ renderer is chosen.
   HTTP request. A page that starts its own request ties it to `takeUntilDestroyed`, so leaving
   a screen cancels the request.
 - **Scoped state.** A screen's own state (a filter, a draft of the settings) lives in the page
-  component or a service it provides, and goes when the teammate leaves the screen.
+  component or a service it provides, and goes when the teammate leaves the screen. An email
+  typed on Sign In or Create Team, a postal code and a city search go the same way.
+- **Timers that count down.** The toast's 4 s dismissal (`InviteLinkCopier`), the rate limit
+  countdown and the pause before a city search (`JoinStore`) are each one timer, cleared when
+  it ends and when its owner is destroyed. A pending city search is aborted when a newer one
+  starts and when the route is left.
 
 **One clock, and it rests (L2-047).**
 
@@ -93,14 +112,21 @@ renderer is chosen.
 
 **Bound what grows (L2-047).**
 
-- **`TeamTable`** and **`MomentList`** render their rows through CDK virtual scrolling
-  (`cdkVirtualFor`), so the number of rows in the page stays under a fixed limit for a team of
-  500. The limit follows from the viewport's height and the buffer; the buffer size is
-  `<TO SUPPLY>`.
+- **The Team list** is bounded by its sections, not by virtual scrolling. Past
+  `LargeTeamThreshold` (40) teammates it is split into one `CitySection` per city; a closed
+  section holds no rows, and an open one holds at most `CityRowLimit` (50)
+  (`view-team-through-the-day`, L2-056). The day ribbon of such a team is 48 bars, whatever
+  the team's size.
+- **`MomentList`** renders its rows through CDK virtual scrolling (`cdkVirtualFor`), so the
+  number of rows in the page stays under a fixed limit. The limit follows from the viewport's
+  height and the buffer; the buffer size is `<TO SUPPLY>`.
+- **The Globe's panel** lists at most six moments and six teammates in working hours
+  (`view-week-around-the-world`).
 - `TeamStore` replaces its pins on each refresh; it keeps no history. A team has at most 500
   teammates (`Team.MaxTeammates`).
-- `PinLayer` groups close pins (`spreadPins`), so the labels drawn at once are bounded by the
-  globe's size, not the team's.
+- `PinLayer` groups close pins (`groupPins`, through `PIN_GROUPER`), so the pins and labels
+  drawn at once are bounded by the globe's size, not the team's: a team of 500 is drawn as
+  group pins with counts.
 
 **Prove it.** A heap check enters and leaves the Globe screen 20 times and compares the heap
 after garbage collection with its size after the first visit; a second check runs the Globe
@@ -147,7 +173,7 @@ percentile, compressed.
 `BrowserClock` implements `Clock`. `GlobeView` composes `GlobeScene` and
 `DetailLevel`; `GlobeView` shows the `GlobeFallback` that `GlobePage` gives it when WebGL is unavailable. `GlobePage` depends
 on `TeamStore`, `Clock` and, through a dynamic import, `GlobeView`. `TeamTable` and
-`MomentList` render windowed rows.
+`MomentList` hold a bounded number of rows.
 
 ![Class diagram for staying fast and light](diagrams/class-structure.png)
 

@@ -16,10 +16,12 @@ The terms used below:
 - **teammate screen** — one of Globe, Team, Moments and Profile & Settings, shown only to a teammate
 - **membership** — record on the device that it has joined a team: the team's id, the teammate's id and the team's name
 
-A teammate reaches Globe, Team, Moments and Profile & Settings from every screen after joining.
-A person who is not a teammate of any team on the device and opens one of those addresses is
-shown, at that address, that an invite link is needed, and no team's data. An address that
-belongs to no screen says so. The backend, not the browser, decides
+A teammate reaches Globe, Team, Moments and Profile & Settings from every screen after joining,
+and "Invite teammate" from the header of each. A person who is not a teammate of any team on
+the device and opens one of those addresses is shown, at that address, that an invite link is
+needed, and no team's data. An address that belongs to no screen says so. Join, Sign In,
+Create Team and the pages that say one thing show no header; each carries the mark and
+wordmark itself. The backend, not the browser, decides
 who is a teammate; the browser's check is a convenience that saves a request
 (`protect-team-data`, L2-043).
 
@@ -38,6 +40,8 @@ with `loadComponent`, so each screen is its own chunk.
 | Address | Component | Guarded |
 |---------|-----------|---------|
 | `/join/:inviteToken` | `JoinPage` | no |
+| `/sign-in` | `SignInPage` | no |
+| `/new` | `CreateTeamPage` | no |
 | `/globe` | `GlobePage` | yes |
 | `/team` | `TeamPage` | yes |
 | `/moments` | `MomentsPage` | yes |
@@ -48,11 +52,10 @@ with `loadComponent`, so each screen is its own chunk.
 The four teammate screens are children of one pathless parent route, whose component is
 `TeamShell`. The parent carries `canMatch: [teammateGuard]` and `TeamShell` provides
 `TeamStore`, so the team's pins are shared by the four screens and released when the teammate
-leaves them. The parent has a last child, `**`, which loads `NotFoundPage`, so a teammate who
-opens an address that belongs to no screen keeps the header and its navigation, as the mock
-draws. A second pathless parent follows it with the same four addresses, each loading
+leaves them. A second pathless parent follows it with the same four addresses, each loading
 `InviteNeededPage`; the router falls through to it when the guard refuses the first, so the
-address stays as it was opened, and any other address then reaches the last `**` route. The empty address
+address stays as it was opened. Any other address reaches the last `**` route, which loads
+`NotFoundPage` for a teammate and for anyone else alike, with no header, as the mock draws. The empty address
 redirects to `/globe`. The router uses path addresses, so an address that is opened directly or reloaded
 shows its screen and the browser's back button returns to the previous screen (L2-038). The
 host that serves the app shall answer each of these addresses with the app's `index.html`; the
@@ -65,37 +68,47 @@ hosting platform is `<TO SUPPLY>`.
 
 **`TeamMembership`** — service in `domain`'s `storage/`. It holds a `Membership` (`teamId`,
 `teammateId`, `teamName`) in the browser's local storage and exposes it as the signal
-`current`. `JoinPage` calls `remember(...)` after a successful join, and leaving the team calls
-`forget()`. It holds no postal code, no position and no session: the session is an `HttpOnly`
-cookie that scripts cannot read (L2-043). How a teammate signs in again on another device is
-`<TO SUPPLY>`.
+`current`. `JoinPage` calls `remember(...)` after a successful join, `CreateTeamPage` once the
+team is made (`make-team`) and `SignInPage` once an emailed link is opened (`sign-in`); leaving
+the team calls `forget()`. It holds no postal code, no email, no position and no session: the
+session is an `HttpOnly` cookie that scripts cannot read (L2-043).
 
 **`sessionExpiredInterceptor`** — `HttpInterceptorFn` bound in `app.config.ts`. When the
 `Mondino API` answers 401, it calls `TeamMembership.forget()` and navigates to the current
 address again, which now shows `InviteNeededPage`. A membership that outlives its session
 therefore leads to the same screen as no membership.
 
-**`InviteNeededPage`** — lazy route component. It says "You need an invite link" and that a
-teammate can give their team's. It reads no API and shows no team's name or data. It renders
-`mo-app-header` without navigation.
-
-**`NotFoundPage`** — lazy route component for an address that belongs to no screen. It says
-"This page fell off the map", shows the address (the host and the path, as text, without its
-query string or fragment, from `shownAddress`) and links "Back to the globe". It reads no API.
-It is a `NoticePage`.
-
 **`NoticePage`** (`mo-notice-page`, block `notice-page`) — presentation component in
-`components` for a page that says one thing: the `Wordmark`, a small globe (`GlobeFallback`,
-named "A small globe"), a title, a line and a way on. The line is the inputs `lead`, `emphasis`
-(in strong) and `rest`, all rendered as text; the way on is the `actions` slot. It renders the
-screen's `main`. Not Found, "You need an invite link" and "You’ve left" are built from it.
+`components` for a page that says one thing: the mark and wordmark, a small still picture of
+the globe (`GlobeFallback` in `notice-page__art`, named "A small globe"), a title
+(`notice-page__title`), one text (`notice-page__text`) and an actions slot
+(`notice-page__actions`) for one or two ways on. The text is the inputs `lead`, `emphasis`
+(in strong) and `rest`, all rendered as text. It renders the screen's `main`, and no header,
+and loads no renderer. `InviteNeededPage`, `NotFoundPage` and
+`LeftPage` (`leave-team`) render it.
+
+**`InviteNeededPage`** — lazy route component. Its title reads "You need an invite link". Its
+text reads "Mondino teams are invite-only, and **sofia@northwind.co** isn’t on one yet. Ask a
+teammate to send you their team’s link — it opens straight onto the globe.", with the email
+that `SignInPage` passed in the navigation state rendered as text (`sign-in`). With no email
+known, the sentence reads "and you aren’t on one yet". Its actions are the links "Start a
+team", to `/new`, and "Use a different email", to `/sign-in`. It reads no API and shows no
+team's name or data.
+
+**`NotFoundPage`** — lazy route component for an address that belongs to no screen. Its title
+reads "This page fell off the map" and its text "There’s nothing at
+**mondino.app/team/northwind/pins/old**. It may have moved, or the link was mistyped." The
+address is the app's host and the path that was opened, rendered as text, never as markup, and
+without its query string or fragment (`shownAddress`). Its one action is "Back to the globe", a
+link to
+`/globe`; a person on no team is then shown `InviteNeededPage` there. It reads no API.
 
 **`App`** — root component of the `mondino` application. It renders the "Skip to content"
 link, which is the first focusable element of every screen, and the router outlet, and nothing
 else. Each screen renders its own `main`, which is the skip link's target.
 
 **`TeamShell`** — route component of the guarded parent route, in the `mondino` application.
-It provides `TeamStore` and `InviteLinkCopier` and renders `mo-app-header`, the refresh banner (`keep-team-fresh`),
+It provides `TeamStore`, `InviteLinkCopier` and `InviteDialogOpener` and renders `mo-app-header`, the refresh banner (`keep-team-fresh`),
 the router outlet that holds Globe, Team, Moments and Profile & Settings, and the toast. The
 banner and the toast are therefore the same on all four screens and are not rendered by a
 page. `TeamShell` holds the three `NavItem`s (Globe, Team, Moments) and projects one link per
@@ -104,26 +117,27 @@ the link to Profile & Settings, the viewer's avatar with the accessible name "Pr
 Settings", into its `me` slot. Each link is an anchor with `routerLink` and
 `ariaCurrentWhenActive="page"`, so the current screen carries `aria-current="page"`. The
 avatar's initials and colour come from the viewer's pin in `TeamStore`. On the header's
-`invite` output `TeamShell` calls `InviteLinkCopier.copy()`, which copies the team's invite
-link, and shows the toast (`view-week-around-the-world`, L2-025).
+`invite` output `TeamShell` calls `InviteDialogOpener.open(trigger)`, which opens the invite
+dialog on whichever screen is showing (`invite-teammates`, L2-054).
 
 **`AppHeader`** (`mo-app-header`) — presentation component in `components`; its block is
 `app-header`. It renders the header with `Wordmark`, the `nav` slot inside a `nav` landmark
 named "Primary", and, at the header's end (`app-header__actions`), its own "Invite teammate"
-button (`app-header__invite`), which the mocks draw from 768 px and which emits the output
-`invite`, and the `me` slot. It injects no router
+button (`app-header__invite`) and the `me` slot. The button is in the header at every width
+and emits the output `invite` with its own element. From 768 px it shows an icon and its
+label (`app-header__invite-label`); under 768 px its stylesheet hides the label, so it is an
+icon alone, with the same accessible name, "Invite teammate". The header injects no router
 and no service. The navigation sits in the header at every width, and each target is at least
 44 × 44 px; under 360 px the header's gaps and the options' padding tighten, so the three
-options and the avatar fit at 320 px. With the input `showNavigation` the mark and wordmark
-link to the Globe; without it the header is the mocks' `app-header--bare`, which shows the
-mark and wordmark alone, not as a link, with no "Invite teammate" button. `LeftPage` and `InviteNeededPage` render it that way.
-The Join screen shows no header and carries the mark and wordmark at the top of its form.
+options, the invite icon and the avatar fit at 320 px. The mark and wordmark link to the
+Globe. Only `TeamShell` renders the header: Join, Sign In, Create Team and the pages that say
+one thing show none and carry the mark and wordmark themselves.
 
 **`Wordmark`** (`mo-wordmark`) — presentation component in `components`. It renders the mark
 and the lowercase wordmark "mondino" in Gabarito. With the input `collapses` set, as in the
-header with navigation, its own stylesheet hides the word under 576 px, so that header on a
-phone shows the mark alone. Without it, as in the header without navigation and on the Join
-screen, the word shows at every width.
+header, its own stylesheet hides the word under 576 px, so the header on a phone shows the
+mark alone. Without it, as on Join, Sign In, Create Team and `NoticePage`, the word shows at
+every width.
 
 **Layouts.** Each screen's layout is decided by CSS in that component's own stylesheet, written
 for one column first and extended with `min-width` media queries at the breakpoints. The
@@ -135,13 +149,16 @@ upright to sideways keeps the selected pin, any filter and anything typed (L2-03
 | Screen | Under the breakpoint | From the breakpoint |
 |--------|----------------------|---------------------|
 | Join | under 992 px: form above the globe, one column | 992 px: form beside the globe |
+| Sign In, Create Team (`AuthLayout`, block `auth`) | under 992 px: form above the globe, one column | 992 px: form beside the globe, each filling the height of the viewport |
+| Invite Needed, Left Team, Not Found (`NoticePage`) | one centred column at every width; the two actions stack on a phone | 576 px: wider side padding |
 | Globe | under 992 px: globe, then panel, one scrolling column; the heading is above the globe under 576 px and over its top corner from 576 px | 992 px: panel to the right of the globe, scrolling on its own |
 | Team | under 768 px: name, status, local time with city and offset, next moment | 768 px: `TeamTable` with all its columns |
 | Profile & Settings | under 992 px: the pin's card above the settings | 992 px: the pin's card beside the settings, kept in view |
 
 From 1200 px, text columns are capped in width and centred, and the Globe screen's globe grows
 to fill the space. The Team screen under 768 px hides columns with CSS; it does not render a
-second component. Each layout uses flexible tracks and `min-width: 0` on its children so that
+second component. The invite dialog and the two other dialogs are centred from 576 px and are
+a sheet from the bottom under it. Each layout uses flexible tracks and `min-width: 0` on its children so that
 nothing overflows sideways from 320 px upward.
 
 ## Requirements
@@ -152,7 +169,7 @@ level-1 (L1) requirement, cited by identifier.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-037` | `L1-012` | Each screen has a one-column layout on a phone and uses the width it is given on a tablet and a desktop. Nothing is cut off and the page never scrolls sideways, from 320 px wide upward. |
-| `L2-038` | `L1-012` | Globe, Team, Moments and Profile & Settings are reachable from every screen after joining. The header carries the lowercase wordmark **mondino**; on a phone it shows the mark without the wordmark. |
+| `L2-038` | `L1-012` | Globe (`/globe`), Team (`/team`), Moments (`/moments`) and Profile & Settings (`/profile`) are reachable from every screen after joining. The header carries the lowercase wordmark **mondino**; on a phone it shows the mark without the wordmark. Join (`/join/{inviteToken}`), Sign In (`/sign-in`), Create Team (`/new`), Left Team (`/left`) and the pages that say one thing carry the wordmark and no navigation. |
 
 ## Diagrams
 
@@ -174,8 +191,8 @@ session only.
 ### Components
 
 `app.routes.ts` runs `teammateGuard` to match a teammate screen and loads the screen's chunk.
-`TeamShell` provides `TeamStore` and renders `AppHeader` with the navigation links, the
-refresh banner and the toast around the four screens. `teammateGuard` and
+`TeamShell` provides `TeamStore` and renders `AppHeader` with the navigation links and
+"Invite teammate", the refresh banner and the toast around the four screens. `teammateGuard` and
 `sessionExpiredInterceptor` read or clear `TeamMembership`.
 
 ![C4 component view for adapting to every width](diagrams/c4-component.png)
@@ -200,7 +217,8 @@ reads its pins with the session cookie and shows them in the layout for the curr
 ### Behaviour — open a screen's address as a non-teammate
 
 With no membership on the device, `teammateGuard` refuses the match, the same address shows
-`InviteNeededPage` and no request reaches the `Mondino API` (L2-038). With a membership whose session is no longer valid,
+`InviteNeededPage`, with its ways on to Create Team and Sign In, and no request reaches the
+`Mondino API` (L2-038). With a membership whose session is no longer valid,
 the API answers 401 with no team data (L2-043), and `sessionExpiredInterceptor` forgets the
 membership and shows the same screen.
 

@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Make a team
+
+Person(person, "Person starting a team", "Chooses Create team")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Create Team screen, then the invite link and the Globe")
+  Container(api, "Mondino API", "ASP.NET Core", "Makes the team once and issues the session cookie")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams, teammates and their pins")
+}
+System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+System_Ext(weather, "Open-Meteo", "Weather")
+
+Rel(person, web, "Fills the form, copies the invite link", "HTTPS")
+Rel(web, api, "GET /api/countries, POST /api/postal-code-lookups, POST /api/city-searches, POST /api/teams", "JSON/HTTPS, email and postal code in the body")
+Rel(api, db, "Writes the team and its first teammate", "EF Core")
+Rel(api, postal, "Country and postal code only", "HTTPS, timeout, cached")
+Rel(api, weather, "The city's position only", "HTTPS, timeout, cached")
+@enduml

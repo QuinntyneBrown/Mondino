@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Reset the invite link
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "InviteDialog" as dialog
+  participant "HttpTeamApi" as client
+  participant "TeamStore" as store
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "TeamsController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "TeamScopeBehaviour" as scope
+  participant "ResetInviteLinkCommandHandler" as handler
+  participant "Team" as team
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "InviteTokens" as tokens
+  database "Mondino database" as db
+end box
+actor -> dialog : Choose "Reset link"
+dialog --> actor : What the dialog asks before it acts is TO SUPPLY
+dialog -> client : resetInviteLink(teamId)
+client -> controller : POST /api/teams/{teamId}/invite-link-resets, session cookie, antiforgery token
+controller -> scope : Send ResetInviteLinkCommand
+scope -> scope : The team is the current teammate's (L2-043)
+scope -> handler : Continue
+handler -> db : Load the team
+db --> handler : Team
+handler -> tokens : Create()
+tokens --> handler : New invite token
+handler -> team : ResetInviteToken(new token)
+handler -> db : Save changes
+db --> handler : Committed; the old token matches no team
+handler --> controller : InviteLinkDto
+controller --> client : 200 InviteLinkDto
+client --> dialog : InviteLink
+dialog -> store : replaceInviteToken(new token)
+dialog --> actor : The new invite link in the dialog (L2-055)
+note over controller, db
+  From the commit, GET /api/invites/{old token} answers 404 invite_not_found, and Join
+  shows "This invite link no longer works" (L2-055, L2-001).
+end note
+@enduml

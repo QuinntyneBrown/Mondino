@@ -17,7 +17,7 @@ Terms used below:
 - **globe library** — Angular library `@mondino/globe` that holds everything that draws the globe, imported dynamically and never part of the initial bundle
 - **scene** — the renderer, the Blender-built model, its textures and the render loop, behind one class
 - **placeholder** — element that holds the globe's box, at the globe's size, until the 3D globe has drawn its first frame
-- **still picture** — bundled image of the globe shown in the globe's place when WebGL is unavailable or the globe's assets fail to load
+- **still picture** — bundled picture of the globe, with the team's pins in place on it, shown in the globe's place when WebGL is unavailable or the globe's assets fail to load; it does not turn and is not dragged
 - **subsolar point** — position on the Earth where the sun is directly overhead at a given instant
 - **detail step** — one level of resolution and model detail at which the scene can be drawn
 - **low-power device** — device on which the globe sustains fewer than 30 frames a second (L2-046)
@@ -52,10 +52,29 @@ any other origin.
   globe moves nothing (L2-008). It is part of the page's own chunk, because it is shown before
   the globe library has arrived.
 - **`GlobeFallback`** (`mo-globe-fallback`) — presentation component that shows the still
-  picture, an image bundled with the app, in the same square box, with `role="img"` and the
-  name "A still picture of the globe". It needs neither WebGL, the renderer nor the `globe`
+  picture in the same square box: the mocks' `globe` block holding the picture
+  (`globe__art`, an SVG bundled with the app and coloured through the `--color-globe-*`
+  tokens) and, over it, the pins. It needs neither WebGL, the renderer nor the `globe`
   library, so it shows when that library's chunk fails to load as well as when the scene
-  cannot be drawn. No pin is drawn on it, it is not focusable and it has no list of pins.
+  cannot be drawn. Inputs: `placements` (`StillPlacement[]`), `descriptions`, `markers` and
+  `selectedId`; outputs: `select` and `selectGroup`. It takes the same pin and label
+  templates as `GlobeView`. Its pins are the list `PinLayer` would render,
+  `ul.globe__pins > li.globe__pin > button.pin`, each named by its description and carrying
+  `aria-pressed`. A pin lifts when it is pointed at, focused or selected, and selecting it
+  opens its panel, as on the 3D globe (`show-pins`). The block has `role="group"` and the name
+  "A still picture of the globe, with 13 teammates’ pins." (the team's count). The block itself
+  is not focusable and listens for no drag and no arrow key: the still picture does not turn.
+
+**In the `domain` library**
+
+- **`stillPlacements(pins, size, options)`** — pure function in `pins/`. It projects each
+  place at `STILL_ORIENTATION`, the one orientation the still picture is drawn at, drops the
+  places on the far side, groups the rest with `groupPins` (`show-pins`) and returns one
+  `StillPlacement` for each: the `PinPlacement`, its `x` and `y` as fractions of the box, and
+  the side its label sits on. The pins are therefore where the picture's land is, and pins
+  that would cover each other are one group pin, as on the 3D globe. `STILL_ORIENTATION` is
+  `<TO SUPPLY>`, with the picture. A teammate whose city is on the far side of the still
+  picture has no pin on it and is reached through the panel and the Team screen.
 
 **In the `globe` library**
 
@@ -66,7 +85,8 @@ any other origin.
   content projected into it, which `GlobePage` fills with a second `GlobePlaceholder`, so the
   same picture stays in the same box from the first paint to the first 3D frame. In `Fallback`
   it renders the fallback content projected into it, which the page fills with
-  `GlobeFallback`; the `globe` library depends on `api` only and imports neither component.
+  `GlobeFallback`, and renders neither the canvas nor `PinLayer`; the `globe` library depends
+  on `api` only and imports neither component.
   The canvas carries `aria-hidden="true"`; the text equivalent is `PinLayer`'s list of pins
   (L2-040).
 - **`GlobeScene`** — class that hides the renderer. Nothing outside it imports the renderer or
@@ -75,7 +95,12 @@ any other origin.
   `options.assetBaseUrl`, and resolves once the scene can draw. It rejects with a
   `GlobeUnavailableError` whose `reason` is `NoWebGL`, `AssetsFailed` or `ContextLost`. Its
   other methods are `resize`, `setSun`, `setDetail`, `setOrientation`, `project`, `onFrame`,
-  `start`, `stop` and `dispose`. Renderer: `<TO SUPPLY>`. Asset format: `<TO SUPPLY>`.
+  `start`, `stop`, `setPalette` and `dispose`. Renderer: `<TO SUPPLY>`. Asset format:
+  `<TO SUPPLY>`.
+- **`GlobePalette`** — the globe's colours as the scene needs them: ocean, deep ocean, land,
+  deep land, sand, ice, cloud, night and outline. `GlobeView` reads them from the
+  `--color-globe-*` tokens on its host with `getComputedStyle` and passes them to
+  `GlobeScene.setPalette`. The scene holds no colour of its own.
 - **`GlobeSceneOptions`** — `assetBaseUrl`, the starting `DetailStep`, and an `AbortSignal`
   that cancels the import and the fetches when the teammate leaves before they finish.
 - **`SunPosition`** — pure functions. `subsolarPoint(now)` returns the `Position` where the sun
@@ -102,13 +127,18 @@ any other origin.
 `GlobeView` starts the scene after its first render. On success it sizes the scene from a
 `ResizeObserver` on its host, sets the sun, starts the loop, and moves to `Ready` when the
 first frame has been drawn. On a `GlobeUnavailableError` it moves to `Fallback` and renders
-the projected `GlobeFallback` with no pins and no list of pins; the teammates stay reachable through the panel and the Team screen, which do
-not depend on the scene. A WebGL context lost while the globe is running is handled the same
-way. `GlobePage` reads `GlobeView`'s `state`, and in `Fallback`, or when the `@error` block is
-shown, it shows a notice
-(`globe-screen__notice`) in place of the legend: "This device can’t draw the 3D globe, so this
-is a still picture. Everyone is still here: in the panel, and on Team.", where "Team" links to
-the Team screen.
+the projected `GlobeFallback`. A WebGL context lost while the globe is running is handled the
+same way. `GlobePage` gives `GlobeFallback` the placements from `stillPlacements`, the
+descriptions, the markers and the selected teammate id, and handles its `select` and
+`selectGroup` as it handles `GlobeView`'s, so a pin on the still picture lifts and opens its
+panel. The picture stays as it is when a pin or a group pin is selected: nothing turns to it.
+
+`GlobePage` reads `GlobeView`'s `state`. In `Fallback`, or when the `@error` block is shown,
+the legend's last item reads "Still view — 3D isn’t available in this browser" in place of
+"Drag to spin"; "Night side", "Moment this week" and "Teammates close together" stay. Under
+576 px, where the legend is not shown, a line under the globe (`globe-screen__still`) reads
+"Still view — 3D isn’t available in this browser. Pins still open." Whether the still picture
+shades its night side from the clock or is drawn at one fixed hour is `<TO SUPPLY>`.
 
 The night side follows the clock. `GlobeView` runs one effect on the clock's minute tick that
 calls `SunPosition.subsolarPoint(clock.now())` and passes the result to `GlobeScene.setSun`.
@@ -118,13 +148,24 @@ The shading is a darkening of the surface, not a change to the pins: pins and la
 over the scene by `PinLayer` and keep their own contrast on both sides (L2-041). The legend
 that names "Night side" at 576 px and wider is part of `GlobePage`'s template.
 
+The globe's colours are tokens. The design system defines `--color-globe-ocean`,
+`--color-globe-ocean-deep`, `--color-globe-land`, `--color-globe-land-deep`,
+`--color-globe-sand`, `--color-globe-ice`, `--color-globe-cloud`, `--color-globe-night` and
+`--color-globe-outline` for the light theme and again for the dark theme. In dark the globe
+is the same picture a little deeper, with a light outline in place of the ink one. `GlobeView`
+reads the tokens when the scene starts and again when the theme changes, which it learns from
+a `matchMedia('(prefers-color-scheme: dark)')` listener, and passes the new `GlobePalette` to
+the scene; no colour is written in the `globe` library. The still picture and the placeholder
+are styled with the same tokens, so they follow the theme with no script. How the model's
+materials take the palette is `<TO SUPPLY>`, with the renderer.
+
 The assets are part of the build. The model, its textures and the still picture are emitted
 with content-hashed file names and served from the web app's own origin, so a repeat visit
 reads them from the browser's cache (L2-046). `GlobeScene` shall request nothing from any other
 origin.
 
 `GlobeView` releases everything it acquired when it is destroyed: it aborts pending loads,
-disconnects the `ResizeObserver`, and calls `GlobeScene.dispose()`, which stops the render
+disconnects the `ResizeObserver`, removes the colour scheme listener, and calls `GlobeScene.dispose()`, which stops the render
 loop and frees the renderer, the model, the textures and the WebGL context (L2-047). The
 clock effect ends with the component.
 
@@ -160,7 +201,8 @@ them.
 `GlobePage` shows `GlobePlaceholder` and loads `GlobeView` with a dynamic import. `GlobeView`
 creates the `GlobeScene`, feeds it the sun's position from `SunPosition` and the clock, reports
 frame times to `DetailLevel`, and shows the `GlobeFallback` the page projects when the scene
-is unavailable. `GlobePage` shows `GlobeFallback` itself when the globe library fails to load.
+is unavailable. `GlobePage` shows `GlobeFallback` itself when the globe library fails to load,
+and in both cases gives it the pins' placements from `stillPlacements`.
 
 ![C4 component view for drawing the globe](diagrams/c4-component.png)
 
@@ -168,7 +210,9 @@ is unavailable. `GlobePage` shows `GlobeFallback` itself when the globe library 
 
 `GlobeView` owns one `GlobeScene` and one `DetailLevel` and holds a `GlobeState`. `GlobeScene`
 is created from `GlobeSceneOptions` and rejects with a `GlobeUnavailableError`. `SunPosition`
-returns a `Position`, and `GlobeView` reads the time through the `Clock` contract.
+returns a `Position`, and `GlobeView` reads the time through the `Clock` contract and gives the
+scene a `GlobePalette`. `GlobeFallback` presents the `StillPlacement`s that `stillPlacements`
+returns.
 
 ![Class diagram for drawing the globe](diagrams/class-structure.png)
 
@@ -177,8 +221,8 @@ returns a `Position`, and `GlobeView` reads the time through the `Clock` contrac
 The placeholder is on screen before the globe library is requested. The scene then loads the
 renderer and the assets from the app's own origin. Without a WebGL context, or when the assets
 fail to load, `GlobeView` shows the still picture instead; when the globe library's chunk
-fails to load, `GlobePage` does. Leaving the screen disposes of the
-scene.
+fails to load, `GlobePage` does. The still picture keeps the team's pins, which lift and open
+their panels; it does not turn. Leaving the screen disposes of the scene.
 
 ![Sequence diagram for loading the globe with a placeholder and a still picture](diagrams/sequence-load-globe.png)
 

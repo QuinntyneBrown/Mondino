@@ -33,10 +33,12 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 participant "Postal code source" as source
 participant "Open-Meteo" as meteo
-actor -> field : Change the country or postal code, leave the field
-field -> store : changePostalCode(value), lookUp()
+actor -> field : Change the country or postal code
+field -> store : changePostalCode(value)
+actor -> field : Choose "Look up", beside the field
+field -> store : lookUp()
 store -> store : Clear the found city; lookupState = Locating; canSave = false
-field --> actor : "Finding M5V 2T6…"
+field --> actor : "Finding M5V 2T6 in Canada…"; "Look up" disabled and busy
 store -> client : lookUpPostalCode(teamId, countryCode, postalCode)
 client -> controller : POST /api/teams/{teamId}/me/postal-code-lookups (postal code in the body)
 controller -> controller : Authenticate the session; apply the lookup rate limit
@@ -70,7 +72,7 @@ controller --> client : 200 PostalCodeResultDto, or ProblemDetails with a code
 client --> store : PostalCodeResult or ApiError
 alt found
   store -> store : lookupState = Found; canSave = true
-  field --> actor : City and region, "your pin moves here when you save"; the small globe shows the pin there as new; saving is offered
+  field --> actor : "Toronto, Canada. Your pin moves here when you save."; the small globe shows the pin there as new; saving is offered
 else postal_code_not_found
   store -> store : lookupState = NotFound; canSave = false
   field --> actor : Alert of L2-004, ending "Your pin stays in Milan."; saving is not offered; the pin stays (L2-032)

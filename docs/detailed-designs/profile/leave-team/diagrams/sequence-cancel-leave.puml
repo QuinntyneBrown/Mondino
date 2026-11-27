@@ -23,13 +23,13 @@ end box
 box "Backend — Mondino API" #D1FADF
   participant "ProfileController" as controller
 end box
-actor -> page : Choose "Remove my pin and leave Northwind"
+actor -> page : Choose "Leave Northwind"
 page -> dialog : Open through CDK Dialog with the team's name
-dialog --> actor : "Leave Northwind?"; focus starts on "Cancel" and is trapped in the dialog
+dialog --> actor : "Leave Northwind?"; role alertdialog; focus starts on "Stay" and is trapped in the dialog
 alt Escape is pressed
   actor -> dialog : Escape
-else "Cancel" is chosen
-  actor -> dialog : Cancel
+else "Stay" is chosen
+  actor -> dialog : Stay
 end
 dialog --> page : Close
 page -> page : Focus returns to the button that opened the dialog (L2-036)

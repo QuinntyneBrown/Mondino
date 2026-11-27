@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/design-system/assets/logo/lockup-on-ink.svg">
+    <img src="docs/design-system/assets/logo/lockup.svg" alt="mondino" width="320">
+  </picture>
+</p>
+
 # Mondino
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)

@@ -3,8 +3,8 @@
 ## Goal
 
 In Profile & Settings the viewer chooses °C or °F, a 24-hour or 12-hour clock, which kinds of moment show on
-their globe, and what teammates see of them: "Share my local weather" and "Show when I'm outside working
-hours". Nothing applies until saved: a bar says "You have unsaved changes", then "Saved — your pin is up to
+their globe, and what teammates see of them: "Share my local weather" and "Share whether I’m working or
+asleep". Nothing applies until saved: a bar says "You have unsaved changes", then "Saved — your pin is up to
 date". Leaving with unsaved changes asks first.
 
 Journey 23 of `docs/journeys.md`. Requirements: L2-033, L2-034, L2-035 (`docs/specs/L2.md`).
@@ -89,7 +89,7 @@ Builds on: journeys 11, 13, 20 and 22.
 - Plan thin vertical slices, for example:
   1. Backend: the teammate's settings (unit, clock, kinds, the two sharing switches) saved through the API,
      defaults from the country at join; the backend applies sharing: no weather for a teammate who does not
-     share it, `ShowsStatusOutsideWorkingHours` false.
+     share it, `SharesStatus` false.
   2. Frontend: Display, `Segmented` as radio groups for Temperature and Clock; every screen follows the saved
      choice, on a later day too.
   3. The moment-kind switches and the Privacy switches (`role="switch"`), with the own-pin note when one is
@@ -119,8 +119,8 @@ Builds on: journeys 11, 13, 20 and 22.
 
 ## Done means
 - The nine mocks above are what the screen, bar and dialog show.
-- Another teammate's read carries no weather, and shows no status outside working hours, for a teammate who
-  turned them off.
+- Another teammate's read carries no weather, and shows no status at any hour, for a teammate who turned them
+  off.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.
 - The requirement, detailed design, mocks, tests and code agree.

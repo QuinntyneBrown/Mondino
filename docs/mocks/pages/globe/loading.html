@@ -30,20 +30,21 @@
 <main id="main" class="globe-screen">
   <section class="globe-screen__stage" aria-labelledby="globe-title">
     <div class="globe-screen__heading">
-      <h1 id="globe-title">Your team</h1>
-      <p class="globe-screen__counts tnum"><span class="skeleton skeleton--pill"></span></p>
+      <h1 id="globe-title"><span class="visually-hidden">Your team</span><span class="skeleton globe-loading__title"></span></h1>
+      <p class="globe-screen__counts tnum"><span class="skeleton globe-loading__counts"></span></p>
     </div>
     <div class="globe-screen__globe"><div class="globe-stage">
-  <div class="globe globe--placeholder" role="img" aria-label="The globe is loading">
-    <svg class="globe__art" viewBox="0 0 600 600" aria-hidden="true" focusable="false"><circle class="globe__ocean" cx="300" cy="300" r="252"/><circle class="globe__outline" cx="300" cy="300" r="252" stroke-width="2"/></svg>
-    <div class="globe__pins" aria-hidden="true"></div>
-  </div>
+  <span class="globe-loading__disc skeleton" role="img" aria-label="The globe is loading"></span>
     </div></div>
     
     
   </section>
   <aside class="globe-screen__panel" aria-label="Loading">
-  <div class="panel" aria-busy="true"><div class="stack"><span class="skeleton skeleton--h2"></span><span class="skeleton skeleton--text"></span><div class="skeleton-row"><span class="skeleton skeleton--avatar"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span><span class="skeleton skeleton--short"></span></div><span class="skeleton skeleton--num"></span></div><div class="skeleton-row"><span class="skeleton skeleton--avatar"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span><span class="skeleton skeleton--short"></span></div><span class="skeleton skeleton--num"></span></div><div class="skeleton-row"><span class="skeleton skeleton--avatar"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span><span class="skeleton skeleton--short"></span></div><span class="skeleton skeleton--num"></span></div><div class="skeleton-row"><span class="skeleton skeleton--avatar"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span><span class="skeleton skeleton--short"></span></div><span class="skeleton skeleton--num"></span></div><div class="skeleton-row"><span class="skeleton skeleton--avatar"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span><span class="skeleton skeleton--short"></span></div><span class="skeleton skeleton--num"></span></div></div><div class="stack"><span class="skeleton skeleton--h2"></span><div class="skeleton-row"><span class="skeleton skeleton--avatar-sm"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span></div><span class="skeleton skeleton--num"></span></div><div class="skeleton-row"><span class="skeleton skeleton--avatar-sm"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span></div><span class="skeleton skeleton--num"></span></div><div class="skeleton-row"><span class="skeleton skeleton--avatar-sm"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span></div><span class="skeleton skeleton--num"></span></div><div class="skeleton-row"><span class="skeleton skeleton--avatar-sm"></span><div class="skeleton-row__body"><span class="skeleton skeleton--mid"></span></div><span class="skeleton skeleton--num"></span></div></div></div>
+  <div class="panel globe-loading" aria-busy="true"><span class="skeleton globe-loading__heading"></span><span class="skeleton globe-loading__subheading"></span>
+<div class="globe-loading__row"><span class="skeleton skeleton--avatar"></span><div class="globe-loading__identity"><span class="skeleton globe-loading__name"></span><span class="skeleton globe-loading__detail"></span></div></div>
+<div class="globe-loading__row"><span class="skeleton skeleton--avatar"></span><div class="globe-loading__identity"><span class="skeleton globe-loading__name"></span><span class="skeleton globe-loading__detail"></span></div></div>
+<div class="globe-loading__row"><span class="skeleton skeleton--avatar"></span><div class="globe-loading__identity"><span class="skeleton globe-loading__name"></span><span class="skeleton globe-loading__detail"></span></div></div>
+<div class="globe-loading__row"><span class="skeleton skeleton--avatar"></span><div class="globe-loading__identity"><span class="skeleton globe-loading__name"></span><span class="skeleton globe-loading__detail"></span></div></div></div>
   </aside>
   <p class="visually-hidden" role="status" aria-live="polite">Loading your team…</p>
 </main>

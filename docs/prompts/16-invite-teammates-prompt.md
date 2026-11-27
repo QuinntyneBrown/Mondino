@@ -77,7 +77,7 @@ Builds on: journeys 6 and 15. Journey 15 builds `TeamShell`, `AppHeader`, the in
 - The design system, under `docs/design-system/components/`: `dialog.html`, `button.html`, `text-field.html`,
   `toast.html`, `app-header.html`, `card.html`, and the tokens in `docs/design-system/tokens/`. Components are
   named as there and keep the mocks' BEM classes.
-- `docs/detailed-designs/README.md` ("Contracts the features share", "Designed in the mocks, not here yet",
+- `docs/detailed-designs/README.md` ("Contracts the features share",
   "Not decided yet") and the neighbouring designs this builds on.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock and the requirement disagree anywhere in this scope, the mock is right: bring the requirement
@@ -85,42 +85,35 @@ Builds on: journeys 6 and 15. Journey 15 builds `TeamShell`, `AppHeader`, the in
   with `writing-html-mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Detailed design (`writing-software-design-documents`)
-- This feature has requirements and mocks and no detailed design yet. Write it in
-  `docs/detailed-designs/team/invite-teammates/`, in the house style of its neighbours: overview, parts, the
-  L2 requirements it realises, C4 context, container and component, a class diagram, and a sequence diagram
-  per behaviour. Cover `InviteDialog` as a CDK Dialog opened by `TeamShell` on `AppHeader`'s `invite` and by
-  Team's "Invite teammates", loaded lazily; focus on open and on close; the two toasts; and the sheet under
-  576 px. Bring the designs that still say "Invite teammate" copies the link
-  (`team/view-week-around-the-world`, `platform/adapt-to-every-width`, the root README) in line.
-- Render the diagrams with `python .claude/skills/writing-software-design-documents/scripts/render_puml.py
-  docs/detailed-designs`.
-- In `docs/detailed-designs/README.md`, move the feature from "Designed in the mocks, not here yet" into the
-  table of subsystems and features, add any contract other features share, and bring the neighbouring designs
-  it changes in line.
+- The design is `docs/detailed-designs/joining/invite-teammates/README.md`. Read it, its diagrams and the neighbouring
+  designs it names before any code.
+- Where the work shows the design to be wrong or incomplete, change it before the code, render its diagrams with
+  `python .claude/skills/writing-software-design-documents/scripts/render_puml.py docs/detailed-designs`, and
+  bring the neighbouring designs it changes in line.
 
 ## Phase 3: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- "Reset link" (L2-055) is drawn and not designed: what it asks before it acts, and what the dialog shows
-  afterwards (`docs/mocks/README.md`, open question 3). Do not build a control that does nothing. Leave "Reset
-  link" out of the built dialog, record that in the design's open questions and in `docs/mocks/README.md`, and
-  build only what L2-055's criteria state: a link that no longer works shows Join's "This invite link no
-  longer works", the same for a reset, a withdrawn and a mistyped link.
+- Resetting the invite link is not built before its design exists (L2-055): what "Reset link" asks before it
+  acts, and what the dialog shows while the reset is pending, when it fails and once it is done, are not drawn.
+  Do not build a control that does nothing. Leave "Reset link" out of the built dialog, record that in the
+  design's open points and in `docs/mocks/README.md`, and build only what already holds without it: Join's "This
+  invite link no longer works", with one answer for every unusable link (L2-001).
 
 ## Phase 4: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
   1. Frontend: `InviteDialog` (CDK Dialog, its chunk loaded on first open) from `AppHeader`'s "Invite
      teammate" on all four screens: the title with the team's name, the read-only link, the count line (L2-054
-     AC1, AC6).
+     AC1, AC9).
   2. Focus: starts on "Copy link", stays inside, Escape and "Close" return it to the opener (AC2).
   3. "Copy link": the dialog closes and the success toast shows for 4 seconds, pausing while pointed at or
-     focused (AC3); the same toast after "Copy" on the invite card (AC7).
+     focused (AC3, AC4); the same toast after "Copy" on the invite card (AC7).
   4. A refused copy: the dialog stays, the link is selected and focused, and the danger toast stays until
-     dismissed (AC4). The clipboard is a token in `api` with a fake in e2e.
-  5. Under 576 px: the header's icon button with its accessible name and 44 × 44 px target, and the dialog as
-     a sheet from the bottom (AC5).
-  6. "Invite teammates" on Team for a team of one opens the same dialog.
-  7. Join's unusable invite link reads as the mock does for a reset, withdrawn or mistyped link, with one
-     answer from the backend for all three (L2-055 AC1, AC2).
+     dismissed (AC5). The clipboard is a token in `api` with a fake in e2e.
+  5. Under 768 px the header's button is an icon with its accessible name and a 44 × 44 px target; under 576 px
+     the dialog is a sheet from the bottom (AC8).
+  6. "Invite teammates" on Team for a team of one opens the same dialog (AC6).
+  7. Join's unusable invite link reads as the mock does, with one answer from the backend for every unusable
+     link (L2-001).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page

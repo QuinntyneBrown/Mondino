@@ -75,7 +75,7 @@ session cookie, the guard and "You need an invite link".
 - The design system, under `docs/design-system/components/`: `logo.html`, `text-field.html`,
   `form-field.html`, `button.html`, `alert.html`, `link.html`, and the tokens in `docs/design-system/tokens/`.
   Components are named as there and keep the mocks' BEM classes.
-- `docs/detailed-designs/README.md` ("Contracts the features share", "Designed in the mocks, not here yet",
+- `docs/detailed-designs/README.md` ("Contracts the features share",
   "Not decided yet") and the neighbouring designs this builds on.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock and the requirement disagree anywhere in this scope, the mock is right: bring the requirement
@@ -83,50 +83,44 @@ session cookie, the guard and "You need an invite link".
   with `writing-html-mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Detailed design (`writing-software-design-documents`)
-- This feature has requirements and mocks and no detailed design yet. Write it in
-  `docs/detailed-designs/joining/sign-in/`, in the house style of its neighbours: overview, parts, the L2
-  requirements it realises, C4 context, container and component, a class diagram, and a sequence diagram per
-  behaviour. Cover the request for a link (the same answer for a known and an unknown email, in the same
-  time), the token (random, stored as a hash, single use, 15 minutes, read from `TimeProvider`),
-  `ISignInEmailSender` in `Mondino.Application` (it receives an address and a link and nothing else), the
-  endpoint that exchanges the token for a session, `SignInPage` and its states, and how the token leaves the
-  address bar.
-- Render the diagrams with `python .claude/skills/writing-software-design-documents/scripts/render_puml.py
-  docs/detailed-designs`.
-- In `docs/detailed-designs/README.md`, move the feature from "Designed in the mocks, not here yet" into the
-  table of subsystems and features, add any contract other features share, and bring the neighbouring designs
-  it changes in line.
+- The design is `docs/detailed-designs/joining/sign-in/README.md`. Read it, its diagrams and the neighbouring
+  designs it names before any code.
+- Where the work shows the design to be wrong or incomplete, change it before the code, render its diagrams with
+  `python .claude/skills/writing-software-design-documents/scripts/render_puml.py docs/detailed-designs`, and
+  bring the neighbouring designs it changes in line.
 
 ## Phase 3: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- The sender of sign-in emails (`<TO SUPPLY>` in `docs/detailed-designs/README.md`): choose a provider behind
+- The email source (`<TO SUPPLY>` in `docs/detailed-designs/README.md`): choose a provider behind
   `ISignInEmailSender`, with a timeout, and record it with its terms in an ADR. Document every setting a
   deployed system needs. Tests use a fake that records what it was asked to send.
-- Where the sign-in link points and how the token is kept out of the address shown, the history and the
-  `Referer` (for example a fragment or a `POST` exchange); record it in the design.
-- Not designed, and not built here (`docs/mocks/README.md`, open questions 1 and 2): what a sign-in link shows
-  once it has expired or been used, and how a teammate who joined by invite link and gave no email signs in
-  again. Until the mock exists, a link that does not work takes the person to Sign In's default state and says
-  nothing more; record that in the design's open questions.
+- Not designed, and not built here (L2-052, and "Not decided yet" in `docs/detailed-designs/README.md`): how a
+  teammate who joined by invite link and gave no email signs in again, what is shown when an emailed link has
+  expired or was already used and while one is being opened, which team is shown when one email is on more than
+  one team, the words of the email, and what Sign In shows for a 429 (L2-045). A link that has been used or has
+  expired signs no one in (L2-052 AC11).
 
 ## Phase 4: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
-  1. Backend: `POST /api/sign-in-links` (marked open; 5 a minute per client, 3 per email in 15 minutes):
-     validation; the same status and body for a known and an unknown email; a link is sent only to a known one
-     (L2-052 AC4, AC8). A direct test per row of the limits, advancing `FakeTimeProvider`.
-  2. Backend: the token: at least 128 bits, stored as a hash, single use, dead after 15 minutes (AC7).
-     `ISignInEmailSender` with its fake; the sender receives an address and a link and nothing else (AC9).
-  3. Backend: exchanging a token for a session, as journey 6's cookie; a used or expired token gives no
-     session and reveals nothing (AC6).
-  4. Frontend: the lazy route `/sign-in` with `SignInPage`: default, the invalid email on submit with focus
-     back on the field (AC1, AC2).
+  1. Backend: `POST /api/sign-in-links` (marked open): validation (L2-044 AC9); the same status and body for a
+     known and an unknown email (L2-043 AC9, L2-052 AC6); 5 requests in 15 minutes per client, then 429 with
+     `Retry-After`; past 3 for one email in 15 minutes, no mail and the same answer (L2-045 AC7, AC8). A direct
+     test per row of the limits, advancing `FakeTimeProvider`.
+  2. Backend: the token: at least 128 bits, stored as a hash, single use, dead after 15 minutes (L2-043 AC10).
+     `ISignInEmailSender` with its fake; the sender receives an address and a link and nothing else (L2-052
+     AC13).
+  3. Backend: `POST /api/sign-in-links/redemptions` (marked open, 10 openings a minute per client, L2-045 AC9):
+     a good token gives journey 6's session cookie; a used or expired one gives no session and reveals nothing;
+     an email on no team gets no session (L2-052 AC9 to AC12).
+  4. Frontend: the lazy route `/sign-in` with `SignInPage`: default with "Start a team", the invalid email on
+     submit with focus back on the field (AC1 to AC3).
   5. Frontend: submitting ("Sending link…", pressed once), sent ("Check your inbox", the email as text, focus
-     on the title, "Use another email") and error with "Try again", keeping the email (AC3, AC5).
+     on the title, "Use another email") and error with "Try again", keeping the email (AC4, AC5, AC7, AC8).
   6. Frontend: opening the link signs the teammate in and shows the Globe; the token is not in the address
-     shown afterwards, and the email is in no URL and no browser storage (AC6, AC10). An email on no team sees
-     "You need an invite link" with that email.
-  7. The links that lead here: "Sign in" on Join and Create Team, "Use a different email" on "You need an
-     invite link", "Sign in to another team" on "You’ve left".
+     shown afterwards, and the email is in no URL and no browser storage (AC9). An email on no team sees "You
+     need an invite link" with that email (AC10, L2-038 AC6).
+  7. The links that lead here: "Use a different email" on "You need an invite link", "Sign in" on Create Team,
+     and every other the mocks draw.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page

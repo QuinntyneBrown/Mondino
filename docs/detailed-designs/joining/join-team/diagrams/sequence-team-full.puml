@@ -45,6 +45,6 @@ handler --> controller : Refuse with team_full, nothing saved
 controller -> problems : Write the refusal
 problems --> client : 409 ProblemDetails, code team_full
 client --> store : ApiError team_full
-store --> page : joinState TeamFull, what was typed is kept
-page --> actor : Say the team is full, button disabled (L2-005)
+store --> page : inviteState Full
+page --> actor : "Northwind is full", in the form's place; no pins (L2-005)
 @enduml

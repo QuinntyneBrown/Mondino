@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teammate panel — Mondino design system</title>
-<meta name="description" content="A selected teammate, answered in one column: where they are, what time it is there, and what it is like.">
+<meta name="description" content="A selected teammate, answered in one column: where they are, what time it is there, and what it is like. A selected group pin, answered by city.">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../assets/components.css">
 <link rel="stylesheet" href="../assets/ds.css">
@@ -36,6 +36,7 @@
       <li><a href="../components/select.html">Select</a></li>
       <li><a href="../components/form-field.html">Form field</a></li>
       <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/copy-field.html">Copy field</a></li>
       <li><a href="../components/switch.html">Switch</a></li>
       <li><a href="../components/chip.html">Chip</a></li>
       <li><a href="../components/avatar.html">Avatar</a></li>
@@ -51,6 +52,8 @@
       <li><a href="../components/empty-state.html">Empty state</a></li>
       <li><a href="../components/skip-link.html">Skip link</a></li>
       <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/auth.html">Auth</a></li>
+      <li><a href="../components/notice-page.html">Notice page</a></li>
       <li><a href="../components/logo.html">Logo</a></li>
       <li><a href="../components/globe.html">Globe</a></li>
       <li><a href="../components/pin.html">Pin</a></li>
@@ -63,6 +66,7 @@
       <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
       <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
       <li><a href="../components/team-table.html">Team table</a></li>
+      <li><a href="../components/city-section.html">City section</a></li>
     </ul></details>
     <details open><summary>Patterns</summary><ul>
       <li><a href="../patterns/forms.html">Forms</a></li>
@@ -79,83 +83,143 @@
     <header class="ds-header">
       <p class="ds-kicker">Component · Mondino</p>
       <h1>Teammate panel</h1>
-      <p class="ds-lead">A selected teammate, answered in one column: where they are, what time it is there, and what it is like.</p>
+      <p class="ds-lead">A selected teammate, answered in one column: where they are, what time it is there, and what it is like. A selected group pin, answered by city.</p>
       <div class="ds-meta"><span class="ds-pill ds-pill--ok">WCAG 2.2 AA</span><span class="ds-pill">Status: stable</span><span class="ds-pill">Since v1.0</span></div>
       <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#anatomy">Anatomy</a></li><li><a href="#variants">Variants</a></li><li><a href="#sizes">Sizes</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#theming">Theming</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#tokens">Tokens</a></li><li><a href="#code">Code</a></li><li><a href="#sources">Sources</a></li></ul>
     </header>
 <section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
-<p>Selecting a pin opens that teammate in the panel: name, city and country, local time and day, offset from you, <a href="status.html">status</a>, weather, upcoming <a href="moment-card.html">moments</a> and the <a href="overlap-bar.html">overlap</a> of your working hours. Your own panel has “(you)” after the name and no offset or overlap.</p>
+<p>Selecting a pin opens that teammate in the panel: name, city and country, local time and day, offset from you, status, weather, upcoming moments and the overlap of your working hours. Your own panel has “(you)” after the name and no offset or overlap.</p><p>A teammate chooses what teammates see. With weather not shared the panel has no weather; with “Share whether I’m working or asleep” off it has no status and no working-hours overlap, at any hour. With both off, a private note takes their place and the panel still shows the local time and city.</p><p>Selecting a <a href="pin.html">group pin</a> opens the group instead: how many teammates are close together, then one block per city, largest first, with the city’s name and local time and its teammates as <a href="panel-row.html">panel rows</a>. Choosing one selects that teammate’s pin.</p>
 </section>
 
 <section class="ds-section" id="anatomy"><h2><a href="#anatomy">Anatomy</a></h2>
-<p>Its parts, in reading order:</p><div class="ds-anatomy"><figure class="ds-anatomy__figure" style="padding: var(--space-4);"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel">
-    <article class="person" aria-labelledby="person-name-308">
+<p>Its parts, in reading order:</p><div class="ds-anatomy"><figure class="ds-anatomy__figure" style="padding: var(--space-4);"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9000">
       <div class="person__head">
         <span class="avatar avatar--lg hue-11" aria-hidden="true">TH</span>
-        <p class="person__name" id="person-name-308" tabindex="-1">Tomás Herrera</p>
+        <p class="person__name" id="person-name-9000" tabindex="-1">Tomás Herrera</p>
         <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Tomás Herrera"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
       </div>
       <div>
         <p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Mexico City, Mexico</p>
         <p class="person__clock tnum">08:05</p>
-        <p class="person__day">Monday 27 Oct · <span class="tnum">7 h behind you</span></p>
+        <p class="person__day">Monday 27 Oct · <span class="tnum">7h behind you</span></p>
         <span class="status status--morning">Early morning</span>
       </div>
       <div class="person__weather"><svg class="icon icon--lg" role="img" aria-label="Partly cloudy" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg><div><p class="person__temp tnum">22°C</p><p class="person__sky">Partly cloudy in Mexico City</p></div></div>
       <div class="person__moments">
         <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg></span><div><p class="moment-card__kind">Holiday · In 5 days</p><p class="moment-card__title">Día de Muertos</p><p class="moment-card__detail">Ofrendas, marigolds and the big parade on Reforma</p></div></div>
+        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" role="img" aria-label="Sport" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span><div><p class="moment-card__kind">Sport · In 6 days</p><p class="moment-card__title">Clásico Nacional</p><p class="moment-card__detail">América vs. Chivas at the Azteca, 19:00 local</p></div></div>
       </div>
-      <section class="overlap" aria-labelledby="overlap-title-308">
-      <div class="overlap__head"><p class="overlap__title" id="overlap-title-308">Working-hours overlap</p><p class="overlap__when tnum">16:00–18:00 your time</p></div>
+      <section class="overlap" aria-labelledby="overlap-title-9000">
+      <div class="overlap__head"><p class="overlap__title" id="overlap-title-9000">Working-hours overlap</p><p class="overlap__when tnum">16:00–18:00 your time</p></div>
       <div class="overlap__track" aria-hidden="true"><span class="overlap__theirs" style="--from: 66.67%; --span: 33.33%"></span><span class="overlap__theirs" style="--from: 0.00%; --span: 4.17%"></span><span class="overlap__both" style="--from: 66.67%; --span: 8.33%"></span><span class="overlap__you" style="--from: 37.50%; --span: 37.50%"></span><span class="overlap__now" style="--from: 62.85%"></span></div>
       <ul class="overlap__scale tnum" aria-hidden="true"><li>00:00</li><li>06:00</li><li>12:00</li><li>18:00</li><li>00:00</li></ul>
       <ul class="overlap__legend" aria-hidden="true"><li><span class="swatch swatch--you"></span>You</li><li><span class="swatch swatch--theirs"></span>Tomás</li><li><span class="swatch swatch--both"></span>Both</li></ul>
       <p class="overlap__text tnum">You and Tomás share 2 hours of working hours: 16:00 to 18:00 on your clock.</p>
     </section>
-      <button class="btn btn--primary btn--block" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>Message Tomás</button>
-    </article>
-  </div></div></figure><ol class="ds-anatomy__list"><li><div><b>Avatar and name</b><small>Gabarito, 20 px</small></div></li><li><div><b>Close</b><small>Clears the selection</small></div></li><li><div><b>City and country</b><small>Never a postal code</small></div></li><li><div><b>Local time</b><small>Gabarito bold, 64 px, tabular</small></div></li><li><div><b>Day and offset</b><small>Their own day; “7 h behind you”</small></div></li><li><div><b>Status</b><small>In words</small></div></li><li><div><b>Weather</b><small>Icon, temperature with unit, the sky in words</small></div></li></ol></div>
+    </article></div></div></figure><ol class="ds-anatomy__list"><li><div><b>Avatar and name</b><small>Gabarito, 20 px</small></div></li><li><div><b>Close</b><small>Clears the selection</small></div></li><li><div><b>City and country</b><small>Never a postal code</small></div></li><li><div><b>Local time</b><small>Gabarito bold, 64 px, tabular</small></div></li><li><div><b>Day and offset</b><small>Their own day; “7h behind you”</small></div></li><li><div><b>Status</b><small>In words; absent when not shared</small></div></li><li><div><b>Weather</b><small>Icon, temperature with unit, the sky in words</small></div></li><li><div><b>Moments</b><small>A <a href="moment-card.html">moment card</a> for each one coming up</small></div></li><li><div><b>Working-hours overlap</b><small>The <a href="overlap-bar.html">overlap bar</a>; absent for you and when not shared</small></div></li></ol></div>
 </section>
 
 <section class="ds-section" id="variants"><h2><a href="#variants">Variants</a></h2>
-<div class="ds-example"><div class="ds-example__canvas"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel">
-    <article class="person" aria-labelledby="person-name-50">
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9001">
       <div class="person__head">
         <span class="avatar avatar--lg hue-9" aria-hidden="true">NW</span>
-        <p class="person__name" id="person-name-50" tabindex="-1">Noah Williams</p>
+        <p class="person__name" id="person-name-9001" tabindex="-1">Noah Williams</p>
         <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Noah Williams"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
       </div>
       <div>
         <p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Melbourne, Australia</p>
         <p class="person__clock tnum">01:05</p>
-        <p class="person__day">Tuesday 28 Oct · <span class="tnum">10 h ahead of you</span></p>
+        <p class="person__day">Tuesday 28 Oct · <span class="tnum">10h ahead of you</span></p>
         <span class="status status--asleep">Probably asleep</span>
       </div>
       <div class="person__weather"><svg class="icon icon--lg" role="img" aria-label="Windy" viewBox="0 0 24 24"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></svg><div><p class="person__temp tnum">18°C</p><p class="person__sky">Windy in Melbourne</p></div></div>
       <div class="person__moments">
         <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></span><div><p class="moment-card__kind">Sport · In 7 days</p><p class="moment-card__title">Melbourne Cup Day</p><p class="moment-card__detail">The race that stops a nation — public holiday</p></div></div>
       </div>
-      <section class="overlap" aria-labelledby="overlap-title-50">
-      <div class="overlap__head"><p class="overlap__title" id="overlap-title-50">Working-hours overlap</p><p class="overlap__when tnum">None today</p></div>
+      <section class="overlap" aria-labelledby="overlap-title-9001">
+      <div class="overlap__head"><p class="overlap__title" id="overlap-title-9001">Working-hours overlap</p><p class="overlap__when tnum">None today</p></div>
       <div class="overlap__track" aria-hidden="true"><span class="overlap__theirs" style="--from: 95.83%; --span: 4.17%"></span><span class="overlap__theirs" style="--from: 0.00%; --span: 33.33%"></span><span class="overlap__you" style="--from: 37.50%; --span: 37.50%"></span><span class="overlap__now" style="--from: 62.85%"></span></div>
       <ul class="overlap__scale tnum" aria-hidden="true"><li>00:00</li><li>06:00</li><li>12:00</li><li>18:00</li><li>00:00</li></ul>
       <ul class="overlap__legend" aria-hidden="true"><li><span class="swatch swatch--you"></span>You</li><li><span class="swatch swatch--theirs"></span>Noah</li><li><span class="swatch swatch--both"></span>Both</li></ul>
       <p class="overlap__text tnum">You and Noah share no working hours. Noah’s working day is 23:00 to 08:00 on your clock.</p>
     </section>
-      <button class="btn btn--primary btn--block" type="button"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>Message Noah</button>
-    </article>
-  </div></div></div><div class="ds-example__caption"><span>On the night side: Melbourne’s own day, the night form of the weather, and no shared working hours</span></div></div>
+    </article></div></div></div><div class="ds-example__caption"><span>On the night side: Melbourne’s own day, the night form of the weather, and no shared working hours</span></div></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9002">
+      <div class="person__head">
+        <span class="avatar avatar--lg hue-1" aria-hidden="true">SB</span>
+        <p class="person__name" id="person-name-9002" tabindex="-1">Sofia Bianchi <span class="person__you">(you)</span></p>
+        <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Sofia Bianchi"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
+      </div>
+      <div>
+        <p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Milan, Italy</p>
+        <p class="person__clock tnum">15:05</p>
+        <p class="person__day">Monday 27 Oct</p>
+        <span class="status status--working">Working hours</span>
+      </div>
+      <div class="person__weather"><svg class="icon icon--lg" role="img" aria-label="Foggy" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/></svg><div><p class="person__temp tnum">13°C</p><p class="person__sky">Foggy in Milan</p></div></div>
+      <div class="person__moments">
+        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg></span><div><p class="moment-card__kind">Formula 1 · 12 Nov</p><p class="moment-card__title">Monza tickets on sale</p><p class="moment-card__detail">Italian GP 2026 general sale opens at 10:00</p></div></div>
+      </div>
+      
+      
+    </article></div></div></div><div class="ds-example__caption"><span>Your own panel: “(you)”, and no offset or overlap</span></div></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><section aria-labelledby="group-title-9003">
+    <div class="panel__head panel__head--close"><div><p id="group-title-9003" tabindex="-1">2 teammates close together</p><p class="panel__lead">All in Milan · pick someone to see their pin</p></div><a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a></div>
+    <div class="panel__city"><p>Milan</p><span class="panel__city-time tnum">15:05</span></div>
+    <ul class="row-list"><li><a class="row" href="../../mocks/pages/globe/selected-self.html"><span class="avatar avatar--sm hue-1" aria-hidden="true">SB</span><span class="row__name"><strong>Sofia Bianchi</strong> (you)</span></a></li><li><a class="row" href="../../mocks/pages/globe/selected.html"><span class="avatar avatar--sm hue-13" aria-hidden="true">LF</span><span class="row__name"><strong>Luca Ferri</strong></span></a></li></ul>
+  </section></div></div></div><div class="ds-example__caption"><span>A group pin selected: the count, where they are, a close button, then a block per city with its local time and its teammates</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;div style=&quot;width: 100%; max-width: var(--layout-panel-width);&quot;&gt;&lt;div class=&quot;panel&quot;&gt;&lt;section aria-labelledby=&quot;group-title-9003&quot;&gt;
+    &lt;div class=&quot;panel__head panel__head--close&quot;&gt;&lt;div&gt;&lt;p id=&quot;group-title-9003&quot; tabindex=&quot;-1&quot;&gt;2 teammates close together&lt;/p&gt;&lt;p class=&quot;panel__lead&quot;&gt;All in Milan · pick someone to see their pin&lt;/p&gt;&lt;/div&gt;&lt;a class=&quot;btn btn--icon&quot; href=&quot;../../mocks/pages/globe/default.html&quot; aria-label=&quot;Close&quot;&gt;&lt;svg class=&quot;icon&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+    &lt;div class=&quot;panel__city&quot;&gt;&lt;p&gt;Milan&lt;/p&gt;&lt;span class=&quot;panel__city-time tnum&quot;&gt;15:05&lt;/span&gt;&lt;/div&gt;
+    &lt;ul class=&quot;row-list&quot;&gt;&lt;li&gt;&lt;a class=&quot;row&quot; href=&quot;../../mocks/pages/globe/selected-self.html&quot;&gt;&lt;span class=&quot;avatar avatar--sm hue-1&quot; aria-hidden=&quot;true&quot;&gt;SB&lt;/span&gt;&lt;span class=&quot;row__name&quot;&gt;&lt;strong&gt;Sofia Bianchi&lt;/strong&gt; (you)&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a class=&quot;row&quot; href=&quot;../../mocks/pages/globe/selected.html&quot;&gt;&lt;span class=&quot;avatar avatar--sm hue-13&quot; aria-hidden=&quot;true&quot;&gt;LF&lt;/span&gt;&lt;span class=&quot;row__name&quot;&gt;&lt;strong&gt;Luca Ferri&lt;/strong&gt;&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+  &lt;/section&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details></div>
 </section>
 
 <section class="ds-section" id="sizes" data-na="It has one size."><h2><a href="#sizes">Sizes</a></h2><p class="ds-na">It has one size.</p></section>
 
 <section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
-<div class="ds-matrix"><table><thead><tr><th scope="col">Variant</th><th scope="col">Shares everything</th><th scope="col">Weather unavailable</th><th scope="col">Shares neither</th></tr></thead><tbody><tr><th scope="row">Panel</th><td><span class="text-muted">Status, weather and temperature shown</span></td><td><span class="text-muted">“Weather is unavailable right now.” Local time and status still shown</span></td><td><span class="text-muted">Local time and day only; “doesn’t share local weather”; no status outside working hours</span></td></tr></tbody></table></div>
-<div class="ds-themes"><div data-theme="light"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel">
-    <article class="person" aria-labelledby="person-name-312">
+<div class="ds-matrix"><table><thead><tr><th scope="col">Variant</th><th scope="col">Shares everything</th><th scope="col">Weather unavailable</th><th scope="col">Shares neither</th></tr></thead><tbody><tr><th scope="row">Panel</th><td><span class="text-muted">Status, weather, temperature and the working-hours overlap shown</span></td><td><span class="text-muted">“Weather for Mexico City isn’t available right now. We’ll try again in a few minutes.” Local time, status and overlap still shown</span></td><td><span class="text-muted">Local time, day, offset and moments only, with the private note; no status, no weather and no working-hours overlap</span></td></tr></tbody></table></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9004">
+      <div class="person__head">
+        <span class="avatar avatar--lg hue-11" aria-hidden="true">TH</span>
+        <p class="person__name" id="person-name-9004" tabindex="-1">Tomás Herrera</p>
+        <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Tomás Herrera"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
+      </div>
+      <div>
+        <p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Mexico City, Mexico</p>
+        <p class="person__clock tnum">08:05</p>
+        <p class="person__day">Monday 27 Oct · <span class="tnum">7h behind you</span></p>
+        <span class="status status--morning">Early morning</span>
+      </div>
+      <div class="person__weather person__weather--note"><svg class="icon" role="img" aria-label="Weather unavailable" viewBox="0 0 24 24"><path d="m2 2 20 20"/><path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193"/><path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07"/></svg><p>Weather for Mexico City isn’t available right now. We’ll try again in a few minutes.</p></div>
+      <div class="person__moments">
+        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg></span><div><p class="moment-card__kind">Holiday · In 5 days</p><p class="moment-card__title">Día de Muertos</p><p class="moment-card__detail">Ofrendas, marigolds and the big parade on Reforma</p></div></div>
+        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" role="img" aria-label="Sport" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span><div><p class="moment-card__kind">Sport · In 6 days</p><p class="moment-card__title">Clásico Nacional</p><p class="moment-card__detail">América vs. Chivas at the Azteca, 19:00 local</p></div></div>
+      </div>
+      <section class="overlap" aria-labelledby="overlap-title-9004">
+      <div class="overlap__head"><p class="overlap__title" id="overlap-title-9004">Working-hours overlap</p><p class="overlap__when tnum">16:00–18:00 your time</p></div>
+      <div class="overlap__track" aria-hidden="true"><span class="overlap__theirs" style="--from: 66.67%; --span: 33.33%"></span><span class="overlap__theirs" style="--from: 0.00%; --span: 4.17%"></span><span class="overlap__both" style="--from: 66.67%; --span: 8.33%"></span><span class="overlap__you" style="--from: 37.50%; --span: 37.50%"></span><span class="overlap__now" style="--from: 62.85%"></span></div>
+      <ul class="overlap__scale tnum" aria-hidden="true"><li>00:00</li><li>06:00</li><li>12:00</li><li>18:00</li><li>00:00</li></ul>
+      <ul class="overlap__legend" aria-hidden="true"><li><span class="swatch swatch--you"></span>You</li><li><span class="swatch swatch--theirs"></span>Tomás</li><li><span class="swatch swatch--both"></span>Both</li></ul>
+      <p class="overlap__text tnum">You and Tomás share 2 hours of working hours: 16:00 to 18:00 on your clock.</p>
+    </section>
+    </article></div></div></div><div class="ds-example__caption"><span>Weather unavailable: a note in the weather’s place</span></div></div><div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9005">
+      <div class="person__head">
+        <span class="avatar avatar--lg hue-6" aria-hidden="true">AA</span>
+        <p class="person__name" id="person-name-9005" tabindex="-1">Ahmed Al-Sayed</p>
+        <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Ahmed Al-Sayed"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
+      </div>
+      <div>
+        <p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Dubai, United Arab Emirates</p>
+        <p class="person__clock tnum">18:05</p>
+        <p class="person__day">Monday 27 Oct · <span class="tnum">3h ahead of you</span></p>
+        
+      </div>
+      <p class="panel__note"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg><span>Ahmed keeps their weather and working hours private. You’ll still see their local time and city.</span></p>
+      <div class="person__moments">
+        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg></span><div><p class="moment-card__kind">Holiday · 2 Dec</p><p class="moment-card__title">UAE National Day</p><p class="moment-card__detail">Long weekend across the Emirates</p></div></div>
+        <div class="moment-card"><span class="emblem emblem--solid"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg></span><div><p class="moment-card__kind">Formula 1 · 7 Dec</p><p class="moment-card__title">Abu Dhabi Grand Prix</p><p class="moment-card__detail">Season finale at Yas Marina, 17:00 local</p></div></div>
+      </div>
+    </article></div></div></div><div class="ds-example__caption"><span>Shares neither: the private note</span></div></div><div class="ds-themes"><div data-theme="light"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9006">
       <div class="person__head">
         <span class="avatar avatar--lg hue-1" aria-hidden="true">SB</span>
-        <p class="person__name" id="person-name-312" tabindex="-1">Sofia Bianchi <span class="person__you">(you)</span></p>
+        <p class="person__name" id="person-name-9006" tabindex="-1">Sofia Bianchi <span class="person__you">(you)</span></p>
         <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Sofia Bianchi"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
       </div>
       <div>
@@ -170,12 +234,10 @@
       </div>
       
       
-    </article>
-  </div></div></div><div data-theme="dark"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel">
-    <article class="person" aria-labelledby="person-name-313">
+    </article></div></div></div><div data-theme="dark"><div style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel"><article class="person" aria-labelledby="person-name-9007">
       <div class="person__head">
         <span class="avatar avatar--lg hue-1" aria-hidden="true">SB</span>
-        <p class="person__name" id="person-name-313" tabindex="-1">Sofia Bianchi <span class="person__you">(you)</span></p>
+        <p class="person__name" id="person-name-9007" tabindex="-1">Sofia Bianchi <span class="person__you">(you)</span></p>
         <a class="btn btn--icon" href="../../mocks/pages/globe/default.html" aria-label="Close Sofia Bianchi"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
       </div>
       <div>
@@ -190,8 +252,7 @@
       </div>
       
       
-    </article>
-  </div></div></div></div>
+    </article></div></div></div></div>
 </section>
 
 <section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
@@ -203,23 +264,25 @@
 </section>
 
 <section class="ds-section" id="accessibility"><h2><a href="#accessibility">Accessibility</a></h2>
-<h3>Role and pattern</h3><p>An <code>&lt;article&gt;</code> named by the teammate’s name, inside an <code>&lt;aside&gt;</code>. Its change is announced once through a polite live region.</p>
-<h3>Keyboard</h3><div class="ds-table-wrap"><table class="ds-table ds-keys"><thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead><tbody><tr><td><kbd>Esc</kbd></td><td>Closes the panel and clears the selection</td></tr><tr><td><kbd>Tab</kbd></td><td>Close, then Message</td></tr></tbody></table></div>
-<h3>Focus</h3><p>Opened from the keyboard, focus moves to the name. On closing it returns to the pin.</p>
-<h3>Labelling</h3><p>The close button names the teammate: “Close Tomás Herrera”. The overlap is given as a sentence as well as a bar.</p>
+<h3>Role and pattern</h3><p>An <code>&lt;article&gt;</code> named by the teammate’s name, inside an <code>&lt;aside&gt;</code> named the same. Its change is announced once through a polite live region. A group is a <code>&lt;section&gt;</code> named by its heading (“2 teammates close together”), with a heading and a list of links for each city.</p>
+<h3>Keyboard</h3><div class="ds-table-wrap"><table class="ds-table ds-keys"><thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead><tbody><tr><td><kbd>Esc</kbd></td><td>Closes the panel and clears the selection, for a teammate and for a group</td></tr><tr><td><kbd>Tab</kbd></td><td>Close, then any links in the panel; in a group, Close, then each teammate</td></tr><tr><td><kbd>Enter</kbd></td><td>On a teammate in a group, selects their pin and opens their panel</td></tr></tbody></table></div>
+<h3>Focus</h3><p>Opened from the keyboard, focus moves to the name, or to the group’s heading. On closing it returns to the pin.</p>
+<h3>Labelling</h3><p>The close button names the teammate: “Close Tomás Herrera”; a group’s is “Close”. The overlap is given as a sentence as well as a bar. The private note is text beside an icon, not an icon alone.</p>
 <h3>Contrast</h3><div class="ds-pair"><span>Local time <code>--color-fg-default</code> on <code>--color-bg-surface</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-default|--color-bg-surface" data-min="4.5"></span></div>
 <div class="ds-pair"><span>Secondary text <code>--color-fg-muted</code> on <code>--color-bg-surface</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-muted|--color-bg-surface" data-min="4.5"></span></div>
+<div class="ds-pair"><span>Private note <code>--color-fg-muted</code> on <code>--color-bg-canvas</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-muted|--color-bg-canvas" data-min="4.5"></span></div>
+<div class="ds-pair"><span>City in a group <code>--color-fg-default</code> on <code>--color-bg-surface</code></span><span class="ds-pair__ratio" data-contrast="--color-fg-default|--color-bg-surface" data-min="4.5"></span></div>
 <h3>Motion</h3><p>One teammate fades to the next over <code>--duration-base</code>, 180 ms. No fade under reduced motion. The clock ticking over is not announced.</p>
 <h3>Touch</h3><p>The target is at least 44 × 44 px (<code>--target-comfortable</code>).</p>
 </section>
 
 <section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
-<p>Offset: “7 h behind you”, “4 h 30 min ahead of you”, “Same time as you”; never “0 hours” and never a sign. Weather: the temperature with its unit, then the sky and the city: “Partly cloudy in Mexico City”.</p>
+<p>Offset: “7h behind you”, “4h 30m ahead of you”, “same time as you”; never “0 hours” and never a sign. Weather: the temperature with its unit, then the sky and the city: “Partly cloudy in Mexico City”. Weather unavailable: “Weather for Mexico City isn’t available right now. We’ll try again in a few minutes.”</p><p>The private note names the teammate and says what is still shown: “Ahmed keeps their weather and working hours private. You’ll still see their local time and city.”</p><p>A group: “2 teammates close together”, then “All in Milan · pick someone to see their pin”, or for several cities “3 cities · pick someone to see their pin”.</p>
 </section>
 
 <section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
 <div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Mexico City, Mexico</p></div><figcaption>Show the city and country.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p class="person__place"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Mexico City, Mexico · 06700</p></div><figcaption>Show a postal code. It is the teammate’s own.</figcaption></figure></div>
-<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p class="person__day">Monday 27 Oct · <span class="tnum">7 h behind you</span></p></div><figcaption>Give the offset in words.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p class="person__day">Monday 27 Oct · <span class="tnum">−7h</span></p></div><figcaption>Give it as a signed number.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p class="person__day">Monday 27 Oct · <span class="tnum">7h behind you</span></p></div><figcaption>Give the offset in words.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p class="person__day">Monday 27 Oct · <span class="tnum">−7h</span></p></div><figcaption>Give it as a signed number.</figcaption></figure></div>
 </section>
 
 <section class="ds-section" id="tokens"><h2><a href="#tokens">Tokens</a></h2>
@@ -229,17 +292,22 @@
 <section class="ds-section" id="code"><h2><a href="#code">Code</a></h2>
 <pre><code>&lt;article class=&quot;person&quot; aria-labelledby=&quot;person-name&quot;&gt;
   &lt;div class=&quot;person__head&quot;&gt;&lt;span class=&quot;avatar avatar--lg hue-11&quot; aria-hidden=&quot;true&quot;&gt;TH&lt;/span&gt;&lt;h2 class=&quot;person__name&quot; id=&quot;person-name&quot; tabindex=&quot;-1&quot;&gt;Tomás Herrera&lt;/h2&gt;&lt;a class=&quot;btn btn--icon&quot; href=&quot;/globe&quot; aria-label=&quot;Close Tomás Herrera&quot;&gt;…&lt;/a&gt;&lt;/div&gt;
-  &lt;div&gt;&lt;p class=&quot;person__place&quot;&gt;Mexico City, Mexico&lt;/p&gt;&lt;p class=&quot;person__clock tnum&quot;&gt;08:05&lt;/p&gt;&lt;p class=&quot;person__day&quot;&gt;Monday 27 Oct · 7 h behind you&lt;/p&gt;&lt;span class=&quot;status&quot;&gt;Early morning&lt;/span&gt;&lt;/div&gt;
+  &lt;div&gt;&lt;p class=&quot;person__place&quot;&gt;Mexico City, Mexico&lt;/p&gt;&lt;p class=&quot;person__clock tnum&quot;&gt;08:05&lt;/p&gt;&lt;p class=&quot;person__day&quot;&gt;Monday 27 Oct · 7h behind you&lt;/p&gt;&lt;span class=&quot;status&quot;&gt;Early morning&lt;/span&gt;&lt;/div&gt;
   &lt;div class=&quot;person__weather&quot;&gt;…&lt;/div&gt;
   &lt;div class=&quot;person__moments&quot;&gt;…&lt;/div&gt;
-&lt;/article&gt;</code></pre>
-<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Class / attribute</th><th scope="col">Effect</th></tr></thead><tbody><tr><td><code>.person</code></td><td>The column.</td></tr><tr><td><code>.person__head</code></td><td>Avatar, name, close.</td></tr><tr><td><code>.person__place / __clock / __day</code></td><td>Where, the local time, the day and offset.</td></tr><tr><td><code>.person__weather / __temp / __sky</code></td><td>The weather block.</td></tr><tr><td><code>.person__you</code></td><td>“(you)”, quieter.</td></tr><tr><td><code>.person__note</code></td><td>A small note: not shared, unavailable.</td></tr></tbody></table></div>
+&lt;/article&gt;
+
+&lt;p class=&quot;panel__note&quot;&gt;&lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;span&gt;Ahmed keeps their weather and working hours private. You’ll still see their local time and city.&lt;/span&gt;&lt;/p&gt;
+
+&lt;div class=&quot;panel__head panel__head--close&quot;&gt;&lt;div&gt;&lt;h2 id=&quot;group-title&quot; tabindex=&quot;-1&quot;&gt;2 teammates close together&lt;/h2&gt;&lt;p class=&quot;panel__lead&quot;&gt;All in Milan · pick someone to see their pin&lt;/p&gt;&lt;/div&gt;&lt;a class=&quot;btn btn--icon&quot; href=&quot;../../pages/globe/default.html&quot; aria-label=&quot;Close&quot;&gt;&lt;svg class=&quot;icon&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;div class=&quot;panel__city&quot;&gt;&lt;h3&gt;Milan&lt;/h3&gt;&lt;span class=&quot;panel__city-time tnum&quot;&gt;15:05&lt;/span&gt;&lt;/div&gt;</code></pre>
+<div class="ds-table-wrap"><table class="ds-table"><thead><tr><th scope="col">Class / attribute</th><th scope="col">Effect</th></tr></thead><tbody><tr><td><code>.person</code></td><td>The column.</td></tr><tr><td><code>.person__head</code></td><td>Avatar, name, close.</td></tr><tr><td><code>.person__place / __clock / __day</code></td><td>Where, the local time, the day and offset.</td></tr><tr><td><code>.person__weather / __temp / __sky</code></td><td>The weather block.</td></tr><tr><td><code>.person__you</code></td><td>“(you)”, quieter.</td></tr><tr><td><code>.person__note</code></td><td>A small note: not shared, unavailable.</td></tr><tr><td><code>.person__weather--note</code></td><td>Weather unavailable: a note in the weather’s place.</td></tr><tr><td><code>.panel__note</code></td><td>A note on the canvas colour: the private note, and “Every kind of moment is switched off”.</td></tr><tr><td><code>.panel__head</code></td><td>A heading with something at its end.</td></tr><tr><td><code>.panel__head--close</code></td><td>A group’s heading and lead, with a close button.</td></tr><tr><td><code>.panel__count</code></td><td>A count beside a heading: “In working hours now”, 8.</td></tr><tr><td><code>.panel__city</code> / <code>.panel__city-time</code></td><td>A city in a group, and its local time.</td></tr></tbody></table></div>
 </section>
 
 <section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
 <p>Extracted from these mocks:</p>
-<ul><li><a href="../../mocks/pages/globe/selected.html">pages/globe/selected</a></li><li><a href="../../mocks/pages/globe/selected-self.html">pages/globe/selected-self</a></li><li><a href="../../mocks/pages/globe/selected-asleep.html">pages/globe/selected-asleep</a></li><li><a href="../../mocks/pages/globe/sharing-off.html">pages/globe/sharing-off</a></li><li><a href="../../mocks/pages/globe/weather-unavailable.html">pages/globe/weather-unavailable</a></li></ul>
-<p>Drift fixed during extraction: the prototype’s panel showed a role and a postal code. The role is gone, since Join asks for none, and the place is city and country only.</p>
+<ul><li><a href="../../mocks/pages/globe/selected.html">pages/globe/selected</a></li><li><a href="../../mocks/pages/globe/selected-self.html">pages/globe/selected-self</a></li><li><a href="../../mocks/pages/globe/selected-asleep.html">pages/globe/selected-asleep</a></li><li><a href="../../mocks/pages/globe/sharing-off.html">pages/globe/sharing-off</a> (the private note)</li><li><a href="../../mocks/pages/globe/weather-unavailable.html">pages/globe/weather-unavailable</a></li><li><a href="../../mocks/pages/globe/group.html">pages/globe/group</a> (a group pin selected)</li></ul>
+<p>Drift fixed during extraction: the prototype’s panel showed a role and a postal code. The role is gone, since Join asks for none, and the place is city and country only. The prototype’s “Message” button is not in the mocks and is not part of the panel.</p>
 </section>
     <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>
   </main>

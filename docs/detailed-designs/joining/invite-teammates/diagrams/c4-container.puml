@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Invite teammates
+
+Person(teammate, "Teammate", "Chooses Invite teammate")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "The invite dialog on every teammate screen; copies in the browser")
+  Container(api, "Mondino API", "ASP.NET Core", "Gives the team's invite token; replaces it on a reset")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams and their invite tokens")
+}
+
+Rel(teammate, web, "Copies or resets the invite link", "HTTPS")
+Rel(web, api, "GET /api/teams/{teamId}/pins; POST /api/teams/{teamId}/invite-link-resets", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads the team; writes the new invite token", "EF Core")
+@enduml

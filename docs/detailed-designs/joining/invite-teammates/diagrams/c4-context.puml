@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Invite teammates
+
+Person(teammate, "Teammate", "Any teammate of the team")
+Person(newcomer, "Person with an invite link", "Has been sent the team's invite link")
+System(mondino, "Mondino", "Shows the team's invite link to copy, and resets it")
+
+Rel(teammate, mondino, "Opens the invite dialog, copies the link, resets the link")
+Rel(teammate, newcomer, "Sends the invite link, outside Mondino")
+Rel(newcomer, mondino, "Opens the invite link and joins")
+@enduml

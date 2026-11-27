@@ -3,7 +3,7 @@
 LAYOUT_WITH_LEGEND()
 title Components — Place a pin from a postal code
 
-Container(web, "Mondino web app", "Angular", "JoinPage, JoinStore, PostalCodeField, HttpInviteApi, GlobeView")
+Container(web, "Mondino web app", "Angular", "JoinPage, JoinStore, PostalCodeField, CityField, HttpInviteApi, GlobeView")
 Container_Boundary(api, "Mondino API") {
   Component(ctrl, "InvitesController", "ASP.NET Core controller", "Open to an invite link's holder, rate limited")
   Component(handler, "LookUpPostalCodeQueryHandler", "MediatR handler", "Checks the format, finds the city, reads the weather")
@@ -11,13 +11,17 @@ Container_Boundary(api, "Mondino API") {
   Component(lookup, "CachedPostalCodeLookup", "IPostalCodeLookup decorator", "Cache, timeout and circuit breaker")
   Component(lookupClient, "PostalCodeLookupClient", "HTTP client", "Maps the source's answer to a City")
   Component(weather, "CachedWeatherSource", "IWeatherSource decorator", "Cache, timeout and circuit breaker over OpenMeteoWeatherSource")
+  Component(search, "SearchCitiesQueryHandler", "MediatR handler", "Searches the cities of a country while the lookup is down")
+  Component(directory, "BundledCityDirectory", "ICityDirectory", "Mondino's own data set of cities")
   ComponentDb(db, "Mondino database", "EF Core, IAppDbContext", "Invite tokens")
 }
 System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
 System_Ext(meteo, "Open-Meteo", "Weather")
 
-Rel(web, ctrl, "POST postal-code-lookups", "JSON/HTTPS")
+Rel(web, ctrl, "POST postal-code-lookups, POST city-searches", "JSON/HTTPS")
 Rel(ctrl, handler, "Sends LookUpPostalCodeQuery")
+Rel(ctrl, search, "Sends SearchCitiesQuery")
+Rel(search, directory, "Search(countryCode, text, max)")
 Rel(handler, db, "Checks the invite token", "EF Core")
 Rel(handler, formats, "Normalises and checks the form")
 Rel(handler, lookup, "FindCityAsync(postalCode)")

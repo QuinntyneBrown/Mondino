@@ -7,7 +7,7 @@ at each half hour of their day ("324 of 500 are in working hours right now"). Th
 person or city", and splits into one section per city from west to east, each with its count and local time. A
 search that matches no one says so and offers "Show everyone". A team of 40 or fewer is unchanged.
 
-Journey 18 of `docs/journeys.md`. Requirements: L2-056 (`docs/specs/L2.md`).
+Journey 18 of `docs/journeys.md`. Requirements: L2-056, and L2-027 criteria 8 to 10 (`docs/specs/L2.md`).
 
 Builds on: journey 17, which builds the Team screen, its day ribbon, its filter and its bounded rows for a
 team of 40 or fewer.
@@ -65,7 +65,8 @@ team of 40 or fewer.
 
 ## Phase 1: Read, and bring the docs in line
 - `docs/lessons-learned.md`: apply the lessons that fit (journey 1 creates it).
-- The requirements: L2-056 in `docs/specs/L2.md`, with every acceptance criterion, and the L1 each refines in
+- The requirements: L2-056 and L2-027 criteria 8 to 10 in `docs/specs/L2.md`, with every acceptance
+  criterion, and the L1 each refines in
   `docs/specs/L1.md`.
 - The mocks (the source of truth), under `docs/mocks/`: `pages/team/hundreds.html`,
   `pages/team/hundreds-no-match.html`, `pages/team/default.html`, `pages/team/no-results.html`,
@@ -75,7 +76,7 @@ team of 40 or fewer.
 - The design system, under `docs/design-system/components/`: `day-ribbon.html`, `team-table.html`,
   `text-field.html`, `segmented-control.html`, `empty-state.html`, `button.html`, and the tokens in
   `docs/design-system/tokens/`. Components are named as there and keep the mocks' BEM classes.
-- `docs/detailed-designs/README.md` ("Contracts the features share", "Designed in the mocks, not here yet",
+- `docs/detailed-designs/README.md` ("Contracts the features share",
   "Not decided yet") and the neighbouring designs this builds on.
 - The ADRs in `docs/adr/` for the areas this touches.
 - If the mock and the requirement disagree anywhere in this scope, the mock is right: bring the requirement
@@ -83,38 +84,33 @@ team of 40 or fewer.
   with `writing-html-mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Detailed design (`writing-software-design-documents`)
-- This feature has requirements and mocks and no detailed design yet. Write it in
-  `docs/detailed-designs/team/find-teammate-in-large-team/`, in the house style of its neighbours: overview,
-  parts, the L2 requirements it realises, C4 context, container and component, a class diagram, and a sequence
-  diagram per behaviour. Cover the threshold of 40, the half-hour counts and the grouping by city as pure
-  helpers in `domain` (`time/` and `pins/`) worked out from the injected clock, the search as a signal held by
-  the Team page, how sections and rows are windowed so the page holds a bounded number, and what the ribbon
-  says in words. Bring `team/view-team-through-the-day` in line.
-- Render the diagrams with `python .claude/skills/writing-software-design-documents/scripts/render_puml.py
-  docs/detailed-designs`.
-- In `docs/detailed-designs/README.md`, move the feature from "Designed in the mocks, not here yet" into the
-  table of subsystems and features, add any contract other features share, and bring the neighbouring designs
-  it changes in line.
+- The design is `docs/detailed-designs/team/view-team-through-the-day/README.md`. Read it, its diagrams and the neighbouring
+  designs it names before any code.
+- Where the work shows the design to be wrong or incomplete, change it before the code, render its diagrams with
+  `python .claude/skills/writing-software-design-documents/scripts/render_puml.py docs/detailed-designs`, and
+  bring the neighbouring designs it changes in line.
 
 ## Phase 3: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- How a section per city is windowed (a virtual scroll over sections and rows, or sections that render their
-  rows when near the viewport) so the rows in the page stay under a fixed limit; record the limit and the
-  choice in the design.
-- Whether a section starts open or closed for a team of 500, as the mock draws it; follow the mock.
+- The design bounds the rows without a virtual scroll: a closed city section holds none and an open one at most
+  50, with the first two sections open. Follow it and the mock.
+- Not designed (L2-056): the words that follow the first 50 teammates of a city. Settle the design's other
+  `<TO SUPPLY>` marks that this journey needs; draw any new screen state first.
 
 ## Phase 4: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
   1. `domain`: counts per half hour from pins and the clock, and the grouping by city from west to east;
      direct unit tests, one case per row, with a fake clock.
-  2. The ribbon as a bar chart past 40 teammates, with its sentence in words; a face per teammate at 40 or
-     fewer (L2-056 AC1, AC5).
-  3. A section per city with its count and local time, teammates under it, within the filter that is on (AC2).
-  4. The search: name or city, as typed, within the filter; matched in the browser, in no URL and no storage
-     (AC3, AC7).
-  5. No match: the live region, "Try another filter." and "Show everyone", which clears the search and returns
-     to All (AC4).
-  6. A team of 500 from a fixture: rows in the page stay under the limit while scrolling and searching (AC6).
+  2. The ribbon as a bar chart past 40 teammates, with its sentences in words; a face per teammate at 40 or
+     fewer (L2-027 AC8 to AC10).
+  3. The heading, the filter counts and the search field; a section per city west to east, the first two open,
+     each opened and closed by its button (L2-056 AC1 to AC4).
+  4. An open city lists at most 50 teammates, then says how many more it has (AC5).
+  5. The search: name or city, as typed, within the status filter; a city with no match is absent; the text is
+     data (AC6, AC8, AC10).
+  6. No match: "No one matches “Reykjavik”", "Try another filter." and "Show everyone", which clears the search
+     and returns to All (AC7).
+  7. A team of 500 from a fixture: rows in the page stay under the limit while scrolling and searching (AC9).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page

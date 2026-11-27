@@ -1,0 +1,40 @@
+@startuml
+title UML sequence behaviour — Copy the new team's invite link
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate who made the team" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "CreateTeamPage" as page
+  participant "CopyField" as field
+  participant "Clipboard (CDK)" as copier
+  participant "Toast" as toast
+end box
+actor -> field : Choose "Copy link"
+field -> page : copy
+page -> copier : copy(inviteLink)
+alt the browser accepts the copy
+  copier --> page : true
+  page -> field : copied = true
+  field --> actor : The button reads "Copied", with a tick
+else the browser refuses the copy
+  copier --> page : false
+  page -> field : select()
+  field --> actor : The link is selected and focused
+  page -> toast : Show the danger toast, which stays
+  toast --> actor : "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself."
+end
+actor -> page : Choose "Go to the globe"
+page --> actor : Navigate to /globe: the Globe of a team of one (L2-053)
+@enduml

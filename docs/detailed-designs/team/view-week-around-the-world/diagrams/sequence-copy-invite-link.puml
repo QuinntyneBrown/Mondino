@@ -20,7 +20,6 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "TeamStore" as store
   participant "inviteLinkFor" as fn
   participant "InviteCard" as card
-  participant "AppHeader" as header
   participant "TeamShell" as shell
   participant "InviteLinkCopier" as copier
   participant "Clipboard" as clip
@@ -34,26 +33,21 @@ page -> fn : inviteLinkFor(origin, inviteToken)
 fn --> page : origin + /join/{inviteToken}
 page -> card : inviteLink
 page --> actor : "Just you, for now", "Invite your team to fill the map", the invite link and "Copy"; no panel
-alt "Copy" on the invite card
-  actor -> card : Use "Copy"
-  card -> page : copy
-  page -> copier : copy()
-else "Invite teammate" in the header, on any of the four screens
-  actor -> header : Use "Invite teammate"
-  header -> shell : invite
-  shell -> copier : copy()
-end
+actor -> card : Use "Copy"
+card -> page : copy
+page -> copier : copy()
 copier -> clip : copy(inviteLink)
 alt the link is on the clipboard
   clip --> copier : true
   copier --> shell : result is Copied
-  shell -> toast : "Invite link copied", status region, 4 seconds
+  shell -> toast : "Invite link copied. Paste it wherever your team talks.",\nstatus region, 4 seconds
   toast --> actor : Confirmation announced to assistive technology (L2-025)
 else the browser refuses
   clip --> copier : false
   copier --> shell : result is Refused
-  shell -> toast : "Couldn’t copy the invite link", alert, until dismissed
-  toast --> actor : The failure announced; the link stays shown as selectable text (L2-025)
+  shell -> toast : "Couldn’t copy the link.", alert, until dismissed
+  page -> card : selectLink()
+  toast --> actor : The failure announced; the link in the card is selected (L2-025)
 end
 == A second teammate joins ==
 store -> store : Next load or refresh brings two pins (L2-048)

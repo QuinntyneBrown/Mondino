@@ -1,0 +1,137 @@
+@startuml
+set namespaceSeparator none
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure — Sign in with an emailed link
+
+package "mondino application" {
+  class SignInPage
+  class SignInStore {
+    +email: WritableSignal<string>
+    +state: Signal<SignInState>
+    +requestLink(): Promise<void>
+    +useAnotherEmail(): void
+    +open(signInToken: string): Promise<SignInResult | null>
+  }
+  enum SignInState {
+    Idle
+    Invalid
+    Sending
+    Sent
+    Failed
+    Opening
+    LinkUnusable
+  }
+}
+package "@mondino/domain" {
+  class TeamMembership {
+    +remember(membership: Membership): void
+  }
+}
+package "@mondino/api" {
+  interface SignInApi {
+    +requestLink(email: string, signal: AbortSignal): Promise<void>
+    +redeem(signInToken: string): Promise<SignInResult>
+  }
+  class HttpSignInApi
+  class SignInResult {
+    +membership: Membership | null
+    +email: string
+  }
+}
+package "Mondino.Api" {
+  class SignInController {
+    +RequestLink(body: SignInLinkRequest): Task<IActionResult>
+    +Redeem(body: SignInRedemptionRequest): Task<ActionResult<SignInResultDto>>
+  }
+}
+package "Mondino.Application" {
+  class RequestSignInLinkCommand {
+    +string Email
+  }
+  class RequestSignInLinkCommandValidator
+  class RequestSignInLinkCommandHandler {
+    +Handle(command: RequestSignInLinkCommand): Task
+  }
+  class RedeemSignInLinkCommand {
+    +string SignInToken
+  }
+  class RedeemSignInLinkCommandHandler {
+    +Handle(command: RedeemSignInLinkCommand): Task<SignInResultDto>
+  }
+  class SignInResultDto {
+    +Guid? TeamId
+    +Guid? TeammateId
+    +string? TeamName
+    +string Email
+  }
+  interface ISignInTokens {
+    +Create(): SignInToken
+    +Hash(token: string): string
+  }
+  interface ISignInEmailSender {
+    +SendAsync(email: EmailAddress, link: Uri, ct): Task<bool>
+  }
+  interface IAppDbContext
+}
+package "Mondino.Domain" {
+  class SignInLink {
+    +Guid Id
+    +string TokenHash
+    +EmailAddress Email
+    +DateTimeOffset ExpiresAt
+    +DateTimeOffset? UsedAt
+    +{static} TimeSpan Lifetime = 15 minutes
+    +TryUse(now: DateTimeOffset): bool
+  }
+  class EmailAddress {
+    +string Value
+    +{static} TryParse(text): EmailAddress?
+  }
+  class Teammate {
+    +Guid Id
+    +Guid TeamId
+    +EmailAddress? Email
+  }
+}
+package "Mondino.Infrastructure" {
+  class SignInTokens
+  class SignInEmailSender
+  class TeammateSessionHandler
+}
+
+SignInPage --> SignInStore
+SignInPage ..> TeamMembership : remembers the team after signing in
+SignInStore --> SignInState
+SignInStore ..> SignInApi : SIGN_IN_API
+HttpSignInApi ..|> SignInApi
+SignInApi ..> SignInResult
+SignInController ..> RequestSignInLinkCommand : sends
+SignInController ..> RedeemSignInLinkCommand : sends
+SignInController ..> TeammateSessionHandler : signs in through
+RequestSignInLinkCommandValidator ..> RequestSignInLinkCommand : validates
+RequestSignInLinkCommandHandler ..> RequestSignInLinkCommand : handles
+RequestSignInLinkCommandHandler ..> ISignInTokens
+RequestSignInLinkCommandHandler ..> ISignInEmailSender
+RequestSignInLinkCommandHandler ..> IAppDbContext
+RequestSignInLinkCommandHandler ..> SignInLink : creates
+RedeemSignInLinkCommandHandler ..> RedeemSignInLinkCommand : handles
+RedeemSignInLinkCommandHandler ..> ISignInTokens
+RedeemSignInLinkCommandHandler ..> IAppDbContext
+RedeemSignInLinkCommandHandler ..> SignInLink : uses once
+RedeemSignInLinkCommandHandler ..> Teammate : finds by email
+RedeemSignInLinkCommandHandler ..> SignInResultDto : returns
+SignInTokens ..|> ISignInTokens
+SignInEmailSender ..|> ISignInEmailSender
+SignInLink --> EmailAddress
+Teammate --> EmailAddress
+@enduml

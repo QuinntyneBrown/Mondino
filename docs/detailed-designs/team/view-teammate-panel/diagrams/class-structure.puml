@@ -16,7 +16,7 @@ class GlobePage <<mondino>> {
   -openedFromKeyboard: boolean
   +panel: Signal<TeammatePanelContent | null>
   +groupTeammateIds: WritableSignal<string[]>
-  +group: Signal<GroupRow[]>
+  +group: Signal<GroupContent | null>
   +onSelect(teammateId: string): void
   +onSelectGroup(teammateIds: string[]): void
   +onClosed(): void
@@ -35,7 +35,7 @@ class TeamStore <<domain pins/>> {
 
 class "teammatePanelView" as view <<function, domain pins/>> {
   +teammatePanelView(pin: Pin, viewer: Pin, now: Date, settings: Settings): TeammatePanelContent
-  +groupRows(pins: Pin[], teammateIds: string[], viewer: Pin, now: Date, settings: Settings): GroupRow[]
+  +groupCities(pins: Pin[], teammateIds: string[], now: Date, settings: Settings): GroupContent
   +firstName(name: string): string
 }
 
@@ -54,6 +54,7 @@ class TeammatePanelContent <<domain pins/>> {
   +status: Status | null
   +weather: Weather | null
   +weatherState: WeatherState
+  +keepsPrivate: boolean
   +moments: Moment[]
   +overlap: Overlap | null
   +theirDay: DaySpan | null
@@ -77,18 +78,28 @@ class OverlapText <<domain time/>> {
   +sentence: string
 }
 
+class GroupContent <<domain pins/>> {
+  +count: number
+  +lead: string
+  +cities: GroupCity[]
+}
+
+class GroupCity <<domain pins/>> {
+  +city: string
+  +localTime: string
+  +rows: GroupRow[]
+}
+
 class GroupRow <<domain pins/>> {
   +teammateId: string
   +name: string
   +initials: string
   +colour: string
   +isViewer: boolean
-  +city: string
-  +localTime: string
 }
 
 class GroupPanel <<components, mo-group-panel>> {
-  +rows: InputSignal<GroupRow[]>
+  +content: InputSignal<GroupContent>
   +teammateChosen: OutputEmitterRef<string>
   +closed: OutputEmitterRef<void>
   +focusHeading(): void
@@ -111,6 +122,7 @@ class OverlapBar <<components, mo-overlap-bar>> {
 class GlobeView <<globe, mo-globe>> {
   +pins: InputSignal<Pin[]>
   +selectedId: InputSignal<string | null>
+  +selectedGroupIds: InputSignal<string[]>
   +select: OutputEmitterRef<string>
   +selectGroup: OutputEmitterRef<string[]>
   +focusPin(teammateId: string): void
@@ -126,7 +138,7 @@ class Pin <<api>> {
   +timeZoneId: string
   +weather: Weather | null
   +weatherState: WeatherState
-  +showsStatusOutsideWorkingHours: boolean
+  +sharesStatus: boolean
   +moments: Moment[]
 }
 
@@ -146,8 +158,10 @@ TeammatePanelContent *-- Overlap
 TeammatePanelContent *-- DaySpan
 TeammatePanelContent *-- OverlapText
 GlobePage --> GroupPanel : renders for a group pin
-view ..> GroupRow : builds
-GroupPanel ..> GroupRow : presents
+view ..> GroupContent : builds
+GroupContent "1" *-- "1..*" GroupCity
+GroupCity "1" *-- "1..*" GroupRow
+GroupPanel ..> GroupContent : presents
 TeammatePanel ..> TeammatePanelContent : presents
 TeammatePanel --> OverlapBar : renders
 TeamStore "1" o-- "*" Pin

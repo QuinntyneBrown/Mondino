@@ -6,9 +6,9 @@ every later journey builds on the ones before it.
 
 Each journey realises the L2 requirements beside it ([`specs/L2.md`](specs/L2.md)), from its detailed
 design ([`detailed-designs/`](detailed-designs/)) and its mocks ([`mocks/`](mocks/), the source of truth).
-Journeys 5, 7, 16 and 18 were drawn in the mocks' second transcription; their requirements are written and
-each writes its own detailed design before any code. Journey 1 is scored against L2-038 criterion 6 (Not
-Found); the rest of L2-038 is journey 27's. Every requirement, L2-001 to L2-056, belongs to one journey.
+Journey 1 is scored against L2-038 criterion 7 (Not Found); the rest of L2-038 is journey 27's. Journey 18
+also builds the day ribbon's bar chart for a large team (L2-027 criteria 8 to 10). Every requirement, L2-001
+to L2-056, belongs to a journey.
 
 Effort is days for one intermediate developer.
 
@@ -31,7 +31,7 @@ Effort is days for one intermediate developer.
 | 15 | [View the week around the world](prompts/15-view-the-week-around-the-world-prompt.md) | See this week's moments, who is working, and team counts. | L2-024, L2-025 | 4 | 0 |
 | 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 0 |
 | 17 | [View the team through the day](prompts/17-view-the-team-through-the-day-prompt.md) | See everyone west to east on a day ribbon. | L2-026, L2-027, L2-028 | 6 | 0 |
-| 18 | [Find a teammate in a large team](prompts/18-find-a-teammate-in-a-large-team-prompt.md) | Search a team past 40, listed in a section per city. | L2-056 | 3 | 0 |
+| 18 | [Find a teammate in a large team](prompts/18-find-a-teammate-in-a-large-team-prompt.md) | Search a team past 40, listed in a section per city. | L2-027, L2-056 | 3 | 0 |
 | 19 | [Find moments](prompts/19-find-moments-prompt.md) | Holidays, races, events and sport found where teammates live. | L2-020 | 8 | 0 |
 | 20 | [Mark pins with moments](prompts/20-mark-pins-with-moments-prompt.md) | See a moment marker beside pins with moments this week. | L2-021, L2-022 | 4 | 0 |
 | 21 | [List moments](prompts/21-list-moments-prompt.md) | Browse upcoming moments by when and filter by kind. | L2-029, L2-030 | 4 | 0 |

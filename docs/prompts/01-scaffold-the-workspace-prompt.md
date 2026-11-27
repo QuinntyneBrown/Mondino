@@ -102,7 +102,7 @@ Journey 1 of `docs/journeys.md`. Requirements: L2-038 (`docs/specs/L2.md`).
      localhost or a page error; the page-object folder; behaviour specs as the default project, with the
      visual, responsive, accessibility and heap sweeps as separate projects that never run by default.
   4. First acceptance path: `**` shows `NotFoundPage` (lazy route) with `Logo`/`Wordmark`, the mock's copy and
-     its link (L2-038 AC6). Spec first, see it fail, then build the page and the components it needs.
+     its link (L2-038 AC7). Spec first, see it fail, then build the page and the components it needs.
   5. Backend solution in the four layers with MediatR, `IAppDbContext`, EF Core (InMemory for tests),
      ProblemDetails with a `code`, `TimeProvider`, and a test project with a `WebApplicationFactory` fixture
      (one InMemory store per fixture, fakes for outside sources, `FakeTimeProvider`). First acceptance test
