@@ -1,5 +1,5 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
-import { ApiError, SIGN_IN_API } from '@mondino/api';
+import { ApiError, SIGN_IN_API, type SignInResult } from '@mondino/api';
 import { isEmailAddress } from '@mondino/domain';
 import type { SignInState } from './sign-in-state';
 
@@ -48,6 +48,25 @@ export class SignInStore {
       if (request.signal.aborted) return;
       this.state.set({ kind: 'Failed' });
       if (!(error instanceof ApiError)) throw error;
+    } finally {
+      if (this.pending === request) this.pending = null;
+    }
+  }
+
+  /**
+   * Opens an emailed link by its token. A refusal (used, expired, unknown, too often) or no answer
+   * is `LinkUnusable` and gives null: it signs no one in.
+   */
+  async open(signInToken: string): Promise<SignInResult | null> {
+    this.state.set({ kind: 'Opening' });
+    const request = (this.pending = new AbortController());
+    try {
+      return await this.api.redeem(signInToken, request.signal);
+    } catch (error) {
+      if (request.signal.aborted) return null;
+      this.state.set({ kind: 'LinkUnusable' });
+      if (!(error instanceof ApiError)) throw error;
+      return null;
     } finally {
       if (this.pending === request) this.pending = null;
     }
