@@ -85,10 +85,10 @@ with the *Mondino Brand* prototype (*Logo & Wordmark*) beside it.
 - **Wordmark:** lowercase **mondino**, set in Gabarito.
 - **Mark:** a little world: a globe with one meridian and one parallel, and a single pin resting
   on its rim.
-- **Look:** paper and ink carry the interface: a warm paper canvas and deep navy ink. Pin
-  (orange-red) marks people, sun (yellow) marks moments, leaf (green) marks working hours and
-  sea (navy) is the globe. Gabarito for the wordmark, names and clocks; Inter for everything
-  that is read.
+- **Look:** paper and ink carry the interface: a lavender paper canvas and deep indigo ink. Pin
+  (violet) marks people, sun (yellow) marks moments, leaf (teal) marks working hours and sea
+  (deep indigo) is the brand's colour; the globe has colours of its own. Gabarito for the
+  wordmark, names and clocks; Inter for everything that is read.
 - **Phone:** one column; Globe puts the globe on top and the panel under it.
 - **Tablet and desktop:** the Join form sits beside the globe, the panel to the right of the
   globe, Team is a table, and your pin sits beside your settings.
