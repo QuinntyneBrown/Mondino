@@ -1,3 +1,4 @@
+using Mondino.Infrastructure.OutsideSources;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -26,6 +27,7 @@ internal static class MondinoTelemetry
             {
                 // No exception events: a span's events cannot be removed once added.
                 tracing
+                    .AddSource(SourceTelemetry.Name)
                     .AddAspNetCoreInstrumentation(options => options.RecordException = false)
                     .AddHttpClientInstrumentation(options => options.RecordException = false)
                     .AddProcessor(new SpanRedaction());
@@ -37,6 +39,7 @@ internal static class MondinoTelemetry
             .WithMetrics(metrics =>
             {
                 metrics
+                    .AddMeter(SourceTelemetry.Name)
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddView(_ => new MetricStreamConfiguration { TagKeys = [.. TelemetryRedaction.AllowedMetricTags] });

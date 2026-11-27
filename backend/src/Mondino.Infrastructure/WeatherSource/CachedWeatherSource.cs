@@ -12,10 +12,11 @@ namespace Mondino.Infrastructure.WeatherSource;
 /// one call, and none is queued. While the source fails, times out or its breaker is open, the
 /// city's last good answer is given if it was read under 3 hours ago, and otherwise none (L2-049).
 /// A caller whose token is cancelled stops waiting; the call goes on for the others. At most
-/// 10,000 cities are held.
+/// 10,000 cities are held. Each call, and each read left alone, is recorded by
+/// <see cref="SourceTelemetry"/> as <c>weather</c> (docs/adr/0031).
 /// </summary>
 internal sealed class CachedWeatherSource(
-    OpenMeteoWeatherSource source, IOptions<OutsideSourceOptions> options, TimeProvider time) : IWeatherSource
+    OpenMeteoWeatherSource source, IOptions<OutsideSourceOptions> options, TimeProvider time, SourceTelemetry telemetry) : IWeatherSource
 {
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan FreshFor = TimeSpan.FromMinutes(15);
@@ -42,6 +43,7 @@ internal sealed class CachedWeatherSource(
 
             if (breaker.IsOpen)
             {
+                telemetry.LeftAlone(SourceTelemetry.Weather);
                 return Task.FromResult(Older(entry, now));
             }
 
@@ -65,17 +67,25 @@ internal sealed class CachedWeatherSource(
     private async Task ReadAsync(Position key, TaskCompletionSource<Weather?> pending)
     {
         Weather? weather = null;
+        var call = telemetry.Start(SourceTelemetry.Weather);
         try
         {
             using var timeout = new CancellationTokenSource(Timeout, time);
             try
             {
                 weather = await source.GetCurrentAsync(key, timeout.Token);
+                call.End(weather is null ? SourceOutcome.Failure : SourceOutcome.Success);
             }
             catch (OperationCanceledException) when (timeout.IsCancellationRequested)
             {
+                call.End(SourceOutcome.Timeout);
                 weather = null;
             }
+        }
+        catch
+        {
+            call.End(SourceOutcome.Failure);
+            throw;
         }
         finally
         {

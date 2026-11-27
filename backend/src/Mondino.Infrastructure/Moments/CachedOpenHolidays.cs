@@ -9,10 +9,11 @@ namespace Mondino.Infrastructure.Moments;
 /// (docs/adr/0019, docs/adr/0026). A country's year is fresh 24 hours; concurrent reads of one
 /// share one call, and none is queued. While the source fails, times out or its breaker is open,
 /// the last year it gave is given, whatever its age, and otherwise nothing. At most 1,000 years
-/// are held; one goes only for room, the one read longest ago first.
+/// are held; one goes only for room, the one read longest ago first. Each call, and each read
+/// left alone, is recorded by <see cref="SourceTelemetry"/> as <c>holiday_calendar</c> (docs/adr/0031).
 /// </summary>
 internal sealed class CachedOpenHolidays(
-    OpenHolidaysCalendar source, IOptions<OutsideSourceOptions> options, TimeProvider time)
+    OpenHolidaysCalendar source, IOptions<OutsideSourceOptions> options, TimeProvider time, SourceTelemetry telemetry)
 {
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan FreshFor = TimeSpan.FromHours(24);
@@ -44,6 +45,7 @@ internal sealed class CachedOpenHolidays(
 
             if (breaker.IsOpen)
             {
+                telemetry.LeftAlone(SourceTelemetry.HolidayCalendar);
                 return Task.FromResult(entry?.Kept ?? Nothing);
             }
 
@@ -67,17 +69,25 @@ internal sealed class CachedOpenHolidays(
     private async Task ReadAsync((string Country, int Year) key, TaskCompletionSource<IReadOnlyList<CalendarEntry>> pending)
     {
         IReadOnlyList<CalendarEntry>? entries = null;
+        var call = telemetry.Start(SourceTelemetry.HolidayCalendar);
         try
         {
             using var timeout = new CancellationTokenSource(Timeout, time);
             try
             {
                 entries = await source.YearAsync(key.Country, key.Year, timeout.Token);
+                call.End(entries is null ? SourceOutcome.Failure : SourceOutcome.Success);
             }
             catch (OperationCanceledException) when (timeout.IsCancellationRequested)
             {
+                call.End(SourceOutcome.Timeout);
                 entries = null;
             }
+        }
+        catch
+        {
+            call.End(SourceOutcome.Failure);
+            throw;
         }
         finally
         {

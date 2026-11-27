@@ -10,13 +10,15 @@ namespace Mondino.Infrastructure.SignIn;
 /// The Email source: Postmark's HTTP API (docs/adr/0011). It is given the address and the link and
 /// nothing else (L2-050), as plain text, with open and link tracking off so the link is never
 /// rewritten through Postmark's domain. A call has 5 seconds; after 5 failures in a row the breaker
-/// opens for 30 seconds (<c>OutsideSources:*</c>, docs/adr/0026) and nothing is sent. Its client logs nothing: its body carries the link.
+/// opens for 30 seconds (<c>OutsideSources:*</c>, docs/adr/0026) and nothing is sent. Each call, and
+/// each mail left alone, is recorded by <see cref="SourceTelemetry"/> as <c>email</c> (docs/adr/0031). Its client logs nothing: its body carries the link.
 /// </summary>
 internal sealed class PostmarkSignInEmailSender(
     IHttpClientFactory clients,
     IOptions<SignInEmailOptions> options,
     IOptions<OutsideSourceOptions> breakerOptions,
-    TimeProvider time) : ISignInEmailSender
+    TimeProvider time,
+    SourceTelemetry telemetry) : ISignInEmailSender
 {
     public const string ClientName = "email-source";
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
@@ -39,10 +41,13 @@ internal sealed class PostmarkSignInEmailSender(
 
         if (breaker.IsOpen)
         {
+            telemetry.LeftAlone(SourceTelemetry.Email);
             return false;
         }
 
         var accepted = false;
+        var outcome = SourceOutcome.Failure;
+        var call = telemetry.Start(SourceTelemetry.Email);
         using (var timeout = new CancellationTokenSource(Timeout, time))
         using (var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token))
         {
@@ -64,14 +69,20 @@ internal sealed class PostmarkSignInEmailSender(
                 request.Headers.Add("Accept", "application/json");
                 using var response = await clients.CreateClient(ClientName).SendAsync(request, linked.Token);
                 accepted = response.IsSuccessStatusCode;
+                outcome = accepted ? SourceOutcome.Success : SourceOutcome.Failure;
             }
             catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
                 accepted = false;
+                outcome = SourceOutcome.Timeout;
             }
             catch (HttpRequestException)
             {
                 accepted = false;
+            }
+            finally
+            {
+                call.End(outcome);
             }
         }
 
