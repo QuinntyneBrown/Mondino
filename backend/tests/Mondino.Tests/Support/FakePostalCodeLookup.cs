@@ -51,5 +51,7 @@ public static class KnownCities
 {
     public static readonly KnownCity Milan = new("3173435", "Milan", "Lombardy", "IT", 45.46427, 9.18951, "Europe/Rome", 1371498);
     public static readonly KnownCity Mississauga = new("6075357", "Mississauga", "Ontario", "CA", 43.5789, -79.6583, "America/Toronto", 717961);
+    public static readonly KnownCity Ottawa = new("6094817", "Ottawa", "Ontario", "CA", 45.41117, -75.69812, "America/Toronto", 812129);
+    public static readonly KnownCity Rome = new("3169070", "Rome", "Lazio", "IT", 41.89193, 12.51133, "Europe/Rome", 2318895);
     public static readonly KnownCity Toronto = new("6167865", "Toronto", "Ontario", "CA", 43.65333, -79.38389, "America/Toronto", 2794356);
 }

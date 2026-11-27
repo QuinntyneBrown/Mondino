@@ -52,6 +52,22 @@ public static class Sessions
         return await SessionOfAsync(response);
     }
 
+    /// <summary>Joins Northwind (seeded) through its invite link from a postal code of <paramref name="city"/>, as <paramref name="name"/>.</summary>
+    public static async Task<Session> JoinNorthwindFromAsync(
+        this MondinoApi api, HttpClient client, string name, string countryCode, string postalCode, Application.Cities.KnownCity city)
+    {
+        api.PostalCodes.Knows(countryCode, postalCode, city);
+        using var response = await client.PostAsJsonAsync("/api/invites/northwind-7Kq2/teammates", new
+        {
+            name,
+            countryCode,
+            postalCode,
+            joinRequestId = Guid.NewGuid(),
+        });
+        response.EnsureSuccessStatusCode();
+        return await SessionOfAsync(response);
+    }
+
     /// <summary>Makes a team named <paramref name="teamName"/> from M5V 2T6 in Canada, so its maker is in Toronto.</summary>
     public static async Task<Session> MakeTeamAsync(
         this MondinoApi api, HttpClient client, string teamName = "Southwind", string email = "liam@southwind.co")

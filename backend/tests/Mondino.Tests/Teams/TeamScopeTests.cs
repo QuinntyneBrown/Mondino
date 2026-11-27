@@ -60,6 +60,7 @@ public sealed class TeamScopeTests
     [Theory]
     [InlineData("pins")]
     [InlineData("me")]
+    [InlineData("moments")]
     public async Task A_teammate_of_another_team_is_answered_404_as_for_a_team_that_does_not_exist(string what)
     {
         // Given Sofia in Northwind, and Liam who made Southwind

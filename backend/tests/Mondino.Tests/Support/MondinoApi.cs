@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Mondino.Application.Joining;
+using Mondino.Application.Moments;
 using Mondino.Application.Persistence;
 using Mondino.Application.SignIn;
 using Mondino.Application.Teammates;
@@ -57,6 +58,9 @@ public class MondinoApi : WebApplicationFactory<Program>
     public FakeOpenMeteo OpenMeteo { get; } = new();
 
     public bool UsesWeatherSource { get; set; }
+
+    /// <summary>The holiday, race and event calendars, answering as the test tells them: nothing, until told.</summary>
+    public FakeCalendars Calendars { get; } = new();
 
     /// <summary>Set before the first request to serve <c>TestApp</c>, a stand-in for the Angular build, as wwwroot.</summary>
     public bool ServesApp { get; set; }
@@ -173,6 +177,13 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.RemoveAll<IWeatherSource>();
                 services.AddSingleton<IWeatherSource>(Weather);
             }
+
+            services.RemoveAll<IHolidayCalendar>();
+            services.RemoveAll<IRaceCalendar>();
+            services.RemoveAll<IEventCalendar>();
+            services.AddSingleton<IHolidayCalendar>(Calendars);
+            services.AddSingleton<IRaceCalendar>(Calendars);
+            services.AddSingleton<IEventCalendar>(Calendars);
 
             if (UsesEmailSource)
             {

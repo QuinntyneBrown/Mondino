@@ -3,11 +3,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Mondino.Application.Cities;
 using Mondino.Application.Joining;
+using Mondino.Application.Moments;
 using Mondino.Application.Persistence;
 using Mondino.Application.SignIn;
 using Mondino.Application.Teammates;
 using Mondino.Application.Teams;
 using Mondino.Infrastructure.Cities;
+using Mondino.Infrastructure.Moments;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.Persistence.Seeds;
 using Mondino.Infrastructure.PostalCodes;
@@ -75,6 +77,12 @@ public static class DependencyInjection
             .RemoveAllLoggers();
         services.AddSingleton<OpenMeteoWeatherSource>();
         services.AddSingleton<IWeatherSource, CachedWeatherSource>();
+
+        // The calendars moments are found in (docs/adr/0019).
+        services.AddSingleton<NoCalendars>();
+        services.AddSingleton<IHolidayCalendar>(provider => provider.GetRequiredService<NoCalendars>());
+        services.AddSingleton<IRaceCalendar>(provider => provider.GetRequiredService<NoCalendars>());
+        services.AddSingleton<IEventCalendar>(provider => provider.GetRequiredService<NoCalendars>());
 
         // A new team's invite token, and the keyed fingerprint its maker's email is kept as
         // (<c>EmailProtection:Key</c>, docs/adr/0009).
