@@ -27,6 +27,7 @@
         "found",
         "not-found",
         "lookup-unavailable",
+        "choosing-city",
         "invalid",
         "submitting",
         "join-failed",
