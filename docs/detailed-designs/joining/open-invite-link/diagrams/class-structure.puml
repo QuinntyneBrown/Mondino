@@ -27,13 +27,13 @@ package "mondino application" {
     Ready
     AlreadyJoined
     NotFound
-    Full
+    Full, with join-team
     Failed
   }
 }
 package "@mondino/api" {
   interface InviteApi {
-    +getInvite(inviteToken: string): Promise<Invite>
+    +getInvite(inviteToken: string, signal: AbortSignal): Promise<Invite>
   }
   class HttpInviteApi
   class Invite {
@@ -42,7 +42,7 @@ package "@mondino/api" {
     +positions: Position[]
     +avatars: InviteAvatar[]
     +alreadyJoined: boolean
-    +full: boolean
+    +full: boolean, with join-team
     +countries: Country[]
   }
   class InviteAvatar {
@@ -71,7 +71,7 @@ package "Mondino.Application" {
     +IReadOnlyList<Position> Positions
     +IReadOnlyList<InviteAvatarDto> Avatars
     +bool AlreadyJoined
-    +bool Full
+    +bool Full, with join-team
     +IReadOnlyList<CountryDto> Countries
   }
   class InviteAvatarDto {

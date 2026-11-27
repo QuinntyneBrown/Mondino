@@ -16,11 +16,14 @@ the share of its prompt's nine slices), rounded to the nearest 10, and 100 only 
 means" in its prompt holds. The total is weighted by effort. Journey 1 stands at 100: Not Found draws the still
 globe as [`mocks/pages/not-found/default.html`](mocks/pages/not-found/default.html) draws it since it was
 redrawn, and its acceptance test compares the two shape for shape.
+Journey 2 stands at 100: every criterion of L2-001 is proven by an acceptance test, the backend's
+through the API and the screen's in Playwright, with the bare pins on the still globe until
+journey 8 draws the 3D one.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
 | 1 | [Scaffold the workspace](prompts/01-scaffold-the-workspace-prompt.md) | Angular workspace, .NET solution, test harnesses, verify script and CI. | L2-038 | 5 | 100 |
-| 2 | [Open an invite link](prompts/02-open-an-invite-link-prompt.md) | See the team's name, count and pins before joining. | L2-001 | 3 | 0 |
+| 2 | [Open an invite link](prompts/02-open-an-invite-link-prompt.md) | See the team's name, count and pins before joining. | L2-001 | 3 | 100 |
 | 3 | [Place a pin from a postal code](prompts/03-place-a-pin-from-a-postal-code-prompt.md) | Give name, country and postal code; the city is found. | L2-002, L2-003, L2-004, L2-006 | 5 | 0 |
 | 4 | [Join the team](prompts/04-join-the-team-prompt.md) | Join and land on the Globe with your new pin. | L2-005 | 4 | 0 |
 | 5 | [Create a team](prompts/05-create-a-team-prompt.md) | Name a team, place your own pin and get its invite link. | L2-053 | 5 | 0 |
@@ -49,4 +52,4 @@ redrawn, and its acceptance test compares the two shape for shape.
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **3** |
+| | **Total** | | | **147** | **5** |
