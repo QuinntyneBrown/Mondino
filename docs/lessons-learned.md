@@ -683,3 +683,67 @@ apply the lessons that fit.
   no route yet; the initial total stayed 259.64 kB.
 - *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit was chained
   with `&&` on the verify script's `rc`.
+
+## Journey 13: Show weather
+
+**What slowed it**
+
+- The design said a resting pin label shows the degrees and only a lifted one the icon; the mocks draw
+  the icon and the degrees at rest and add the word when lifted. The mock won before any code. The design
+  also kept a stored unit and `TeammateSettings` that no journey has built; as journey 11 did for the clock,
+  the unit starts from the country in the browser and "Share my local weather" is `Teammate.SharesWeather`
+  until journey 23 (ADR 0015).
+- A type named `Weather` in a namespace `…Weather` is the namespace, not the type, from anywhere under it.
+  The types went into `Mondino.Domain.Teams` and `Mondino.Application.Teams`, beside the pins, and the
+  adapter into `Mondino.Infrastructure.WeatherSource`.
+- The cache first stored the read's task after starting it; a source that answered at once ran the
+  "drop a failure" step before the entry existed, so the failure was kept. The entry is now a
+  `TaskCompletionSource` stored first and completed by the read; the failure test caught it.
+- Giving every cast pin its weather changed 15 Globe and Create Team specs at once: names gained
+  "Cloudy 8°", labels "15:058°". Journeys 10 and 11 had trimmed names to "up to the status"; the specs now
+  read the mocks' full names, and labels are read by their parts (`labelTimeOf`, `labelDegreesOf`).
+- Labels with weather are 86 to 93 px, against the 48 px the placer assumed; it passed by luck. Each label
+  now carries its width.
+- `npm test` dropped a whole library's suite from its summary when a spec fixture no longer compiled (a
+  `Pin` without `weather`); only the missing line showed it. The exit code was 1, so the verify script
+  would have caught it, but a quick read of the summary would not.
+- Only 4 of the 9 criteria can be read off a screen that exists: the panel, the Team row and Profile &
+  Settings carry the rest, and prompts 14, 17 and 23 now name them.
+
+**Lessons**
+
+1. **Compare an icon with the mock's by its shapes.** Read each shape's tag and sorted attributes from the
+   mock's label and from the page; it proves the night form without a class the mock does not draw.
+2. **Store a shared read before starting it.** A cache entry that a fast answer may remove must exist
+   before the call can complete; a `TaskCompletionSource` stored first, completed by the read, does it.
+3. **When a fixture gains data every screen draws, run the whole suite before the slice's spec.** The cast's
+   weather reached every Globe and found-line spec; list them and read the mock's full words in each.
+4. **Read the unit-test summary per library, not just its total.** A library whose specs fail to compile
+   vanishes from the summary; count the suites, or trust only the exit code.
+5. **Give a presentation component the parts the mock styles separately.** The found line's degrees are in
+   tabular figures and the words are not, so `FoundWeather` carries both, and no two-interpolation text
+   enters the template (journey 10, lesson 1).
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0015, the design's label, unit and sharing, the
+  class diagram, the shared contracts and the deployment settings were one commit before any code; the
+  design was touched again only for names the code chose (`FoundWeather`, `size`, `WeatherLabelWidthPx`).
+- *Read the prompt against the mock too* (journey 3, lesson 1): the prompt's "panel line" has no screen
+  yet; `weatherLabel` is built and unit-tested and the panel left to journey 14.
+- *Give the source only what the answer needs* (journey 3, lesson 3) and *remove `IHttpClientFactory`'s
+  loggers* (journey 3, lesson 4): Open-Meteo is sent a rounded position, the test reads every address it
+  was sent, and its client logs nothing.
+- *Test an outside source at its HTTP boundary* (journey 3, lesson 5): `FakeOpenMeteo` proved the address,
+  the 15-minute cache, the 5-second timeout under `FakeTimeProvider`, a failure not kept and the mapping.
+- *Run the spec before the page exists* (journey 1, lesson 5): each slice ran red first, on missing types,
+  the missing found-line weather or pin weather; the cache and "no weather" specs were also run against a
+  sabotaged line (a zero freshness, weather shown whatever its state) and failed.
+- *Measure the initial chunk after each template change* (journey 10, lesson 1): 259.64 kB before and after
+  every slice; `WeatherIcon` and the label's `@if` are in the lazy chunks.
+- *Pick a teammate the screen shows for a time boundary, and jump to it* (journey 11, lesson 2): the night
+  icon is proven on Ahmed, five hours on, in one `pauseAt`.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit was chained
+  with `&&`.
+- *Put a type where its lowest reader can import it* (journey 12, lesson 2): `PinWeather`, `FoundWeather`
+  and `WeatherCondition` are in `api`, so `PinLabel`, `LookupMessage` and `WeatherIcon` read them.

@@ -151,13 +151,15 @@ weather is available, unavailable or not shared, so the web app can say which.
   `TemperatureUnit`, the label, and the night flag from the pin's local hour. `GlobePage` does it
   through `pinViews`, which gives each `PinView` its `PinWeather` and puts the word and the
   degrees in the pin's accessible name after the status ("Partly cloudy 22°"). `JoinPage` and
-  `CreateTeamPage` give `LookupMessage` the found line's weather, `foundWeather(weather, unit)`:
-  "13° and foggy right now.", in the unit of the country chosen in the form, the word in lower
-  case; nothing when the lookup has no weather. The viewer's
+  `CreateTeamPage` give `LookupMessage` its `weather` input, `foundWeather(weather, unit)`, a
+  `FoundWeather` (`@mondino/api`) of `degrees` ("13°", set in tabular figures) and `rest` ("and
+  foggy right now."), in the unit of the country chosen in the form, the word in lower case; null
+  when the lookup has no weather, and the line names the city alone. The viewer's
   settings are a signal held by `SettingsCache` and updated when `ProfilePage` saves, so a saved
   change of unit reaches every temperature on every screen (L2-019).
 - **`WeatherIcon`** (`svg[mo-weather-icon]`, the mocks' `svg.icon`) — presentation component
-  with inputs `condition` and `night`. It draws one bundled SVG per condition, with a night form for `clear` and
+  with inputs `condition`, `night`, `decorative` and `size` (`xs` in a pin's label, `sm` in a Team
+  row). It draws one bundled SVG per condition, with a night form for `clear` and
   `partly-cloudy`; `night` has no effect on the other six. The icon is exposed as an image whose
   accessible name is the condition's word (L2-018), unless it is `decorative`: beside its word,
   or in a pin's label, whose pin names the word, it is hidden, as the mocks draw it. Icons are
@@ -166,7 +168,8 @@ weather is available, unavailable or not shared, so the web app can say which.
   the temperature text, the condition and the night flag as inputs and sets the temperature in
   tabular figures. A pin's label shows the icon and the degrees beside the local time, and,
   when the pin is lifted, the condition's word as well (`pages/globe/default`,
-  `pages/globe/selected`). The label placer allows a label with weather the width it is drawn at. The panel shows the icon, the temperature
+  `pages/globe/selected`). The label placer (`placeLabels`) allows a label with weather the width it is drawn at,
+  `WeatherLabelWidthPx` (92 px), and one with the time alone 48 px. The panel shows the icon, the temperature
   with its unit and the label. A Team row shows the icon and the degrees.
 
 When `pin.weather` is `null` no temperature and no condition is shown, and a pin's label and

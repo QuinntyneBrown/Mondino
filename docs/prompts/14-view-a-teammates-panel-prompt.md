@@ -107,6 +107,10 @@ Builds on: journeys 10 to 13.
   lesson it applied worked.
 - Journey 12 built the offset, the overlap and `OverlapBar` and waits for this screen to prove
   the panel's offset and overlap (L2-016 criteria 1 to 5, L2-017 criteria 1 to 8) in Playwright; raise journey 12's % by the criteria proven here.
+- Journey 13 built the weather (`formatTemperature`, `weatherLabel`, `WeatherIcon`, `PinView.weather`) and
+  waits for this screen to prove the panel's "13°C", "Foggy in Milan" and the fog icon (L2-018 criterion 1),
+  and its "55°F" and "0°C" (L2-019 criteria 1 and 2, with the Team row's "55°" from journey 17) in
+  Playwright; raise journey 13's % by the criteria proven here.
 - Set journey 14 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
