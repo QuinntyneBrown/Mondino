@@ -20,7 +20,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "GlobePage" as page
   participant "Router" as router
   participant "TeamStore" as store
-  participant "GlobeView" as globe
+  participant "PinLayer" as globe
   participant "WeekPanel" as week
 end box
 alt close button
@@ -28,16 +28,16 @@ alt close button
   panel -> page : closed
 else Escape
   actor -> page : Press Escape
-  page -> page : onEscape()
+  page -> page : close()
 end
-page -> router : navigate /globe, removing the teammate parameter
-router --> page : teammate input is undefined
-page -> store : clearSelection() (L2-023)
+page -> router : navigate /globe, removing the teammate parameter, replacing the entry
+router --> page : queryParamMap has no "teammate"
+page -> store : clear() (L2-023)
 store --> page : selectedPin is null
 page -> globe : selectedId null; the pin settles back
-page -> week : Render in place of TeammatePanel (L2-024)
+page -> week : Render in place of TeammatePanel (L2-024; journey 15)
 opt the panel was opened from the keyboard
-  page -> globe : focusPin(teammateId)
+  page -> globe : focusPin(teammateId): focus the pin's button
 end
 week --> actor : "This week around the world"
 @enduml
