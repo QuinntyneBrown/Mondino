@@ -36,7 +36,7 @@ else Tab moves to a pin (L2-012 AC3)
 else tap on a touch device (L2-012 AC4)
   actor -> layer : Tap a pin
 end
-layer --> page : select(teammate id)
+layer --> page : selectPin(teammate id)
 page -> store : Set the selected teammate id
 page -> view : facing = the pin's position: turn to it and hold (L2-009)
 page -> layer : selectedId

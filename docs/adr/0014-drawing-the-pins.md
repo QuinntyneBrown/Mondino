@@ -20,12 +20,13 @@ in `components`, would need a second pin layer of its own, the same markup and s
 
 ## Decision
 
-- **One `PinLayer`, in `components`.** It is presentation: it takes the placements, the
-  selected teammate and group, whether the globe is compact, and emits `select` and
-  `selectGroup`. It draws the mocks' `ul.globe__pins > li.globe__pin > button.pin` with each
-  pin's label, and holds which pin the pointer or the keyboard has lifted. `GlobeView` and
-  `GlobeFallback` each take it through a content slot (`[pins]`), so the 3D globe and the still
-  picture draw the same pins.
+- **One `PinLayer`, in `components`.** It is presentation: it takes the placements and the
+  selected teammate and group, and emits `selectPin` and `selectGroup`; whether the globe is
+  compact its styles read from the globe's box, the `globe` container. It draws the mocks'
+  `ul.globe__pins > li.globe__pin > button.pin` with each pin's label (`PinLabel`, the design
+  system's `pin-label`), and holds which pin the pointer or the keyboard has lifted.
+  `GlobeView` and `GlobeFallback` each take it through a content slot (`[pins]`), so the 3D
+  globe and the still picture draw the same pins.
 - **`GlobeView` says where things are; the page places them.** `GlobeView` emits `viewChange`,
   a `GlobeViewport` (`api`): the box's width in CSS px and a `project(position)` that gives a
   position's place in the box, or null on the far side. It emits once the first frame is
@@ -62,6 +63,10 @@ in `components`, would need a second pin layer of its own, the same markup and s
 - **The viewer's own pin is marked by more than colour**: a ring twice as thick
   (`--border-width-pin`) in the ink colour, and "(you)" after the name in its label and in its
   accessible name.
+- **The pins add nothing to the initial chunk.** Measured, a text with two interpolations
+  (`{{ a }} · {{ b }}`) brings `ɵɵtextInterpolate2` into it (0.41 kB) and `@let` its own
+  instructions (0.35 kB); the label's line is one computed string and the templates use no
+  `@let`.
 
 ## Consequences
 
@@ -70,5 +75,5 @@ in `components`, would need a second pin layer of its own, the same markup and s
 - The Angular change detection runs on each frame in which the globe turns, for the pin
   elements alone, which are bounded by the globe's area rather than by the team (L2-047).
 - The pin and label markup is written once, in `PinLayer`.
-- Journey 14 adds the panels on top of `select` and `selectGroup`; journey 13 adds the weather
+- Journey 14 adds the panels on top of `selectPin` and `selectGroup`; journey 13 adds the weather
   to `PinView`, journey 11 the status, journey 20 the moment markers.
