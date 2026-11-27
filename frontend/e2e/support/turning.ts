@@ -65,3 +65,13 @@ export async function setTheTabHidden(page: Page, hidden: boolean): Promise<void
     hidden,
   );
 }
+
+/**
+ * Turns reduced motion on or off while the page is open, as the system setting would. The browser
+ * tells the page at its next rendering, which the paused clock does not bring about, so a
+ * one-pixel picture of the page does.
+ */
+export async function changeReducedMotion(page: Page, reduce: boolean): Promise<void> {
+  await page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' });
+  await page.screenshot({ clip: { x: 0, y: 0, width: 1, height: 1 } });
+}

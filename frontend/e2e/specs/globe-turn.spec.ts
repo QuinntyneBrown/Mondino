@@ -1,9 +1,10 @@
 // Acceptance Test
-// Traces to: L2-009
+// Traces to: L2-009, L2-042
 // Description: Left alone the Globe screen's globe turns eastward on its own; it stops under reduced motion and while the tab is hidden, and resumes where it rested
 
 import { expect, test } from '../fixtures/test';
 import {
+  changeReducedMotion,
   joinFromMilan,
   makeTheTabHideable,
   pauseTheClock,
@@ -34,7 +35,7 @@ test.describe('Globe: it turns on its own', () => {
     expect(after.x - before.x).toBeGreaterThan(20);
   });
 
-  test('under reduced motion the globe does not turn on its own', async ({
+  test('under reduced motion the globe does not turn on its own, and the setting is followed live', async ({
     page,
     api,
     joinPage,
@@ -52,6 +53,19 @@ test.describe('Globe: it turns on its own', () => {
 
     // Then the globe has not turned
     expect(await globePage.youPinAt()).toEqual(before);
+
+    // And the setting is followed without a reload: turned off, the globe turns on its own
+    await changeReducedMotion(page, false);
+    await page.clock.runFor(1_000);
+    const turning = await globePage.youPinAt();
+    expect(turning.x - before.x).toBeGreaterThan(5);
+
+    // And turned on again, it stops where it is
+    await changeReducedMotion(page, true);
+    await page.clock.runFor(100);
+    const stopped = await globePage.youPinAt();
+    await page.clock.runFor(2_000);
+    expect(await globePage.youPinAt()).toEqual(stopped);
   });
 
   test('while the tab is hidden the globe does not turn, and it resumes where it rested', async ({
