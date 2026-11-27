@@ -131,6 +131,7 @@ export class GlobePage {
       this.justJoined?.teammateId ?? null,
       this.clockFormat(),
       this.unit(),
+      this.store.moments(),
     );
   });
 

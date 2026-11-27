@@ -278,3 +278,25 @@ export function mockCitySections(
 export function mockText(path: string, className: string): string | null {
   return textOf(mockMarkup(path), className);
 }
+
+/** A pin's moment marker in a mock: the pin's accessible name, the marker's classes, its count or icon. */
+export interface MockPinMarker {
+  name: string;
+  className: string;
+  count: string;
+  icon: string[];
+}
+
+/** The pins of a mock that carry a moment marker, in the mock's order. */
+export function mockPinMarkers(path: string): MockPinMarker[] {
+  return [
+    ...mockMarkup(path).matchAll(
+      /<button class="pin [^"]*"[^>]*aria-label="([^"]*)"><span aria-hidden="true">[^<]*<\/span><span class="(moment-marker[^"]*)"[^>]*>([\s\S]*?)<\/span><\/button>/g,
+    ),
+  ].map(([, name, className, inside]) => ({
+    name,
+    className,
+    count: inside.startsWith('<svg') ? '' : inside.trim(),
+    icon: inside.startsWith('<svg') ? shapesOf(inside) : [],
+  }));
+}

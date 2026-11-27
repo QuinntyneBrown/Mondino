@@ -249,6 +249,58 @@ export class GlobePage {
     return this.page.evaluate(() => window.getSelection()?.toString() ?? '');
   }
 
+  /** A pin's moment marker, beside its initials. */
+  markerOf(name: string): Locator {
+    return this.pin(name).locator('.moment-marker');
+  }
+
+  /** The pins' moment markers, each read as a mock's: its pin's name, classes, count or icon. */
+  pinMarkers(): Promise<{ name: string; className: string; count: string; icon: string[] }[]> {
+    return this.pinButtons.evaluateAll((buttons) =>
+      buttons.flatMap((button) => {
+        const marker = button.querySelector('.moment-marker');
+        if (!marker) return [];
+        const svg = marker.querySelector('svg');
+        return [
+          {
+            name: button.getAttribute('aria-label') ?? '',
+            className: [...marker.classList].join(' '),
+            count: svg ? '' : (marker.textContent ?? '').trim(),
+            icon: [...(svg?.children ?? [])].map((shape) =>
+              [
+                shape.tagName,
+                ...[...shape.attributes]
+                  .filter((attribute) => !attribute.name.startsWith('_ng'))
+                  .map((attribute) => `${attribute.name}=${attribute.value}`)
+                  .sort(),
+              ].join(' '),
+            ),
+          },
+        ];
+      }),
+    );
+  }
+
+  /** Where a pin's marker and initials are drawn, and the marker's ring. */
+  markerBoxes(name: string): Promise<{
+    marker: { x: number; y: number; width: number; height: number };
+    initials: { x: number; y: number; width: number; height: number };
+    ring: string;
+  }> {
+    return this.pin(name).evaluate((button) => {
+      const box = (element: Element | null) => {
+        const { x, y, width, height } = element!.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      const marker = button.querySelector('.moment-marker');
+      return {
+        marker: box(marker),
+        initials: box(button.querySelector('span[aria-hidden="true"]:not(.moment-marker)')),
+        ring: getComputedStyle(marker!).boxShadow,
+      };
+    });
+  }
+
   /** A moment row of the week, by its title. */
   weekRow(title: string): Locator {
     return this.weekRows.filter({ has: this.page.locator('.row__title', { hasText: title }) });

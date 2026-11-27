@@ -1,3 +1,4 @@
+import type { MarkerView } from '../moments/moment';
 import type { Status } from '../time/status';
 import type { PinWeather } from '../weather/weather';
 
@@ -20,7 +21,12 @@ export interface PinView {
   readonly status: Status | null;
   /** The weather in the viewer's unit, or null when there is none to show. */
   readonly weather: PinWeather | null;
-  /** The pin's accessible name: "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°". */
+  /** Its moment marker: a moment today or in the next 7 days of a chosen kind (L2-021); or null. */
+  readonly marker: MarkerView | null;
+  /**
+   * The pin's accessible name: "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy
+   * 22°", and its moments this week after it.
+   */
   readonly description: string;
   readonly isViewer: boolean;
   /** Placed just now: it pulses once. */

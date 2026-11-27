@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import type { PinPlacement } from '@mondino/api';
+import { MomentMarker } from '../moment-marker/moment-marker';
 import { PinLabel } from '../pin-label/pin-label';
 
 /** The palette's teammate colours: `teammate-1` to `teammate-13`. */
@@ -8,14 +9,14 @@ const teammateColour = /^teammate-(1[0-3]|[1-9])$/;
 /**
  * The pins over a globe (L2-011 to L2-013, ADR 0014): the mocks' `ul.globe__pins`, one
  * `li.globe__pin` for each placement, holding a `button.pin` named for a screen reader and, for a
- * pin alone, its label, hidden from assistive technology. A pin under the pointer or with
- * keyboard focus lifts, as does the selected one; Enter, Space, a click or a tap selects it.
+ * pin alone, its moment marker (L2-021) and its label, hidden from assistive technology. A pin
+ * under the pointer or with keyboard focus lifts, as does the selected one; Enter, Space, a click or a tap selects it.
  * Names, initials and cities are rendered as text (L2-044). It is placed in a globe's `[pins]`
  * slot; the page works out the placements.
  */
 @Component({
   selector: 'mo-pin-layer',
-  imports: [PinLabel],
+  imports: [MomentMarker, PinLabel],
   templateUrl: './pin-layer.html',
   styleUrl: './pin-layer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
