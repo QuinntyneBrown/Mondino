@@ -121,4 +121,24 @@ test.describe('Invite teammates', () => {
     await page.clock.runFor(100);
     await expect(globePage.toast).toHaveCount(0);
   });
+
+  test('a refused copy keeps the dialog with the link selected and focused, and an alert that stays', async ({
+    globePage,
+    inviteDialog,
+    page,
+  }) => {
+    await globePage.refuseCopy();
+    await globePage.open();
+    await globePage.inviteTeammate.click();
+    await inviteDialog.copyLink.click();
+
+    await expect(globePage.alertToast).toHaveText(
+      'Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself.',
+    );
+    await expect(inviteDialog.dialog).toBeVisible();
+    await expect(inviteDialog.link).toBeFocused();
+    expect(await inviteDialog.selectedText()).toBe('127.0.0.1:4310/join/northwind-7Kq2');
+    await page.clock.runFor(10_000);
+    await expect(globePage.alertToast).toBeVisible();
+  });
 });
