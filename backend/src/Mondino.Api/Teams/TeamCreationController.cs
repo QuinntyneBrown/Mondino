@@ -55,4 +55,8 @@ public sealed class TeamCreationController(ISender sender) : ControllerBase
 
 /// <summary>A team name, a name, a work email, a country, and a postal code or a city chosen from "Your city", as given.</summary>
 public sealed record CreateTeamRequest(
-    string? TeamName, string? Name, string? Email, string? CountryCode, string? PostalCode, string? CityId, Guid? CreateRequestId);
+    string? TeamName, string? Name, string? Email, string? CountryCode, string? PostalCode, string? CityId, Guid? CreateRequestId)
+{
+    /// <summary>Only the type: what a teammate sent is never written to a log (L2-051).</summary>
+    public override string ToString() => nameof(CreateTeamRequest);
+}

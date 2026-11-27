@@ -149,8 +149,10 @@ source, the Email source (Postmark, ADR 0011). The browser calls only the Mondin
   `SignInEmail:ServerToken`, `SignInEmail:From` or `SignInEmail:AppAddress` nothing is sent.
 - **`TeammateSessionHandler`** — issues the session cookie, as it does after a join
   (`join-team`).
-- No log carries the email or the token: the Email source's `HttpClient` logs nothing, and
-  neither the handlers nor the dispatcher log a request (`observe-without-exposing`, L2-051).
+- No log carries the email or the token: the Email source's `HttpClient` logs nothing, neither
+  the handlers nor the dispatcher log a request, and every request record of the API prints only
+  its type, since MVC writes an action's arguments to its Trace log (`observe-without-exposing`,
+  L2-051).
 
 **Refusals**
 
