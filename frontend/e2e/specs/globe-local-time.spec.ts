@@ -63,6 +63,34 @@ test.describe('Globe: local time and status', () => {
     await expect(globePage.labelOf('Priya Raman')).toHaveText('19:35');
   });
 
+  test('a teammate who joined from the United States reads every local time on a 12-hour clock', async ({
+    api,
+    globePage,
+  }) => {
+    // Given the viewer is Jordan, who joined from Austin, and has not chosen a clock
+    api.answer(
+      'GET',
+      NORTHWIND_PINS,
+      northwindPinsWhere((pin) => ({ ...pin, isViewer: pin.name === 'Jordan Lee' })),
+    );
+
+    // When Jordan opens the Globe
+    await globePage.open();
+
+    // Then each local time is on the 12-hour clock, as the 12-hour mock gives it
+    await expect(globePage.labelOf('Chloé Martin')).toHaveText('11:05 am');
+    await expect(globePage.labelOf('Liam O’Connor')).toHaveText('2:05 pm');
+    await expect(globePage.labelOf('Priya Raman')).toHaveText('7:35 pm');
+    const mock = namesIn('pages/globe/fahrenheit-12-hour.html', 4);
+    for (const name of ['Chloé Martin', 'Liam O’Connor']) {
+      const named = (await globePage.pinNames()).find((each) => each.startsWith(name));
+      expect(mock).toContain(named);
+    }
+    await expect(globePage.pin('Ahmed Al-Sayed')).toHaveAccessibleName(
+      'Ahmed Al-Sayed, Dubai, 6:05 pm, Evening',
+    );
+  });
+
   test('every local time changes together when the minute changes', async ({
     api,
     page,
