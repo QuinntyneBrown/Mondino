@@ -57,7 +57,7 @@ The prototype's sample team is the cast, not rules. Every mock uses it.
 | Chloé Martin | São Paulo, Brazil | America/Sao_Paulo | 11:05 | Working hours | 4h behind | Showers, 26° | Formula 1 · São Paulo Grand Prix · 9 Nov |
 | Liam O’Connor | Dublin, Ireland | Europe/Dublin | 14:05 | Working hours | 1h behind | Rainy, 9° | Holiday · October Bank Holiday · today |
 | Kwame Mensah | Accra, Ghana | Africa/Accra | 14:05 | Working hours | 1h behind | Clear, 30° | Holiday · Farmers’ Day · 5 Dec |
-| Luca Ferri | Milan, Italy | Europe/Rome | 15:05 | Working hours | Same time | Foggy, 13° | none |
+| Luca Ferri | Milan, Italy | Europe/Rome | 15:05 | Working hours | Same time | Foggy, 13° | Formula 1 · Monza tickets on sale · 12 Nov |
 | Sofia Bianchi (you) | Milan, Italy | Europe/Rome | 15:05 | Working hours | — | Foggy, 13° | Formula 1 · Monza tickets on sale · 12 Nov |
 | Lena Fischer | Berlin, Germany | Europe/Berlin | 15:05 | Working hours | Same time | Cloudy, 8° | Local event · St. Martin’s lantern walk · 11 Nov |
 | Mara Lindqvist | Stockholm, Sweden | Europe/Stockholm | 15:05 | Working hours | Same time | Cloudy, 6° | Holiday · Alla helgons dag · 1 Nov |
@@ -121,6 +121,7 @@ kind's icon, darker pin text and control edges, all four kinds of moment on. Wha
 | The invite dialog's "Reset link", and the copy button on the empty Globe's card, do nothing when pressed. | "Reset link" is drawn and noted as not designed; the card's "Copy" ends in the invite toasts. | See the open questions. |
 | The globe calculates the night side from the clock at render time. | The default globe shows the night side at 14:05 UTC on 27 October 2025. | A fixed instant keeps the globe, local times and working-hour counts consistent across captures. |
 | Moments on the same date keep the prototype’s sample-team order. | On 1 November, Mexico City comes first, followed by Stockholm and Bengaluru. | Both the Globe panel and Moments order same-date entries from west to east, as required by the L2 acceptance criteria. |
+| Luca, in Milan like Sofia, has no moment, and only Sofia has “Monza tickets on sale”. | Luca has it too: on Team his “Coming up” is “Monza tickets on sale · 12 Nov”, and Moments lists it once for each of them, Luca first. | A moment belongs to every teammate where it happens, and appears once for each, naming them (L2-020). |
 | Join colours each nameless pin in its teammate’s colour. | Every nameless pin on Join is in the pin colour. | The initials beside the team’s name carry their teammates’ colours, so a coloured pin would tie a set of initials to a city; the initials are not tied to any pin (L2-001). |
 | The globe fetches its land from a CDN and is drawn live with d3-geo. | A still SVG of the same cartoon globe, drawn into each mock. | Mocks open from disk with no network. |
 | Fonts from Google Fonts. | Gabarito and Inter bundled in the design system. | Fonts are self-hosted, never from a CDN. |
