@@ -71,6 +71,17 @@ its prompt hands on: the weather on a pin and in its label (L2-011 criterion 1, 
 with journey 13, a teammate's sharing switches (L2-011 criteria 4 and 7) with journey 23, and the panel a
 selected pin or group pin opens, through which a group's teammates are chosen (L2-012 criterion 5, L2-013
 criteria 3 and 7), with journey 14 (ADR 0014).
+Journey 11 stands at 100: every criterion of L2-014 and L2-015 is proven by an acceptance test, the
+backend's through the API (a pin's IANA time zone, no local time, and whether its status is shared) and
+the Globe's in Playwright under the page's fake clock (each pin's local time and status in words as
+`pages/globe/default` names them, on the 24-hour clock and on the 12-hour clock of a teammate who joined
+from the United States, every time ticking together on the minute, a status changing at its hour, and no
+status for a teammate who does not share it), with the status table, its boundaries and Saturday, the
+12-hour form and a daylight-saving change by direct unit tests, but for what belongs to the screens of
+later journeys: the panel's "Tuesday 28 Oct" (L2-014 criterion 5; `formatDay` is built and unit-tested)
+and the `status` badge come with journey 14, and the counts and filters that leave out a teammate who
+does not share their status (L2-015 criterion 4) with journeys 15 and 17; the switch that turns sharing
+off, and the clock chosen in Profile & Settings, with journey 23.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -84,7 +95,7 @@ criteria 3 and 7), with journey 14 (ADR 0014).
 | 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 100 |
 | 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 100 |
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 100 |
-| 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 0 |
+| 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 100 |
 | 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 0 |
 | 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 0 |
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 0 |
@@ -104,4 +115,4 @@ criteria 3 and 7), with journey 14 (ADR 0014).
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **41** |
+| | **Total** | | | **147** | **44** |
