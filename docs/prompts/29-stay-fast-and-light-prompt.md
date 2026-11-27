@@ -94,6 +94,9 @@ Builds on: journeys 8 to 21.
      it recovers, the look unchanged.
   4. Bounded rows on Team and Moments for a team of 500; the backend's read of a team of 500 under 300 ms at
      the 95th percentile.
+     Team's part of L2-047 criterion 5 is proven by journey 18 (`e2e/specs/team-large.spec.ts`: scrolled to
+     the bottom and searched, the page holds the open cities' rows only, at most 50 each); Moments' part
+     waits for journey 21, and the criterion is counted when both are proven.
   5. Release: one shared clock, requests cancelled on leaving a screen, nothing left from an earlier visit to
      the Globe; nothing drawn while the tab is hidden.
   6. Keep the heap checks current (8 simulated hours; 20 enters and leaves) (written, not run).

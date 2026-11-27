@@ -35,9 +35,7 @@ recomputes from the one clock each minute. A team may hold 500 teammates, so the
 rows only for the city sections that are open, and at most 50 for each.
 
 Journey 17 builds the team of 40 or fewer; journey 18 builds the large team (the bar chart, the
-search and the city sections, L2-056). Until it does, a team past 40 is drawn with the ribbon's
-bands and scale and no marker, as the bar chart will be, and the first 40 rows of the filter, west
-to east, so the rows in the page stay bounded. The next moment under "Coming up" comes with the
+search and the city sections, L2-056). The next moment under "Coming up" comes with the
 moments (journey 19); until then every row's "Coming up" is a dash, "Nothing coming up".
 
 ## Description
@@ -95,15 +93,17 @@ loading and refreshing are designed in `keep-team-fresh`.
   `working` keeps status Working hours and `asleep` keeps status Probably asleep. A row whose
   status is null is kept by `All` only. The order is unchanged (L2-028).
 - **`searchRows(rows, query)`** — pure function in `pins/`. It trims the query and, when
-  anything is left, keeps the rows whose name or city contains it, without regard to case. An
-  empty query keeps every row. The order is unchanged. Whether accents are ignored, so that
-  São Paulo is found without its tilde, is `<TO SUPPLY>`. `TeamPage` applies it to what
+  anything is left, keeps the rows whose name or city contains it, without regard to case or accents: both sides are
+  compared in lower case with their combining marks taken off (Unicode NFD), so "sao paulo" finds
+  São Paulo and "Tomas" finds Tomás. An empty query keeps every row. The order is unchanged.
+  `TeamPage` applies it to what
   `filterByStatus` returns, so the search works within the filter that is on (L2-056).
-- **`citySections(rows, toggled, now, settings)`** — pure function in `pins/`. It gathers the
+- **`citySections(rows, toggled)`** — pure function in `pins/`. It gathers the
   rows it is given by city, in the order they arrive, which is west to east, and returns one
   `CitySectionContent` for each city that has a row: a `key` (the city and its country), the city's
-  `name`, the `count` of its rows, the city's formatted `localTime`, `open`, its `rows` and
-  `more`. A section is open when the teammate opened it, or when it is one of the first two
+  `name`, the `count` of its rows, the city's `localTime` (its first row's, since every teammate of
+  a city lives the same minute), `open`, its `rows` and `more`. `toggled` maps a city's key to
+  whether the teammate has opened (`true`) or closed (`false`) it. A section is open when the teammate opened it, or when it is one of the first two
   sections of the list and the teammate has not closed it. An open section holds its first
   `CityRowLimit` (50) rows, and `more` is the count less those; a closed section holds no
   rows. A city none of whose teammates passes the filter and the search has no section.
@@ -119,11 +119,11 @@ loading and refreshing are designed in `keep-team-fresh`.
 - **`ribbonScale(format)`** — pure function in `pins/`: the nine marks, every three hours from
   midnight to midnight, "00:00" to "00:00", or on the 12-hour clock by the hour alone, "12 am",
   "3 am" to "9 pm" and "12 am" (L2-027).
-- **`ribbonDensity(pins, now, settings)`** — pure function in `pins/`, for a large team. It
+- **`ribbonDensity(pins, now, format)`** — pure function in `pins/`, for a large team. It
   counts the pins in 48 bins, one for each half hour of the day, by each pin's local time: a
   pin at 15:05 is in the bin that starts at 15:00. It returns a `RibbonDensity`: the 48
-  `bins`, the largest count as `max`, the bin that holds it as `maxBin`, and that bin's start
-  as a formatted time in the viewer's clock format. Every teammate is counted, since a local
+  `bins`, the largest count as `max`, the first bin that holds it as `maxBin`, and that bin's
+  start as `maxBinTime`, formatted on the viewer's clock ("15:00", "3:00 pm"). Every teammate is counted, since a local
   time is always shown. It is one pass over the pins.
 
 **In the `components` library**
@@ -144,8 +144,8 @@ loading and refreshing are designed in `keep-team-fresh`.
   four bands it draws 48 bars (`day-ribbon__bar`), one for each half hour, each as tall as its
   bin's share of `max`; an empty bin is a `day-ribbon__bar--none`. The count stands in figures
   over the tallest bar ("123", `day-ribbon__bar-count`). Above the track a summary line
-  (`day-ribbon__summary`) reads "324 of 500" and "are in working hours right now"; `TeamPage`
-  builds it from `teamCounts`, so it follows the clock and leaves out a teammate who
+  (`day-ribbon__summary`) reads "324 of 500", in bold, and "are in working hours right now";
+  `summary` is the bold part, and `TeamPage` builds it from `teamCounts`, so it follows the clock and leaves out a teammate who
   does not share their status. The track (`day-ribbon__track--density`) is one picture,
   `role="img"`, named "How many teammates are at each half hour of their day. The most, 123,
   are at 15:00."; its bars are hidden from assistive technology and are not controls. Where
@@ -166,13 +166,17 @@ loading and refreshing are designed in `keep-team-fresh`.
   change them.
 - **`SearchField`** (`mo-search-field`) — presentation component, shown for a large team
   beside the filters (`section-head__tools`). It is an `input` of type `search` named "Find a
-  person or city", with the same words as its placeholder, and it names the list as what it
-  controls (`aria-controls`). It takes `value` and emits `valueChange` on each input event.
+  person or city", with the same words as its placeholder, that takes at most 60 characters
+  (`maxlength`, as "Your city" on Join, L2-044), and it names the list as what it controls
+  (`aria-controls`). It takes `value`, `label` and `controls`, and emits `valueChange` on each
+  input event.
   `TeamPage` sets `query` at once: `searchRows` is a pass over at most 500 rows held in
   memory, so the search needs no request, no delay and no timer. What is typed is data: it is
   rendered as text and sent nowhere (L2-044).
 - **`TeamTable`** (`mo-team-table`) — presentation component, the mocks' `team-table` block. It
-  takes `rows`, `caption` and `address`, and emits `teammateChosen`. From 768 px it has the columns
+  takes `rows`, `caption` and `address`, and in a city section `tableId`, which the section's
+  button names, and `sectioned`, which from 768 px hides its column headings from sight (they stay
+  for assistive technology) under the one `team-head`; it emits `teammateChosen`. From 768 px it has the columns
   Person, Location, Local time, Compared to you, Weather and Coming up; below that each row
   gives the name, the status in words, the local time, the city with the offset ("Mexico City
   · 7h behind") and the next moment. The viewer's row shows the name
@@ -191,14 +195,15 @@ loading and refreshing are designed in `keep-team-fresh`.
   "Everyone, west to east", "Teammates in working hours, west to east" or "Teammates probably
   asleep, west to east". It holds at most 40 rows.
 - **`CitySection`** (`mo-city-section`) — presentation component, the mocks' `city-section`
-  block, one for each `CitySectionContent` of a large team. It takes `content`. Its heading holds a button
+  block, one for each `CitySectionContent` of a large team. It takes `content` and `address`, and
+  emits `toggled` with the city's key and `teammateChosen`. Its heading holds a button
   (`city-section__toggle`) with the city's name, its count ("4", followed by "teammates" for
   assistive technology) and its local time in tabular figures ("Honolulu", "4", "04:05"). The
   button carries `aria-expanded` and, while open, `aria-controls` naming the table under it;
-  it emits `toggle`. An open section renders a `TeamTable` of its rows, with the caption
-  "Teammates in Honolulu". When `more` is above zero a line under the table says how many
-  more teammates the city has and to search for them; its words are `<TO SUPPLY>`, since the
-  largest open city in the mocks has four teammates. A closed section renders no table. From
+  it emits `toggled`. An open section renders a `TeamTable` of its rows, with the caption
+  "Teammates in Honolulu". When `more` is above zero a line under the table (`city-section__more`) says how many
+  more teammates the city has and to search for them: "**14 more teammates in London.** Search to
+  find them." (`team/hundreds-crowded-city`), "1 more teammate" for one. A closed section renders no table. From
   768 px one row of column headings (`team-head`), hidden from assistive technology, stands
   above the sections, and each table keeps its own headings for assistive technology.
 - **`ListNote`** (`mo-list-note`) — presentation component, the mocks' `list-note` block, a
@@ -268,9 +273,10 @@ The rows in the page stay bounded (L2-047, L2-056):
   the pins, the filter, the search or the clock's minute change, and none accumulates over a
   visit.
 
-Whether the number of city sections open at once also needs a limit is `<TO SUPPLY>`; the
-heap check of a team of 500 (L2-047) settles it. The limit of 500 teammates in a team is the
-ceiling in every case.
+The number of city sections open at once has no limit of its own: a teammate opens them one at
+a time, by hand, and with every city open the page holds at most 50 rows for each, never more
+than the team's 500. The heap check of a team of 500 (L2-047, journey 29) may still ask for one;
+until it does, the limit of 500 teammates in a team is the ceiling.
 
 **What does not depend on the team's size**
 

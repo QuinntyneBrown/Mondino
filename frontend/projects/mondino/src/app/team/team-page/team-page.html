@@ -36,6 +36,8 @@
           [markers]="ribbon.markers"
           [rows]="ribbon.rows"
           [scale]="scale()"
+          [density]="density()"
+          [summary]="summary()"
           [address]="addressOf"
           (teammateChosen)="choose($event)"
         />
@@ -45,13 +47,31 @@
       } @else {
         <div class="section-head">
           <h2>Everyone, west to east</h2>
-          <mo-segmented
-            label="Filter by status"
-            controls="team-list"
-            [options]="tabs()"
-            [value]="filter()"
-            (valueChange)="chooseFilter($event)"
-          />
+          @if (large()) {
+            <div class="section-head__tools">
+              <mo-search-field
+                label="Find a person or city"
+                controls="team-list"
+                [value]="query()"
+                (valueChange)="query.set($event)"
+              />
+              <mo-segmented
+                label="Filter by status"
+                controls="team-list"
+                [options]="tabs()"
+                [value]="filter()"
+                (valueChange)="chooseFilter($event)"
+              />
+            </div>
+          } @else {
+            <mo-segmented
+              label="Filter by status"
+              controls="team-list"
+              [options]="tabs()"
+              [value]="filter()"
+              (valueChange)="chooseFilter($event)"
+            />
+          }
         </div>
         <div id="team-list" role="tabpanel" [attr.aria-labelledby]="'tab-' + filter()">
           @if (rows().length === 0 && note(); as note) {
@@ -59,8 +79,21 @@
               [title]="note.title"
               [text]="note.text"
               action="Show everyone"
-              (actionChosen)="chooseFilter('all')"
+              (actionChosen)="showEveryone()"
             />
+          } @else if (large()) {
+            <div class="team-head" aria-hidden="true">
+              <span>Person</span><span>Location</span><span>Local time</span
+              ><span>Compared to you</span><span>Weather</span><span>Coming up</span>
+            </div>
+            @for (section of sections(); track section.key) {
+              <mo-city-section
+                [content]="section"
+                [address]="addressOf"
+                (toggled)="toggle($event)"
+                (teammateChosen)="choose($event)"
+              />
+            }
           } @else {
             <mo-team-table
               [caption]="caption()"

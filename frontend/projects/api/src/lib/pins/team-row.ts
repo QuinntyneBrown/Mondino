@@ -36,3 +36,22 @@ export interface TeamRow {
   readonly weather: RowWeather | null;
   readonly weatherState: WeatherState;
 }
+
+/**
+ * One city of a large team's list (L2-056), west to east: its teammates that pass the filter and
+ * the search, of which an open section holds at most 50 and a closed one none.
+ */
+export interface CitySectionContent {
+  /** The city and its country, which tell one city from another of the same name. */
+  readonly key: string;
+  readonly name: string;
+  /** How many of its teammates pass the filter and the search. */
+  readonly count: number;
+  /** The city's local time on the viewer's clock: "04:05". */
+  readonly localTime: string;
+  readonly open: boolean;
+  /** At most 50, and none while closed. */
+  readonly rows: readonly TeamRow[];
+  /** How many more an open section has past its rows. */
+  readonly more: number;
+}

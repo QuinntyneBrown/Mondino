@@ -76,6 +76,50 @@
   font-size: var(--font-size-xs);
   box-shadow: 0 0 0 var(--border-width-thick) var(--color-bg-surface);
 }
+// A large team's ribbon: how many are at each half hour (L2-027).
+.day-ribbon__summary {
+  margin-bottom: var(--space-3);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.day-ribbon__summary strong {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-semibold);
+}
+.day-ribbon__track--density {
+  height: calc(var(--ribbon-density-height) + var(--space-8));
+}
+.day-ribbon__bars {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-0-5);
+  height: var(--ribbon-density-height);
+  padding: 0 var(--border-width-hairline);
+}
+.day-ribbon__bar {
+  position: relative;
+  flex: 1;
+  height: calc(var(--share) * (100% - var(--space-6)));
+  min-height: var(--space-1);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--color-fg-default);
+  opacity: 0.75;
+}
+.day-ribbon__bar--none {
+  visibility: hidden;
+}
+.day-ribbon__bar-count {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--space-1));
+  translate: -50% 0;
+  font: var(--text-caption);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-default);
+}
 .day-ribbon__scale {
   display: flex;
   justify-content: space-between;

@@ -58,7 +58,10 @@ maker, reads its invite link; another team's teammate and no session are refused
 Left Team and the link's reset complete them, so it stays at 34. Journey 17 proved the Team rows' part of
 L2-044 criterion 1 (a name of markup, a long name and a one-word name in Team's rows and on its ribbon,
 as text) and of L2-007 criterion 2 (a Team row gives the city and country, no postal code); the search and
-the moments complete them, so it stays at 34.
+the moments complete them, so it stays at 34. Journey 18 proved the Team search's part of L2-044 criterion
+12 (markup longer than 60 characters typed in "Find a person or city" is held to 60, quoted as text in "No
+one matches" and never in the address), which with Join's "Your city" completes it: 35 of 40, still 90.
+The moments complete the rest of L2-044 criterion 1 and L2-007 criterion 2.
 Journey 7 stands at 100: every criterion of L2-052 is proven by an acceptance test, the backend's
 through the API and the screen's in Playwright, by keyboard and by touch at 320 px. The Globe it opens
 is the arrival journey 4 left; an expired or used link, and the wait while one opens, show Sign In's
@@ -182,7 +185,7 @@ a team of one (criterion 6; journey 17), and every criterion of L2-055, which wa
 what "Reset link" asks before it acts (`mocks/README.md`, open question 3). Journey 17 proved "Invite
 teammates" on Team for a team of one (criterion 6) and the header's "Invite teammate" on Team (criterion 1's
 Team part), which brought it to 8 of 15, still 50.
-Journey 17 stands at 80 (24 of the 29 criteria of L2-026, L2-027 criteria 1 to 7, 11 and 12, and L2-028):
+Journey 17 stands at 90 (27 of the 29 criteria of L2-026, L2-027 criteria 1 to 7, 11 and 12, and L2-028):
 Team sits under `TeamShell` at `/team`, a lazy route, and is what `pages/team/default`, `working`, `asleep`,
 `no-results`, `quiet`, `loading`, `empty`, `error`, `weather-unavailable`, `sharing-off` and `edge` draw,
 proven in Playwright against the mocks' markup: every row west to east with its city and country, local
@@ -198,7 +201,24 @@ one's card opening the invite dialog, the weather warning, and names as text; `t
 the first 40 rows of its filter and a ribbon without faces until journey 18. Not yet proven, for later
 journeys: a team of 500 scrolled city by city (L2-026 criterion 7), the bar chart's scrolling and its line
 about working hours (L2-027 criteria 11 and 12's bar part) with journey 18, and "Coming up" with the next
-moment, on a row and on a phone's row (L2-026 criteria 9 and 10), with journey 19.
+moment, on a row and on a phone's row (L2-026 criteria 9 and 10), with journey 19. Journey 18 proved
+L2-026 criterion 7 (a team of 500 scrolled to the bottom and searched holds only its open cities' rows),
+L2-027 criterion 11 (the bar chart scrolls sideways inside itself on a phone, by keyboard, named "The day
+ribbon; scroll sideways to see all 24 hours") and the bar's part of criterion 12 (a teammate who hides their
+status is counted in their half hour's bar and not in "323 of 500"), which brought it from 24 to 27 of 29;
+the next moment is what is left.
+Journey 18 stands at 100 (all 13 criteria of L2-056 and L2-027 criteria 8 to 10): past 40 teammates Team
+draws the day ribbon as a bar chart of the half hours and lists the team city by city with a search, as
+`pages/team/hundreds`, `hundreds-crowded-city` and `hundreds-no-match` draw it, proven in Playwright
+against the mocks' markup with a team of 500 that is the mock's city for city: 48 bars and "123" over the
+tallest, one picture named by what it shows, "324 of 500 are in working hours right now" following the
+clock; the heading, the filters and the search; a section per city west to east, the first two open, each
+button opening and closing its city with `aria-expanded`; an open city's rows as the mock draws them, on a
+phone too, a row opening the Globe; a filter leaving each city its own; London's 64 listing 50 and "14 more
+teammates in London. Search to find them."; the search by name or city without accents, within the filter,
+never in the address, held to 60 characters and shown as text; "No one matches “Reykjavik”" with "Show
+everyone"; and the rows in the page bounded while scrolled and searched. `ribbonDensity`, `searchRows`
+and `citySections` by direct unit tests.
 
 Journey 30 stands at 20 before its own run: one of the six criteria of L2-051 is proven by acceptance tests
 through the API, criterion 4, liveness and readiness reported to anyone as one word with no configuration,
@@ -224,8 +244,8 @@ ADR 0017). The telemetry, its redaction and the correlation id are journey 30's 
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 80 |
 | 15 | [View the week around the world](prompts/15-view-the-week-around-the-world-prompt.md) | See this week's moments, who is working, and team counts. | L2-024, L2-025 | 4 | 70 |
 | 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 50 |
-| 17 | [View the team through the day](prompts/17-view-the-team-through-the-day-prompt.md) | See everyone west to east on a day ribbon. | L2-026, L2-027, L2-028 | 6 | 80 |
-| 18 | [Find a teammate in a large team](prompts/18-find-a-teammate-in-a-large-team-prompt.md) | Search a team past 40, listed in a section per city. | L2-027, L2-056 | 3 | 0 |
+| 17 | [View the team through the day](prompts/17-view-the-team-through-the-day-prompt.md) | See everyone west to east on a day ribbon. | L2-026, L2-027, L2-028 | 6 | 90 |
+| 18 | [Find a teammate in a large team](prompts/18-find-a-teammate-in-a-large-team-prompt.md) | Search a team past 40, listed in a section per city. | L2-027, L2-056 | 3 | 100 |
 | 19 | [Find moments](prompts/19-find-moments-prompt.md) | Holidays, races, events and sport found where teammates live. | L2-020 | 8 | 0 |
 | 20 | [Mark pins with moments](prompts/20-mark-pins-with-moments-prompt.md) | See a moment marker beside pins with moments this week. | L2-021, L2-022 | 4 | 0 |
 | 21 | [List moments](prompts/21-list-moments-prompt.md) | Browse upcoming moments by when and filter by kind. | L2-029, L2-030 | 4 | 0 |
@@ -238,4 +258,4 @@ ADR 0017). The telemetry, its redaction and the correlation id are journey 30's 
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 20 |
-| | **Total** | | | **147** | **58** |
+| | **Total** | | | **147** | **60** |

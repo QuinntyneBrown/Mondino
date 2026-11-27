@@ -1,37 +1,74 @@
 <section class="day-ribbon" aria-labelledby="mo-day-ribbon-title">
   <h2 class="visually-hidden" id="mo-day-ribbon-title">The day, hour by hour</h2>
-  <div class="day-ribbon__scroll" role="region" aria-labelledby="mo-day-ribbon-title" tabindex="0">
-    <div class="day-ribbon__track" [style.--rows]="rows()">
-      <span class="day-ribbon__band day-ribbon__band--night day-ribbon__band--first"
-        ><span>Night</span></span
-      ><span class="day-ribbon__band day-ribbon__band--edge day-ribbon__band--morning"
-        ><span>Morning</span></span
-      ><span class="day-ribbon__band day-ribbon__band--working"><span>Working hours</span></span
-      ><span class="day-ribbon__band day-ribbon__band--edge day-ribbon__band--evening"
-        ><span>Evening</span></span
-      ><span class="day-ribbon__band day-ribbon__band--night day-ribbon__band--last"></span>
-      <ul>
-        @for (marker of markers(); track marker.teammateId) {
-          <li>
-            <a
-              class="day-ribbon__marker"
-              [attr.href]="address()(marker.teammateId)"
-              [style.--at]="marker.at.toFixed(2) + '%'"
-              [style.--row]="marker.lane"
-              [attr.title]="marker.name + ' · ' + marker.cityName"
-              [attr.aria-label]="marker.name + ', ' + marker.localTime"
-              (click)="choose($event, marker.teammateId)"
-            >
-              <mo-avatar [initials]="marker.initials" [colour]="marker.colour" />
-            </a>
-          </li>
+  @if (density(); as density) {
+    @if (summary(); as summary) {
+      <p class="day-ribbon__summary tnum">
+        <strong>{{ summary }}</strong> are in working hours right now
+      </p>
+    }
+  }
+  <div
+    class="day-ribbon__scroll"
+    tabindex="0"
+    [attr.role]="density() ? 'group' : 'region'"
+    [attr.aria-labelledby]="density() ? null : 'mo-day-ribbon-title'"
+    [attr.aria-label]="density() ? 'The day ribbon; scroll sideways to see all 24 hours' : null"
+  >
+    <div>
+      <div
+        class="day-ribbon__track"
+        [class.day-ribbon__track--density]="density()"
+        [style.--rows]="rows()"
+        [attr.role]="density() ? 'img' : null"
+        [attr.aria-label]="densityName()"
+      >
+        <span class="day-ribbon__band day-ribbon__band--night day-ribbon__band--first"
+          ><span>Night</span></span
+        ><span class="day-ribbon__band day-ribbon__band--edge day-ribbon__band--morning"
+          ><span>Morning</span></span
+        ><span class="day-ribbon__band day-ribbon__band--working"><span>Working hours</span></span
+        ><span class="day-ribbon__band day-ribbon__band--edge day-ribbon__band--evening"
+          ><span>Evening</span></span
+        ><span class="day-ribbon__band day-ribbon__band--night day-ribbon__band--last"></span>
+        @if (density(); as density) {
+          <div class="day-ribbon__bars" aria-hidden="true">
+            @for (count of density.bins; track $index) {
+              <span
+                class="day-ribbon__bar"
+                [class.day-ribbon__bar--none]="count === 0"
+                [style.--share]="(count / density.max).toFixed(3)"
+              >
+                @if ($index === density.maxBin) {
+                  <span class="day-ribbon__bar-count tnum">{{ density.max }}</span>
+                }
+              </span>
+            }
+          </div>
+        } @else {
+          <ul>
+            @for (marker of markers(); track marker.teammateId) {
+              <li>
+                <a
+                  class="day-ribbon__marker"
+                  [attr.href]="address()(marker.teammateId)"
+                  [style.--at]="marker.at.toFixed(2) + '%'"
+                  [style.--row]="marker.lane"
+                  [attr.title]="marker.name + ' · ' + marker.cityName"
+                  [attr.aria-label]="marker.name + ', ' + marker.localTime"
+                  (click)="choose($event, marker.teammateId)"
+                >
+                  <mo-avatar [initials]="marker.initials" [colour]="marker.colour" />
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      <ul class="day-ribbon__scale tnum" aria-hidden="true">
+        @for (mark of scale(); track $index) {
+          <li>{{ mark }}</li>
         }
       </ul>
     </div>
-    <ul class="day-ribbon__scale tnum" aria-hidden="true">
-      @for (mark of scale(); track $index) {
-        <li>{{ mark }}</li>
-      }
-    </ul>
   </div>
 </section>

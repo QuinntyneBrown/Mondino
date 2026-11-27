@@ -16,11 +16,27 @@ export class TeamPage {
   readonly ribbonBands: Locator;
   readonly markers: Locator;
   readonly scale: Locator;
+  /** A large team's ribbon: its line about working hours, its picture, its bars and the count. */
+  readonly ribbonSummary: Locator;
+  readonly densityScroll: Locator;
+  readonly density: Locator;
+  readonly bars: Locator;
+  readonly barCount: Locator;
+  readonly barsGroup: Locator;
+  readonly densityControls: Locator;
+  readonly ribbonSummaryCount: Locator;
   /** The list's heading, the filter's tab list and its tabs, and the list it controls. */
   readonly listHeading: Locator;
   readonly filters: Locator;
   readonly tabs: Locator;
   readonly list: Locator;
+  /** A large team's search, the column headings over its cities, and its city sections. */
+  readonly search: Locator;
+  readonly teamHead: Locator;
+  readonly sections: Locator;
+  readonly sectionToggles: Locator;
+  /** The line under an open city's 50th teammate. */
+  readonly more: Locator;
   /** The table, its caption, its column headings and its rows. */
   readonly table: Locator;
   readonly caption: Locator;
@@ -61,10 +77,25 @@ export class TeamPage {
     this.ribbonBands = this.main.locator('.day-ribbon__band');
     this.markers = this.main.locator('.day-ribbon__marker');
     this.scale = this.main.locator('.day-ribbon__scale li');
+    this.ribbonSummary = this.main.locator('.day-ribbon__summary');
+    this.densityScroll = page.getByRole('group', {
+      name: 'The day ribbon; scroll sideways to see all 24 hours',
+    });
+    this.density = this.main.locator('.day-ribbon__track--density');
+    this.bars = this.density.locator('.day-ribbon__bar');
+    this.barCount = this.density.locator('.day-ribbon__bar-count');
+    this.barsGroup = this.density.locator('.day-ribbon__bars');
+    this.densityControls = this.density.locator('a, button');
+    this.ribbonSummaryCount = this.ribbonSummary.locator('strong');
     this.listHeading = this.main.locator('.section-head h2');
     this.filters = page.getByRole('tablist', { name: 'Filter by status' });
     this.tabs = this.filters.getByRole('tab');
     this.list = page.getByRole('tabpanel');
+    this.search = page.getByRole('searchbox', { name: 'Find a person or city' });
+    this.teamHead = this.main.locator('.team-head');
+    this.sections = this.main.locator('.city-section');
+    this.sectionToggles = this.sections.locator('.city-section__toggle');
+    this.more = this.sections.locator('.city-section__more');
     this.table = this.main.locator('table.team-table');
     this.caption = this.table.locator('caption');
     this.columns = this.table.locator('thead th');
@@ -95,6 +126,39 @@ export class TeamPage {
     return this.filters.getByRole('tab', { name });
   }
 
+  /** A city's button, by the city's name. */
+  sectionToggle(city: string): Locator {
+    return this.sectionToggles.filter({
+      has: this.page.locator('.city-section__name', { hasText: new RegExp(`^${city}$`) }),
+    });
+  }
+
+  /** The table a city's button names as what it controls. */
+  async controlledBy(toggle: Locator): Promise<Locator> {
+    return this.main.locator(`table#${await toggle.getAttribute('aria-controls')}`);
+  }
+
+  /** The rows in a city's section. */
+  sectionRows(city: string): Locator {
+    return this.sections
+      .filter({
+        has: this.page.locator('.city-section__name', { hasText: new RegExp(`^${city}$`) }),
+      })
+      .locator('tbody tr.team-table__row');
+  }
+
+  /** Each section's button as a mock writes it: city, count, local time and aria-expanded. */
+  async sectionHeads(): Promise<{ name: string; count: string; time: string; expanded: string }[]> {
+    return this.sectionToggles.evaluateAll((toggles: HTMLElement[]) =>
+      toggles.map((toggle) => ({
+        name: toggle.querySelector('.city-section__name')?.textContent?.trim() ?? '',
+        count: toggle.querySelector('.city-section__count')?.firstChild?.textContent?.trim() ?? '',
+        time: toggle.querySelector('.city-section__time')?.textContent?.trim() ?? '',
+        expanded: toggle.getAttribute('aria-expanded') ?? '',
+      })),
+    );
+  }
+
   /** The row of the teammate named, by the link over their name. */
   row(name: string): Locator {
     return this.rows.filter({ has: this.page.locator('.team-table__link', { hasText: name }) });
@@ -116,9 +180,29 @@ export class TeamPage {
     );
   }
 
+  /** Scrolls the screen to its bottom, as a teammate reading the whole list does. */
+  async scrollToBottom(): Promise<void> {
+    await this.page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await this.page.waitForFunction(
+      () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1,
+    );
+  }
+
   /** Whether the ribbon is wider than its region, which scrolls sideways inside itself. */
   async ribbonScrolls(): Promise<boolean> {
     return this.ribbonScroll.evaluate((region) => region.scrollWidth > region.clientWidth);
+  }
+
+  /** The count over the bar at `index`, from 0 at 00:00. */
+  countOnBar(index: number): Locator {
+    return this.bars.nth(index).locator('.day-ribbon__bar-count');
+  }
+
+  /** Each bar's share of the tallest, as a mock writes it: "0.154". */
+  async barShares(): Promise<string[]> {
+    return this.bars.evaluateAll((bars: HTMLElement[]) =>
+      bars.map((bar) => bar.style.getPropertyValue('--share').trim()),
+    );
   }
 
   /** A row's parts, as the mocks class them. */

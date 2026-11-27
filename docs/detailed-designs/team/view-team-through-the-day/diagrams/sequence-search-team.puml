@@ -30,10 +30,10 @@ page -> page : query.set(text); no request, no timer
 page -> fn : filterByStatus(rows, filter)
 fn --> page : Rows of the chosen filter, west to east
 page -> fn : searchRows(rows, query)
-fn -> fn : Keep rows whose name or city contains the text,\nwithout regard to case
+fn -> fn : Keep rows whose name or city contains the text,\nwithout regard to case or accents
 fn --> page : visibleRows
 alt at least one row matches
-  page -> sections : citySections(visibleRows, toggled, clock.now(), settings)
+  page -> sections : citySections(visibleRows, toggled)
   sections -> sections : One section for each city with a match, west to east;\nthe first two open, at most 50 rows in each
   sections --> page : CitySectionContent[]
   page -> city : content, for each section

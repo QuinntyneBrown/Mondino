@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import type { Status, TeamRow } from '@mondino/api';
 import { Avatar } from '../avatar/avatar';
 import { WeatherIcon } from '../weather-icon/weather-icon';
@@ -38,6 +38,13 @@ export class TeamTable {
   readonly caption = input.required<string>();
   /** The address that selects a teammate on the Globe: "/globe?teammate=…". */
   readonly address = input.required<(teammateId: string) => string>();
+  /** The table's id, which a city section's button names. */
+  readonly tableId = input<string | null>(null);
+  /**
+   * In a city section (L2-056): from 768 px the headings are out of sight under the one row of
+   * headings over every city, and stay for assistive technology.
+   */
+  readonly sectioned = input(false, { transform: booleanAttribute });
 
   readonly teammateChosen = output<string>();
 
