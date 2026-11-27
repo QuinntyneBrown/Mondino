@@ -1,5 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { ApiError, INVITE_API, type Invite, type InviteApi } from '@mondino/api';
+import {
+  ApiError,
+  INVITE_API,
+  type Invite,
+  type InviteApi,
+  type PostalCodeResult,
+} from '@mondino/api';
 import { JoinStore } from './join-store';
 
 const invite: Invite = {
@@ -135,5 +141,111 @@ describe('JoinStore: the form', () => {
     expect(store.submit()).toBe(true);
     expect(store.submitted()).toBe(true);
     expect(store.postalCodeMissing()).toBe(true);
+  });
+});
+
+const milan: PostalCodeResult = {
+  city: {
+    name: 'Milan',
+    region: 'Lombardy',
+    countryCode: 'IT',
+    position: { latitude: 45.46427, longitude: 9.18951 },
+    timeZoneId: 'Europe/Rome',
+  },
+  weather: null,
+};
+
+describe('JoinStore: the postal code lookup', () => {
+  async function storeLookingUp(
+    lookUpPostalCode: InviteApi['lookUpPostalCode'],
+  ): Promise<JoinStore> {
+    const { store } = storeAnswering(() => Promise.resolve(invite), { lookUpPostalCode });
+    await store.open('northwind-7Kq2');
+    store.name.set('Sofia Bianchi');
+    store.setCountry('IT');
+    store.setPostalCode('20121');
+    return store;
+  }
+
+  it('looks the postal code up for the chosen country when the field is left', async () => {
+    const asked: string[] = [];
+    const store = await storeLookingUp((token, country, postalCode) => {
+      asked.push(`${token} ${country} ${postalCode}`);
+      return Promise.resolve(milan);
+    });
+    store.leavePostalCode();
+    expect(store.lookup()).toEqual({ kind: 'Locating', postalCode: '20121' });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(store.lookup()).toEqual({ kind: 'Found', result: milan });
+    expect(asked).toEqual(['northwind-7Kq2 IT 20121']);
+  });
+
+  const refusals: [string, string][] = [
+    ['postal_code_not_found', 'NotFound'],
+    ['validation_failed', 'Idle'],
+    [ApiError.unreachable, 'Idle'],
+  ];
+  for (const [code, kind] of refusals) {
+    it(`gives ${kind} for ${code}`, async () => {
+      const store = await storeLookingUp(() => Promise.reject(new ApiError(code, 400)));
+      await store.lookUp();
+      expect(store.lookup().kind).toBe(kind);
+    });
+  }
+
+  it('replaces the form with "no longer works" when the invite link was reset meanwhile', async () => {
+    const store = await storeLookingUp(() => Promise.reject(new ApiError('invite_not_found', 404)));
+    await store.lookUp();
+    expect(store.inviteState()).toBe('NotFound');
+  });
+
+  it('removes what was found when the postal code or the country changes', async () => {
+    const store = await storeLookingUp(() => Promise.resolve(milan));
+    await store.lookUp();
+    store.setPostalCode('2012');
+    expect(store.lookup().kind).toBe('Idle');
+    await store.lookUp();
+    store.setCountry('CA');
+    expect(store.lookup().kind).toBe('Idle');
+  });
+
+  it('aborts a pending lookup when the postal code changes, and ignores its answer', async () => {
+    let signal: AbortSignal | undefined;
+    let answer!: (value: PostalCodeResult) => void;
+    const store = await storeLookingUp((_t, _c, _p, given) => {
+      signal = given;
+      return new Promise((resolve) => (answer = resolve));
+    });
+    void store.lookUp();
+    store.setPostalCode('20122');
+    answer(milan);
+    await Promise.resolve();
+    expect(signal?.aborted).toBe(true);
+    expect(store.lookup().kind).toBe('Idle');
+  });
+
+  it('aborts a pending lookup when the screen is left', async () => {
+    let signal: AbortSignal | undefined;
+    const store = await storeLookingUp((_t, _c, _p, given) => {
+      signal = given;
+      return new Promise(() => undefined);
+    });
+    void store.lookUp();
+    TestBed.resetTestingModule();
+    expect(signal?.aborted).toBe(true);
+  });
+
+  it('looks nothing up for an empty postal code, or one already found', async () => {
+    let calls = 0;
+    const store = await storeLookingUp(() => {
+      calls++;
+      return Promise.resolve(milan);
+    });
+    await store.lookUp();
+    store.leavePostalCode();
+    store.setPostalCode('  ');
+    store.leavePostalCode();
+    expect(calls).toBe(1);
   });
 });

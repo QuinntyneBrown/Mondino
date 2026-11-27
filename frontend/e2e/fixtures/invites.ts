@@ -57,3 +57,61 @@ export function northwindInvite(overrides: Record<string, unknown> = {}): Answer
     },
   };
 }
+
+/** Where Join looks a postal code up, and searches the cities, through Northwind's invite link. */
+export const NORTHWIND_LOOKUPS = '/api/invites/northwind-7Kq2/postal-code-lookups';
+export const NORTHWIND_CITY_SEARCHES = '/api/invites/northwind-7Kq2/city-searches';
+
+/** Cities as the backend answers them: each at its own position, never a postal code's. */
+export const CITIES = {
+  Milan: {
+    name: 'Milan',
+    region: 'Lombardy',
+    countryCode: 'IT',
+    position: { latitude: 45.46427, longitude: 9.18951 },
+    timeZoneId: 'Europe/Rome',
+  },
+  Milazzo: {
+    name: 'Milazzo',
+    region: 'Sicily',
+    countryCode: 'IT',
+    position: { latitude: 38.22008, longitude: 15.24023 },
+    timeZoneId: 'Europe/Rome',
+  },
+  Mississauga: {
+    name: 'Mississauga',
+    region: 'Ontario',
+    countryCode: 'CA',
+    position: { latitude: 43.5789, longitude: -79.6583 },
+    timeZoneId: 'America/Toronto',
+  },
+  Toronto: {
+    name: 'Toronto',
+    region: 'Ontario',
+    countryCode: 'CA',
+    position: { latitude: 43.65333, longitude: -79.38389 },
+    timeZoneId: 'America/Toronto',
+  },
+};
+
+/** The postal codes the lookup knows, by country and as the backend normalises them. */
+const KNOWN: Record<string, (typeof CITIES)[keyof typeof CITIES]> = {
+  'IT 20121': CITIES.Milan,
+  'CA L5B3C1': CITIES.Mississauga,
+  'CA M5V2T6': CITIES.Toronto,
+};
+
+/**
+ * Answers a postal code lookup as the backend would: the city of a postal code it knows, and
+ * `postal_code_not_found` for any other.
+ */
+export function lookupAnswer(body: { countryCode: string; postalCode: string }): Answer {
+  const key = `${body.countryCode} ${body.postalCode.replace(/[\s-]/g, '').toUpperCase()}`;
+  const city = KNOWN[key];
+  if (city) return { json: { city, weather: null } };
+  return {
+    status: 422,
+    headers: { 'content-type': 'application/problem+json' },
+    json: { status: 422, code: 'postal_code_not_found' },
+  };
+}

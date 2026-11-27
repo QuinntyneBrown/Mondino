@@ -117,6 +117,20 @@ export class JoinPage {
     if (details.postalCode !== undefined) await this.postalCode.fill(details.postalCode);
   }
 
+  /** What the browser keeps for this screen: its address, its storage and its cookies, as text. */
+  async everythingKept(): Promise<string> {
+    const kept = await this.page.evaluate(() => {
+      const all = (storage: Storage) =>
+        Array.from({ length: storage.length }, (_, i) => {
+          const key = storage.key(i) ?? '';
+          return `${key}=${storage.getItem(key)}`;
+        }).join(';');
+      return [location.href, all(localStorage), all(sessionStorage), document.cookie].join('|');
+    });
+    const cookies = await this.page.context().cookies();
+    return `${kept}|${JSON.stringify(cookies)}`;
+  }
+
   /** Leaves the postal code field, which starts the lookup. */
   async leavePostalCode(): Promise<void> {
     await this.postalCode.blur();

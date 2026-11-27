@@ -103,3 +103,72 @@
   border-radius: var(--radius-full);
   background: var(--color-people);
 }
+.globe__pin--lifted {
+  z-index: var(--z-pin-lifted);
+  opacity: 1;
+}
+// Your own pin on Join: larger, with an ink ring, and new.
+.pin-dot--you {
+  width: var(--space-4);
+  height: var(--space-4);
+  border-width: var(--border-width-pin);
+}
+.pin-dot--new::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--space-3));
+  border-radius: var(--radius-full);
+  background: var(--color-people);
+  opacity: 0;
+  z-index: -1;
+  animation: pulse var(--duration-deliberate) var(--ease-standard) 1;
+}
+@keyframes pulse {
+  from {
+    scale: 0.6;
+    opacity: 0.6;
+  }
+  to {
+    scale: 1.6;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pin-dot--new::after {
+    animation: none;
+  }
+}
+.pin-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pin-label--lifted {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-fg-default);
+  color: var(--color-bg-canvas);
+  box-shadow: var(--shadow-lift);
+  font: var(--text-caption);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-none);
+}
+.pin-label--lifted.pin-label--right {
+  translate: calc(var(--pin-size-lifted) / 2 + var(--space-3)) calc(-50% - var(--space-1));
+}
+.pin-label__name {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+@container (max-width: 31.249rem) {
+  .pin-label--lifted.pin-label--right {
+    translate: -50% calc(var(--pin-size-lifted) / 2 + var(--space-2));
+  }
+}
