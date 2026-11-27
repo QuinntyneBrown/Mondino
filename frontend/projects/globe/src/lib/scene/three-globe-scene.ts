@@ -24,6 +24,7 @@ import cloudsUrl from '../assets/clouds.png';
 import { directionOf } from '../sun/sun-position';
 import {
   type DetailStep,
+  DiscShare,
   type GlobePalette,
   type GlobeScene,
   type GlobeSceneOptions,
@@ -36,8 +37,6 @@ import type { GlobeOrientation } from '../motion/globe-motion';
 
 /** The camera's distance from the centre, in globe radii: a gentle perspective. */
 const cameraDistance = 5;
-/** The share of the box the globe's disc fills, as the mocks' circle of radius 264 in 600 does. */
-const discShare = 0.88;
 /** Pins fade towards the rim: fully drawn where the surface faces the viewer this much or more. */
 const fullDepth = 0.625;
 
@@ -174,7 +173,7 @@ export class ThreeGlobeScene implements GlobeScene {
     private readonly images: ImageBitmap[],
     private readonly onContextLost: (event: Event) => void,
   ) {
-    const halfAngle = Math.atan(Math.tan(Math.asin(1 / cameraDistance)) / discShare);
+    const halfAngle = Math.atan(Math.tan(Math.asin(1 / cameraDistance)) / DiscShare);
     this.camera = new PerspectiveCamera((2 * halfAngle * 180) / Math.PI, 1, 0.1, 20);
     this.camera.position.set(0, 0, cameraDistance);
     this.globe.rotation.order = 'XYZ';

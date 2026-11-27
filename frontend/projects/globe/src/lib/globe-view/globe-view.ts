@@ -18,6 +18,7 @@ import { CLOCK, type Position } from '@mondino/api';
 import {
   createGlobeScene,
   detailSteps,
+  DiscShare,
   type GlobePalette,
   type GlobeScene,
   type ProjectedPoint,
@@ -25,6 +26,7 @@ import {
 } from '../scene/globe-scene';
 import { subsolarPoint } from '../sun/sun-position';
 import { GlobeMotion, type GlobeOrientation } from '../motion/globe-motion';
+import { GlobeGestures } from '../motion/globe-gestures';
 
 /** Loading until the first 3D frame is drawn; Fallback where it cannot be, and the page shows the still picture. */
 export type GlobeState = 'Loading' | 'Ready' | 'Fallback';
@@ -176,6 +178,16 @@ export class GlobeView {
         this.orientation.set(after);
       } else if (motion.isMoving()) scene.requestFrame();
     });
+    if (this.interactive()) {
+      const turned = () => {
+        scene.setOrientation(motion.orientation);
+        this.orientation.set(motion.orientation);
+      };
+      new GlobeGestures(motion, () => (box.clientWidth / 2) * DiscShare, turned).attach(
+        box,
+        released,
+      );
+    }
     this.scene.set(scene);
     if (!this.document.hidden) scene.start();
   }

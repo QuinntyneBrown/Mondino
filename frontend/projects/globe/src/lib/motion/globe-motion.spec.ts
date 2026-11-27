@@ -1,4 +1,9 @@
-import { GlobeMotion, TurnRateDegreesPerSecond } from './globe-motion';
+import {
+  GlobeMotion,
+  IdleDelayMs,
+  TiltLimitDegrees,
+  TurnRateDegreesPerSecond,
+} from './globe-motion';
 
 const facingEurope = { longitude: 10, tilt: 17 };
 
@@ -34,5 +39,57 @@ describe('GlobeMotion: turning on its own', () => {
     motion.setReducedMotion(false);
     motion.advance(1000);
     expect(motion.orientation.longitude).toBeCloseTo(10 - TurnRateDegreesPerSecond, 6);
+  });
+});
+
+describe('GlobeMotion: dragging', () => {
+  it('follows the drag, and stops turning on its own while dragged', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.dragStart();
+    motion.dragBy(20, -5);
+    motion.advance(1000);
+    expect(motion.orientation).toEqual({ longitude: 30, tilt: 12 });
+    expect(motion.isMoving()).toBe(false);
+  });
+
+  it('rests for 5 seconds of frame time after the drag ends, then turns on its own again', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.dragStart();
+    motion.dragBy(-10, 0);
+    motion.dragEnd();
+    motion.advance(IdleDelayMs - 1);
+    expect(motion.orientation.longitude).toBe(0);
+    expect(motion.isMoving()).toBe(true);
+    motion.advance(1);
+    expect(motion.motionMode).toBe('TurningOnItsOwn');
+    motion.advance(1000);
+    expect(motion.orientation.longitude).toBeCloseTo(-TurnRateDegreesPerSecond, 6);
+  });
+
+  it('ends still after a drag where it does not turn on its own', () => {
+    for (const motion of [
+      new GlobeMotion(false, facingEurope),
+      new GlobeMotion(true, facingEurope),
+    ]) {
+      motion.setReducedMotion(true);
+      motion.dragStart();
+      motion.dragBy(5, 0);
+      motion.dragEnd();
+      expect(motion.motionMode).toBe('Still');
+      expect(motion.isMoving()).toBe(false);
+    }
+  });
+
+  it('keeps the tilt within its limit, and says when it can tilt no further that way', () => {
+    const motion = new GlobeMotion(true, facingEurope);
+    motion.dragStart();
+    motion.dragBy(0, -200);
+    expect(motion.orientation.tilt).toBe(-TiltLimitDegrees);
+    expect(motion.canTurn(0, -1)).toBe(false);
+    expect(motion.canTurn(0, 1)).toBe(true);
+    expect(motion.canTurn(1, 0)).toBe(true);
+    motion.dragBy(0, 500);
+    expect(motion.orientation.tilt).toBe(TiltLimitDegrees);
+    expect(motion.canTurn(0, 1)).toBe(false);
   });
 });

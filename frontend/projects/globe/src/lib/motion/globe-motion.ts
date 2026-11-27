@@ -4,10 +4,16 @@ export interface GlobeOrientation {
   readonly tilt: number;
 }
 
-export type MotionMode = 'TurningOnItsOwn' | 'Still';
+export type MotionMode = 'TurningOnItsOwn' | 'Dragged' | 'Waiting' | 'Still';
 
 /** How fast the globe turns on its own: a whole turn a minute (ADR 0013). */
 export const TurnRateDegreesPerSecond = 6;
+/** How long the globe rests after a drag before it turns on its own again (L2-009). */
+export const IdleDelayMs = 5000;
+/** How far from the equator the centre of the view may tilt, so a pole never passes it. */
+export const TiltLimitDegrees = 60;
+
+const clampedTilt = (tilt: number) => Math.max(-TiltLimitDegrees, Math.min(TiltLimitDegrees, tilt));
 
 /** Puts a longitude between -180° and 180°. */
 function wrapped(longitude: number): number {
@@ -22,6 +28,8 @@ export class GlobeMotion {
   private current: GlobeOrientation;
   private mode: MotionMode;
   private reducedMotion = false;
+  /** Frame time waited since the last interaction. */
+  private waitedMs = 0;
 
   /**
    * @param turnsOnItsOwn whether the globe turns by itself when left alone: only the Globe
@@ -48,8 +56,34 @@ export class GlobeMotion {
     if (this.mode === 'TurningOnItsOwn') {
       const longitude = this.current.longitude - (TurnRateDegreesPerSecond * elapsedMs) / 1000;
       this.current = { ...this.current, longitude: wrapped(longitude) };
+    } else if (this.mode === 'Waiting') {
+      this.waitedMs += elapsedMs;
+      if (this.waitedMs >= IdleDelayMs) this.mode = this.leftAlone();
     }
     return this.current;
+  }
+
+  /** A drag begins: the globe stops turning by itself and follows the drag. */
+  dragStart(): void {
+    this.mode = 'Dragged';
+  }
+
+  /** Whether the globe can turn by this much, or is already tilted as far as it goes that way. */
+  canTurn(deltaLongitude: number, deltaTilt: number): boolean {
+    if (deltaLongitude !== 0) return true;
+    if (deltaTilt > 0) return this.current.tilt < TiltLimitDegrees;
+    if (deltaTilt < 0) return this.current.tilt > -TiltLimitDegrees;
+    return false;
+  }
+
+  /** Turns the globe with the drag, the tilt within its limit. */
+  dragBy(deltaLongitude: number, deltaTilt: number): void {
+    this.turnBy(deltaLongitude, deltaTilt);
+  }
+
+  /** The drag ends: the globe rests, and turns on its own again 5 seconds later. */
+  dragEnd(): void {
+    this.rest();
   }
 
   /** Follows the reduced motion setting: under it the globe never turns by itself. */
@@ -58,9 +92,22 @@ export class GlobeMotion {
     if (this.mode === 'TurningOnItsOwn' || this.mode === 'Still') this.mode = this.leftAlone();
   }
 
-  /** Whether the next frame is needed to move the globe on. */
+  /** Whether the next frame is needed to move the globe on, or to count the rest. */
   isMoving(): boolean {
-    return this.mode === 'TurningOnItsOwn';
+    return this.mode === 'TurningOnItsOwn' || this.mode === 'Waiting';
+  }
+
+  private turnBy(deltaLongitude: number, deltaTilt: number): void {
+    this.current = {
+      longitude: wrapped(this.current.longitude + deltaLongitude),
+      tilt: clampedTilt(this.current.tilt + deltaTilt),
+    };
+  }
+
+  /** After an interaction: wait, then turn on its own, where the globe does. */
+  private rest(): void {
+    this.waitedMs = 0;
+    this.mode = this.leftAlone() === 'TurningOnItsOwn' ? 'Waiting' : 'Still';
   }
 
   private leftAlone(): MotionMode {

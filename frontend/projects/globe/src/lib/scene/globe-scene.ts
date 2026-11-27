@@ -58,6 +58,9 @@ export interface GlobeSceneOptions {
 /** The orientation the globe faces when it starts: the still picture's, Europe and Africa. */
 export const STARTING_ORIENTATION: GlobeOrientation = { longitude: 10.1, tilt: 17.4 };
 
+/** The share of the box the globe's disc fills, as the mocks' circle of radius 264 in 600 does. */
+export const DiscShare = 0.88;
+
 /** The most time one frame reports, so a frame after a pause never jumps the globe (ADR 0013). */
 export const MaxFrameMs = 100;
 

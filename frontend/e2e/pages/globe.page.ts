@@ -63,6 +63,50 @@ export class GlobePage {
     );
   }
 
+  /** Drags across the globe with the mouse, from its centre, by `dx` and `dy` CSS px. */
+  async dragWithTheMouse(dx: number, dy: number): Promise<void> {
+    const { x, y } = await this.globeCentre();
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.down();
+    for (let step = 1; step <= 10; step++)
+      await this.page.mouse.move(x + (dx * step) / 10, y + (dy * step) / 10);
+    await this.page.mouse.up();
+  }
+
+  /** Drags across the globe with one finger, from its centre, by `dx` and `dy` CSS px. */
+  async dragWithAFinger(dx: number, dy: number): Promise<void> {
+    const { x, y } = await this.globeCentre();
+    const cdp = await this.page.context().newCDPSession(this.page);
+    const touch = (
+      type: 'touchStart' | 'touchMove' | 'touchEnd',
+      points: { x: number; y: number }[],
+    ) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points });
+    await touch('touchStart', [{ x, y }]);
+    for (let step = 1; step <= 10; step++)
+      await touch('touchMove', [{ x: x + (dx * step) / 10, y: y + (dy * step) / 10 }]);
+    await touch('touchEnd', []);
+    await cdp.detach();
+  }
+
+  /**
+   * Makes the page taller than the window, as the panel under the globe will make it on a phone
+   * (journeys 11 to 15), so there is somewhere to scroll to.
+   */
+  async makeRoomToScroll(): Promise<void> {
+    await this.page.evaluate(() => document.body.style.setProperty('min-height', '200vh'));
+  }
+
+  /** How far the page is scrolled down, in CSS px. */
+  scrolled(): Promise<number> {
+    return this.page.evaluate(() => window.scrollY);
+  }
+
+  private async globeCentre(): Promise<{ x: number; y: number }> {
+    const box = await this.globe.boundingBox();
+    if (!box) throw new Error('The globe is not drawn');
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  }
+
   /** Where the new pin's centre is on the page, in CSS px. */
   async youPinAt(): Promise<{ x: number; y: number }> {
     const box = await this.youPin.boundingBox();

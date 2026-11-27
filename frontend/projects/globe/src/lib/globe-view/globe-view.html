@@ -2,6 +2,7 @@
   <div
     class="globe"
     [class.globe--loading]="state() !== 'Ready'"
+    [class.globe--interactive]="interactive()"
     role="img"
     [attr.aria-label]="label()"
   >
