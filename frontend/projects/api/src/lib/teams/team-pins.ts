@@ -1,4 +1,5 @@
 import type { Moment } from '../moments/moment';
+import type { Settings } from '../settings/settings-store';
 import { InjectionToken } from '@angular/core';
 import type { Position } from '../globe/position';
 import type { Weather, WeatherState } from '../weather/weather';
@@ -28,13 +29,18 @@ export interface Pin {
   readonly weatherState: WeatherState;
 }
 
-/** A team as its own teammates see it: its id and name, its invite token, the viewer and the pins. */
+/**
+ * A team as its own teammates see it: its id and name, its invite token, the viewer, the pins, and
+ * the viewer's own saved settings (ADR 0025), which no other teammate's read carries.
+ */
 export interface TeamPins {
   readonly teamId: string;
   readonly teamName: string;
   readonly inviteToken: string;
   readonly viewerTeammateId: string;
   readonly pins: readonly Pin[];
+  /** Absent from an answer that does not carry them: the browser then keeps what it holds. */
+  readonly viewerSettings?: Settings;
 }
 
 /** Reads a team's pins. Refused with 401 when the session has ended, and 404 for another team. */

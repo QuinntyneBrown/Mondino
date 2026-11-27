@@ -112,6 +112,12 @@ Builds on: journeys 3, 13, 19 and 25.
 ## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 25 counted this journey at 6 of 15 (40): L2-049 criteria 7 (the refresh banner,
+  `team-refresh-failed.spec.ts`) and 10, and L2-050 criteria 1, 2, 3 and 5 are proven. Still to prove:
+  L2-049 criteria 1 (city and position kept, weather never zero), 2 (the Team row's status), 3, 4, 5 (the
+  6-second ceiling), 6 (a breaker on the weather, no unbounded queue), 8 (the Globe's "Loading your team…",
+  announced politely) and 9 (the Globe's error, no stale data), and L2-050 criterion 4 (requests recorded
+  on Team, Moments, Profile & Settings and Sign In).
 - Set journey 26 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

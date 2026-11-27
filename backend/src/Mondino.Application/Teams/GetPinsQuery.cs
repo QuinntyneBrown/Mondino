@@ -4,19 +4,25 @@ using Mondino.Application.Errors;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
+using Mondino.Domain.Teams;
 
 namespace Mondino.Application.Teams;
 
 /// <summary>The current teammate's team and its pins (show-pins). Only a teammate of the team may ask (L2-043).</summary>
 public sealed record GetPinsQuery(Guid TeamId) : IRequest<TeamPinsDto>, ITeamScopedRequest;
 
-/// <summary>The team's id and name, its invite token, the viewer's teammate id and the pins.</summary>
+/// <summary>
+/// The team's id and name, its invite token, the viewer's teammate id, the pins, and the viewer's
+/// own settings, so a browser that has never opened Profile &amp; Settings draws in them and a choice
+/// saved elsewhere arrives at the next refresh (docs/adr/0025). No other teammate's settings are in it.
+/// </summary>
 public sealed record TeamPinsDto(
     Guid TeamId,
     string TeamName,
     string InviteToken,
     Guid ViewerTeammateId,
-    IReadOnlyList<PinDto> Pins);
+    IReadOnlyList<PinDto> Pins,
+    SettingsDto ViewerSettings);
 
 /// <summary>
 /// A teammate's pin as their teammates see it: at their city, never at their postal code, which is
@@ -69,6 +75,14 @@ internal sealed class GetPinsQueryHandler(
             .ToListAsync(cancellationToken);
 
         var viewer = currentTeammate.TeammateId;
+        // The viewer's own settings, which only their own read carries (docs/adr/0025).
+        var own = await database.Teammates.AsNoTracking()
+            .Where(t => t.Id == viewer && t.TeamId == team.Id)
+            .Select(t => new { t.TemperatureUnit, t.ClockFormat, t.MomentKinds, t.SharesWeather, t.SharesStatus })
+            .SingleOrDefaultAsync(cancellationToken)
+            ?? throw RefusedException.NotFound(ErrorCodes.TeamNotFound);
+        var viewerSettings = SettingsDto.From(new TeammateSettings(
+            own.TemperatureUnit, own.ClockFormat, own.MomentKinds, own.SharesWeather, own.SharesStatus));
 
         // The weather once per city, in parallel, for the cities of the pins whose weather the
         // viewer may see: their own, and every teammate's who shares it (docs/adr/0015).
@@ -98,7 +112,8 @@ internal sealed class GetPinsQueryHandler(
                 t.SharesStatus || t.Id == viewer,
                 t.Id == viewer,
                 WeatherOf(t.Id, t.SharesWeather, t.Latitude, t.Longitude),
-                StateOf(t.Id, t.SharesWeather, t.Latitude, t.Longitude))).ToList());
+                StateOf(t.Id, t.SharesWeather, t.Latitude, t.Longitude))).ToList(),
+            viewerSettings);
 
         WeatherDto? WeatherOf(Guid id, bool shares, double latitude, double longitude) =>
             showsWeather(id, shares) ? weatherAt[WeatherPlaces.Of(latitude, longitude)] : null;

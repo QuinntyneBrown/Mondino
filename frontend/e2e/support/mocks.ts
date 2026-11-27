@@ -405,3 +405,24 @@ export function mockFilterChips(path: string): { name: string; pressed: string; 
     icon: shapesOf(inner),
   }));
 }
+
+/** A mock's banner, read as `RefreshBannerPage.parts` reads the screen's. */
+export function mockBanner(path: string): {
+  role: string;
+  text: string;
+  button: string;
+  icons: string[][];
+} {
+  const markup = mockMarkup(path);
+  const banner = /<div class="banner" role="(\w+)">([\s\S]*?)<\/button><\/div>/.exec(markup);
+  if (!banner) throw new Error(`No banner in ${path}`);
+  return {
+    role: banner[1],
+    text: textOf(banner[0] + '</div>', 'banner__text') ?? '',
+    button: (/<button[^>]*>([\s\S]*)$/.exec(banner[2])?.[1] ?? '')
+      .replace(/<svg[\s\S]*?<\/svg>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim(),
+    icons: [...banner[0].matchAll(/<svg[\s\S]*?<\/svg>/g)].map(([svg]) => shapesOf(svg)),
+  };
+}

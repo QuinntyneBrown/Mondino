@@ -1,6 +1,6 @@
 // Acceptance Test
-// Traces to: L2-033, L2-034, L2-035, L2-019, L2-022, L2-044
-// Description: A teammate's settings start from their country, are saved from Profile & Settings and read back on a later visit; what a teammate switched off reaches no other teammate; a setting outside its values, or a save without the antiforgery token, stores nothing; no one changes another teammate's settings
+// Traces to: L2-033, L2-034, L2-035, L2-019, L2-022, L2-044, L2-048
+// Description: A teammate's settings start from their country, are saved from Profile & Settings and read back on a later visit, and with the team's pins on any browser (ADR 0025); what a teammate switched off reaches no other teammate; a setting outside its values, or a save without the antiforgery token, stores nothing; no one changes another teammate's settings
 
 using System.Net;
 using System.Text.Json;
@@ -94,8 +94,14 @@ public sealed class ChooseSettingsTests
         Assert.Equal("NotShared", hers.GetProperty("weatherState").GetString());
         Assert.False(hers.GetProperty("sharesStatus").GetBoolean());
         Assert.Equal("Europe/Rome", hers.GetProperty("timeZoneId").GetString());
-        Assert.DoesNotContain("sharesWeather", body, StringComparison.Ordinal);
-        Assert.DoesNotContain("temperatureUnit", body, StringComparison.Ordinal);
+        // The only settings in his read are his own (docs/adr/0025): the team and every pin carry none
+        using var read = JsonDocument.Parse(body);
+        var team = string.Join(",", read.RootElement.EnumerateObject()
+            .Where(property => property.Name != "viewerSettings")
+            .Select(property => property.Value.GetRawText()));
+        Assert.DoesNotContain("sharesWeather", team, StringComparison.Ordinal);
+        Assert.DoesNotContain("temperatureUnit", team, StringComparison.Ordinal);
+        Assert.True(read.RootElement.GetProperty("viewerSettings").GetProperty("sharesWeather").GetBoolean());
 
         // And her own read of the team still carries her weather and her status
         using var own = await client.SendAsync(sofia.Request(HttpMethod.Get, $"/api/teams/{sofia.TeamId}/pins"));
@@ -106,6 +112,34 @@ public sealed class ChooseSettingsTests
         // And Marco's own profile is his alone: his switches are on
         var marcosSettings = await SettingsAsync(client, marco);
         Assert.True(marcosSettings.GetProperty("sharesWeather").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Her_read_of_the_team_carries_her_own_saved_settings_and_no_one_elses()
+    {
+        // Given Sofia and Marco are in Milan, and Sofia has saved °F, the 12-hour clock, holidays only and her status unshared
+        await using var api = new MondinoApi();
+        await api.SeedAsync();
+        using var client = api.CreateSecureClient();
+        var sofia = await api.JoinNorthwindAsync(client);
+        var marco = await api.JoinNorthwindAsync(client, "Marco Rossi");
+        using var saved = await client.SendAsync(Save(sofia, new
+        {
+            settings = Settings("fahrenheit", "12-hour", ["holiday"], sharesWeather: true, sharesStatus: false),
+        }));
+        Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
+
+        // When each reads the team's pins, as a screen does on opening and at each refresh
+        using var hers = await client.SendAsync(sofia.Request(HttpMethod.Get, $"/api/teams/{sofia.TeamId}/pins"));
+        using var his = await client.SendAsync(marco.Request(HttpMethod.Get, $"/api/teams/{marco.TeamId}/pins"));
+
+        // Then Sofia's carries her own saved settings
+        using var herBody = JsonDocument.Parse(await hers.Content.ReadAsStringAsync());
+        AssertSettings(herBody.RootElement.GetProperty("viewerSettings"), "fahrenheit", "12-hour", ["holiday"], true, false);
+
+        // And Marco's carries his, as his country gives them, and nothing of hers
+        using var hisBody = JsonDocument.Parse(await his.Content.ReadAsStringAsync());
+        AssertSettings(hisBody.RootElement.GetProperty("viewerSettings"), "celsius", "24-hour", ["holiday", "formula-1", "local-event", "sport"], true, true);
     }
 
     [Theory]

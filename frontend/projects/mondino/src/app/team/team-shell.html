@@ -20,6 +20,14 @@
     </a>
   }
 </mo-app-header>
+@if (banner(); as banner) {
+  <mo-banner
+    [text]="banner.text"
+    [time]="banner.time"
+    [busy]="store.refreshing()"
+    (retry)="store.refresh()"
+  />
+}
 <router-outlet />
 <div class="toast-region" role="status" aria-live="polite">
   @if (toaster.current(); as toast) {

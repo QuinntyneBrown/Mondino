@@ -50,8 +50,10 @@ them. `GetPinsQueryHandler` already applies both switches for every other viewer
 - The display settings change only the viewer's own screens; the switches change only what the
   backend gives other teammates, so nothing a teammate switched off reaches another browser to
   be hidden there.
-- Rejected: carrying the viewer's settings in `GET /pins`, which every teammate screen reads. It
-  would bring them to a new browser sooner, but it puts one teammate's own choices into the
-  answer that describes the team, and changes every spec's team fixture; journey 25 (keep the
-  team fresh) may revisit it. Rejected: keeping the switches in the browser, which would let a
+- Rejected here: carrying the viewer's settings in `GET /pins`, which every teammate screen
+  reads. It would bring them to a new browser sooner, but it puts one teammate's own choices
+  into the answer that describes the team, and changes every spec's team fixture. Journey 25
+  took it up ([ADR 0025](0025-the-refresh-rides-the-shells-clock.md)): the pins carry the
+  asker's own settings alone, each load and refresh replaces `SETTINGS_STORE` with them, and a
+  fixture without them leaves the store as it was. Rejected: keeping the switches in the browser, which would let a
   teammate's browser, not the backend, decide what others see.

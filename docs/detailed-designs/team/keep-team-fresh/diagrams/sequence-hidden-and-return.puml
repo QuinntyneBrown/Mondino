@@ -33,13 +33,13 @@ end
 actor -> clock : Show the tab again
 clock -> clock : visibilitychange: restart the timer
 clock -> store : Minute tick at once
-store -> store : refreshIfDue(clock.now())
+store -> store : refreshIfDue(minute)
 alt hidden for 15 minutes or more
   store -> client : getPins(teamId, signal)
   client -> controller : GET /api/teams/{teamId}/pins
   controller --> client : 200 with the pins
   client --> store : TeamPins
-  store -> store : merge; refreshedAt = clock.now()
+  store -> store : Replace the pins; refreshedAt = minute
   store --> page : pins, counts
   page --> actor : Current pins, weather and moments, selection kept
 else hidden for less than 15 minutes
@@ -47,6 +47,6 @@ else hidden for less than 15 minutes
   page --> actor : Local times, statuses and moment groups recomputed from the clock
 end
 == The teammate leaves the screens ==
-page -> store : Route destroyed
+page -> store : TeamShell destroyed
 store -> store : Abort the pending request; stop reading the clock
 @enduml

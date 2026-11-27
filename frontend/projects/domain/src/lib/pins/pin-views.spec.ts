@@ -39,7 +39,7 @@ describe('pinViews: weather', () => {
   it('gives the degrees in the viewer’s unit: 13 °C is 55° in °F', () => {
     const luca = { ...tomas, weather: { ...tomas.weather!, temperatureC: 13 } };
     expect(
-      pinViews([luca], now, null, '24-hour', 'fahrenheit').get('Tomás Herrera')?.weather?.degrees,
+      pinViews([luca], now, [], '24-hour', 'fahrenheit').get('Tomás Herrera')?.weather?.degrees,
     ).toBe('55°');
   });
 
@@ -72,7 +72,7 @@ describe('pinViews', () => {
     const view = pinViews(
       [pin('Tomás Herrera', 'Mexico City', 'America/Mexico_City')],
       now,
-      null,
+      [],
       '12-hour',
     ).get('Tomás Herrera');
     expect(view?.localTime).toBe('8:05 am');
@@ -95,13 +95,17 @@ describe('pinViews', () => {
     expect(view?.initials).toBe('SB');
   });
 
-  it('marks the new pin', () => {
+  it('marks the new pins: the one just joined, and those a refresh brought', () => {
     const views = pinViews(
-      [pin('A', 'Milan', 'Europe/Rome'), pin('B', 'Milan', 'Europe/Rome')],
+      [
+        pin('A', 'Milan', 'Europe/Rome'),
+        pin('B', 'Milan', 'Europe/Rome'),
+        pin('C', 'Milan', 'Europe/Rome'),
+      ],
       now,
-      'B',
+      ['B', 'C'],
     );
-    expect([views.get('A')?.isNew, views.get('B')?.isNew]).toEqual([false, true]);
+    expect(['A', 'B', 'C'].map((id) => views.get(id)?.isNew)).toEqual([false, true, true]);
   });
 });
 
@@ -131,7 +135,7 @@ describe('pinViews: moments', () => {
   ];
 
   it('gives each pin its own teammate’s marker, and ends its name with it', () => {
-    const views = pinViews([liam, lena], now, null, '24-hour', 'celsius', moments);
+    const views = pinViews([liam, lena], now, [], '24-hour', 'celsius', moments);
     expect(views.get('Liam O’Connor')?.marker).toMatchObject({ count: 1, today: true });
     expect(views.get('Liam O’Connor')?.description).toBe(
       'Liam O’Connor, Dublin, 14:05, Working hours, October Bank Holiday, today',
@@ -141,7 +145,7 @@ describe('pinViews: moments', () => {
 
   it('marks no pin with no moments, and only the chosen kinds', () => {
     expect(pinViews([liam], now).get('Liam O’Connor')?.marker).toBeNull();
-    const views = pinViews([liam, lena], now, null, '24-hour', 'celsius', moments, ['holiday']);
+    const views = pinViews([liam, lena], now, [], '24-hour', 'celsius', moments, ['holiday']);
     expect(views.get('Lena Fischer')?.marker).toBeNull();
     expect(views.get('Lena Fischer')?.description).toBe(
       'Lena Fischer, Berlin, 15:05, Working hours',

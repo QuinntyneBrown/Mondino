@@ -33,7 +33,6 @@ import {
 } from '@mondino/components';
 import { GlobeView, type GlobeState } from '@mondino/globe';
 import {
-  BrowserClock,
   countsWords,
   defaultClockFormat,
   defaultTemperatureUnit,
@@ -72,8 +71,6 @@ import { Toaster } from '../team/toaster';
     TeammatePanel,
     WeekPanel,
   ],
-  // One clock for the screen, released with it; the team is the shell's.
-  providers: [{ provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './globe-page.html',
   styleUrl: './globe-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -132,6 +129,16 @@ export class GlobePage {
   protected readonly kinds = this.settings.momentKinds;
   protected readonly everyKindOff = computed(() => this.kinds().length === 0);
 
+  /**
+   * The pins that pulse once: the teammate who has just joined, and those a refresh brought, with
+   * no toast for them (L2-005, L2-048).
+   */
+  private readonly newIds = computed(() => {
+    const joined = this.justJoined?.teammateId;
+    const arrived = this.store.arrivedIds();
+    return joined ? [joined, ...arrived] : arrived;
+  });
+
   private readonly views = computed(() => {
     this.clock.minute();
     const team = this.store.team();
@@ -139,7 +146,7 @@ export class GlobePage {
     return pinViews(
       team.pins,
       untracked(() => this.clock.now()),
-      this.justJoined?.teammateId ?? null,
+      this.newIds(),
       this.clockFormat(),
       this.unit(),
       this.store.moments(),

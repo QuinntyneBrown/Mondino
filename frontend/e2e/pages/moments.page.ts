@@ -86,6 +86,18 @@ export class MomentsPage {
     return row.locator('.moment-row__kind');
   }
 
+  /** The titles of today's moments, and of a group's rows: "This week" or "Later". */
+  get todayTitles(): Locator {
+    return this.todayMoments.locator('.today-moment__title');
+  }
+
+  groupRowTitles(group: 'This week' | 'Later'): Locator {
+    return this.main
+      .locator('section.moment-group')
+      .filter({ has: this.page.locator('.moment-group__title', { hasText: group }) })
+      .locator('.moment-row__title');
+  }
+
   /** The rows' titles, in order. */
   get rowTitles(): Locator {
     return this.rows.locator('.moment-row__title');

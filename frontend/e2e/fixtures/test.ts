@@ -13,6 +13,7 @@ import { LeftTeamPage } from '../pages/left-team.page';
 import { MomentsPage } from '../pages/moments.page';
 import { NotFoundPage } from '../pages/not-found.page';
 import { ProfilePage } from '../pages/profile.page';
+import { RefreshBannerPage } from '../pages/refresh-banner.page';
 import { SignInPage } from '../pages/sign-in.page';
 import { TeamPage } from '../pages/team.page';
 
@@ -44,6 +45,7 @@ interface Fixtures {
   discardDialog: DiscardChangesDialogPage;
   leaveDialog: LeaveTeamDialogPage;
   leftTeamPage: LeftTeamPage;
+  refreshBanner: RefreshBannerPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -160,6 +162,10 @@ export const test = base.extend<Options & Fixtures>({
 
   leftTeamPage: async ({ page }, use) => {
     await use(new LeftTeamPage(page));
+  },
+
+  refreshBanner: async ({ page }, use) => {
+    await use(new RefreshBannerPage(page));
   },
 });
 
