@@ -15,5 +15,9 @@ Playwright, WCAG) needs a record here that gives its reason.
 
 Not decided yet, each by the journey that first needs it: the globe's renderer and asset format
 (journey 8), the hosting platform, the providers of the
+| [0004](0004-azure-hosting.md) | Hosted on one Azure App Service, deployed on every commit to main | Accepted |
+
+Not decided yet, each by the journey that first needs it: the globe's renderer and asset format
+(journey 8), the database engine (journey 2), the providers of the
 postal code source (journey 3), the calendars (journey 19) and the sender of sign-in emails
 (journey 7).
