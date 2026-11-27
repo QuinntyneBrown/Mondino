@@ -1878,6 +1878,10 @@ still 90. Total: 93.
   with `performance.now()`, which the fake clock moves in real time. The scene now takes the
   frame's own time from `requestAnimationFrame`, and the spec gives each frame the time a slow or
   a quick device would.
+- On CI the step-down spec drew 49 frames in 15 seconds: SwiftShader on the runner draws about
+  three a second at two device pixels to the CSS pixel. A slow device is now given 4 frames a
+  second, so 3 seconds of them are a dozen frames, on a 320 px screen; the quick case, which needs
+  90 frames to prove anything, is `DetailLevel`'s unit tests.
 - The 95th percentile of the team of 500 was 2 to 3 ms alone and 313 ms in `verify.mjs`, beside
   the e2e workers and xUnit's parallel classes: the thread pool, not the read, was timed. The
   test runs in a collection of its own with parallelisation off.
@@ -1899,6 +1903,9 @@ still 90. Total: 93.
 6. **Hold the globe still in a spec whose clock jumps.** A turning globe draws a frame for every
    16 ms that `runFor` passes; the hidden-tab refresh spec took 12 s on CI for frames it never
    looked at.
+7. **Count the frames a spec needs, and keep them few.** CI's software WebGL draws a few frames a
+   second; give each frame the time you need it to stand for, and leave long runs of frames to
+   unit tests.
 
 **Earlier lessons applied**
 

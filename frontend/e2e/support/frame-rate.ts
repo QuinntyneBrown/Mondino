@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Gives every animation frame a time of the spec's choosing: 32 frames a second, just over 30, until
- * `slowDown` is called, then 20, one frame after another, whatever the machine running the spec
- * can draw. It also records how many indices each draw call drew, so a spec can tell the models
- * apart.
+ * Gives every animation frame a time of the spec's choosing, one frame after another, whatever
+ * the machine running the spec can draw: 60 frames a second until `slowDown` is called, then 4,
+ * so that 3 seconds of them are few frames to draw. It also records how many indices each draw
+ * call drew, so a spec can tell the models apart.
  */
 export async function watchFrames(page: Page): Promise<void> {
   await page.addInitScript(() => {
@@ -19,7 +19,7 @@ export async function watchFrames(page: Page): Promise<void> {
         const batch = { frame: 0, callbacks: [] as FrameRequestCallback[] };
         batch.frame = requestAnimationFrame((now) => {
           pending = undefined;
-          time = time === undefined ? now : time + (frames.slow ? 50 : 1000 / 32);
+          time = time === undefined ? now : time + (frames.slow ? 250 : 1000 / 60);
           frames.count++;
           for (const each of batch.callbacks) each(time);
         });
@@ -47,7 +47,7 @@ export async function watchFrames(page: Page): Promise<void> {
   });
 }
 
-/** From now on, frames come 20 a second. */
+/** From now on, frames come 4 a second. */
 export async function slowDown(page: Page): Promise<void> {
   await page.evaluate(() => {
     (window as unknown as { __frames: { slow: boolean } }).__frames.slow = true;
