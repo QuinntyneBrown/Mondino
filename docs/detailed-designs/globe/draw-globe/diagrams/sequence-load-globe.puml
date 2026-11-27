@@ -26,15 +26,7 @@ participant "Mondino web app origin" as origin
 actor -> page : Open the Globe screen
 page -> placeholder : Show in the globe's box (L2-008 AC5)
 placeholder --> actor : Placeholder, heading, counts and panel
-page -> origin : Dynamic import of the globe library (@defer)
-alt globe chunk fails to load
-  origin --> page : Error
-  page -> fallback : Show in the globe's box (@error),\nwith the placements from stillPlacements
-  fallback --> actor : Still picture with the team's pins, which lift\nand open their panels; it does not turn (L2-008)
-  page --> actor : Legend: "Still view — 3D isn’t available in this browser"
-else globe chunk loaded
-origin --> page : Globe chunk
-page -> view : Create mo-globe in the same box, placeholder and still picture projected
+page -> view : Create mo-globe in the same box, the placeholder projected
 view -> scene : create(canvas, options)
 scene -> scene : Ask for a WebGL context
 alt WebGL context available
@@ -46,22 +38,23 @@ alt WebGL context available
     scene --> view : First frame drawn
     view -> view : state = Ready, remove the placeholder
     view --> actor : 3D globe, no layout shift (L2-008 AC1, AC5)
-  else assets fail to load
-    origin --> scene : Error or timeout
+  else renderer or assets fail to load
+    origin --> scene : Error
     scene --> view : Reject with GlobeUnavailableError(AssetsFailed)
-    view -> fallback : state = Fallback, show the still picture\nwith the placements the page gives it
+    view --> page : stateChange(Fallback); destroyed, scene released
+    page -> fallback : Show in the globe's box,\nwith the placements from stillPlacements
     fallback --> actor : Still picture with the team's pins, which lift\nand open their panels; it does not turn (L2-008)
     page --> actor : Legend: "Still view — 3D isn’t available in this browser"
   end
 else no WebGL context
   scene --> view : Reject with GlobeUnavailableError(NoWebGL)
-  view -> fallback : state = Fallback, show the still picture\nwith the placements the page gives it
+  view --> page : stateChange(Fallback); destroyed
+  page -> fallback : Show in the globe's box,\nwith the placements from stillPlacements
   fallback --> actor : Still picture with the team's pins, which lift\nand open their panels; it does not turn (L2-008)
   page --> actor : Legend: "Still view — 3D isn’t available in this browser"
-end
 end
 actor -> page : Leave the Globe screen
 page -> view : Destroy
 view -> scene : dispose() and abort pending loads
-scene --> view : Renderer, model, textures and loop released
+scene --> view : Renderer, model, textures, pending frame and WebGL context released
 @enduml

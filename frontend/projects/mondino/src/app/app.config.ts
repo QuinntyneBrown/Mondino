@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
+import { TEAM_MEMBERSHIP } from '@mondino/api';
 import { LocalTeamMembership } from '@mondino/domain';
 import { routes } from './app.routes';
 
@@ -10,7 +10,6 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    { provide: CLOCK, useValue: { now: () => Date.now() } },
     { provide: TEAM_MEMBERSHIP, useClass: LocalTeamMembership },
   ],
 };

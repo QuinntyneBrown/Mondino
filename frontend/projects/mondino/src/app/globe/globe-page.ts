@@ -8,22 +8,26 @@ import {
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
-import { TEAM_MEMBERSHIP } from '@mondino/api';
-import { GlobeFallback, Toast } from '@mondino/components';
-import { stillPlacements } from '@mondino/domain';
+import { CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
+import { GlobeFallback, GlobeLegend, GlobePlaceholder, Toast } from '@mondino/components';
+import { GlobeView, type GlobeState } from '@mondino/globe';
+import { BrowserClock, stillPlacements } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
 
 /** How long the toast after joining stays before it goes by itself. */
 export const toastLifetime = 4000;
 
 /**
- * Globe, the home screen. Journey 4 builds only the arrival after joining (L2-005): the new
- * teammate's pin on the still globe, lifted, labelled and pulsing once, and a toast that says they
- * are on the map. The 3D globe, the team's pins, the counts and the panel join with journeys 8 to 15.
+ * Globe, the home screen: the 3D globe (L2-008, L2-010), loaded behind `@defer` with a placeholder
+ * in its place, or the still picture where it cannot be drawn. Straight after joining (L2-005) the
+ * new teammate's pin is on it, lifted, labelled and pulsing once, with a toast that says they are
+ * on the map. The team's pins, the counts and the panel join with journeys 10 to 15.
  */
 @Component({
   selector: 'mo-globe-page',
-  imports: [GlobeFallback, Toast],
+  imports: [GlobeFallback, GlobeLegend, GlobePlaceholder, GlobeView, Toast],
+  // One clock for the screen, released with it.
+  providers: [{ provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './globe-page.html',
   styleUrl: './globe-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +40,18 @@ export class GlobePage {
     inject(Router).currentNavigation()?.extras.state?.['justJoined'],
   );
 
+  /** Whether the 3D globe is loading, drawn, or cannot be drawn and the still picture is shown. */
+  protected readonly globeState = signal<GlobeState>('Loading');
+
+  /** The new pin on the 3D globe. */
+  protected readonly newPin = computed(() => {
+    const joined = this.justJoined;
+    return joined
+      ? { position: joined.position, label: `${joined.name} (you) · ${joined.cityName}` }
+      : null;
+  });
+
+  /** The new pin on the still picture. */
   protected readonly you = computed(() => {
     const joined = this.justJoined;
     if (!joined) return null;

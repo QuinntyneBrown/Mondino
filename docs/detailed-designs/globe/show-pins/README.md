@@ -125,9 +125,9 @@ decides how they are drawn.
   `PinLayer` holds `liftedId`: the pin under
   the pointer, or else the pin with keyboard focus. A pin is drawn lifted when it is the
   lifted pin or the selected pin. The canvas under the layer is hidden from the accessibility
-  tree. Whether the renderer also draws a
-  3D body under each pin is `<TO SUPPLY>` with the renderer ADR; the element over the canvas
-  is what is pointed at, selected and tested.
+  tree. The renderer draws no 3D body under a
+  pin (ADR 0012): the element over the canvas is the pin, and is what is pointed at, selected
+  and tested. `GlobeScene.project` gives each placement's place in the box.
 - **`PinMarkTemplate`** (`ng-template[moPinMark]`) and **`PinLabelTemplate`**
   (`ng-template[moPinLabel]`) — templates that the page projects into `GlobeView`. The `globe`
   library cannot import `components` or `domain`, so it does not know how to draw an avatar or

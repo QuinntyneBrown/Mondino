@@ -4,3 +4,4 @@ export * from './lib/storage/local-team-membership';
 export * from './lib/clipboard/navigator-clipboard';
 export * from './lib/countries/supported-countries';
 export * from './lib/email/email-address';
+export * from './lib/time/browser-clock';

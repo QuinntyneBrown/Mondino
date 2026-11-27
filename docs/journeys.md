@@ -48,6 +48,13 @@ Journey 7 stands at 100: every criterion of L2-052 is proven by an acceptance te
 through the API and the screen's in Playwright, by keyboard and by touch at 320 px. The Globe it opens
 is the arrival journey 4 left; an expired or used link, and the wait while one opens, show Sign In's
 form until their screens are designed (ADR 0011).
+Journey 8 stands at 100: every criterion of L2-008 and L2-010 is proven by an acceptance test in
+Playwright, read from the drawn globe's pixels, and the sun's position by direct unit tests (L2-010
+criterion 1), but for what its prompt hands on: stepping down to the lower level of detail (L2-008
+criterion 4) is journey 29's, which the scene's two detail steps are ready for; pins that lift and
+open their panels on the still picture (criterion 3), a pin in the shaded half and readable there
+(L2-010 criteria 2 and 4) come with journeys 9, 10 and 14; and the legend leaving out "Moment this
+week" with every kind turned off (criterion 5) with journey 22. Join's stage draws the same globe.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -58,7 +65,7 @@ form until their screens are designed (ADR 0011).
 | 5 | [Create a team](prompts/05-create-a-team-prompt.md) | Name a team, place your own pin and get its invite link. | L2-053 | 5 | 100 |
 | 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 90 |
 | 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 100 |
-| 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 0 |
+| 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 100 |
 | 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 0 |
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 0 |
 | 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 0 |
@@ -81,4 +88,4 @@ form until their screens are designed (ADR 0011).
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **22** |
+| | **Total** | | | **147** | **32** |

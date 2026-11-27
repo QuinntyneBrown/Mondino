@@ -25,14 +25,16 @@ import {
   TextField,
   Wordmark,
 } from '@mondino/components';
-import { TEAM_MEMBERSHIP } from '@mondino/api';
-import { stillPlacements } from '@mondino/domain';
+import { CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
+import { BrowserClock, stillPlacements } from '@mondino/domain';
+import { type GlobeState, GlobeView, type NewPin } from '@mondino/globe';
 import type { JustJoined } from '../globe/just-joined';
 import { JoinStore, nameLimit } from './join-store';
 
 /**
  * Join, as an invite link opens it: the team's name and count, a few teammates' initials, the
- * form and the globe with the team's bare pins, before the person has given anything (L2-001).
+ * form and the 3D globe with the team's bare pins, or the still picture where it cannot be drawn
+ * (L2-008), before the person has given anything (L2-001).
  * The form asks for a name, a country and a postal code (L2-002) and says what is missing;
  * joining is journey 4.
  */
@@ -46,6 +48,7 @@ import { JoinStore, nameLimit } from './join-store';
     CityField,
     GlobeFallback,
     GlobePlaceholder,
+    GlobeView,
     LookupMessage,
     Notice,
     RouterLink,
@@ -54,7 +57,8 @@ import { JoinStore, nameLimit } from './join-store';
     TextField,
     Wordmark,
   ],
-  providers: [JoinStore],
+  // One clock for the screen, released with it.
+  providers: [JoinStore, { provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './join-page.html',
   styleUrl: './join-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,10 +79,23 @@ export class JoinPage {
     })),
   );
 
-  /** The team's bare pins on the still globe, until the 3D globe draws them (journey 8). */
-  protected readonly pins = computed(() => {
+  /** Whether the 3D globe is drawn, or the still picture stands in for it (L2-008). */
+  protected readonly globeState = signal<GlobeState>('Loading');
+
+  /** The team's bare pins, as plain markers until pins are built (show-pins). */
+  protected readonly positions = computed(() => {
     const invite = this.store.invite();
-    return invite && this.store.inviteState() === 'Ready' ? stillPlacements(invite.positions) : [];
+    return invite && this.store.inviteState() === 'Ready' ? invite.positions : [];
+  });
+
+  /** The same pins on the still picture. */
+  protected readonly pins = computed(() => stillPlacements(this.positions()));
+
+  /** The new pin at the city found, on the 3D globe. */
+  protected readonly newPin = computed<NewPin | null>(() => {
+    const lookup = this.store.lookup();
+    if (lookup.kind !== 'Found' || this.store.inviteState() !== 'Ready') return null;
+    return { position: lookup.result.city.position, label: `You · ${lookup.result.city.name}` };
   });
 
   /** The join is being answered: the form is locked (L2-005). */

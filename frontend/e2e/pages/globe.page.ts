@@ -1,10 +1,23 @@
 import type { Locator, Page } from '@playwright/test';
 
-/** Globe: the home screen, as journey 4 opens it after joining. */
+/** Globe: the home screen. */
 export class GlobePage {
   readonly main: Locator;
   readonly stage: Locator;
+  /** The box the globe is drawn in, whatever draws it. */
+  readonly globeBox: Locator;
   readonly globe: Locator;
+  /** The placeholder that holds the globe's place while it loads. */
+  readonly placeholder: Locator;
+  /** The 3D globe's canvas. */
+  readonly canvas: Locator;
+  /** The still picture, where the 3D globe cannot be drawn. */
+  readonly stillPicture: Locator;
+  /** The legend over the stage, from 640 px, and its entries. */
+  readonly legend: Locator;
+  readonly legendEntries: Locator;
+  /** The line under the still picture, under 640 px. */
+  readonly stillLine: Locator;
   readonly allPins: Locator;
   /** The new teammate's own pin, lifted, and its label. */
   readonly youPin: Locator;
@@ -23,7 +36,14 @@ export class GlobePage {
     this.images = page.locator('img');
     this.everything = page.locator('body');
     this.stage = this.main.locator('.globe-screen__stage');
-    this.globe = this.stage.locator('.globe');
+    this.globeBox = this.stage.locator('.globe-screen__globe');
+    this.globe = this.stage.locator('.globe:not(.globe--loading)');
+    this.placeholder = this.stage.getByRole('img', { name: 'The globe is loading' });
+    this.canvas = this.stage.locator('canvas.globe__art');
+    this.stillPicture = this.stage.locator('svg.globe__art');
+    this.legend = this.stage.locator('.globe-screen__legend');
+    this.legendEntries = this.legend.locator('li');
+    this.stillLine = this.stage.locator('.globe-screen__still');
     this.allPins = this.stage.locator('.globe__pin');
     this.youPin = this.stage.locator('.globe__pin--lifted .pin-dot--you');
     this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');
@@ -34,6 +54,13 @@ export class GlobePage {
 
   async open(): Promise<void> {
     await this.page.goto('/globe');
+  }
+
+  /** Loses the 3D globe's WebGL context, as a browser does when the GPU is reset. */
+  async loseTheContext(): Promise<void> {
+    await this.canvas.evaluate((canvas: HTMLCanvasElement) =>
+      canvas.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext(),
+    );
   }
 
   /** The name of the new pin's pulse animation, or "none" when it does not pulse. */
