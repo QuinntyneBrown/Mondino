@@ -358,4 +358,22 @@ test.describe('Team: a team of hundreds', () => {
     expect(await teamPage.rows.count()).toBeLessThanOrEqual(open * 50);
     expect(await teamPage.rows.count()).toBeLessThan(150);
   });
+
+  test('under 768 px an open city’s rows are the phone’s rows, and the column headings are gone', async ({
+    api,
+    teamPage,
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+    await teamPage.open();
+    await expect(teamPage.rows).toHaveCount(8);
+
+    const tara = teamPage.row('Tara Okafor');
+    await expect(teamPage.cells(tara).phone).toHaveText('Honolulu · 11h behind');
+    await expect(teamPage.cells(tara).status).toHaveText('Probably asleep');
+    await expect(teamPage.cells(tara).location).toBeHidden();
+    await expect(teamPage.teamHead).toBeHidden();
+    expect(await fitsItsWidth(page)).toBe(true);
+  });
 });
