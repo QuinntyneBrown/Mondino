@@ -407,3 +407,59 @@ apply the lessons that fit.
   `HttpMessageHandler`.
 - *Remove `IHttpClientFactory`'s loggers* (journey 3, lesson 4): the Email source's client logs
   nothing.
+
+## Journey 8: Draw the globe
+
+**What slowed it**
+
+- The prompt and the design put `GlobeView` behind `@defer`. Measured, the defer runtime added about
+  7 kB to the initial chunk and `NgTemplateOutlet` another 2.8 kB, past the 265 kB budget, to defer
+  8 kB of the globe library's own code. The renderer's dynamic import is the lazy boundary instead,
+  and a failed renderer chunk is one more reason for the still picture (ADR 0012). `BrowserClock`
+  moved from the root to each screen's providers for the last 0.8 kB.
+- The CSP of ADR 0010 has no `blob:`, so three.js's texture loading could not be used as it comes:
+  the masks are fetched and decoded with `createImageBitmap`.
+- three.js declares `pc_fragColor` itself only for GLSL 1 shaders; a GLSL 3 `ShaderMaterial` names
+  its own output. `GLTFLoader` also renames nodes with a dot in them, so `Globe.High` became
+  `GlobeHigh`.
+- Natural Earth's rings that cross the date line rasterised as stripes the width of the world until
+  they were unwrapped and drawn on a grid three worlds wide, folded back with XOR.
+- The release spec signed in through an emailed link and then went back: Sign In replaces its
+  history entry, so "back" left the app for `about:blank` and every count read zero. The spec now
+  comes from Not Found through its link, and goes back and forth three times.
+- The just-joined spec waited for the new pin before the toast; with the 3D globe the pin appears
+  only after the first frame, and the toast's four seconds were half gone. The toast is checked
+  first, then the pin.
+
+**Lessons**
+
+1. **Measure a lazy boundary before choosing it.** `@defer` and structural helpers cost bytes in
+   the initial chunk; a dynamic `import()` inside a lazy route's code costs nothing there. Defer the
+   heavy part, not the component around it.
+2. **Prove a 3D drawing by its pixels at projected places.** Replicate the camera in the spec,
+   sample a 5 × 5 patch at a place's projection, and compare one place at two times rather than a
+   colour against a constant; SwiftShader in headless Chromium draws WebGL 2 well enough.
+3. **Count what a screen holds through the browser, not the app.** An init script that wraps
+   `getContext`, the draw calls, `ResizeObserver` and `matchMedia`, with CDP's listener lists,
+   proves release without a hook in the product code.
+4. **Leave a screen in a spec the way a person would, inside the app.** A `goBack` after a replaced
+   history entry leaves the app and proves nothing.
+5. **Under a strict CSP, decode images from bytes.** `fetch` with the page's `AbortSignal` and
+   `createImageBitmap` need neither `blob:` nor a looser `img-src`, and abort with the screen.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0012, the 640 px breakpoint in three
+  requirements and the design system, and the draw-globe design were one commit before any code;
+  the design was touched again for what the build measured (no `@defer`, the clock per screen, the
+  meshes' names and sizes, `GlobeLegend`).
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6): 259.24 kB before, 259.64
+  kB after, inside the 260 kB warning; no budget moved. The renderer's chunk is 629 kB (130 kB
+  compressed) and loads only where WebGL 2 is had.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice ran red first, by
+  stashing the slice's app code or by removing the line under test (the sun's minute tick, the
+  release on destroy, the stop while hidden) and building again.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it caught
+  a triple-slash reference ESLint refuses and the just-joined spec's order.
+- *Read a mock's markup before the app is open* (journey 7, lesson 5): the Join spec that compares
+  pins with the mock still reads it first, and now runs on the still picture the mock draws.
