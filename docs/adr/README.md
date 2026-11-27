@@ -17,6 +17,7 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0004](0004-azure-hosting.md) | Hosted on one Azure App Service, deployed on every commit to main | Accepted |
 | [0008](0008-session-and-cross-site-requests.md) | The session is a year-long sliding cookie, and the open requests refuse other sites | Accepted |
 | [0009](0009-making-a-team.md) | Making a team keeps only a keyed fingerprint of the email, and reuses Join's lookup | Accepted |
+| [0010](0010-protecting-team-data.md) | Every endpoint needs a session unless marked open, and the app is served under a nonce-based CSP | Accepted |
 
 Not decided yet, each by the journey that first needs it: the globe's renderer and asset format
 (journey 8), the providers of the calendars (journey 19) and the sender of sign-in emails

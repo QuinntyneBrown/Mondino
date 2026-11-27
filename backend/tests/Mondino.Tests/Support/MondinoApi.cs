@@ -9,6 +9,7 @@ using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
 using Mondino.Domain.Teams;
+using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
 
 namespace Mondino.Tests.Support;
@@ -41,6 +42,12 @@ public class MondinoApi : WebApplicationFactory<Program>
 
     public bool UsesPostalCodeSource { get; set; }
 
+    /// <summary>Set before the first request to serve <c>TestApp</c>, a stand-in for the Angular build, as wwwroot.</summary>
+    public bool ServesApp { get; set; }
+
+    /// <summary>The changes the test-only session endpoint was asked to make.</summary>
+    public TestOnlyChanges Changes { get; } = new();
+
     /// <summary>The GeoNames account the real lookup is configured with; null leaves it unset.</summary>
     public string? PostalCodeSourceUsername { get; set; } = "mondino-tests";
 
@@ -55,6 +62,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.UseSetting("Database:Provider", "InMemory");
         builder.UseSetting("Database:Name", $"mondino-tests-{Guid.NewGuid():N}");
+
+        if (ServesApp)
+        {
+            builder.UseWebRoot(Path.Combine(AppContext.BaseDirectory, "TestApp"));
+        }
 
         if (EmailKey is not null)
         {
@@ -98,6 +110,8 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.RemoveAll<IAppDbContext>();
                 services.AddScoped<IAppDbContext, FailingAppDbContext>();
             }
+
+            services.AddSingleton(Changes);
 
             // Endpoints that exist only so a test can see how the API answers a failure.
             services.AddControllers().AddApplicationPart(typeof(MondinoApi).Assembly);
@@ -156,12 +170,39 @@ public class MondinoApi : WebApplicationFactory<Program>
         await database.SaveChangesAsync(CancellationToken.None);
     }
 
+    /// <summary>Gives a teammate another postal code, as stored, keeping their city.</summary>
+    public async Task MoveTeammateAsync(Guid teammateId, string postalCode)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var teammate = await database.Teammates.SingleAsync(t => t.Id == teammateId);
+        database.Entry(teammate).Property(t => t.PostalCode).CurrentValue = postalCode;
+        await database.SaveChangesAsync(CancellationToken.None);
+    }
+
+    /// <summary>The id of the team of the invite token.</summary>
+    public async Task<Guid> TeamIdAsync(string inviteToken)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        return await database.Teams.Where(t => t.InviteToken == inviteToken).Select(t => t.Id).SingleAsync();
+    }
+
     /// <summary>A teammate as stored, with their city.</summary>
     public async Task<Teammate> TeammateAsync(Guid teammateId)
     {
         await using var scope = Services.CreateAsyncScope();
         var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         return await database.Teammates.AsNoTracking().Include(t => t.City).SingleAsync(t => t.Id == teammateId);
+    }
+
+    /// <summary>Takes a teammate out of their team, as leaving does (journey 24).</summary>
+    public async Task RemoveTeammateAsync(Guid teammateId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        database.Teammates.Remove(await database.Teammates.SingleAsync(t => t.Id == teammateId));
+        await database.SaveChangesAsync(CancellationToken.None);
     }
 
     /// <summary>Makes the browser's session one of the team's teammates: the one who joined first.</summary>

@@ -13,8 +13,15 @@ export class GlobePage {
   readonly toast: Locator;
   readonly dismiss: Locator;
 
+  /** Every image element on the page: a name rendered as markup would make one. */
+  readonly images: Locator;
+  /** Everything the page shows. */
+  readonly everything: Locator;
+
   constructor(readonly page: Page) {
     this.main = page.locator('main.globe-screen');
+    this.images = page.locator('img');
+    this.everything = page.locator('body');
     this.stage = this.main.locator('.globe-screen__stage');
     this.globe = this.stage.locator('.globe');
     this.allPins = this.stage.locator('.globe__pin');

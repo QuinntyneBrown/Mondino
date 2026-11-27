@@ -109,6 +109,7 @@ source and Open-Meteo. The browser calls only the Mondino API.
   `aria-activedescendant` naming the active one: the WAI-ARIA combobox pattern with a listbox,
   written in the component, as `pages/join/choosing-city` draws it. Up and Down move through
   the list, Enter or a tap chooses, Escape closes it. Its inputs are `text`, `results` and `chosen`; it emits `textChange` and `choose`.
+  What is typed is at most 60 characters (`maxlength="60"`), as the backend's search allows (L2-044).
   Its help, in a `role="status"` element linked with `aria-describedby`, reads "Postal code
   lookup is down right now, so pick your city instead. Your pin goes to its centre." Each
   result shows the city's name and region as text. It injects nothing.

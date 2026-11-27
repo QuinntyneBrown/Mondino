@@ -38,8 +38,12 @@ class TeamScopeBehaviour<TRequest, TResponse> {
   +Handle(request, next, ct): Task<TResponse>
 }
 
-class ValidationBehaviour<TRequest, TResponse> {
-  +Handle(request, next, ct): Task<TResponse>
+class AntiforgeryFilter {
+  +OnAuthorizationAsync(context): Task
+}
+
+class AppShell {
+  +ServeAsync(context: HttpContext): Task
 }
 
 class JoinTeamCommandValidator {
@@ -53,18 +57,20 @@ class NameNormaliser {
 }
 
 class RateLimitPolicies {
-  +{static} string OpenInvite = 30 per minute
-  +{static} string PostalCodeLookup = 10 per minute
+  +{static} string Invite = 30 per minute
+  +{static} string Lookup = 10 per minute
+  +{static} string CitySearch = 30 per minute
   +{static} string Join = 5 per minute
-  +{static} Add(options: RateLimiterOptions): void
+  +{static} string CreateTeam = 5 per hour
+  +{static} AddRateLimitPolicies(services): IServiceCollection
 }
 
 class SecurityHeadersMiddleware {
   +InvokeAsync(context: HttpContext): Task
 }
 
-class ProblemDetailsWriter {
-  +WriteAsync(context, status: int, code: string): Task
+class RefusalHandler {
+  +TryHandleAsync(context, exception, ct): ValueTask<bool>
 }
 
 class PinDto {
@@ -81,8 +87,8 @@ class ProfileDto {
   +string TeamName
   +PinDto Pin
   +string CountryCode
-  +string PostalCode
-  +TeammateSettings Settings
+  +string? PostalCode
+  settings: journeys 22 and 23
 }
 
 class GetPinsQuery {
@@ -99,9 +105,10 @@ TeamScopeBehaviour ..> ICurrentTeammate : compares TeamId
 TeamScopeBehaviour ..> ITeamScopedRequest : applies to
 ITeamScopedRequest <|.. GetPinsQuery
 ITeamScopedRequest <|.. GetProfileQuery
-TeamScopeBehaviour ..> ProblemDetailsWriter : team_not_found
-ValidationBehaviour ..> JoinTeamCommandValidator : runs
-ValidationBehaviour ..> ProblemDetailsWriter : validation_failed
+TeamScopeBehaviour ..> RefusalHandler : team_not_found
+JoinTeamCommandValidator ..> RefusalHandler : validation_failed
+AntiforgeryFilter ..> RefusalHandler : cross_site_request
+SecurityHeadersMiddleware ..> AppShell : gives the nonce to
 JoinTeamCommandValidator ..> NameNormaliser : after
 GetPinsQuery ..> PinDto : answers with, in a TeamPinsDto
 GetProfileQuery ..> ProfileDto : answers the owner with

@@ -19,11 +19,19 @@ export function postJson<T>(url: string, body: unknown, signal: AbortSignal): Pr
   });
 }
 
+/** The cookie the backend gives a session's antiforgery token in, and the header it is returned in (docs/adr/0010). */
+const antiforgeryCookie = '__Host-mondino-xsrf';
+const antiforgeryHeader = 'x-xsrf-token';
+
 async function send<T>(url: string, init: RequestInit & { signal: AbortSignal }): Promise<T> {
   const { signal } = init;
   let response: Response;
   try {
-    response = await fetch(url, { ...init, credentials: 'same-origin' });
+    response = await fetch(url, {
+      ...init,
+      headers: withAntiforgery(init),
+      credentials: 'same-origin',
+    });
   } catch (error) {
     if (signal.aborted) throw signal.reason;
     throw new ApiError(ApiError.unreachable, 0, { cause: error });
@@ -47,4 +55,27 @@ async function codeOf(response: Response): Promise<string> {
   } catch {
     return 'unexpected';
   }
+}
+
+/**
+ * A change (any method but GET and HEAD) returns the antiforgery token the backend gave the
+ * session, so another site cannot make one with the teammate's cookie. A read sends none.
+ */
+function withAntiforgery(init: RequestInit): HeadersInit | undefined {
+  const method = (init.method ?? 'GET').toUpperCase();
+  if (method === 'GET' || method === 'HEAD') return init.headers;
+  const token = cookie(antiforgeryCookie);
+  if (!token) return init.headers;
+  const headers = new Headers(init.headers);
+  headers.set(antiforgeryHeader, token);
+  return headers;
+}
+
+/** The value of one cookie scripts may read, or null. */
+function cookie(name: string): string | null {
+  for (const part of document.cookie.split(';')) {
+    const [key, ...value] = part.trim().split('=');
+    if (key === name) return decodeURIComponent(value.join('='));
+  }
+  return null;
 }

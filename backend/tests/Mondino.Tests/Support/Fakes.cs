@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mondino.Application.Persistence;
@@ -46,10 +47,37 @@ public sealed class FakeCurrentTeammate : ICurrentTeammate
 /// <summary>Throws, carrying what must never reach a response.</summary>
 [ApiController]
 [Route("api/test-only")]
+[AllowAnonymous]
 public sealed class TestOnlyController : ControllerBase
 {
     public const string Secret = "Sofia Bianchi 20121";
 
     [HttpGet("unhandled")]
     public IActionResult Unhandled() => throw new InvalidOperationException(Secret);
+}
+
+/// <summary>What the test-only change below was asked to do, so a test can see that nothing changed.</summary>
+public sealed class TestOnlyChanges
+{
+    private int made;
+
+    public int Made => made;
+
+    public void Make() => Interlocked.Increment(ref made);
+}
+
+/// <summary>
+/// A change that needs a session, as Profile &amp; Settings' will (journeys 22 to 24): it stands in
+/// for them so the protection every such request gets can be proven before they exist.
+/// </summary>
+[ApiController]
+[Route("api/test-only/teams/{teamId:guid}/changes")]
+public sealed class TestOnlySessionController(TestOnlyChanges changes) : ControllerBase
+{
+    [HttpPost]
+    public IActionResult Change()
+    {
+        changes.Make();
+        return NoContent();
+    }
 }

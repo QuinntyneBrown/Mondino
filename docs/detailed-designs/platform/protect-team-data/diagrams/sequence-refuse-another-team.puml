@@ -21,7 +21,7 @@ end box
 box "Backend — Mondino API" #D1FADF
   participant "SecurityHeadersMiddleware" as headers
   participant "TeamsController" as controller
-  participant "ProblemDetailsWriter" as problems
+  participant "RefusalHandler" as problems
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "TeamScopeBehaviour" as scope

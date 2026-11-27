@@ -29,6 +29,9 @@ public static class ErrorCodes
     /// <summary>A team that already has all 500 of its places taken.</summary>
     public const string TeamFull = "team_full";
 
+    /// <summary>A team that is not the current teammate's, or that does not exist: the two answer alike.</summary>
+    public const string TeamNotFound = "team_not_found";
+
     /// <summary>A request that changes something, sent from another site (docs/adr/0008).</summary>
     public const string CrossSiteRequest = "cross_site_request";
 

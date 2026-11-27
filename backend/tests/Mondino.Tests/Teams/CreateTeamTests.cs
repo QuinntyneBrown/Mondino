@@ -56,7 +56,7 @@ public sealed class CreateTeamTests
         Assert.DoesNotContain("sofia", sofia.EmailFingerprint!, StringComparison.OrdinalIgnoreCase);
 
         // And she is signed in: the invite link knows she is already in the team
-        var cookie = Assert.Single(response.Headers.GetValues("Set-Cookie"));
+        var cookie = Assert.Single(response.Headers.GetValues("Set-Cookie"), c => c.StartsWith("__Host-mondino-session=", StringComparison.Ordinal));
         Assert.StartsWith("__Host-mondino-session=", cookie, StringComparison.Ordinal);
         Assert.Contains("httponly", cookie, StringComparison.OrdinalIgnoreCase);
         using var open = new HttpRequestMessage(HttpMethod.Get, $"/api/invites/{inviteToken}");

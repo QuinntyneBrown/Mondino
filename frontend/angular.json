@@ -87,7 +87,15 @@
       "root": "projects/api",
       "sourceRoot": "projects/api",
       "prefix": "mo",
-      "architect": {}
+      "architect": {
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "buildTarget": "mondino:build:development"
+          }
+        }
+      }
     },
     "domain": {
       "projectType": "library",

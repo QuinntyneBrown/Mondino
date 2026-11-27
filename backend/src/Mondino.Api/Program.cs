@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Mondino.Api.Errors;
 using Mondino.Api.RateLimiting;
+using Mondino.Api.Security;
 using Mondino.Application;
 using Mondino.Infrastructure;
 
@@ -11,30 +13,54 @@ builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add<AntiforgeryFilter>());
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemCodes.Customize);
 builder.Services.AddExceptionHandler<RefusalHandler>();
 builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<AppShell>();
 builder.Services.AddRateLimitPolicies();
 
+// Closed by default: every endpoint needs a teammate's session unless it is marked open with
+// [AllowAnonymous] and a rate limit (L2-045, docs/adr/0010).
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+
 var app = builder.Build();
+
+// The security headers go on every answer, the refusals included, so they are added first.
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 // Every error is ProblemDetails with a code. No migration is applied here: `Mondino.Cli migrate` does.
 app.UseExceptionHandler();
 app.UseStatusCodePages();
-app.UseAuthentication();
-app.UseRateLimiter();
-
-// Liveness: the process is running. It checks nothing else, so it never fails with a dependency.
-app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
-app.MapControllers();
 
 // In a deployment the Angular build is published into wwwroot and served from the same origin,
-// so the browser calls only this backend. An unknown /api route stays a 404, never the app shell.
-app.UseDefaultFiles();
+// so the browser calls only this backend. Its files are open to anyone; index.html is served by
+// AppShell, with this answer's nonce, wherever it is asked for.
+app.Use((context, next) =>
+{
+    if (context.Request.Path.Equals("/index.html", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Request.Path = "/";
+    }
+
+    return next(context);
+});
 app.UseStaticFiles();
-app.Map("/api/{**rest}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound));
-app.MapFallbackToFile("index.html");
+
+app.UseRouting();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Liveness: the process is running. It checks nothing else, so it never fails with a dependency.
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+app.MapControllers();
+
+// An unknown /api route stays a 404, never the app shell.
+app.Map("/api/{**rest}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound)).AllowAnonymous();
+app.MapFallback((HttpContext context) => context.RequestServices.GetRequiredService<AppShell>().ServeAsync(context))
+    .AllowAnonymous();
 
 await app.RunAsync();
 
