@@ -13,6 +13,7 @@ export class ProfilePage {
   readonly globe: Locator;
   readonly canvas: Locator;
   readonly stillPicture: Locator;
+  readonly stillGlobe: Locator;
   readonly youPin: Locator;
   readonly youLabel: Locator;
   readonly city: Locator;
@@ -51,6 +52,7 @@ export class ProfilePage {
     this.globe = this.pinCard.locator('.globe');
     this.canvas = this.pinCard.locator('canvas.globe__art');
     this.stillPicture = this.pinCard.locator('mo-globe-fallback');
+    this.stillGlobe = this.stillPicture.locator('.globe');
     this.youPin = this.pinCard.locator('.globe__pin--lifted');
     this.youLabel = this.youPin.locator('.pin-label__name');
     this.city = this.pinCard.locator('.pin-card__city');
