@@ -27,148 +27,151 @@ invite link".
 The two endpoints behind the screen are open to anyone and are rate limited. The email is the
 teammate's own, as the postal code is: it is never shown to another teammate.
 
-Three things are not designed, and none is built before its design exists:
+Two things are not designed, and neither is built before its design exists:
 
-- What is shown when an emailed link has expired or was already used: `<TO SUPPLY>`.
+- What is shown when an emailed link has expired or was already used, and while one is being
+  opened: until it is designed, Sign In shows its form (ADR 0011).
 - How a teammate who joined by invite link signs in again. Join asks for a name, a country and
   a postal code and no email, so only the teammate who made a team has an email on record:
   `<TO SUPPLY>`.
-- Which team a sign-in link opens when one email is on more than one team: `<TO SUPPLY>`.
+
+An email on more than one team opens the team its teammate joined or made last (ADR 0011).
 
 ## Description
 
 The feature is a vertical slice from the Sign In screen to the database and to one outside
-source, the Email source. The browser calls only the Mondino API.
+source, the Email source (Postmark, ADR 0011). The browser calls only the Mondino API.
 
-**Frontend (`mondino` application, `@mondino/api`, `@mondino/components`, `@mondino/globe`)**
+**Frontend (`mondino` application, `@mondino/api`, `@mondino/components`)**
 
-- **`SignInPage`** — page at the lazy route `/sign-in`, not behind `teammateGuard`. It provides
-  `SignInStore` and binds `SIGN_IN_API`, so neither is in the initial bundle. It renders
-  `AuthLayout` with the form, or the "Check your inbox" notice, and the footer "New here?
-  Start a team or open the invite link a teammate sent you.", whose link leads to `/new`.
-  - The button's submit calls `SignInStore.requestLink()`.
+- **`SignInPage`** — page at the lazy route `/sign-in`, not behind `teammateGuard`. The route
+  binds `SIGN_IN_API` and the page provides `SignInStore`, so neither is in the initial bundle.
+  It draws the `auth` block itself, as `CreateTeamPage` does, from the Sass partial the two
+  share (`app/auth/_auth.scss`): the wordmark, the form or the "Check your inbox" notice, the
+  footer "New here? Start a team or open the invite link a teammate sent you.", whose link
+  leads to `/new`, and the stage with `GlobeFallback`, "The globe, with no pins", until journey 8
+  draws the 3D globe.
+  - The form's submit calls `SignInStore.requestLink()`.
   - `Invalid` marks the field `aria-invalid` and shows "That doesn’t look like an email
-    address." in a `role="alert"` element linked with `aria-describedby`. Focus returns to the
-    field, and the message goes when the field is edited.
+    address." in a `role="alert"` element linked with `aria-describedby` (`TextField`). Focus
+    returns to the field, and the message goes when the field is edited.
   - `Sending` disables the button, marks it `aria-busy` and reads "Sending link…".
   - `Sent` replaces the form with a `Notice` in a `role="status"` element: the title "Check
     your inbox", which takes focus, the text with the email rendered as text, and "Use another
-    email", which calls `SignInStore.useAnotherEmail()` and shows the form again.
-  - `Failed` shows an alert, "We couldn’t send the link. Mondino didn’t answer — try again in a
-    moment.", and the button reads "Try again". The email typed is kept.
+    email", a button that calls `SignInStore.useAnotherEmail()` and shows the form again.
+  - `Failed` shows an `Alert`, "We couldn’t send the link. Mondino didn’t answer — try again in
+    a moment.", and the button reads "Try again". The email typed is kept.
   - When the address carries a fragment, the page takes it as the sign-in token, removes it
     from the address with `replaceUrl`, and calls `SignInStore.open(signInToken)`. On a
     `SignInResult` with a membership it calls `TeamMembership.remember(membership)` and
-    navigates to `/globe`. On a result with no membership it navigates to `/globe` with the
-    email in the navigation state; `teammateGuard` refuses the match and `InviteNeededPage`
-    shows "You need an invite link" with that email (`adapt-to-every-width`).
-  - What the page shows in `Opening` and in `LinkUnusable` is `<TO SUPPLY>`.
-- **`SignInStore`** — service provided at the `/sign-in` route, so its state goes when the
-  person leaves the screen. It holds the writable signal `email` and the signal `state`.
-  `requestLink()` checks the email's form, sets `Sending`, calls `SignInApi.requestLink` and
-  sets `Sent` on any 202. An `ApiError` and no answer set `Failed`; the state for the code
-  `rate_limited` is `<TO SUPPLY>`. It aborts a
-  pending request when it is destroyed. `open(signInToken)` sets `Opening` and calls
-  `SignInApi.redeem`; the code `sign_in_link_unusable` sets `LinkUnusable`.
+    navigates to `/globe`, replacing the address. On a result with no membership it navigates
+    to `/globe` with the email in the navigation state; `teammateGuard` refuses the match and
+    `InviteNeededPage` shows "You need an invite link" with that email.
+  - In `Opening` and in `LinkUnusable` the page shows its form, as in `Idle` (ADR 0011).
+- **`SignInStore`** — service the page provides, so its state goes when the person leaves the
+  screen. It holds the signal `email` and the signal `state`. `requestLink()` checks the
+  email's form (`isEmailAddress` in `@mondino/domain`, the backend's own rule), sets `Sending`,
+  calls `SignInApi.requestLink` and sets `Sent`. Any `ApiError`, `rate_limited` included, sets
+  `Failed`. `open(signInToken)` sets `Opening` and calls `SignInApi.redeem`; any refusal sets
+  `LinkUnusable`. It aborts a pending request when it is destroyed.
 - **`SignInState`** — feature-local union of `Idle`, `Invalid`, `Sending`, `Sent`, `Failed`,
   `Opening` and `LinkUnusable`.
 - **`SignInApi` / `SIGN_IN_API`, `HttpSignInApi`** — contract, injection token and HTTP client
   in `@mondino/api`. `requestLink(email, signal)` sends `POST /api/sign-in-links`, and
-  `redeem(signInToken)` sends `POST /api/sign-in-links/redemptions`. The email and the token
-  travel in a request body, never in a URL.
+  `redeem(signInToken, signal)` sends `POST /api/sign-in-links/redemptions`. The email and the
+  token travel in a request body, never in a URL.
 - **`SignInResult`** — `membership` (a `Membership`: `teamId`, `teammateId`, `teamName`) or
-  null, and the `email` the link was sent to.
-- **`AuthLayout`** (`mo-auth`, block `auth`) — presentation component in `@mondino/components`
-  that Sign In and Create Team share: the mark and wordmark, a body slot (`auth__body`), a
-  footer slot (`auth__footer`) and a stage slot (`auth__stage`) for the globe. Its layout is in
-  `adapt-to-every-width`.
+  null, and `email`, the address the link was sent to when it is on no team, or null.
+- **`InviteNeededPage`** — reads the email from the navigation state once, when it is a string,
+  then takes it out of history, as `GlobePage` does with its greeting; opened or reloaded
+  without it, the sentence reads "and you aren’t on one yet". `NoticePage` renders the email as
+  text, in `strong`.
 - **`Notice`** (`mo-notice`, block `notice`) — presentation component in `@mondino/components`:
   an icon, a title, a text and an actions slot. Join uses it for an invite link that cannot be
   used (`open-invite-link`).
-- **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block, with no pins and
-  not interactive ("The globe, with no pins").
-- The email is held in memory by `SignInStore`, and by the navigation state for
-  `InviteNeededPage`. It is never written to browser storage and never placed in a URL.
+- The email is held in memory by `SignInStore`, and for one navigation by the navigation state
+  for `InviteNeededPage`. It is never written to browser storage and never placed in a URL.
 - The sign-in token is in the fragment of the emailed address, so the browser sends it to no
   server when the address is opened, and no log of the host that serves the app holds it.
 
 **Backend**
 
 - **`SignInController`** — `POST /api/sign-in-links` and `POST /api/sign-in-links/redemptions`.
-  Both actions are marked as open to anyone and carry the `SignInLink` and `SignInRedemption`
-  policies of `RateLimitPolicies` (`protect-team-data`, L2-045). Each sends one MediatR request
-  and checks nothing itself. The first answers 202 with no body. The second signs the returned
-  teammate in through `TeammateSessionHandler` and answers 200 with a `SignInResultDto`.
+  Both actions are marked as open to anyone, carry `[SameSiteOnly]` (ADR 0008) and the
+  `sign-in-link` and `sign-in-redemption` policies of `RateLimitPolicies` (L2-045). Each sends
+  one MediatR request and checks nothing itself. The first answers 202 with no body. The
+  second signs the returned teammate in through `TeammateSessionHandler` when the result has a
+  membership, and answers 200 with a `SignInResultDto`.
 - **`RequestSignInLinkCommand`** — carries the `Email`.
-- **`RequestSignInLinkCommandValidator`** — refuses an email over 254 characters or not in the
-  form of an address with 400 and the code `validation_failed`.
-- **`RequestSignInLinkCommandHandler`** — runs the same steps for every email, so neither its
-  answer nor the time it takes says whether the email is on a team.
-  1. It parses the email to an `EmailAddress`, which trims it and lower-cases it. When more
-     than 3 sign-in links were asked for that email in the last 15 minutes, by `TimeProvider`,
-     it stops here, sends no mail and answers as for any other request (L2-045).
-  2. It asks `ISignInTokens.Create()` for a token and its hash.
-  3. It adds a `SignInLink` with the hash, the email and `ExpiresAt`, which is the time from
-     `TimeProvider` plus `SignInLink.Lifetime` (15 minutes), and saves through `IAppDbContext`.
+- **`RequestSignInLinkCommandHandler`** — refuses an email over 254 characters or not in the
+  form of an address (`EmailAddress.TryParse`) with 400 and the code `validation_failed`. Then
+  it runs the same steps for every email, so its answer says nothing about the email:
+  1. It fingerprints the email (`IEmailFingerprints`, ADR 0009), deletes the links of that
+     fingerprint that have expired, and counts those made in the last 15 minutes, by
+     `TimeProvider`. When there are already 3, it stops here, stores and sends nothing, and
+     answers as for any other request (L2-045).
+  2. It asks `ISignInTokens` for a token, its hash, and the email sealed with the token.
+  3. It adds a `SignInLink` with the hash, the fingerprint, the sealed email, `CreatedAt` and
+     `ExpiresAt` (`SignInLink.Lifetime`, 15 minutes, later), and saves through `IAppDbContext`.
      The token itself is not stored.
-  4. It calls `ISignInEmailSender.SendAsync` with the email and the link. When the Email source
-     does not accept the message, it refuses with `sign_in_email_unavailable`.
+  4. When a teammate has the fingerprint, it hands `ISignInMailOutbox` a `SignInMail`: the
+     email and the link `{SignInEmail:AppAddress}/sign-in#{token}`. It never waits for the
+     Email source.
 - **`RedeemSignInLinkCommand`** — carries the `SignInToken`.
-- **`RedeemSignInLinkCommandHandler`** — hashes the token with `ISignInTokens.Hash` and loads
-  the `SignInLink` with that hash. It calls `SignInLink.TryUse(now)` with the time from
-  `TimeProvider`. A link that does not exist, has expired or was used before is refused with
-  `sign_in_link_unusable`; the three cases receive the same refusal. Otherwise it saves the use
-  and finds the `Teammate` whose `EmailFingerprint` is the fingerprint of the link's email
-  (`IEmailFingerprints`, ADR 0009). It returns a `SignInResultDto` with
-  the team id, the teammate id and the team's name, or with the email alone when no teammate
-  has it.
-- **`SignInLink`** — entity in `Mondino.Domain`: `Id`, `TokenHash`, `Email`, `ExpiresAt` and
-  `UsedAt`. `TryUse(now)` sets `UsedAt` and returns true when the link is unused and `now` is
-  before `ExpiresAt`. The save carries a concurrency check on `UsedAt`, so two requests with
-  one token start one session. A link that is used or expired is deleted by a later request for
-  the same email; no timer runs.
+- **`RedeemSignInLinkCommandHandler`** — refuses an empty token or one over 128 characters
+  with `sign_in_link_unusable`. It hashes the token with `ISignInTokens.Hash`, one redemption
+  of a hash at a time in this instance, and loads the `SignInLink` with that hash. It calls
+  `SignInLink.TryUse(now)` with the time from `TimeProvider`. A link that does not exist, has
+  expired or was used before is refused with 410 and `sign_in_link_unusable`; the three cases
+  receive the same refusal. Otherwise it saves the use and finds the `Teammate` with the link's
+  fingerprint who joined last. It returns a `SignInResultDto` with a `MembershipDto` (team id,
+  teammate id and team name), or, when no teammate has it, with the email unsealed by the
+  token.
+- **`SignInLink`** — entity in `Mondino.Domain`: `Id`, `TokenHash`, `EmailFingerprint`,
+  `SealedEmail`, `CreatedAt`, `ExpiresAt` and `UsedAt`. `TryUse(now)` sets `UsedAt` and
+  returns true when the link is unused and `now` is before `ExpiresAt`. `UsedAt` is a
+  concurrency token, so two requests with one token start one session.
 - **`EmailAddress`** — value object in `Mondino.Domain`. A teammate's email is kept only as
-  `Teammate.EmailFingerprint`, a keyed fingerprint `make-team` sets for the teammate who makes
-  a team (ADR 0009); the address itself is not stored with the teammate, and no DTO carries it.
+  `Teammate.EmailFingerprint` (ADR 0009); no DTO carries it.
 - **`ISignInTokens`** — interface in `Mondino.Application`. `SignInTokens` in
-  `Mondino.Infrastructure` makes a token of at least 128 bits from `RandomNumberGenerator`,
-  encoded for a URL, and hashes a token with SHA-256.
-- **`ISignInEmailSender`** — interface in `Mondino.Application` for the outside source that
-  delivers email. `SendAsync(email, link, ct)` returns whether the source accepted the message.
-  `SignInEmailSender` in `Mondino.Infrastructure` calls the Email source through
-  `SourceResilience` with the 5 s timeout and the circuit breaker of `survive-source-failure`.
-  The message holds the link, that it works once and for 15 minutes, and nothing else: no
-  teammate's name, no team's name and no city. The provider, the sender's address and the
-  message's wording are `<TO SUPPLY>`.
+  `Mondino.Infrastructure` makes a token of 256 bits from `RandomNumberGenerator`, base64url;
+  hashes a token with SHA-256; and seals an email with AES-GCM under a key derived from the
+  token, so only the link's holder can read it back (ADR 0011).
+- **`ISignInMailOutbox`** — interface in `Mondino.Application`. `SignInMailOutbox` in
+  `Mondino.Infrastructure` is a bounded channel; `SignInMailDispatcher`, a hosted service,
+  hands each mail to `ISignInEmailSender` and drops one the source refuses.
+- **`ISignInEmailSender`** — interface in `Mondino.Application` for the Email source.
+  `SendAsync(mail, ct)` returns whether the source accepted the message.
+  `PostmarkSignInEmailSender` in `Mondino.Infrastructure` posts it to Postmark with a 5 s
+  timeout and a breaker (5 failures in a row open it for 30 seconds), open and link tracking
+  off. The message is plain text: the link, that it works once and for 15 minutes, and
+  nothing else; no teammate's name, no team's name and no city (ADR 0011). Without
+  `SignInEmail:ServerToken`, `SignInEmail:From` or `SignInEmail:AppAddress` nothing is sent.
 - **`TeammateSessionHandler`** — issues the session cookie, as it does after a join
   (`join-team`).
-- **`MondinoTelemetry`** — records the two routes as their templates and the call to the Email
-  source as the source `email` with its outcome. No log, metric or span carries the email or
-  the token (`observe-without-exposing`, L2-051).
+- No log carries the email or the token: the Email source's `HttpClient` logs nothing, and
+  neither the handlers nor the dispatcher log a request (`observe-without-exposing`, L2-051).
 
 **Refusals**
 
 | Case | Status | `code` | The screen says |
 |------|--------|--------|-----------------|
-| Email over 254 characters or not an address | 400 | `validation_failed` | "We couldn’t send the link." and "Try again"; the browser's own check catches the form first |
-| Over the limit for one client | 429 | `rate_limited` | `<TO SUPPLY>`: what Sign In shows for this refusal is not drawn (L2-045) |
-| Email source did not accept the message | 503 | `sign_in_email_unavailable` | "We couldn’t send the link." and "Try again" |
-| Sign-in link unknown, expired or used | 410 | `sign_in_link_unusable` | `<TO SUPPLY>` |
+| Email over 254 characters or not an address | 400 | `validation_failed` | "We couldn’t send the link." and "Try again"; the screen's own check catches the form first |
+| Over the limit for one client | 429 | `rate_limited` | "We couldn’t send the link." and "Try again", until Sign In's own state for it is drawn (L2-045, ADR 0011) |
+| Sign-in link unknown, expired or used | 410 | `sign_in_link_unusable` | The Sign In form (ADR 0011) |
+| Opening refused for one client, or not answered | 429, — | `rate_limited`, — | The Sign In form |
 | Network failure or any other error | — | — | "We couldn’t send the link." and "Try again" |
 
-No refusal depends on whether the email is on a team.
+No refusal depends on whether the email is on a team, and the Email source being down
+changes no answer.
 
 **Open points**
 
-- The `SignInLink` policy allows one client 5 requests in 15 minutes, and the
-  `SignInRedemption` policy 10 openings a minute; each then answers 429 with `Retry-After`
-  (L2-045). What Sign In shows for a 429 is not drawn and is not built before its design
-  exists: `<TO SUPPLY>`.
-- The protection of these pre-session, state-changing requests against cross-site request
-  forgery follows the session design: `<TO SUPPLY>`.
-- A link is emailed to any address in the right form, since an answer that depended on the
-  address would reveal which emails Mondino knows. Whether an address on no team receives a
-  different message is `<TO SUPPLY>`.
+- The `sign-in-link` policy allows one client 5 requests in 15 minutes, and the
+  `sign-in-redemption` policy 10 openings a minute; each then answers 429 with `Retry-After`
+  (L2-045). What Sign In shows for a 429 is not drawn: `<TO SUPPLY>`.
+- Only an address on a team is mailed; an address on no team receives nothing, and the
+  answer is the same.
 
 ## Requirements
 
@@ -201,7 +204,8 @@ the only container that calls the Email source.
 `SignInPage` works through `SignInStore` and `HttpSignInApi`. `SignInController` sends
 `RequestSignInLinkCommand` or `RedeemSignInLinkCommand` to its handler. The first handler
 stores a `SignInLink` and sends the email through `SignInEmailSender`; the second uses the link
-once, and the controller signs the teammate in through `TeammateSessionHandler`.
+once, and the controller signs the teammate in through `TeammateSessionHandler`. Mail leaves
+through `SignInMailOutbox` and `SignInMailDispatcher`, never while the request waits.
 
 ![C4 component view for signing in with an emailed link](diagrams/c4-component.png)
 
@@ -209,16 +213,17 @@ once, and the controller signs the teammate in through `TeammateSessionHandler`.
 
 `SignInStore` holds a `SignInState` and depends on the `SignInApi` contract, which
 `HttpSignInApi` implements. `RequestSignInLinkCommandHandler` creates a `SignInLink`, which
-holds a token's hash, an `EmailAddress` and an expiry. `RedeemSignInLinkCommandHandler` uses
-the link once and finds the `Teammate` by its `Email`.
+holds a token's hash, the email's fingerprint, the email sealed by the token and an expiry.
+`RedeemSignInLinkCommandHandler` uses the link once and finds the `Teammate` by its
+`EmailFingerprint`.
 
 ![Class diagram for signing in with an emailed link](diagrams/class-structure.png)
 
 ### Behaviour — ask for a sign-in link
 
 An email that is not in the form of an address is refused in the browser. Otherwise the handler
-stores the link's hash with an expiry 15 minutes ahead and sends the email, and the API answers
-202 whatever the email. The screen reads "Check your inbox" in every case (`L2-052`). A request
+stores the link's hash with an expiry 15 minutes ahead, hands a teammate's mail to the outbox,
+and the API answers 202 whatever the email. The screen reads "Check your inbox" in every case (`L2-052`). A request
 that fails keeps the email typed and offers "Try again".
 
 ![Sequence diagram for asking for a sign-in link](diagrams/sequence-request-sign-in-link.png)

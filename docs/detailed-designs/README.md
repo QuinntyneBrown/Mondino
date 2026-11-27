@@ -105,13 +105,15 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - A session is issued in three places only: on joining (`join-team`), on making a team
   (`make-team`) and on opening a sign-in link that is still good (`sign-in`). Each ends in
   `TeamMembership.remember`.
-- An email is the teammate's own, as a postal code is. `Teammate.Email` is optional and is set
-  for the teammate who made a team; it travels only in a request body, is in no DTO another
-  teammate receives, and is in no log, metric or span. No answer says whether Mondino knows
-  an email: `POST /api/sign-in-links` answers 202 whatever the email.
+- An email is the teammate's own, as a postal code is. It is kept only as
+  `Teammate.EmailFingerprint`, a keyed fingerprint set for the teammate who made a team
+  (ADR 0009); it travels only in a request body, is in no DTO another teammate receives, and
+  is in no log, metric or span. No answer says whether Mondino knows an email:
+  `POST /api/sign-in-links` answers 202 with no body whatever the email.
 - `ISignInEmailSender`, in `Mondino.Application`, is the outside source that delivers sign-in
-  links. It receives the address and the link and nothing else. A sign-in token is stored as
-  a hash, works once, and expires after 15 minutes by `TimeProvider`.
+  links: Postmark (ADR 0011). It receives the address and the link and nothing else, from an
+  outbox, so no answer waits for it. A sign-in token is stored as a hash, works once, and
+  expires after 15 minutes by `TimeProvider`.
 - `IInviteTokens` makes a team's invite token when the team is made and when its link is
   reset (`POST /api/teams/{teamId}/invite-link-resets`, which any teammate of the team may
   call). An invite link never expires; a reset token matches no team, and is refused with
@@ -187,12 +189,12 @@ The designs mark these as `<TO SUPPLY>`:
   both before the Globe is built.
 - The hosting platform, and with it how the API learns a client's own address behind the
   platform's proxy (forwarded headers), which the rate limits count by.
-- The providers of the postal code source, of the holiday, race and event calendars and of
-  the email source, and the data set behind the city search.
+- The providers of the holiday, race and event calendars. (The postal code source and the city
+  search's data set are ADR 0006's; the email source is ADR 0011's.)
 - Signing in (`joining/sign-in`): how a teammate who joined by invite link signs in again,
   since Join asks for no email and only Create Team collects one; what is shown when an
-  emailed link has expired or was already used, and while one is being opened; which team is
-  shown when one email is on more than one team; and the words of the email.
+  emailed link has expired or was already used, and while one is being opened (until then
+  Sign In shows its form, ADR 0011); and how the email looks beyond its plain-text words.
 - Resetting the invite link (`joining/invite-teammates`): what "Reset link" asks before it
   acts, and what the dialog shows while the reset is pending, when it fails and once it is
   done. Resetting is not built before that design exists.
