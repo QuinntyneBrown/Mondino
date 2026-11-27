@@ -92,6 +92,21 @@ for the viewer's own pin and no overlap for a teammate who does not share their 
 of L2-016 and L2-017 is read off a teammate's panel or a Team row, which come with journey 14 (L2-016
 criteria 1 to 5, L2-017 criteria 1 to 8) and journey 17 (L2-016 criteria 1 to 4 and 6); their Playwright
 specs raise this number.
+Journey 13 stands at 40 (4 of its 9 criteria): the weather comes from Open-Meteo by way of the backend
+alone (ADR 0015), and is proven through the API (one call per city, fresh for 15 minutes, a code outside
+the table shown as cloudy, a wind of 39 km/h or more as windy, the position rounded to two decimals and
+nothing else sent, 5 seconds and no weather, no weather kept after a failure, and a teammate who does not
+share it shown none) and on the Globe in Playwright (each pin's icon and degrees as `pages/globe/default`
+draws them, its word in the pin's name and the lifted label, °F for a viewer in the United States, the
+night icon of a clear sky at 23:05 in Dubai, and the local time alone where the weather is unavailable or
+not shared), with `formatTemperature`, `formatDegrees` (no "−0") and the words by direct unit tests. Join's
+found line names the weather in the unit of the country chosen (L2-019 criterion 4, and the clause of
+L2-003 criterion 2 journeys 3 and 5 handed on), and the weather on a pin and in its label that journey 10
+handed on (L2-011 criterion 1, L2-012 criterion 1) is proven. Not yet proven, for the screens of later
+journeys: the panel's "13°C" and "Foggy in Milan" (L2-018 criterion 1) and its "55°F" and "0°C" (L2-019
+criteria 1 and 2) come with journey 14, the weather icon a screen reader reads as its word on a Team row
+(L2-018 criterion 5; on the Globe the icon is hidden and its word is in the pin's name) and the Team row's
+"55°" with journey 17, and the unit changed in Profile & Settings (L2-019 criterion 3) with journey 23.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -107,7 +122,7 @@ specs raise this number.
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 100 |
 | 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 80 |
 | 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 0 |
-| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 0 |
+| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 40 |
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 0 |
 | 15 | [View the week around the world](prompts/15-view-the-week-around-the-world-prompt.md) | See this week's moments, who is working, and team counts. | L2-024, L2-025 | 4 | 0 |
 | 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 0 |
@@ -125,4 +140,4 @@ specs raise this number.
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **43** |
+| | **Total** | | | **147** | **45** |
