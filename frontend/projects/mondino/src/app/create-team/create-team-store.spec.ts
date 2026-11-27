@@ -97,7 +97,6 @@ describe('CreateTeamStore', () => {
   const refusals: [string, string][] = [
     ['postal_code_not_found', 'NotFound'],
     ['postal_code_unavailable', 'Unavailable'],
-    ['rate_limited', 'RateLimited'],
   ];
   for (const [code, kind] of refusals) {
     it(`gives the lookup ${kind} when making the team is refused with ${code}`, async () => {
@@ -107,10 +106,22 @@ describe('CreateTeamStore', () => {
       fill(store);
       await store.submit();
       expect(store.lookup().kind).toBe(kind);
-      expect(store.state().kind).toBe(kind === 'RateLimited' ? 'Idle' : 'Failed');
+      expect(store.state().kind).toBe('Failed');
       TestBed.resetTestingModule();
     });
   }
+
+  it('treats a 429 from making the team as any failure, with no countdown (ADR 0016)', async () => {
+    const store = storeAnswering({
+      createTeam: () =>
+        Promise.reject(new ApiError('rate_limited', 429, { retryAfterSeconds: 582 })),
+    });
+    fill(store);
+    await store.submit();
+    expect(store.state()).toEqual({ kind: 'Failed' });
+    expect(store.lookup().kind).toBe('Found');
+    expect(store.secondsToWait()).toBe(0);
+  });
 
   it('aborts a pending request to make the team when it is destroyed', async () => {
     let signal: AbortSignal | undefined;
