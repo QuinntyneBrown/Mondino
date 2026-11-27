@@ -116,6 +116,13 @@ export class GlobePage {
     await this.page.mouse.click(box.x + 8, box.y + box.height / 2);
   }
 
+  /** Taps the globe with a finger where no pin is. */
+  async tapOffThePinsByTouch(): Promise<void> {
+    const box = await this.globe.boundingBox();
+    if (!box) throw new Error('The globe is not drawn');
+    await this.page.touchscreen.tap(box.x + 8, box.y + box.height / 2);
+  }
+
   async open(): Promise<void> {
     await this.page.goto('/globe');
   }
