@@ -44,9 +44,16 @@ test.describe('Globe: just joined', () => {
       'You’re on the map. Northwind can now see your pin in Milan.',
     );
 
-    // And her pin is on the globe, lifted and labelled, pulsing once; the clock is stopped so the
-    // globe does not turn her pin out of view while it is looked at
+    // And the toast dismisses itself after 4 seconds. The clock is stopped as soon as the toast is
+    // seen, so the time the steps below take does not count towards its 4 seconds
     await pauseTheClock(globePage.page);
+    await letTimePass(globePage.page, 3_000);
+    await expect(globePage.toast).toBeVisible();
+    await letTimePass(globePage.page, 1_000);
+    await expect(globePage.toast).toHaveCount(0);
+
+    // And her pin is on the globe, lifted and labelled, pulsing once; the clock stays stopped so
+    // the globe does not turn her pin out of view while it is looked at
     await expect
       .poll(async () => {
         await globePage.page.clock.runFor(16);
@@ -65,12 +72,6 @@ test.describe('Globe: just joined', () => {
     await expect(globePage.pin('Luca Ferri')).toHaveAccessibleName(
       'Luca Ferri, Milan, 15:05, Working hours',
     );
-
-    // And the toast dismisses itself after 4 seconds
-    await letTimePass(globePage.page, 3_400);
-    await expect(globePage.toast).toBeVisible();
-    await letTimePass(globePage.page, 600);
-    await expect(globePage.toast).toHaveCount(0);
   });
 
   test('the toast can be dismissed', async ({ joinPage, globePage }) => {
