@@ -1,0 +1,89 @@
+<article class="person" aria-labelledby="mo-teammate-panel-name">
+  <div class="person__head">
+    <mo-avatar size="lg" [initials]="content().initials" [colour]="content().colour" />
+    <div class="person__identity">
+      <h2 class="person__name" id="mo-teammate-panel-name" tabindex="-1">
+        {{ content().name }}
+        @if (content().isViewer) {
+          <span class="person__you">(you)</span>
+        }
+      </h2>
+      <p class="person__place">
+        <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+          <path
+            d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+          />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        {{ content().cityName + ', ' + content().country }}
+      </p>
+    </div>
+    <button
+      mo-button
+      icon
+      type="button"
+      [attr.aria-label]="'Close ' + content().name"
+      (click)="closed.emit()"
+    >
+      <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
+    </button>
+  </div>
+  <div>
+    <p class="person__clock tnum">{{ content().localTime }}</p>
+    <p class="person__day">
+      {{ content().offset === null ? content().localDay : content().localDay + ' · ' }}
+      @if (content().offset !== null) {
+        <span class="tnum">{{ content().offset }}</span>
+      }
+    </p>
+    @if (content().status; as status) {
+      <mo-status [status]="status" />
+    }
+  </div>
+  @if (content().privateNote; as note) {
+    <p class="panel__note">
+      <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <path
+          d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"
+        />
+        <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+        <path
+          d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"
+        />
+        <path d="m2 2 20 20" />
+      </svg>
+      <span>{{ note }}</span>
+    </p>
+  }
+  @if (content().weather; as weather) {
+    <div class="person__weather">
+      <svg mo-weather-icon size="lg" [condition]="weather.condition" [night]="weather.night"></svg>
+      <div>
+        <p class="person__temp tnum">{{ weather.temperature }}</p>
+        <p class="person__sky">{{ weather.sky }}</p>
+      </div>
+    </div>
+  } @else if (content().weatherNote; as note) {
+    <div class="person__weather person__weather--note">
+      <svg class="icon" role="img" aria-label="Weather unavailable" viewBox="0 0 24 24">
+        <path d="m2 2 20 20" />
+        <path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193" />
+        <path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07" />
+      </svg>
+      <p>{{ note }}</p>
+    </div>
+  }
+  @if (content().overlap; as overlap) {
+    <mo-overlap-bar
+      [overlap]="overlap.overlap"
+      [theirDay]="overlap.theirDay"
+      [nowMinute]="overlap.nowMinute"
+      [firstName]="overlap.firstName"
+      [text]="overlap.text"
+      [clockFormat]="clockFormat()"
+    />
+  }
+</article>

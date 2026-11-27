@@ -20,6 +20,41 @@
   margin-inline: auto;
   aspect-ratio: 1;
 }
+// The panel: under the globe, and beside it from 64 rem (docs/design-system/components/person-panel).
+.globe-screen__panel {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  padding-bottom: var(--space-20);
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-5);
+}
+@media (min-width: 36rem) {
+  .panel {
+    padding: var(--space-6);
+  }
+}
+@media (min-width: 64rem) {
+  .globe-screen {
+    flex-direction: row;
+    height: 100dvh;
+  }
+  .globe-screen__stage {
+    min-width: 0;
+  }
+  .globe-screen__panel {
+    flex: none;
+    width: var(--layout-panel-width);
+    height: 100%;
+    overflow-y: auto;
+    border-top: 0;
+    border-left: var(--border-width-hairline) solid var(--color-border-default);
+    padding-bottom: 0;
+  }
+}
 .toast-region {
   position: fixed;
   left: 50%;

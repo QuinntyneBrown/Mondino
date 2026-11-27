@@ -1,0 +1,100 @@
+// A selected teammate (docs/design-system/components/person-panel).
+.person {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  animation: fade-in var(--duration-base) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  .person {
+    animation: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.person__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.person__identity {
+  flex: 1;
+  min-width: 0;
+}
+.person__name {
+  font: var(--text-name);
+  overflow-wrap: anywhere;
+}
+.person__name:focus-visible {
+  outline: var(--border-width-thick) solid var(--color-focus-ring);
+  outline-offset: var(--space-1);
+}
+.person__you {
+  color: var(--color-fg-muted);
+}
+.person__place {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-top: var(--space-0-5);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.person__clock {
+  font: var(--text-clock);
+  letter-spacing: -0.03em;
+}
+.person__day {
+  margin: var(--space-2) 0 var(--space-3);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.person__weather {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-block: var(--border-width-hairline) solid var(--color-border-default);
+}
+.person__weather--note {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.person__temp {
+  font: var(--text-figure-lg);
+}
+.person__sky {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.panel__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-canvas);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.icon {
+  flex: none;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon--sm {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+.panel__note .icon {
+  margin-top: var(--space-0-5);
+}

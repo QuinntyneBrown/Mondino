@@ -45,6 +45,13 @@
     }
     <mo-globe-legend [still]="globeState() === 'Fallback'" />
   </section>
+  @if (panel(); as panel) {
+    <aside class="globe-screen__panel" [attr.aria-label]="panel.name">
+      <div class="panel">
+        <mo-teammate-panel [content]="panel" [clockFormat]="clockFormat()" (closed)="clear()" />
+      </div>
+    </aside>
+  }
 </main>
 <div class="toast-region" role="status" aria-live="polite">
   @if (toast(); as toast) {

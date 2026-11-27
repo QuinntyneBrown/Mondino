@@ -19,7 +19,14 @@ import {
   type PinPlacement,
   type Position,
 } from '@mondino/api';
-import { GlobeFallback, GlobeLegend, GlobePlaceholder, PinLayer, Toast } from '@mondino/components';
+import {
+  GlobeFallback,
+  GlobeLegend,
+  GlobePlaceholder,
+  PinLayer,
+  TeammatePanel,
+  Toast,
+} from '@mondino/components';
 import { GlobeView, type GlobeState } from '@mondino/globe';
 import {
   BrowserClock,
@@ -28,6 +35,7 @@ import {
   pinViews,
   placePins,
   stillViewport,
+  teammatePanelView,
 } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
 import { TeamStore } from './team-store';
@@ -44,7 +52,15 @@ export const toastLifetime = 4000;
  */
 @Component({
   selector: 'mo-globe-page',
-  imports: [GlobeFallback, GlobeLegend, GlobePlaceholder, GlobeView, PinLayer, Toast],
+  imports: [
+    GlobeFallback,
+    GlobeLegend,
+    GlobePlaceholder,
+    GlobeView,
+    PinLayer,
+    TeammatePanel,
+    Toast,
+  ],
   // One clock and one team for the screen, released with it.
   providers: [
     { provide: CLOCK, useClass: BrowserClock },
@@ -86,17 +102,38 @@ export class GlobePage {
    * viewer's clock and temperatures in their unit: until Profile & Settings stores a choice
    * (journey 23), the defaults for the country of their pin (L2-019).
    */
+  private readonly viewer = computed(() => this.store.team()?.pins.find((pin) => pin.isViewer));
+  protected readonly clockFormat = computed(() => defaultClockFormat(this.viewer()?.country ?? ''));
+  private readonly unit = computed(() => defaultTemperatureUnit(this.viewer()?.country ?? ''));
+
   private readonly views = computed(() => {
     this.clock.minute();
     const team = this.store.team();
     if (!team) return null;
-    const viewer = team.pins.find((pin) => pin.isViewer);
     return pinViews(
       team.pins,
       untracked(() => this.clock.now()),
       this.justJoined?.teammateId ?? null,
-      defaultClockFormat(viewer?.country ?? ''),
-      defaultTemperatureUnit(viewer?.country ?? ''),
+      this.clockFormat(),
+      this.unit(),
+    );
+  });
+
+  /**
+   * The selected teammate's panel (L2-023), worked out again as the one clock's minute changes,
+   * so its local time, status, offset and overlap move with it; null with no teammate selected.
+   */
+  protected readonly panel = computed(() => {
+    this.clock.minute();
+    const id = this.store.selectedId();
+    const pin = this.store.team()?.pins.find((each) => each.teammateId === id);
+    if (!pin) return null;
+    return teammatePanelView(
+      pin,
+      this.viewer(),
+      untracked(() => this.clock.now()),
+      this.clockFormat(),
+      this.unit(),
     );
   });
 

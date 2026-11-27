@@ -34,6 +34,33 @@ export class GlobePage {
   /** The new teammate's own pin, lifted, and its label. */
   readonly youPin: Locator;
   readonly youLabel: Locator;
+  /** The panel beside the globe (under it on a phone), and a selected teammate's parts in it. */
+  readonly panel: Locator;
+  readonly person: Locator;
+  readonly personName: Locator;
+  readonly personYou: Locator;
+  readonly personAvatar: Locator;
+  readonly personPlace: Locator;
+  readonly personClock: Locator;
+  readonly personDay: Locator;
+  readonly personStatus: Locator;
+  readonly personWeather: Locator;
+  readonly personWeatherIcon: Locator;
+  readonly personTemperature: Locator;
+  readonly personSky: Locator;
+  readonly personWeatherNote: Locator;
+  readonly privateNote: Locator;
+  readonly personMoments: Locator;
+  readonly overlap: Locator;
+  readonly overlapWhen: Locator;
+  readonly overlapText: Locator;
+  readonly overlapParts: Locator;
+  /** The overlap bar's shared part, and a "Message" button, which Mondino never has. */
+  readonly overlapBoth: Locator;
+  readonly messageButton: Locator;
+  readonly closePanel: Locator;
+  /** The one polite announcement of what was selected. */
+  readonly announcement: Locator;
   readonly toastRegion: Locator;
   readonly toast: Locator;
   readonly dismiss: Locator;
@@ -67,6 +94,30 @@ export class GlobePage {
     this.liftedLabels = this.pinList.locator('.pin-label--lifted');
     this.youPin = this.stage.locator('.globe__pin--lifted .pin--you');
     this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');
+    this.panel = page.locator('aside.globe-screen__panel');
+    this.person = this.panel.locator('article.person');
+    this.personName = this.person.locator('.person__name');
+    this.personYou = this.personName.locator('.person__you');
+    this.personAvatar = this.person.locator('.person__head .avatar');
+    this.personPlace = this.person.locator('.person__place');
+    this.personClock = this.person.locator('.person__clock');
+    this.personDay = this.person.locator('.person__day');
+    this.personStatus = this.person.locator('.status');
+    this.personWeather = this.person.locator('.person__weather');
+    this.personWeatherIcon = this.personWeather.locator('svg').first();
+    this.personTemperature = this.person.locator('.person__temp');
+    this.personSky = this.person.locator('.person__sky');
+    this.personWeatherNote = this.person.locator('.person__weather--note');
+    this.privateNote = this.person.locator('.panel__note');
+    this.personMoments = this.person.locator('.person__moments');
+    this.overlap = this.person.locator('section.overlap');
+    this.overlapWhen = this.overlap.locator('.overlap__when');
+    this.overlapText = this.overlap.locator('.overlap__text');
+    this.overlapParts = this.overlap.locator('.overlap__track > span');
+    this.overlapBoth = this.overlap.locator('.overlap__both');
+    this.messageButton = this.panel.getByRole('button', { name: /message/i });
+    this.closePanel = this.panel.getByRole('button', { name: /^Close/ });
+    this.announcement = this.main.locator('p.visually-hidden[role="status"]');
     this.toastRegion = page.locator('.toast-region');
     this.toast = this.toastRegion.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
@@ -120,6 +171,38 @@ export class GlobePage {
             .sort(),
         ].join(' '),
       ),
+    );
+  }
+
+  /** The shapes of the panel's weather icon, each as its tag and its attributes in order of name. */
+  async panelIconShapes(): Promise<string[]> {
+    return this.personWeatherIcon.evaluate((svg) =>
+      [...svg.children].map((shape) =>
+        [
+          shape.tagName,
+          ...[...shape.attributes]
+            .filter((attribute) => !attribute.name.startsWith('_ng'))
+            .map((attribute) => `${attribute.name}=${attribute.value}`)
+            .sort(),
+        ].join(' '),
+      ),
+    );
+  }
+
+  /** The overlap bar's parts, each as its class and its --from and --span, as a mock writes them. */
+  async overlapBarParts(): Promise<string[]> {
+    return this.overlapParts.evaluateAll((parts: HTMLElement[]) =>
+      parts.map((part) => {
+        const from = part.style.getPropertyValue('--from');
+        const span = part.style.getPropertyValue('--span');
+        const style = [
+          `--from: ${parseFloat(from).toFixed(2)}%`,
+          span ? `--span: ${parseFloat(span).toFixed(2)}%` : '',
+        ]
+          .filter(Boolean)
+          .join('; ');
+        return `${part.className.split(' ')[0]} ${style}`;
+      }),
     );
   }
 
