@@ -1,4 +1,5 @@
 import type { Position } from '@mondino/api';
+import type { GlobeOrientation } from '../motion/globe-motion';
 
 /** One level of resolution and model detail the scene can be drawn at (ADR 0012). */
 export interface DetailStep {
@@ -55,7 +56,10 @@ export interface GlobeSceneOptions {
 }
 
 /** The orientation the globe faces when it starts: the still picture's, Europe and Africa. */
-export const STARTING_ORIENTATION: Position = { latitude: 17.4, longitude: 10.1 };
+export const STARTING_ORIENTATION: GlobeOrientation = { longitude: 10.1, tilt: 17.4 };
+
+/** The most time one frame reports, so a frame after a pause never jumps the globe (ADR 0013). */
+export const MaxFrameMs = 100;
 
 /**
  * The 3D globe: the renderer, the Blender-built model, its masks and the drawing, behind one
@@ -68,7 +72,15 @@ export interface GlobeScene {
   setPalette(palette: GlobePalette): void;
   /** Where a position is drawn, or null when it is on the far side. */
   project(position: Position): ProjectedPoint | null;
-  /** Called after each frame is drawn, with the time it took. */
+  /** Draws the globe facing `orientation` from the next frame. */
+  setOrientation(orientation: GlobeOrientation): void;
+  /** Asks for one more frame, as a globe in motion does to move on. */
+  requestFrame(): void;
+  /**
+   * Called after each frame is drawn, with the time since the frame before it: 0 for the first
+   * frame after a rest or after a frame not asked for by a frame listener, and never more than
+   * `MaxFrameMs`.
+   */
   onFrame(listener: (elapsedMs: number) => void): void;
   start(): void;
   stop(): void;

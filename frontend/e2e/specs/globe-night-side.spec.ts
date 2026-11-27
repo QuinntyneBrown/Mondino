@@ -10,6 +10,9 @@ import { rememberTeam } from '../support/membership';
 test.describe('Globe: the night side', () => {
   test.beforeEach(async ({ page }) => {
     await rememberTeam(page);
+    // The globe holds still at the orientation it starts at, so its pixels are where a spec
+    // looks for them (ADR 0013).
+    await page.emulateMedia({ reducedMotion: 'reduce' });
   });
 
   test('the half facing away from the sun is shaded, and lit when the sun is over it', async ({

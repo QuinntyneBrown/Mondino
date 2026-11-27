@@ -28,9 +28,11 @@ import {
   type GlobeScene,
   type GlobeSceneOptions,
   GlobeUnavailableError,
+  MaxFrameMs,
   type ProjectedPoint,
   STARTING_ORIENTATION,
 } from './globe-scene';
+import type { GlobeOrientation } from '../motion/globe-motion';
 
 /** The camera's distance from the centre, in globe radii: a gentle perspective. */
 const cameraDistance = 5;
@@ -156,6 +158,10 @@ export class ThreeGlobeScene implements GlobeScene {
   private readonly camera: PerspectiveCamera;
   private readonly frameListeners: ((elapsedMs: number) => void)[] = [];
   private frame: number | undefined;
+  /** When the last frame was drawn, while frames follow one another; undefined after a rest. */
+  private previousFrameAt: number | undefined;
+  /** Whether the frame listeners are running, so a frame they ask for follows on from this one. */
+  private inFrame = false;
   private running = false;
   private disposed = false;
 
@@ -172,11 +178,9 @@ export class ThreeGlobeScene implements GlobeScene {
     this.camera = new PerspectiveCamera((2 * halfAngle * 180) / Math.PI, 1, 0.1, 20);
     this.camera.position.set(0, 0, cameraDistance);
     this.globe.rotation.order = 'XYZ';
-    this.globe.rotation.y = (-STARTING_ORIENTATION.longitude * Math.PI) / 180;
-    this.globe.rotation.x = (STARTING_ORIENTATION.latitude * Math.PI) / 180;
     this.globe.add(meshes.high, meshes.low, meshes.clouds);
     this.scene.add(this.globe);
-    this.globe.updateMatrixWorld();
+    this.orient(STARTING_ORIENTATION);
   }
 
   static async create(
@@ -317,6 +321,15 @@ export class ThreeGlobeScene implements GlobeScene {
     };
   }
 
+  setOrientation(orientation: GlobeOrientation): void {
+    this.orient(orientation);
+    this.invalidate();
+  }
+
+  requestFrame(): void {
+    this.invalidate();
+  }
+
   onFrame(listener: (elapsedMs: number) => void): void {
     this.frameListeners.push(listener);
   }
@@ -330,6 +343,7 @@ export class ThreeGlobeScene implements GlobeScene {
     this.running = false;
     if (this.frame !== undefined) cancelAnimationFrame(this.frame);
     this.frame = undefined;
+    this.previousFrameAt = undefined;
   }
 
   dispose(): void {
@@ -349,15 +363,34 @@ export class ThreeGlobeScene implements GlobeScene {
     this.renderer.forceContextLoss();
   }
 
-  /** Draws one frame when the next one comes, if the scene is running; on demand, never in a loop. */
+  /** Turns the globe so the centre of the view is at `orientation`'s longitude and latitude. */
+  private orient({ longitude, tilt }: GlobeOrientation): void {
+    this.globe.rotation.y = (-longitude * Math.PI) / 180;
+    this.globe.rotation.x = (tilt * Math.PI) / 180;
+    this.globe.updateMatrixWorld();
+  }
+
+  /**
+   * Draws one frame when the next one comes, if the scene is running; on demand, never in a loop
+   * of its own. A frame asked for from a frame listener follows on from that frame.
+   */
   private invalidate(): void {
     if (!this.running || this.frame !== undefined) return;
+    if (!this.inFrame) this.previousFrameAt = undefined;
     this.frame = requestAnimationFrame(() => {
       this.frame = undefined;
-      const started = performance.now();
+      const now = performance.now();
+      const previous = this.previousFrameAt;
+      const elapsed =
+        previous === undefined ? 0 : Math.min(MaxFrameMs, Math.max(0, now - previous));
+      this.previousFrameAt = now;
       this.renderer.render(this.scene, this.camera);
-      const elapsed = performance.now() - started;
-      for (const listener of [...this.frameListeners]) listener(elapsed);
+      this.inFrame = true;
+      try {
+        for (const listener of [...this.frameListeners]) listener(elapsed);
+      } finally {
+        this.inFrame = false;
+      }
     });
   }
 }
