@@ -1561,3 +1561,73 @@ Northwind?" opens at once, and "Leave without saving?" is never asked on the way
 100). Handed on: L2-038 criterion 10 is proven here and L2-037 criterion 9's sheet is not measured
 (prompt 27), with a 401 on leaving; L2-039 criterion 4's Escape while leaving is proven (prompt 28).
 Total: 82.
+
+## Journey 25: Keep the team fresh
+
+**What slowed it**
+
+- The prompt said the banner reads "Couldn't refresh just now." with "Try now"; the mock, L2-048 and the
+  design system say "Couldn’t refresh. Clocks are live; weather and moments are from 14:50." with "Try
+  again" and "Trying…". The mock won and the prompt was corrected.
+- The design still put `TeamStore` in `domain` and had `GlobeView` take `arrivedIds` and emit
+  `arrivedShown`. The pins pulse in `PinLayer` over the globe, from `pinViews`' `isNew`, so the arrived ids
+  join the just-joined one there; the design and three diagrams were brought to that before any code.
+- The store sat in `TeamShell`, above four screens that each bound their own `BrowserClock` (ADR 0012), so
+  it had no clock to ride. ADR 0025 binds one clock in the shell for the four screens and the refresh.
+- The first arrival in the refresh spec was Kwame in Accra, on the far side of a globe turned to Tomás in
+  Mexico City, so his pin had no button to find; Jordan in Austin arrives instead.
+- Carrying the viewer's settings in `GET /pins` (ADR 0025) broke journey 23's test that the body of
+  another teammate's read holds no `sharesWeather` and no `temperatureUnit`: the body now holds the
+  reader's own. The test reads everything but `viewerSettings` and checks that part is the reader's.
+- The midnight spec was green on arrival, as Moments already grouped by the clock's minute; with the
+  clock's read taken out of the page it failed, and the page was put back.
+
+**Lessons**
+
+1. **Bind the shared clock where the state that rides it lives.** A store above several screens cannot
+   read a clock each screen binds below it; one clock at the store's level drives both, and a refresh on
+   its tick rests with it while the tab is hidden, with no timer or listener of its own.
+2. **Count an interval from the minute of the read, not the millisecond.** `refreshedAt` is the clock's
+   minute, so "15 minutes pass" refreshes on the 15th tick and not the 16th.
+3. **Pick a spec's teammate on the near side of what the globe faces.** A pin turned away has no button;
+   choose the teammate from where the selection turns the globe.
+4. **A test that a word is absent from a whole body breaks when the body gains the reader's own part.**
+   Assert over everything but that part, and that the part is the reader's.
+5. **Prove a slice red by stashing the product code alone.** `git stash push -- projects` keeps the new
+   spec, page objects and fixtures and builds the app as it was; untracked new files stay, so a new
+   component must not yet be exported for the old app to build as before.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): ADR 0025, the notes in ADRs 0012 and 0023, the design, three diagrams, the
+  shared contracts and the prompt were one commit before any code.
+- *Read the prompt against the mock too* (journey 3, lesson 1): caught the banner's words.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit code,
+  written to a log; it stopped two commits (the formatter, a unit spec still passing `null` for the new
+  pin).
+- *Measure the initial bundle* (journey 2, lesson 1): 274.26 kB before and after; `Banner` and the
+  refresh are in the shell's lazy chunk.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5) and *break a
+  slice with a copy, not with git* (journey 23, lesson 1): the midnight spec, with Moments' page copied
+  aside.
+- *Look at an overlay once* (journey 16, lesson 3): one picture of the banner at 1280 and 375 px.
+- *Default an e2e fixture to the state earlier specs assumed* (journey 19, lesson 3): an answer without
+  `viewerSettings` leaves `SETTINGS_STORE` as it was, so no earlier spec's team fixture changed.
+- *Wait for a turning globe to settle on the exact place* (journey 22, lesson 3): the selected pin is read
+  at (50%, 50%) before and after the refresh.
+
+**Progress:** 7 of 7 criteria of L2-048 proven (100%): the read every 15 minutes with the selection and the
+globe's place kept, the arrival that pulses with no toast as the counts change, the hidden tab, the return
+after an hour, moments moving at Milan's midnight, the banner on Globe, Team and Moments, and "Try again"
+with "Trying…". Proven here for earlier journeys: L2-025 criterion 10's second half, a teammate who joins
+while the Globe is open appearing at the next refresh with a pulse and no toast. Until now no spec proved it,
+so journey 15 was 20 of 21 and strictly 90 while it showed 100; it is now 21 of 21 (100). Journey 23's
+handed-on question is answered and proven: the pins carry the viewer's saved settings to a browser that
+never opened Profile & Settings, and a change saved elsewhere arrives at the next refresh (ADR 0025;
+journey 23 stays 100). Journey 26, counted criterion by criterion: 6 of 15 (40, from 0). Proven: L2-049
+criteria 7 (here) and 10; L2-050 criteria 1, 2, 3 and 5. Not proven: L2-049 criterion 1 (city and position
+kept, weather never zero), 2 (the Team row's status), 3 (cache under 3 hours), 4 (the failing kind's
+cached moments), 5 (the 6-second ceiling), 6 (a breaker on the weather, no unbounded queue), 8 (the Globe's
+"Loading your team…", and that it is polite) and 9 (the Globe's error, no stale data); L2-050 criterion 4
+(requests recorded on Team, Moments, Profile & Settings and Sign In). Total: 85.
