@@ -36,12 +36,14 @@ presentation components that show a time and a status.
 
 - **`City`** — value object in `Mondino.Domain`. Its `TimeZoneId` holds the IANA name found when
   the teammate's postal code was looked up.
-- **`TeammateSettings`** — value object in `Mondino.Domain`. Its `ShareStatus` records the
-  teammate's choice for "Share whether I’m working or asleep", on to begin with.
+- **`Teammate`** — entity in `Mondino.Domain`. Its `SharesStatus` records the teammate's
+  choice for "Share whether I’m working or asleep", on to begin with. The switch that changes
+  it comes with Profile & Settings (`choose-display-and-sharing`), which moves it into
+  `TeammateSettings` beside the other choices.
 - **`GetPinsQueryHandler`** — MediatR handler in `Mondino.Application`. It returns one `PinDto`
   per teammate of the viewer's team.
 - **`PinDto`** — carries `TimeZoneId` and `SharesStatus`, and no local time (L2-014). The
-  handler sets `SharesStatus` to the teammate's `ShareStatus`, except on the viewer's own pin,
+  handler sets `SharesStatus` to the teammate's own `SharesStatus`, except on the viewer's own pin,
   where it is `true`: a teammate still sees their own status. The backend therefore applies
   the choice, and the frontend only follows the flag.
 - **`TeamsController`** — exposes `GET /api/teams/{teamId}/pins`, checks nothing itself and
@@ -49,17 +51,23 @@ presentation components that show a time and a status.
 
 ### Frontend — `api` library
 
-- **`Clock`** and **`CLOCK`** — contract and injection token of the one clock. `now(): Date`
-  returns the current instant. `minute: Signal<Date>` holds the instant of the latest minute
-  boundary and changes once per minute.
+- **`Clock`** and **`CLOCK`** — contract and injection token of the one clock. `now(): number`
+  returns the current instant in milliseconds since the epoch. `minute: Signal<number>` holds
+  the instant of the latest minute boundary and changes once per minute.
 - **`Pin`** — type mirroring `PinDto`, with `timeZoneId: string` and `sharesStatus: boolean`.
 - **`Status`** — `'early-morning' | 'working-hours' | 'evening' | 'probably-asleep'`.
-- **`ClockFormat`** — `'24-hour' | '12-hour'`, the viewer's choice in `Settings`.
+- **`ClockFormat`** — `'24-hour' | '12-hour'`, the viewer's choice in `Settings`. Until
+  Profile & Settings stores the choice (`choose-display-and-sharing`), the default of L2-033
+  applies: the 12-hour clock for a viewer whose pin is in the United States or Canada, and the
+  24-hour clock otherwise.
+- **`PinView`** — what a pin shows (`show-pins`), with its `localTime` text and its `status`
+  (`Status | null`).
 
 ### Frontend — `domain` library, `time/`
 
-- **`BrowserClock`** — the implementation of `Clock`, bound to `CLOCK` once in `app.config.ts`
-  because the whole app shares it. It holds one timer however many pins a screen shows. The
+- **`BrowserClock`** — the implementation of `Clock`, bound to `CLOCK` by each screen that
+  reads the time (`draw-globe`), so it is released with the screen. It holds one timer however
+  many pins a screen shows. The
   timer is a `setTimeout` armed for the next minute boundary (`60 000 ms` minus the current
   instant modulo `60 000 ms`). When it fires, `BrowserClock` sets `minute` and arms the timer
   again from the current instant, so delay does not accumulate and the tick stays within one
@@ -70,7 +78,8 @@ presentation components that show a time and a status.
   weekday and calendar date of `now` in the given time zone through `Intl.DateTimeFormat` with
   `timeZone` set and the `h23` hour cycle. The browser's time zone data supplies the zone's rule,
   including daylight-saving changes. Formatters are kept in a map keyed by time zone id, which
-  is bounded by the number of IANA time zones.
+  is bounded by the number of IANA time zones. A time zone the browser does not know gives
+  UTC's time.
 - **`LocalTime`** — `hour` (0 to 23), `minute` (0 to 59), `weekday` (`Weekday`) and `date` (the
   local calendar date as `YYYY-MM-DD`). The `weekday` is the teammate's own day, so a panel
   shows Tuesday for Melbourne while the viewer in Milan is on Monday evening.
@@ -79,7 +88,12 @@ presentation components that show a time and a status.
   day line of a panel.
 - **`formatTime(time, format): string`** — pure function. On the 24-hour clock it gives two-digit
   hours and minutes ("08:05"). On the 12-hour clock it gives the hour without a leading zero and
-  a lowercase "am" or "pm" ("8:05 am").
+  a lowercase "am" or "pm" ("8:05 am", "12:30 pm", "12:05 am").
+- **`defaultClockFormat(country): ClockFormat`** — pure function: `12-hour` for the United
+  States and Canada, `24-hour` otherwise (L2-033). It stands for the viewer's choice until
+  Profile & Settings stores one.
+- **`statusWords(status): string`** — pure function: the words of a status as the mocks give
+  them, "Early morning", "Working hours", "Evening" and "Probably asleep".
 - **`statusAt(localHour): Status`** — pure function holding the table of L2-015: 7 and 8 give
   `early-morning`, 9 to 17 give `working-hours`, 18 to 22 give `evening`, and 23 and 0 to 6 give
   `probably-asleep`. It takes no day of the week.
@@ -98,17 +112,25 @@ instant comes from `CLOCK`. Unit tests bind a fake `Clock` and advance it; none 
 
 ### Frontend — pages and presentation
 
+- **`pinViews(pins, now, …)`** — in `domain`'s `pins/` (`show-pins`). For each pin it calls
+  `localTime`, `formatTime` with the viewer's `ClockFormat` and `statusFor`, and puts the time
+  text and the status on the pin's `PinView`. The pin's accessible name gives both, the status
+  as its words: "Tomás Herrera, Mexico City, 08:05, Early morning"; with no status, "Ahmed
+  Al-Sayed, Dubai, 18:05".
 - **`GlobePage`** and **`TeamPage`** — pages in the `mondino` application. Each holds one
-  `computed` that reads `CLOCK`'s `minute`, the pins of `TeamStore` and the viewer's
-  `ClockFormat`, and derives each pin's `LocalTime`, time text and status. One change of
-  `minute` therefore changes every local time on the screen in one pass. A page's `computed` is
-  released with the page.
+  `computed` that reads `CLOCK`'s `minute` and the pins of `TeamStore` and calls `pinViews`,
+  which derives each pin's `LocalTime`, time text and status. One change of `minute` therefore
+  changes every local time on the screen in one pass. A page's `computed` is released with the
+  page. The Team screen comes with `view-team-through-the-day`.
 - **`PinLabel`**, **`TeammatePanel`**, **`TeamTable`** and **`DayRibbon`** — presentation
   components in `components`. Each takes the time text, and where it shows one the day text, as
   inputs. Times are set in Gabarito with tabular figures. None injects `CLOCK`.
 - **`StatusBadge`** — presentation component, the `status` block of the mocks. It takes a
   `Status` and shows it as its words;
-  colour accompanies the words and never replaces them. It renders nothing for `null`.
+  colour accompanies the words and never replaces them. It renders nothing for `null`. It is
+  built with the first screen that shows it, the teammate panel (`view-teammate-panel`); until
+  then the Globe gives each status in words in its pin's accessible name, as the mocks do, and
+  the pin label shows the local time only.
 
 The words for each status and for each weekday follow the mocks in `docs/mocks/`.
 
