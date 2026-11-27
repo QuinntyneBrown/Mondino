@@ -5,6 +5,7 @@
 import { expect, test } from '../fixtures/test';
 import {
   lookupAnswer,
+  NORTHWIND_CITY_SEARCHES,
   NORTHWIND_INVITE,
   NORTHWIND_JOINS,
   NORTHWIND_LOOKUPS,
@@ -83,5 +84,38 @@ test.describe('What a person types is data', () => {
     await expect(joinPage.everything).not.toContainText('InvalidOperationException');
     await expect(joinPage.everything).not.toContainText(markup);
     await expect(joinPage.images).toHaveCount(0);
+  });
+
+  test('what is typed in "Your city" is held to 60 characters, sent as data and shown as text', async ({
+    api,
+    joinPage,
+  }) => {
+    // Given the lookup is down, so Join offers "Your city"
+    api.answer('GET', NORTHWIND_INVITE, northwindInvite());
+    api.refuse('POST', NORTHWIND_LOOKUPS, 503, 'postal_code_unavailable');
+    const searched: unknown[] = [];
+    api.answer('POST', NORTHWIND_CITY_SEARCHES, (route) => {
+      searched.push(route.request().postDataJSON());
+      return { json: [] };
+    });
+    await joinPage.open('northwind-7Kq2');
+    await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
+    await joinPage.leavePostalCode();
+
+    // When markup longer than 60 characters is typed in it
+    const typed = `${markup}${'x'.repeat(60)}`;
+    await joinPage.city.pressSequentially(typed);
+
+    // Then the field keeps 60 characters, shown as they were typed
+    await expect(joinPage.city).toHaveAttribute('maxlength', '60');
+    await expect(joinPage.city).toHaveValue(typed.slice(0, 60));
+    await expect(joinPage.images).toHaveCount(0);
+
+    // And it is sent in a request body, never in the address, as at most 60 characters
+    await expect.poll(() => searched.length).toBeGreaterThan(0);
+    for (const body of searched) {
+      expect((body as { text: string }).text.length).toBeLessThanOrEqual(60);
+    }
+    expect(joinPage.page.url()).not.toContain('img');
   });
 });

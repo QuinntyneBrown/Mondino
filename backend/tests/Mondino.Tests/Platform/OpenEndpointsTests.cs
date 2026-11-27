@@ -3,6 +3,7 @@
 // Description: No endpoint is open by omission: every endpoint the API maps refuses a request with no session but those marked open, and each open one is rate limited
 
 using System.Net;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
@@ -96,6 +97,38 @@ public sealed partial class OpenEndpointsTests
         // Then it is refused with 429 and a Retry-After header
         Assert.Equal(HttpStatusCode.TooManyRequests, refused.StatusCode);
         Assert.True(refused.Headers.RetryAfter?.Delta > TimeSpan.Zero);
+    }
+
+    [Fact]
+    public async Task The_open_requests_that_do_not_join_or_make_a_team_issue_no_session()
+    {
+        // Given Northwind, and a source that knows 20121 in Italy
+        await using var api = new MondinoApi();
+        await api.SeedAsync();
+        api.PostalCodes.Knows("IT", "20121", KnownCities.Milan);
+        using var client = api.CreateSecureClient();
+        var lookup = new { countryCode = "IT", postalCode = "20121" };
+        var search = new { countryCode = "IT", text = "Mil" };
+
+        // When an invite link is opened, a postal code looked up and a city searched for, with and without it
+        var answers = new List<HttpResponseMessage>
+        {
+            await client.GetAsync("/api/invites/northwind-7Kq2"),
+            await client.PostAsJsonAsync("/api/invites/northwind-7Kq2/postal-code-lookups", lookup),
+            await client.PostAsJsonAsync("/api/postal-code-lookups", lookup),
+            await client.PostAsJsonAsync("/api/invites/northwind-7Kq2/city-searches", search),
+            await client.PostAsJsonAsync("/api/city-searches", search),
+        };
+
+        // Then each is answered, and none issues a session or a token
+        foreach (var answer in answers)
+        {
+            using (answer)
+            {
+                Assert.Equal(HttpStatusCode.OK, answer.StatusCode);
+                Assert.False(answer.Headers.Contains("Set-Cookie"), answer.RequestMessage?.RequestUri?.ToString());
+            }
+        }
     }
 
     private static HttpRequestMessage Request(string method, string path) => new(new HttpMethod(method), path)
