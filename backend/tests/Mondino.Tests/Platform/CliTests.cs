@@ -2,9 +2,11 @@
 // Traces to: L2-051
 // Description: Migrations and seed data are applied by a CLI command, never by the API on startup
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Mondino.Application.Persistence;
 using Mondino.Cli;
+using Mondino.Domain.Teams;
 using Mondino.Tests.Support;
 
 namespace Mondino.Tests.Platform;
@@ -81,6 +83,12 @@ public sealed class CliTests
 
     private sealed class CountingAppDbContext : IAppDbContext
     {
+        public DbSet<Team> Teams => throw new NotSupportedException();
+
+        public DbSet<Teammate> Teammates => throw new NotSupportedException();
+
+        public DbSet<City> Cities => throw new NotSupportedException();
+
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken) => Task.FromResult(0);
     }
 

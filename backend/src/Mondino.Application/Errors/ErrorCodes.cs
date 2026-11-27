@@ -14,6 +14,9 @@ public static class ErrorCodes
     public const string RateLimited = "rate_limited";
     public const string Unexpected = "unexpected";
 
+    /// <summary>An invite token that matches no team: never issued, mistyped or reset.</summary>
+    public const string InviteNotFound = "invite_not_found";
+
     /// <summary>The code for a status that no handler gave a code of its own.</summary>
     public static string? ForStatus(int status) => status switch
     {

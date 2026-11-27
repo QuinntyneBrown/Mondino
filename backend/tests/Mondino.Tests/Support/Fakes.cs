@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Mondino.Application.Persistence;
+using Mondino.Application.Teammates;
+using Mondino.Domain.Teams;
 
 namespace Mondino.Tests.Support;
 
@@ -18,8 +21,26 @@ public sealed class SpyDatabaseMigrator : IDatabaseMigrator
 /// <summary>A database that is down: every use of it throws.</summary>
 public sealed class FailingAppDbContext : IAppDbContext
 {
+    public DbSet<Team> Teams => throw Down();
+
+    public DbSet<Teammate> Teammates => throw Down();
+
+    public DbSet<City> Cities => throw Down();
+
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken) =>
-        throw new InvalidOperationException("The database is down.");
+        throw Down();
+
+    private static InvalidOperationException Down() => new("The database is down.");
+}
+
+/// <summary>Who is asking, as the test says: no one until the test signs a teammate in.</summary>
+public sealed class FakeCurrentTeammate : ICurrentTeammate
+{
+    public bool IsAuthenticated => TeammateId != Guid.Empty;
+
+    public Guid TeammateId { get; set; }
+
+    public Guid TeamId { get; set; }
 }
 
 /// <summary>Throws, carrying what must never reach a response.</summary>

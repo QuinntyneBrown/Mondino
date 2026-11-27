@@ -12,6 +12,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemCodes.Customize);
+builder.Services.AddExceptionHandler<RefusalHandler>();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();

@@ -1,6 +1,6 @@
 # 0004: The database engine
 
-**Status:** Accepted (journey 2, Open an invite link)
+**Status:** Accepted (journey 2, Open an invite link). Supersedes the part of [0003](0003-backend-baseline.md) that left the engine open.
 
 ## Context
 

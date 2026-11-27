@@ -1,0 +1,44 @@
+namespace Mondino.Domain.Teams;
+
+/// <summary>Someone in a team, with their pin at their city.</summary>
+public sealed class Teammate
+{
+    private Teammate()
+    {
+        Name = string.Empty;
+        Colour = string.Empty;
+        City = null!;
+    }
+
+    internal Teammate(Guid id, Guid teamId, string name, string colour, City city, DateTimeOffset joinedAt)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(colour);
+        ArgumentNullException.ThrowIfNull(city);
+        Id = id;
+        TeamId = teamId;
+        Name = name;
+        Colour = colour;
+        City = city;
+        CityId = city.Id;
+        JoinedAt = joinedAt;
+    }
+
+    public Guid Id { get; private set; }
+
+    public Guid TeamId { get; private set; }
+
+    public string Name { get; private set; }
+
+    /// <summary>The teammate's colour: a teammate colour of the palette, <c>teammate-1</c> to <c>teammate-13</c>.</summary>
+    public string Colour { get; private set; }
+
+    public Guid CityId { get; private set; }
+
+    public City City { get; private set; }
+
+    public DateTimeOffset JoinedAt { get; private set; }
+
+    /// <summary>The first character of up to the first two words of the name: "Liam O’Connor" is "LO".</summary>
+    public string Initials => TeammateInitials.Of(Name);
+}
