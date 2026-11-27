@@ -57,7 +57,8 @@ email, and would tell anyone which emails Mondino knows (L2-043 criterion 9).
   email's fingerprint (ADR 0009), to count and to find the teammate, and `SealedEmail`: the
   address encrypted with AES-GCM under a key derived from the token
   (`HMAC-SHA256(token, "mondino sign-in email")`), so only the holder of the link can read it
-  back. Opening a good link whose email is on no team (the teammate left after asking) names the
+  back. Opening a good link whose email is on no team (one that never was: a teammate's links are
+  deleted when they leave, ADR 0024) names the
   email on "You need an invite link" (L2-052 criterion 10) from it. A database read on its own
   gives no address, as ADR 0009 requires.
 - **The limits.** One client may ask for 5 links in 15 minutes (`sign-in-link`) and open 10 a

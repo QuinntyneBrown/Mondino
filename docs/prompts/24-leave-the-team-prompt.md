@@ -90,9 +90,9 @@ Builds on: journeys 6 and 22.
 - Plan thin vertical slices, for example:
   1. Backend: the leave command through the API: the teammate's name, postal code, city, settings and session
      deleted; the old session refused with 401; only one's own.
-  2. Frontend: `LeaveTeamDialog` (CDK Dialog, a sheet under 576 px): focus starts on Cancel; Escape or Cancel
+  2. Frontend: `LeaveTeamDialog` (CDK Dialog, a sheet under 576 px): focus starts on "Stay"; Escape or "Stay"
      closes with focus back on the button and nothing changed.
-  3. Busy ("Removing your pin…", both buttons disabled) and failed (an alert in the dialog with "Try again").
+  3. Busy ("Leaving…", both buttons disabled) and failed (an alert in the dialog with "Try again").
   4. `LeftPage` at `/left` with the team's name from the navigation state ("You've left the team" without it);
      `TeamMembership` cleared; opening the app again shows no team.
 - For each slice:

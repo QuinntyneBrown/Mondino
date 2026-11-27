@@ -27,7 +27,6 @@ box "Backend — Mondino API" #D1FADF
 end box
 box "Backend — Mondino Application and Domain" #ECFDF3
   participant "LeaveTeamCommandHandler" as handler
-  participant "Team" as team
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
   participant "TeammateSessions" as sessions
@@ -35,7 +34,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 actor -> page : Choose "Leave Northwind"
 page -> dialog : Open through CDK Dialog with the team's name
-dialog --> actor : "Leave Northwind?", says the pin comes off the globe for all 12 teammates; "Stay" or "Leave Northwind". Nothing is removed yet (L2-036)
+dialog --> actor : "Leave Northwind?", says the pin comes off the globe for all 12 teammates; "Stay" or "Leave Northwind". Nothing is removed yet, and "Leave without saving?" is not asked (L2-036)
 actor -> dialog : Use "Leave Northwind"
 dialog -> store : leave()
 store -> store : leaving = true
@@ -44,26 +43,25 @@ store -> client : leaveTeam(teamId)
 client -> controller : DELETE /api/teams/{teamId}/me
 controller -> controller : Authenticate the session; check the anti-forgery token
 controller -> handler : Send LeaveTeamCommand (no teammate id)
-handler -> db : Load the Team with the teammate ICurrentTeammate names
-db --> handler : Team
+handler -> db : Load the teammate ICurrentTeammate names, in that team
+db --> handler : Teammate
 alt left
-  handler -> team : RemoveTeammate(teammateId)
-  team --> handler : Teammate removed with name, postal code, city and settings
-  handler -> sessions : EndAllAsync(teammateId)
-  sessions --> handler : Sessions deleted; cookie expired on the response
+  handler -> db : Remove the Teammate (name, postal code, city, email fingerprint, settings) and the SignInLinks of their fingerprint no other teammate holds
   handler -> db : Save changes in one unit of work (L2-036)
   db --> handler : Commit result
+  handler -> sessions : EndAsync()
+  sessions --> handler : Session and antiforgery cookies expired on the answer; any copy of the session is refused, its teammate gone (ADR 0010)
   handler --> controller : Done
   controller --> client : 204 No Content, session cookie expired
   client --> store : Done
-  store -> store : Discard the draft; clear SettingsStore and SettingsCache; TeamMembership.forget()
+  store -> store : Discard the draft; SETTINGS_STORE.clear(); TeamMembership.forget()
   store -> left : Navigate to /left with the team's name in the navigation state, replacing /profile; the dialog closes
-  left --> actor : "You’ve left Northwind" ("You’ve left the team" when reloaded): "Start a new team" and "Sign in to another team"
+  left --> actor : "You’ve left Northwind"; the name is taken out of history, so a reload reads "You’ve left the team". "Start a new team" and "Sign in to another team"
 else the request fails
   controller --> client : ProblemDetails, or no answer
   client --> store : ApiError
   store -> store : leaving = false; leaveFailed = true; nothing is cleared
   dialog --> actor : Alert in the dialog: "We couldn’t take your pin off. You’re still on Northwind — try again."; "Try again". The pin stays
 end
-note over page, db : At their next read of GET /api/teams/{teamId}/pins, every other teammate receives no pin for the teammate who left.\nThe old session is refused with 401 from now on.
+note over page, db : A team whose last teammate leaves is kept, with its invite link (ADR 0024).\nAt their next read of GET /api/teams/{teamId}/pins, every other teammate receives no pin for the teammate who left.\nThe old session is refused with 401 from now on.
 @enduml

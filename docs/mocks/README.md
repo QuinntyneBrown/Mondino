@@ -212,7 +212,10 @@ still picture keeps its pins.
     Sweden, United Arab Emirates and the United States.
 14. **Leaving.** `left-team` takes the team's name from the screen the teammate left from;
     opened or reloaded without it, its title reads "You’ve left the team". Someone on no team
-    who opens a screen sees `invite-needed` in place.
+    who opens a screen sees `invite-needed` in place. `dialogs/leave-team` draws Sofia with 12
+    other teammates; with one, the text says "for your 1 teammate", and with none, "Your pin
+    comes off the team’s globe, along with your weather and moments. To come back you’ll need
+    the team’s invite link." The prototype draws neither.
 15. **The sheet's width.** `dialogs/invite` says a dialog is a sheet "under 576 px", as L2-037
     and the design system's dialog page do; the component CSS made it one under 640 px, with the
     Globe's stage. Journey 16 brought the CSS to 576 px (36rem), the phone's own breakpoint.

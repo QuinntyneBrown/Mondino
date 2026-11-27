@@ -31,5 +31,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0021](0021-a-window-of-moments.md) | A long Moments list keeps a window of 60 rows in the page, moved by the page itself rather than by CDK virtual scrolling | Accepted |
 | [0022](0022-a-teammates-own-lookup-limit.md) | A teammate's own postal code lookup is limited to 10 a minute for the teammate, so the rate limiter runs after the session is read | Accepted |
 | [0023](0023-settings-kept-by-the-backend.md) | A teammate's settings are kept by the backend, and the browser keeps the display ones to draw the first screen | Accepted; extends 0020 |
+| [0024](0024-what-leaving-deletes.md) | Leaving deletes the teammate's row and their sign-in links, ends the session by its absence, and keeps an empty team | Accepted; changes one line of 0011 |
 
 Not decided yet: nothing a journey has reached.

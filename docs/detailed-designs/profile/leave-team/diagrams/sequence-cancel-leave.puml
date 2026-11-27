@@ -33,6 +33,6 @@ else "Stay" is chosen
 end
 dialog --> page : Close
 page -> page : Focus returns to the button that opened the dialog (L2-036)
-page --> actor : Profile & Settings as it was
+page --> actor : Profile & Settings as it was, unsaved changes included
 note over store, controller : ProfileStore.leave() is not called and no request reaches the backend. Nothing has changed.
 @enduml
