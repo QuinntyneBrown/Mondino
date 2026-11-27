@@ -1,4 +1,4 @@
-import type { DatedMoment, Moment, MomentGroups, Pin } from '@mondino/api';
+import type { DatedMoment, Moment, MomentGroups, MomentKind, Pin } from '@mondino/api';
 import { firstName } from '../pins/first-name';
 import { initialsOf } from '../pins/initials';
 import { orderWestToEast } from '../pins/west-to-east';
@@ -15,6 +15,19 @@ export function daysAheadLabel(daysAhead: number): string {
   if (daysAhead === 0) return 'Today';
   if (daysAhead === 1) return 'Tomorrow';
   return `In ${daysAhead} days`;
+}
+
+/** Each kind as a sentence names it. */
+const kindInWords: Record<MomentKind, string> = {
+  holiday: 'holiday',
+  'formula-1': 'Formula 1',
+  'local-event': 'local event',
+  sport: 'sport',
+};
+
+/** What Moments says when a kind has nothing ahead: "No sport moments coming up" (L2-030). */
+export function noMomentsOf(kind: MomentKind): string {
+  return `No ${kindInWords[kind] ?? 'such'} moments coming up`;
 }
 
 function datedOf(moment: Moment, pin: Pin, daysAhead: number): DatedMoment {

@@ -17,7 +17,7 @@ import {
   MomentList,
   Skeleton,
 } from '@mondino/components';
-import { BrowserClock, groupMoments } from '@mondino/domain';
+import { BrowserClock, groupMoments, noMomentsOf } from '@mondino/domain';
 import { TeamStore } from '../team/team-store';
 
 /**
@@ -90,7 +90,7 @@ export class MomentsPage {
       groups.today.length + groups.thisWeek.length + groups.later.length
     )
       return null;
-    return `No ${notes[filter]} moments coming up`;
+    return noMomentsOf(filter);
   });
 
   /** The loading placeholder's four rows, as moments/loading draws them. */
@@ -122,11 +122,3 @@ export class MomentsPage {
     void this.router.navigateByUrl(this.addressOf(teammateId));
   }
 }
-
-/** Each kind as the note names it. */
-const notes: Record<Exclude<MomentFilter, 'everything'>, string> = {
-  holiday: 'holiday',
-  'formula-1': 'Formula 1',
-  'local-event': 'local event',
-  sport: 'sport',
-};

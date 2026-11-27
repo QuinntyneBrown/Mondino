@@ -1,7 +1,7 @@
 // Traces to: L2-029, L2-020
-import type { Moment, MomentKind } from '@mondino/api';
+import { ALL_MOMENT_KINDS, type Moment, type MomentKind } from '@mondino/api';
 import { cast, pin } from '../pins/cast.testing';
-import { daysAheadLabel, groupMoments } from './moment-list';
+import { daysAheadLabel, groupMoments, noMomentsOf } from './moment-list';
 
 /** The mocks' "now": 14:05 UTC on Monday 27 October 2025. */
 const now = Date.UTC(2025, 9, 27, 14, 5);
@@ -38,6 +38,17 @@ describe('daysAheadLabel', () => {
       'In 7 days',
       'In 13 days',
       'In 90 days',
+    ]);
+  });
+});
+
+describe('noMomentsOf', () => {
+  it('names each kind in its own note (L2-030 criterion 3)', () => {
+    expect(ALL_MOMENT_KINDS.map(noMomentsOf)).toEqual([
+      'No holiday moments coming up',
+      'No Formula 1 moments coming up',
+      'No local event moments coming up',
+      'No sport moments coming up',
     ]);
   });
 });
