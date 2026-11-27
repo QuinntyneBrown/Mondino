@@ -13,7 +13,7 @@ public sealed class City
         TimeZoneId = string.Empty;
     }
 
-    public City(Guid id, string name, string countryCode, Position position, string timeZoneId, string? directoryId = null)
+    public City(Guid id, string name, string countryCode, Position position, string timeZoneId, string? directoryId = null, string? region = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(countryCode);
@@ -26,6 +26,7 @@ public sealed class City
         Longitude = position.Longitude;
         TimeZoneId = timeZoneId;
         DirectoryId = directoryId;
+        Region = string.IsNullOrWhiteSpace(region) ? null : region.Trim();
     }
 
     public Guid Id { get; private set; }
@@ -44,6 +45,22 @@ public sealed class City
 
     /// <summary>The id of the city in Mondino's city directory (docs/adr/0006), or null for a seeded city.</summary>
     public string? DirectoryId { get; private set; }
+
+    /// <summary>
+    /// The English name of the city's first-level division, as the city directory names it
+    /// ("Lombardy"): which regional holidays are its own (L2-020). Null for a city stored before it
+    /// was kept, which then has its country's holidays only.
+    /// </summary>
+    public string? Region { get; private set; }
+
+    /// <summary>Keeps the region the city directory names, for a city stored before regions were kept.</summary>
+    public void KnowRegion(string? region)
+    {
+        if (Region is null && !string.IsNullOrWhiteSpace(region))
+        {
+            Region = region.Trim();
+        }
+    }
 
     public Position Position => new(Latitude, Longitude);
 }

@@ -72,6 +72,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             city.HasIndex(c => new { c.CountryCode, c.Name });
             city.Property(c => c.DirectoryId).HasMaxLength(16);
             city.HasIndex(c => c.DirectoryId).IsUnique();
+            city.Property(c => c.Region).HasMaxLength(120);
         });
     }
 }
