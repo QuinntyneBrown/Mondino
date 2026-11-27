@@ -326,4 +326,36 @@ test.describe('Team: a team of hundreds', () => {
     await expect(teamPage.images).toHaveCount(0);
     expect(page.url()).not.toContain('img');
   });
+
+  test('scrolled from top to bottom and searched, the page holds a bounded number of rows', async ({
+    api,
+    teamPage,
+  }) => {
+    // Given a team of 500
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+    await teamPage.open();
+    await expect(teamPage.rows).toHaveCount(8);
+
+    // When the screen is scrolled to its bottom, the closed cities hold no rows
+    await teamPage.scrollToBottom();
+    await expect(teamPage.sectionToggles).toHaveCount(40);
+    await expect(teamPage.rows).toHaveCount(8);
+    await expect(teamPage.table).toHaveCount(2);
+
+    // When London, the largest city, is opened as well, the page holds its 43 and no more
+    await teamPage.sectionToggle('London').click();
+    await expect(teamPage.rows).toHaveCount(51);
+    await teamPage.scrollToBottom();
+    await expect(teamPage.rows).toHaveCount(51);
+
+    // And a search that matches teammates in many cities holds at most 50 for each city it opens
+    await teamPage.search.fill('ada');
+    await expect(teamPage.sectionToggles).not.toHaveCount(40);
+    const open = await teamPage.sectionToggles.evaluateAll(
+      (toggles) =>
+        toggles.filter((toggle) => toggle.getAttribute('aria-expanded') === 'true').length,
+    );
+    expect(await teamPage.rows.count()).toBeLessThanOrEqual(open * 50);
+    expect(await teamPage.rows.count()).toBeLessThan(150);
+  });
 });

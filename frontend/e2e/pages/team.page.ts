@@ -180,6 +180,14 @@ export class TeamPage {
     );
   }
 
+  /** Scrolls the screen to its bottom, as a teammate reading the whole list does. */
+  async scrollToBottom(): Promise<void> {
+    await this.page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await this.page.waitForFunction(
+      () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1,
+    );
+  }
+
   /** Whether the ribbon is wider than its region, which scrolls sideways inside itself. */
   async ribbonScrolls(): Promise<boolean> {
     return this.ribbonScroll.evaluate((region) => region.scrollWidth > region.clientWidth);
