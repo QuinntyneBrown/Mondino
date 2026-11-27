@@ -1,0 +1,52 @@
+<div class="field">
+  <label class="field__label" [for]="fieldId()">Your city</label>
+  <div class="input-wrap">
+    <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+    <input
+      #input
+      class="input"
+      type="text"
+      role="combobox"
+      [id]="fieldId()"
+      name="city"
+      autocomplete="off"
+      aria-autocomplete="list"
+      [attr.aria-controls]="listId()"
+      [attr.aria-expanded]="expanded() ? 'true' : 'false'"
+      [attr.aria-activedescendant]="expanded() && active() >= 0 ? optionId(active()) : null"
+      [attr.aria-describedby]="helpId()"
+      [value]="text()"
+      (input)="typed(input.value)"
+      (keydown)="key($event)"
+      (blur)="closed.set(true)"
+    />
+  </div>
+  @if (expanded()) {
+    <ul class="listbox" role="listbox" [id]="listId()" [attr.aria-label]="listLabel()">
+      @for (result of results(); track result.cityId; let index = $index) {
+        <!-- In the combobox pattern an option takes no focus: the input keeps it and its keys
+             move aria-activedescendant, so the click here is the tap's way in. -->
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+        <li
+          class="listbox__option"
+          role="option"
+          [id]="optionId(index)"
+          [attr.aria-selected]="index === active() ? 'true' : 'false'"
+          (pointerdown)="$event.preventDefault()"
+          (click)="choose.emit(result)"
+        >
+          <span class="listbox__name">{{ result.city.name }}</span>
+          @if (result.city.region) {
+            &ngsp;<span class="listbox__region">{{ result.city.region }}</span>
+          }
+        </li>
+      }
+    </ul>
+  }
+  <p class="field__help" [id]="helpId()" role="status">
+    Postal code lookup is down right now, so pick your city instead. Your pin goes to its centre.
+  </p>
+</div>

@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import {
   ApiError,
+  CLOCK,
+  type CityResult,
   INVITE_API,
   type Invite,
   type InviteApi,
@@ -41,7 +43,11 @@ function storeAnswering(
     ...rest,
   };
   TestBed.configureTestingModule({
-    providers: [JoinStore, { provide: INVITE_API, useValue: api }],
+    providers: [
+      JoinStore,
+      { provide: INVITE_API, useValue: api },
+      { provide: CLOCK, useValue: { now: () => Date.now() } },
+    ],
   });
   return { store: TestBed.inject(JoinStore) };
 }
@@ -247,5 +253,110 @@ describe('JoinStore: the postal code lookup', () => {
     store.setPostalCode('  ');
     store.leavePostalCode();
     expect(calls).toBe(1);
+  });
+});
+
+const milanResult: CityResult = { cityId: '3173435', city: milan.city };
+
+describe('JoinStore: when the lookup is down', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  async function storeWithLookupDown(
+    searchCities: InviteApi['searchCities'] = () => Promise.resolve([milanResult]),
+  ): Promise<JoinStore> {
+    const { store } = storeAnswering(() => Promise.resolve(invite), {
+      lookUpPostalCode: () => Promise.reject(new ApiError('postal_code_unavailable', 503)),
+      searchCities,
+    });
+    await store.open('northwind-7Kq2');
+    store.name.set('Sofia Bianchi');
+    store.setCountry('IT');
+    store.setPostalCode('20121');
+    await store.lookUp();
+    return store;
+  }
+
+  it('is unavailable, and stays so when the country changes', async () => {
+    const store = await storeWithLookupDown();
+    expect(store.lookup().kind).toBe('Unavailable');
+    store.setCountry('CA');
+    expect(store.lookup().kind).toBe('Unavailable');
+  });
+
+  it('searches the cities 300 ms after typing stops, once, for the chosen country', async () => {
+    const asked: string[] = [];
+    const store = await storeWithLookupDown((_token, country, text) => {
+      asked.push(`${country} ${text}`);
+      return Promise.resolve([milanResult]);
+    });
+    store.setCityText('M');
+    store.setCityText('Mi');
+    store.setCityText('Mil');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(asked).toEqual([]);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(asked).toEqual(['IT Mil']);
+    expect(store.cityResults()).toEqual([milanResult]);
+  });
+
+  it('aborts a search when typing goes on, and drops the timer when the screen is left', async () => {
+    let signal: AbortSignal | undefined;
+    const store = await storeWithLookupDown((_t, _c, _x, given) => {
+      signal = given;
+      return new Promise(() => undefined);
+    });
+    store.setCityText('Mil');
+    await vi.advanceTimersByTimeAsync(300);
+    store.setCityText('Mila');
+    expect(signal?.aborted).toBe(true);
+    TestBed.resetTestingModule();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('places the pin at the chosen city, and typing again takes it away', async () => {
+    const store = await storeWithLookupDown();
+    store.chooseCity(milanResult);
+    expect(store.cityText()).toBe('Milan');
+    expect(store.submit()).toBe(false);
+    expect(store.lookup()).toEqual({ kind: 'Found', result: { city: milan.city, weather: null } });
+    store.setCityText('Mila');
+    expect(store.lookup().kind).toBe('Unavailable');
+    expect(store.chosenCity()).toBeNull();
+  });
+});
+
+describe('JoinStore: too many tries', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  async function rateLimitedStore(): Promise<JoinStore> {
+    const { store } = storeAnswering(() => Promise.resolve(invite), {
+      lookUpPostalCode: () =>
+        Promise.reject(new ApiError('rate_limited', 429, { retryAfterSeconds: 42 })),
+    });
+    await store.open('northwind-7Kq2');
+    store.setPostalCode('20121');
+    await store.lookUp();
+    return store;
+  }
+
+  it('counts down from Retry-After and is idle again at zero', async () => {
+    const store = await rateLimitedStore();
+    expect(store.lookup().kind).toBe('RateLimited');
+    expect(store.secondsToWait()).toBe(42);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(store.secondsToWait()).toBe(32);
+    await vi.advanceTimersByTimeAsync(32_000);
+    expect(store.lookup().kind).toBe('Idle');
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('keeps counting when the postal code is edited, and stops when the screen is left', async () => {
+    const store = await rateLimitedStore();
+    store.setPostalCode('20122');
+    expect(store.lookup().kind).toBe('RateLimited');
+    TestBed.resetTestingModule();
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

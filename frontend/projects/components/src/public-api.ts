@@ -3,6 +3,7 @@ export * from './lib/alert/alert';
 export * from './lib/avatar/avatar';
 export * from './lib/avatar-group/avatar-group';
 export * from './lib/button/button';
+export * from './lib/city-field/city-field';
 export * from './lib/globe-fallback/globe-fallback';
 export * from './lib/globe-placeholder/globe-placeholder';
 export * from './lib/lookup-message/lookup-message';
