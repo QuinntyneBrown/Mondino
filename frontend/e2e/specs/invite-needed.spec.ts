@@ -5,6 +5,7 @@
 import { expect, test } from '../fixtures/test';
 import { mockMarkup } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
+import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
 import { NotFoundPage } from '../pages/not-found.page';
 
 const text =
@@ -56,12 +57,14 @@ test.describe('Invite Needed', () => {
   });
 
   test('a browser that is on a team opens the Globe itself', async ({
+    api,
     page,
     inviteNeededPage,
     globePage,
   }) => {
     // Given a browser that remembers Northwind
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
 
     // When the Globe is opened
     await globePage.open();

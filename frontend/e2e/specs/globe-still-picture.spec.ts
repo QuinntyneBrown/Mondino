@@ -14,6 +14,7 @@ import {
 } from '../fixtures/invites';
 import { BrowserRecord } from '../support/browser-record';
 import { rememberTeam } from '../support/membership';
+import { NORTHWIND_PINS, northwindPins, northwindPinsOf } from '../fixtures/pins';
 
 const still = 'Still view — 3D isn’t available in this browser';
 
@@ -29,10 +30,12 @@ async function refuseTheRenderer(page: Page): Promise<void> {
 
 test.describe('Globe: the legend over the 3D globe', () => {
   test('names the night side, moments, teammates close together and how to turn the globe', async ({
+    api,
     page,
     globePage,
   }) => {
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
     await globePage.open();
     await expect(globePage.canvas).toBeVisible();
 
@@ -45,9 +48,10 @@ test.describe('Globe: the legend over the 3D globe', () => {
     await expect(globePage.stillLine).toHaveCount(0);
   });
 
-  test('is not shown on a phone', async ({ page, globePage }) => {
+  test('is not shown on a phone', async ({ api, page, globePage }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
     await globePage.open();
     await expect(globePage.canvas).toBeVisible();
 
@@ -60,11 +64,13 @@ test.describe('Globe: the still picture', () => {
     test.use({ webgl: false });
 
     test('the still picture stands in the globe’s place, and the legend says why', async ({
+      api,
       page,
       globePage,
     }) => {
       const record = new BrowserRecord(page);
       await rememberTeam(page);
+      api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
 
       await globePage.open();
 
@@ -81,9 +87,14 @@ test.describe('Globe: the still picture', () => {
       expect(record.requests.some((url) => /\.glb$|surface-|clouds-/.test(url))).toBe(false);
     });
 
-    test('on a phone, a line under the globe says why it is still', async ({ page, globePage }) => {
+    test('on a phone, a line under the globe says why it is still', async ({
+      api,
+      page,
+      globePage,
+    }) => {
       await page.setViewportSize({ width: 375, height: 812 });
       await rememberTeam(page);
+      api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
 
       await globePage.open();
 
@@ -102,6 +113,7 @@ test.describe('Globe: the still picture', () => {
         lookupAnswer(route.request().postDataJSON()),
       );
       api.answer('POST', NORTHWIND_JOINS, SOFIA_JOINED);
+      api.answer('GET', NORTHWIND_PINS, northwindPins());
       await joinPage.open('northwind-7Kq2');
       await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
       await joinPage.leavePostalCode();
@@ -111,16 +123,21 @@ test.describe('Globe: the still picture', () => {
 
       await expect(globePage.stillPicture).toBeVisible();
       await expect(globePage.youLabel).toHaveText('Sofia Bianchi (you) · Milan');
-      await expect(globePage.globe).toHaveAccessibleName('The globe, with your new pin in Milan');
+      await expect(globePage.youPin).toHaveAttribute('aria-pressed', 'true');
+      await expect(globePage.globe).toHaveAccessibleName(
+        'A still picture of the globe, with 13 teammates’ pins.',
+      );
     });
   });
 
   test('the still picture stands in when the globe’s model cannot be loaded', async ({
+    api,
     page,
     globePage,
   }) => {
     await page.route('**/media/globe-*.glb', (route) => route.abort('failed'));
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
 
     await globePage.open();
 
@@ -130,11 +147,13 @@ test.describe('Globe: the still picture', () => {
   });
 
   test('the still picture stands in when the renderer cannot be loaded', async ({
+    api,
     page,
     globePage,
   }) => {
     await refuseTheRenderer(page);
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
 
     await globePage.open();
 
@@ -144,10 +163,12 @@ test.describe('Globe: the still picture', () => {
   });
 
   test('the still picture takes over when the 3D globe loses its context', async ({
+    api,
     page,
     globePage,
   }) => {
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
     await globePage.open();
     await expect(globePage.canvas).toBeVisible();
 

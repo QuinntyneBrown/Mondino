@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import type { StillPlacement } from '@mondino/api';
 
 /**
@@ -24,4 +33,22 @@ export class GlobeFallback {
    * pins; or null. Its label is text.
    */
   readonly you = input<(StillPlacement & { readonly label: string }) | null>(null);
+
+  /**
+   * The width of the picture's box in CSS px, as it is first drawn and each time it changes, so
+   * the page can place the pins in the `[pins]` slot (ADR 0014). Observed only where listened to.
+   */
+  readonly widthChange = output<number>();
+
+  constructor() {
+    const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+    let resizing: ResizeObserver | undefined;
+    afterNextRender(() => {
+      const box = host.querySelector<HTMLElement>('.globe');
+      if (!box || !host.hasAttribute('data-measured')) return;
+      resizing = new ResizeObserver(([entry]) => this.widthChange.emit(entry.contentRect.width));
+      resizing.observe(box);
+    });
+    inject(DestroyRef).onDestroy(() => resizing?.disconnect());
+  }
 }

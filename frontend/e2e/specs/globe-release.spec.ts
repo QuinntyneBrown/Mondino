@@ -5,15 +5,18 @@
 import { expect, test } from '../fixtures/test';
 import { watchWhatIsHeld, whatIsHeld } from '../support/globe-resources';
 import { rememberTeam } from '../support/membership';
+import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
 
 test.describe('Globe: leaving it releases the globe', () => {
   test('entering and leaving the Globe leaves no context, drawing, observer or listener behind', async ({
+    api,
     page,
     notFoundPage,
     globePage,
   }) => {
     await watchWhatIsHeld(page);
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
 
     // Given a teammate on another screen, who goes to the Globe from it
     await notFoundPage.open('/somewhere-else');
@@ -47,6 +50,7 @@ test.describe('Globe: leaving it releases the globe', () => {
   });
 
   test('a hidden tab draws nothing, and draws again when it is shown', async ({
+    api,
     page,
     globePage,
   }) => {
@@ -62,6 +66,7 @@ test.describe('Globe: leaving it releases the globe', () => {
       });
     });
     await rememberTeam(page);
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
     await globePage.open();
     await expect(globePage.canvas).toBeVisible();
 

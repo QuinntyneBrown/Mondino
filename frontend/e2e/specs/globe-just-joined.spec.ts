@@ -1,7 +1,8 @@
 // Acceptance Test
-// Traces to: L2-005, L2-042
+// Traces to: L2-005, L2-042, L2-012, L2-013
 // Description: Straight after joining, the Globe shows the new pin pulsing once and a toast that says so and dismisses itself
 
+import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { expect, test } from '../fixtures/test';
 import {
   lookupAnswer,
@@ -18,6 +19,7 @@ test.describe('Globe: just joined', () => {
     api.answer('GET', NORTHWIND_INVITE, northwindInvite());
     api.answer('POST', NORTHWIND_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
     api.answer('POST', NORTHWIND_JOINS, SOFIA_JOINED);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
   });
 
   async function join(joinPage: import('../pages/join.page').JoinPage): Promise<void> {
@@ -52,11 +54,15 @@ test.describe('Globe: just joined', () => {
       })
       .toBe(1);
     await expect(globePage.youLabel).toHaveText('Sofia Bianchi (you) · Milan');
-    await expect(globePage.youPin).toHaveClass(/pin-dot--new/);
+    await expect(globePage.youPin).toHaveClass(/pin--new/);
     expect(await globePage.pulse()).not.toBe('none');
     await expect(globePage.globe).toHaveAccessibleName(
-      'The globe, with your new pin in Milan. Drag to spin, or use the arrow keys.',
+      'The globe, with 13 teammates’ pins. Drag to spin, or use the arrow keys.',
     );
+
+    // And her pin is selected, so it stands alone, apart from Luca's in the same city
+    await expect(globePage.youPin).toHaveAttribute('aria-pressed', 'true');
+    await expect(globePage.pin('Luca Ferri')).toHaveAccessibleName('Luca Ferri, Milan, 15:05');
 
     // And the toast dismisses itself after 4 seconds
     await letTimePass(globePage.page, 3_400);
@@ -82,7 +88,10 @@ test.describe('Globe: just joined', () => {
     expect(await globePage.pulse()).toBe('none');
   });
 
-  test('the Globe opened again shows no toast and no new pin', async ({ joinPage, globePage }) => {
+  test('the Globe opened again shows no toast, and no pin new or selected', async ({
+    joinPage,
+    globePage,
+  }) => {
     await join(joinPage);
     await expect(globePage.toast).toBeVisible();
 
@@ -90,6 +99,8 @@ test.describe('Globe: just joined', () => {
 
     await expect(globePage.globe).toBeVisible();
     await expect(globePage.toast).toHaveCount(0);
-    await expect(globePage.allPins).toHaveCount(0);
+    await expect(globePage.pin('2 teammates close together')).toBeVisible();
+    await expect(globePage.liftedPins).toHaveCount(0);
+    await expect(globePage.newPins).toHaveCount(0);
   });
 });

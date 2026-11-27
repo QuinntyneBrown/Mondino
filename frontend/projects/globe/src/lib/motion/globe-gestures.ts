@@ -22,11 +22,14 @@ export class GlobeGestures {
    * @param radiusPx the radius of the globe's disc as drawn, in CSS px: a drag of one radius
    *   turns it one radian, so the place under the pointer follows it.
    * @param turned called after the globe has been turned, so it is drawn.
+   * @param tapped called with what a tap landed on: a pointer or a finger that let go before it
+   *   moved `TapThresholdPx` (ADR 0014).
    */
   constructor(
     private readonly motion: GlobeMotion,
     private readonly radiusPx: () => number,
     private readonly turned: () => void,
+    private readonly tapped: (target: EventTarget | null) => void = () => undefined,
   ) {}
 
   attach(target: HTMLElement, signal: AbortSignal): void {
@@ -59,7 +62,10 @@ export class GlobeGestures {
     this.turned();
   }
 
-  /** A mouse or a pen drags through pointer events, captured to the globe until it lets go. */
+  /**
+   * A mouse or a pen drags through pointer events, captured to the globe from when it starts to
+   * move until it lets go. Until it moves it is not captured, so a click on a pin reaches the pin.
+   */
   private attachPointer(target: HTMLElement, signal: AbortSignal): void {
     let drag: {
       id: number;
@@ -74,7 +80,7 @@ export class GlobeGestures {
       if (drag.moving) {
         this.motion.dragEnd();
         this.turned();
-      }
+      } else if (event.type === 'pointerup') this.tapped(event.target);
       if (target.hasPointerCapture(drag.id)) target.releasePointerCapture(drag.id);
       drag = null;
     };
@@ -90,7 +96,6 @@ export class GlobeGestures {
           y: event.clientY,
           moving: false,
         };
-        target.setPointerCapture(event.pointerId);
       },
       { signal },
     );
@@ -102,6 +107,7 @@ export class GlobeGestures {
           const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
           if (distance < TapThresholdPx) return;
           drag.moving = true;
+          target.setPointerCapture(drag.id);
           this.motion.dragStart();
         }
         this.dragBy(event.clientX - drag.x, event.clientY - drag.y);
@@ -129,7 +135,7 @@ export class GlobeGestures {
       if (touch.taken) {
         this.motion.dragEnd();
         this.turned();
-      }
+      } else if (touch.taken === null && event.type === 'touchend') this.tapped(event.target);
       touch = null;
     };
     target.addEventListener(
