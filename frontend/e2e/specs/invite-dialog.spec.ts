@@ -146,4 +146,32 @@ test.describe('Invite teammates', () => {
     await expect(globePage.toast).toHaveCount(0);
     await expect(inviteDialog.dialog).toBeVisible();
   });
+
+  test('on a phone “Invite teammate” is an icon alone, and the dialog is a sheet from the bottom under 576 px', async ({
+    globePage,
+    inviteDialog,
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 740 });
+    await globePage.open();
+
+    await expect(globePage.inviteTeammate).toHaveAccessibleName('Invite teammate');
+    await expect(globePage.inviteTeammateLabel).toBeHidden();
+    const target = await globePage.inviteTeammateTarget();
+    expect(target.width).toBeGreaterThanOrEqual(44);
+    expect(target.height).toBeGreaterThanOrEqual(44);
+
+    await globePage.inviteTeammate.click();
+    const sheet = await inviteDialog.panelBox();
+    expect(sheet.x).toBe(0);
+    expect(sheet.width).toBe(375);
+    expect(Math.round(sheet.y + sheet.height)).toBe(740);
+
+    // From 576 px it is a dialog in the middle
+    await page.setViewportSize({ width: 576, height: 740 });
+    const centred = await inviteDialog.panelBox();
+    expect(Math.round(centred.x * 2 + centred.width)).toBe(576);
+    expect(Math.round(centred.y * 2 + centred.height)).toBe(740);
+    await expect(globePage.inviteTeammateLabel).toBeHidden();
+  });
 });
