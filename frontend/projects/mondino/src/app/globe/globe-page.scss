@@ -18,9 +18,21 @@
 }
 .globe-screen__globe {
   width: 100%;
-  max-width: 40rem;
-  margin-inline: auto;
   aspect-ratio: 1;
+}
+// From 640 px the stage is 4:3 and the globe fills it; from 1024 px the stage fills the window's
+// height beside the panel. The globe has no maximum width, so it grows (ADR 0027).
+@media (min-width: bp.$stage) {
+  .globe-screen__stage {
+    display: block;
+    aspect-ratio: 4 / 3;
+  }
+  .globe-screen__globe {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    height: 100%;
+  }
 }
 // The heading: over the globe on a phone, and in its top-left corner from 40 rem.
 .globe-screen__heading {
@@ -81,7 +93,10 @@
     height: calc(100dvh - var(--layout-header-height));
   }
   .globe-screen__stage {
+    flex: 1;
     min-width: 0;
+    height: 100%;
+    aspect-ratio: auto;
   }
   .globe-screen__panel {
     flex: none;

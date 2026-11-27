@@ -118,3 +118,22 @@ export function cutOff(page: Page): Promise<string[]> {
     return found;
   });
 }
+
+export interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** Where an element is drawn, in px of the window; it must be shown. */
+export async function boxOf(element: Locator): Promise<Box> {
+  const box = await element.boundingBox();
+  if (!box) throw new Error(`${element.toString()} is not shown`);
+  return box;
+}
+
+/** Whether a box sits over the window's horizontal centre, within a pixel. */
+export function centredIn(box: Box, width: number): boolean {
+  return Math.abs(box.x + box.width / 2 - width / 2) <= 1;
+}

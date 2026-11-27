@@ -5,6 +5,8 @@ import { globeArt, shapesOf } from './not-found.page';
 export class InviteNeededPage {
   readonly main: Locator;
   readonly title: Locator;
+  /** The ways on, under the text. */
+  readonly actions: Locator;
   readonly text: Locator;
   /** The email a sign-in link was sent to, when the text names one. */
   readonly email: Locator;
@@ -20,6 +22,7 @@ export class InviteNeededPage {
   constructor(readonly page: Page) {
     this.main = page.locator('main.notice-page');
     this.title = this.main.locator('.notice-page__title');
+    this.actions = this.main.locator('.notice-page__actions a');
     this.text = this.main.locator('.notice-page__text');
     this.email = this.text.locator('strong');
     this.wordmark = this.main.locator('.brand .wordmark');
