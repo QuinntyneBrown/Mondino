@@ -106,8 +106,9 @@ Design principles:
   backend alone calls the outside sources, with a timeout, a cache and a circuit breaker, and
   sends them a place and never a teammate's name or team.
 - **Lazy loading and memory come first.** Every route is lazy-loaded, the globe's renderer is
-  imported dynamically, and the initial bundle is held to a 300 kB budget. Everything a screen
-  acquires is released when the teammate leaves it.
+  imported dynamically, and the initial bundle is held to 150 kB compressed (a 290 kB raw
+  budget). The globe is drawn first from a light model and steps its detail down on a slow
+  device. Everything a screen acquires is released when the teammate leaves it.
 - **One clock.** Local time is never stored or sent. The backend gives a pin's time zone, and
   every local time on a screen ticks from one shared, injected clock.
 - **Private telemetry.** OpenTelemetry logs, metrics and spans carry no name, email, postal
@@ -170,7 +171,7 @@ Every setting is described in [`docs/deployment/README.md`](docs/deployment/READ
 | Production build | `cd frontend && npm run build` |
 | Behaviour specs | `cd frontend && npx playwright install chromium && npm run e2e` |
 | Backend format and tests | `cd backend && dotnet format --verify-no-changes && dotnet test` |
-| Visual, responsive and accessibility sweeps | `cd frontend && npm run e2e:visual`, `e2e:responsive`, `e2e:accessibility` |
+| Visual, responsive, accessibility and performance sweeps | `cd frontend && npm run e2e:visual`, `e2e:responsive`, `e2e:accessibility`, `e2e:performance` |
 
 Run `node tools/verify/verify.mjs` before you push. It runs every CI check and the unit tests.
 
