@@ -4,6 +4,7 @@ using Mondino.Api.Health;
 using Mondino.Api.Hosting;
 using Mondino.Api.RateLimiting;
 using Mondino.Api.Security;
+using Mondino.Api.Telemetry;
 using Mondino.Application;
 using Mondino.Infrastructure;
 
@@ -18,6 +19,8 @@ builder.Services.AddControllers(options => options.Filters.Add<AntiforgeryFilter
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemCodes.Customize);
 builder.Services.AddExceptionHandler<RefusalHandler>();
 builder.Services.AddMondinoHealth();
+// Traces, metrics and logs that carry no teammate (L2-051, docs/adr/0031).
+builder.Services.AddMondinoTelemetry(builder.Configuration);
 builder.Services.AddSingleton<AppShell>();
 builder.Services.AddRateLimitPolicies();
 builder.Services.AddAppCompression();

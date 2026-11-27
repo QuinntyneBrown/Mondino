@@ -18,6 +18,10 @@ using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
 using Mondino.Infrastructure.SignIn;
 using Mondino.Infrastructure.WeatherSource;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 namespace Mondino.Tests.Support;
 
@@ -106,6 +110,14 @@ public class MondinoApi : WebApplicationFactory<Program>
 
     public bool CapturesLogs { get; set; }
 
+    /// <summary>
+    /// Every span, log record (at every level) and metric the API exports, once
+    /// <see cref="CapturesTelemetry"/> is set before the first request.
+    /// </summary>
+    public CapturedTelemetry Telemetry { get; } = new();
+
+    public bool CapturesTelemetry { get; set; }
+
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
 
@@ -143,6 +155,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         if (CapturesLogs)
         {
             builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs).AddFilter<CapturedLogs>(null, LogLevel.Trace));
+        }
+
+        if (CapturesTelemetry)
+        {
+            builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddFilter<OpenTelemetryLoggerProvider>(null, LogLevel.Trace));
         }
 
         foreach (var (name, value) in Settings)
@@ -222,9 +239,24 @@ public class MondinoApi : WebApplicationFactory<Program>
 
             services.AddSingleton(Changes);
 
+            // After the API's own processors, so what is captured is what would be exported.
+            if (CapturesTelemetry)
+            {
+                services.ConfigureOpenTelemetryTracerProvider(tracing => tracing.AddProcessor(new SimpleActivityExportProcessor(Telemetry.SpanExporter())));
+                services.ConfigureOpenTelemetryLoggerProvider(logging => logging.AddProcessor(new SimpleLogRecordExportProcessor(Telemetry.LogExporter())));
+                services.ConfigureOpenTelemetryMeterProvider(metrics => metrics.AddReader(new BaseExportingMetricReader(Telemetry.MetricExporter())));
+            }
+
             // Endpoints that exist only so a test can see how the API answers a failure.
             services.AddControllers().AddApplicationPart(typeof(MondinoApi).Assembly);
         });
+    }
+
+    /// <summary>Collects every metric now, into <see cref="CapturedTelemetry.Points"/>.</summary>
+    public IReadOnlyList<CapturedPoint> CollectMetrics()
+    {
+        Services.GetRequiredService<MeterProvider>().ForceFlush();
+        return Telemetry.Points;
     }
 
     /// <summary>Runs the seed, as `Mondino.Cli seed` does: Northwind and its twelve teammates.</summary>

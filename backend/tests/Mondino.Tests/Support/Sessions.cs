@@ -86,7 +86,7 @@ public static class Sessions
         return await SessionOfAsync(response);
     }
 
-    private static async Task<Session> SessionOfAsync(HttpResponseMessage response)
+    internal static async Task<Session> SessionOfAsync(HttpResponseMessage response)
     {
         using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var cookies = response.Headers.GetValues("Set-Cookie").Select(cookie => cookie.Split(';')[0]).ToList();
