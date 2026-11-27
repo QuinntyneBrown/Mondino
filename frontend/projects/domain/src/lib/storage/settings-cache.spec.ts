@@ -98,4 +98,19 @@ describe('SettingsCache', () => {
     expect(cache.clockFormat()).toBeNull();
     expect(cache.momentKinds()).toEqual(ALL_MOMENT_KINDS);
   });
+
+  it('forgets what it kept, in storage too', () => {
+    const cache = cacheFor('sofia');
+    cache.replace({
+      temperatureUnit: 'fahrenheit',
+      clockFormat: '12-hour',
+      momentKinds: [],
+      sharesWeather: true,
+      sharesStatus: true,
+    });
+    cache.clear();
+    expect(localStorage.getItem(settingsKey)).toBeNull();
+    expect(cache.temperatureUnit()).toBeNull();
+    expect(cache.momentKinds()).toEqual(ALL_MOMENT_KINDS);
+  });
 });

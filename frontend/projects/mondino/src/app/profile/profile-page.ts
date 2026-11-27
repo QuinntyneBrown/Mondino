@@ -13,6 +13,7 @@ import {
   untracked,
 } from '@angular/core';
 import type { Dialog } from '@angular/cdk/dialog';
+import type { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 import { RouterLink } from '@angular/router';
 import {
   CLOCK,
@@ -56,7 +57,8 @@ import { ProfileStore } from './profile-store';
  * Location section, where a teammate who has moved looks a new postal code up and saves it
  * (L2-032), and the settings: Display (L2-033), Moments on the globe (L2-022) and What teammates
  * see (L2-034), saved through the bar for unsaved changes (L2-035). The postal code shown is the
- * viewer's own, the only one any screen shows after joining. Leaving the team joins with journey 24.
+ * viewer's own, the only one any screen shows after joining. "Leave Northwind" opens
+ * "Leave Northwind?" (L2-036), before and instead of "Leave without saving?".
  */
 @Component({
   selector: 'mo-profile-page',
@@ -92,10 +94,12 @@ export class ProfilePage {
   private readonly clock = inject(CLOCK);
   private readonly injector = inject(Injector);
   private readonly environment = inject(EnvironmentInjector);
-  /** The CDK Dialog, imported when "Leave without saving?" is first asked; it goes with the screen. */
+  /** The CDK Dialog, imported when a dialog is first opened; it goes with the screen. */
   private dialogs: { readonly service: Dialog; readonly injector: EnvironmentInjector } | null =
     null;
   private asking: Promise<boolean> | null = null;
+  private leaveDialog: { close(): void } | null = null;
+  private leaveDialogOpen = false;
   private destroyed = false;
 
   protected readonly countries: SelectOption[] = supportedCountries.map((country) => ({
@@ -196,6 +200,9 @@ export class ProfilePage {
   /** Whether the 3D globe is drawn, or the still picture stands in for it (L2-008). */
   protected readonly globeState = signal<GlobeState>('Loading');
 
+  /** "Leave Northwind", the team's name as text. */
+  protected readonly leaveLabel = computed(() => `Leave ${this.store.profile()?.teamName ?? ''}`);
+
   /** The city the pin stays in until a new one is saved: "Milan". */
   protected readonly stays = computed(() => this.store.profile()?.pin.cityName ?? '');
 
@@ -214,6 +221,8 @@ export class ProfilePage {
     void this.store.load();
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
+      // "Leave Northwind?" goes with the screen it was asked on, as once the team is left.
+      this.leaveDialog?.close();
       // Destroying the dialogs' injector closes a dialog still open.
       this.dialogs?.injector.destroy();
     });
@@ -248,27 +257,75 @@ export class ProfilePage {
       import('./discard-changes-dialog/discard-changes-dialog'),
     ]);
     if (this.destroyed) return true;
-    if (!this.dialogs) {
-      const injector = createEnvironmentInjector(
-        [Dialog, { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } }],
-        this.environment,
-      );
-      this.dialogs = { service: injector.get(Dialog), injector };
-    }
-    const dialog = this.dialogs.service.open<boolean>(DiscardChangesDialog, {
+    const dialog = this.dialogService(Dialog, OVERLAY_DEFAULT_CONFIG).open<boolean>(
+      DiscardChangesDialog,
+      {
+        injector: this.injector,
+        role: 'alertdialog',
+        ariaModal: true,
+        ariaLabelledBy: discardChangesTitleId,
+        ariaDescribedBy: discardChangesDescriptionId,
+        autoFocus: '.btn--primary',
+        hasBackdrop: false,
+        width: '100%',
+        height: '100%',
+        maxWidth: '100%',
+        maxHeight: '100%',
+      },
+    );
+    return new Promise((answer) => dialog.closed.subscribe((leave) => answer(leave === true)));
+  }
+
+  /**
+   * "Leave Northwind" opens "Leave Northwind?" (L2-036) at once, whatever is unsaved: leaving takes
+   * the settings too. Focus starts on "Stay" and returns to the button. One dialog at a time.
+   */
+  protected async openLeaveDialog(event: Event): Promise<void> {
+    const trigger = event.currentTarget as HTMLElement;
+    if (this.leaveDialogOpen) return;
+    this.leaveDialogOpen = true;
+    const [
+      { Dialog, OVERLAY_DEFAULT_CONFIG },
+      { LeaveTeamDialog, leaveTeamTitleId, leaveTeamDescriptionId },
+    ] = await Promise.all([
+      import('../team/invite-dialog/dialog-layers'),
+      import('./leave-team-dialog/leave-team-dialog'),
+    ]);
+    if (this.destroyed) return;
+    const dialog = this.dialogService(Dialog, OVERLAY_DEFAULT_CONFIG).open(LeaveTeamDialog, {
       injector: this.injector,
       role: 'alertdialog',
       ariaModal: true,
-      ariaLabelledBy: discardChangesTitleId,
-      ariaDescribedBy: discardChangesDescriptionId,
-      autoFocus: '.btn--primary',
+      ariaLabelledBy: leaveTeamTitleId,
+      ariaDescribedBy: leaveTeamDescriptionId,
+      autoFocus: '.dialog__footer .btn:first-child',
+      restoreFocus: trigger,
       hasBackdrop: false,
       width: '100%',
       height: '100%',
       maxWidth: '100%',
       maxHeight: '100%',
     });
-    return new Promise((answer) => dialog.closed.subscribe((leave) => answer(leave === true)));
+    this.leaveDialog = dialog;
+    dialog.closed.subscribe(() => {
+      this.leaveDialog = null;
+      this.leaveDialogOpen = false;
+    });
+  }
+
+  /** The screen's CDK Dialog, drawn in the page's own layers, made on first use. */
+  private dialogService(
+    dialog: typeof Dialog,
+    overlayDefaults: typeof OVERLAY_DEFAULT_CONFIG,
+  ): Dialog {
+    if (!this.dialogs) {
+      const injector = createEnvironmentInjector(
+        [dialog, { provide: overlayDefaults, useValue: { usePopover: false } }],
+        this.environment,
+      );
+      this.dialogs = { service: injector.get(dialog), injector };
+    }
+    return this.dialogs.service;
   }
 
   protected chooseTemperatureUnit(value: string): void {

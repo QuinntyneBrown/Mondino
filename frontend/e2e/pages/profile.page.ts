@@ -55,6 +55,8 @@ export class ProfilePage {
   readonly errorText: Locator;
   readonly tryAgain: Locator;
   readonly backToGlobe: Locator;
+  /** "Leave Northwind", under the sections. */
+  readonly leave: Locator;
 
   constructor(readonly page: Page) {
     this.main = page.locator('main#main');
@@ -102,6 +104,7 @@ export class ProfilePage {
     this.errorText = this.main.locator('.empty__text');
     this.tryAgain = this.main.getByRole('button', { name: 'Try again' });
     this.backToGlobe = this.main.getByRole('link', { name: 'Back to the globe' });
+    this.leave = this.main.locator('.settings__leave').getByRole('button');
   }
 
   /** An option of a Display radio group: "°F" of Temperature. */

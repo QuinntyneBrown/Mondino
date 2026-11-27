@@ -53,6 +53,15 @@ export class SettingsCache implements SettingsStore {
       // Storage blocked: the choice holds for this visit, and the backend keeps it.
     }
   }
+
+  clear(): void {
+    this.kept.set(nothingKept);
+    try {
+      localStorage.removeItem(settingsKey);
+    } catch {
+      // Nothing was kept.
+    }
+  }
 }
 
 function read(teammateId: string | null): Kept {

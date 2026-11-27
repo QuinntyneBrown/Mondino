@@ -94,6 +94,12 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
   settings part, each optional. The teammate screens read the display settings and the kinds
   through `SETTINGS_STORE`, bound by `TeamShell` to `SettingsCache`; a null unit or clock means the
   viewer's country's default.
+- Leaving (`profile/leave-team`, ADR 0024) is `DELETE /api/teams/{teamId}/me`
+  (`ProfileApi.leaveTeam`), answered 204. It deletes the asker's `Teammate` row and the
+  `SignInLink`s of their email fingerprint that no other teammate holds, and expires the session
+  and antiforgery cookies; any copy of the session is then refused with 401. A team whose last
+  teammate leaves is kept with its invite link. The browser then clears `SETTINGS_STORE`
+  (`SettingsStore.clear()`) and forgets its `TeamMembership`.
 - A postal code travels only in a request body. `IPostalCodeLookup.FindCityAsync` answers a
   `PostalCodeLookupOutcome`: found with a `City`, not found or unavailable; the API answers 422 `postal_code_not_found` and 503
   `postal_code_unavailable`, and 429 `rate_limited` over the limit. A person joining looks one up
@@ -229,7 +235,6 @@ The designs mark these as `<TO SUPPLY>`:
   the mock's countdown ("9:42").
 - Where the attributions of Open-Meteo (CC BY 4.0, ADR 0015) and OpenHolidays (ODbL, ADR 0019)
   are shown; no mock draws them.
-- What becomes of a team when its last teammate leaves.
 - Numbers the requirements do not give: the circuit breaker's threshold,
   the globe's turning rate, the rate limit on a teammate's own postal code
   lookup.

@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-044, L2-054
+// Traces to: L2-044, L2-054, L2-036
 // Description: What a person types is shown as its literal characters wherever it appears, and the backend's own text is never shown
 
 import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
@@ -13,6 +13,8 @@ import {
   northwindInvite,
   SOFIA_JOINED,
 } from '../fixtures/invites';
+import { NORTHWIND_ME, sofiaProfile } from '../fixtures/profile';
+import { rememberTeam } from '../support/membership';
 
 const markup = '<img src=x onerror=alert(1)>';
 
@@ -62,6 +64,42 @@ test.describe('What a person types is data', () => {
     await expect(inviteDialog.title).toHaveText(`Invite teammates to ${markup}`);
     await expect(inviteDialog.dialog).toHaveAccessibleName(`Invite teammates to ${markup}`);
     await expect(globePage.images).toHaveCount(0);
+  });
+
+  test('a team named as markup is shown as those characters in the leave dialog and on Left Team', async ({
+    api,
+    leaveDialog,
+    leftTeamPage,
+    page,
+    profilePage,
+  }) => {
+    // Given Sofia on a team named as markup
+    await rememberTeam(page);
+    const pins = northwindPinsOf('Sofia Bianchi', 'Lena Fischer');
+    (pins.json as { teamName: string }).teamName = markup;
+    api.answer('GET', NORTHWIND_PINS, pins);
+    const profile = sofiaProfile();
+    (profile.json as { teamName: string }).teamName = markup;
+    api.answer('GET', NORTHWIND_ME, profile);
+    api.refuse('DELETE', NORTHWIND_ME, 503, 'unexpected');
+
+    // When she asks to leave, and the first try fails, the dialog names the team as text
+    await profilePage.open();
+    await expect(profilePage.leave).toHaveText(`Leave ${markup}`);
+    await profilePage.leave.click();
+    await expect(leaveDialog.dialog).toHaveAccessibleName(`Leave ${markup}?`);
+    await leaveDialog.confirm.click();
+    await expect(leaveDialog.alert).toHaveText(
+      `We couldn’t take your pin off. You’re still on ${markup} — try again.`,
+    );
+    await expect(leaveDialog.images).toHaveCount(0);
+
+    // And once she has left, Left Team names it as text
+    api.answer('DELETE', NORTHWIND_ME, { status: 204 });
+    await leaveDialog.confirm.click();
+    await expect(leftTeamPage.title).toHaveText(`You’ve left ${markup}`);
+    await expect(leftTeamPage.text).toContainText(`off ${markup}’s globe`);
+    await expect(leaveDialog.images).toHaveCount(0);
   });
 
   test('a refusal is shown in the screen’s own words, never the backend’s text', async ({

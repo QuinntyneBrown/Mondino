@@ -49,6 +49,7 @@ const settingsStore: SettingsStore = {
   temperatureUnit: signal(null),
   clockFormat: signal(null),
   replace: (settings) => replaced.push(settings),
+  clear: () => undefined,
 };
 const toronto: PostalCodeResult = {
   city: {
@@ -66,6 +67,7 @@ async function storeAnswering(rest: Partial<ProfileApi> = {}): Promise<ProfileSt
     getProfile: () => Promise.resolve(milan),
     lookUpPostalCode: () => new Promise(() => undefined),
     updateProfile: () => new Promise(() => undefined),
+    leaveTeam: () => new Promise(() => undefined),
     ...rest,
   };
   TestBed.configureTestingModule({

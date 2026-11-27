@@ -1488,3 +1488,76 @@ switches turning every kind off and bringing the Globe's note and legend (journe
 criterion 4's held emblem cannot be reached). Handed on: what "Leave Northwind" does with unsaved changes
 (prompt 24), carrying the backend's settings to a browser that never opened Profile & Settings (prompt 25),
 and a save with an ended session (prompt 27). Total: 80.
+
+## Journey 24: Leave the team
+
+**What slowed it**
+
+- The prompt said "Removing your pin…" and "Cancel"; the mocks say "Leaving…" and "Stay". The mocks won
+  and the prompt was corrected.
+- The design left the session `<TO SUPPLY>` and drew a session store to delete. Sessions are protected
+  cookies (ADR 0008) and ADR 0010 already refused one whose teammate is gone, so ending a session is
+  deleting the teammate's row and expiring the cookies on the answer. ADR 0024 records it, with the empty
+  team kept and the sign-in links deleted.
+- Deleting a teammate's sign-in links with them makes L2-052 criterion 10 (a good link for an email on no
+  team) unreachable by any flow, since mail goes only to an email on a team. Its backend test removes the
+  row directly, and ADR 0024 hands the question to the requirements.
+- The CDK did not close "Leave Northwind?" when Profile & Settings was destroyed by the navigation to
+  `/left`: the dialog stayed over Left Team. The page now closes it itself when it goes.
+- `rememberTeam` writes the membership on every page load, so a spec could not see what a reload shows
+  once the app forgets the team. `rememberTeamOnce` writes it once a tab.
+- `ProfileStore`'s unit test stubs `ProfileApi` and `SettingsStore` by hand; adding a method to each broke
+  the unit build, which the quick e2e loop did not run. The verify script caught it.
+- Journey 23's save bar spec failed once under the whole suite: pausing the page's clock at the time just
+  read raced the running clock ("Cannot fast-forward to the past"). `pauseNow` pauses 20 ms ahead and
+  reads again if it lands in the past; the three specs that paused that way use it.
+- The markup spec of the leave dialog and Left Team was green on arrival; Left Team's title bound as
+  `innerHTML` made it fail.
+
+**Lessons**
+
+1. **A session that is a signed cookie ends when what it names is gone.** Validate the principal against
+   the store on each request, and ending every copy of it is deleting the row; expire the cookie on the
+   answer too.
+2. **Close a dialog yourself when its screen goes.** Destroying the injector that made a CDK Dialog did not
+   take its open dialog away after a navigation; keep the `DialogRef` and close it on destroy.
+3. **Remember state for a spec once a tab when the spec tests forgetting it.** An init script runs on every
+   reload and puts back what the app removed.
+4. **Pause a running page clock ahead of the time read.** The clock moves between reading it and pausing
+   it; pause a little ahead and read again on "Cannot fast-forward to the past".
+5. **Deleting data can make another requirement's precondition unreachable.** Check which flows still lead
+   to each criterion that reads what is deleted, and say so in the ADR.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): ADR 0024, the design, five diagrams, the shared contracts, the mocks' note and
+  the prompt were one commit before any code.
+- *Read the prompt against the mock too* (journey 3, lesson 1): "Leaving…" and "Stay" won over the prompt.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit code,
+  written to a log; it stopped four commits (the redemption test's narrative, the unit stub, a selector in
+  a spec, the clock race).
+- *Measure the initial bundle* (journey 2, lesson 1): 273.19 kB before, 274.26 kB after: the `danger` and
+  `link` variants of `Button`, which the initial chunk holds, and the `/left` route's entry. The dialog and
+  Left Team are lazy chunks.
+- *Take what a lazy feature needs from a package by name* (journey 16, lesson 2): "Leave Northwind?" opens
+  through the same `dialog-layers` module as the other two dialogs.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5) and *break a
+  slice with a copy, not with git* (journey 23, lesson 1): the markup spec, with Left Team's page copied
+  aside.
+- *Check the shape of navigation state and storage* (journey 4, lesson 3): `LeftPage` reads the team's name
+  only as a short string, and takes it out of history as `InviteNeededPage` does an email.
+
+**Progress:** 8 of 8 criteria of L2-036 proven (100%): the dialog, busy, failed, "Stay" and Escape, Left
+Team with and without the name, the four screens showing "You need an invite link" after leaving, and the
+backend's deletion, for the last teammate too. Proven here for earlier journeys: L2-044 criterion 10's leave
+dialog and Left Team, and L2-043 criterion 4 through the real leave rather than a removed row. Journey 6,
+recounted criterion by criterion: 37 of 40, still 90. Proven: L2-007 criteria 1 to 5; L2-043 criteria 1 to
+6 and 8 to 11; L2-044 criteria 1 to 12; L2-045 criteria 1 to 4 and 6 to 11. Not proven: L2-043 criteria 7
+and 12 (the reset of the invite link, which waits for its design, L2-055) and L2-045 criterion 5 (no spec
+reads "You can try again in" or that the countdown is announced once). Journey 5's "Start a new team" from
+Left Team leads to Create Team (journey 5 stays 100). Journey 23's question is answered and proven: "Leave
+Northwind?" opens at once, and "Leave without saving?" is never asked on the way out (journey 23 stays
+100). Handed on: L2-038 criterion 10 is proven here and L2-037 criterion 9's sheet is not measured
+(prompt 27), with a 401 on leaving; L2-039 criterion 4's Escape while leaving is proven (prompt 28).
+Total: 82.

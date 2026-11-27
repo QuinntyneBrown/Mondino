@@ -111,6 +111,8 @@ closes what is left.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 24 proved L2-039 criterion 4's exception (Escape does nothing while leaving the team is
+  pending) in `profile-leave-team.spec.ts`; count it, and prove the rest of the criterion here.
 - Set journey 28 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

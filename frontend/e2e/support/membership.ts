@@ -15,6 +15,21 @@ export async function rememberTeam(page: Page, membership = NORTHWIND_MEMBERSHIP
 }
 
 /**
+ * Makes the browser remember a team before the first page of the tab loads, and not again on a
+ * reload, so a spec can see what the browser keeps once the app forgets it.
+ */
+export async function rememberTeamOnce(
+  page: Page,
+  membership = NORTHWIND_MEMBERSHIP,
+): Promise<void> {
+  await page.addInitScript((kept) => {
+    if (sessionStorage.getItem('e2e.remembered')) return;
+    sessionStorage.setItem('e2e.remembered', 'yes');
+    localStorage.setItem('mondino.membership', kept);
+  }, JSON.stringify(membership));
+}
+
+/**
  * Makes the browser hold a teammate's chosen kinds of moment, as a save on Profile & Settings
  * leaves them (ADR 0020): Sofia's unless another teammate id is given.
  */

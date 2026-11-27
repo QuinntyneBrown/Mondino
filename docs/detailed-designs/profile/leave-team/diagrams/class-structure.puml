@@ -13,28 +13,33 @@ title Class structure — Leave team
 
 package "Frontend" {
   class ProfilePage {
-    +openLeaveDialog(): void
+    +openLeaveDialog(trigger: HTMLElement): void
   }
   class LeaveTeamDialog {
-    +teamName: string
-    +cancel(): void
+    +teamName: Signal<string>
+    +teammates: Signal<number>
     +leave(): void
   }
   class ProfileStore {
     +leaving: Signal<boolean>
     +leaveFailed: Signal<boolean>
-    +leave(): void
+    +leave(): Promise<void>
   }
   interface ProfileApi {
-    +leaveTeam(teamId: string): Promise<void>
+    +leaveTeam(teamId: string, signal: AbortSignal): Promise<void>
   }
   class HttpProfileApi
-  class LeftPage
-  class SettingsStore {
+  class LeftPage {
+    +teamName: string | null
+  }
+  interface SettingsStore {
     +clear(): void
   }
   class SettingsCache {
     +clear(): void
+  }
+  interface TeamMembership {
+    +forget(): void
   }
 }
 
@@ -53,27 +58,32 @@ package "Backend" {
     +Guid TeamId
   }
   interface ITeammateSessions {
-    +EndAllAsync(teammateId: Guid): Task
+    +EndAsync(): Task
   }
-  class TeammateSessions
+  class CookieTeammateSessions
   interface IAppDbContext {
+    +Teammates: DbSet<Teammate>
+    +SignInLinks: DbSet<SignInLink>
     +SaveChangesAsync(): Task<int>
   }
   class Team {
     +Guid Id
     +string Name
-    +IReadOnlyList<Teammate> Teammates
-    +RemoveTeammate(teammateId: Guid): void
+    +string InviteToken
   }
   class Teammate {
     +Guid Id
     +string Name
     +string Colour
-    +PostalCode PostalCode
+    +string? PostalCode
     +City City
+    +string? EmailFingerprint
     +TeammateSettings Settings
   }
-  class PostalCode
+  class SignInLink {
+    +string EmailFingerprint
+    +byte[] SealedEmail
+  }
   class City
   class TeammateSettings
 }
@@ -82,19 +92,19 @@ ProfilePage ..> LeaveTeamDialog : opens (CDK Dialog)
 LeaveTeamDialog --> ProfileStore : leave() / leaving, leaveFailed
 ProfileStore ..> ProfileApi : PROFILE_API
 ProfileApi <|.. HttpProfileApi
-ProfileStore ..> SettingsStore : clears
-SettingsStore ..> SettingsCache : clears
+ProfileStore ..> SettingsStore : clear()
+SettingsStore <|.. SettingsCache
+ProfileStore ..> TeamMembership : forget()
 ProfileStore ..> LeftPage : navigates to
 HttpProfileApi ..> ProfileController : DELETE
 ProfileController ..> LeaveTeamCommandHandler : LeaveTeamCommand
 LeaveTeamCommandHandler ..> LeaveTeamCommand : handles
 LeaveTeamCommandHandler ..> ICurrentTeammate : who leaves
-LeaveTeamCommandHandler --> Team : loads / RemoveTeammate
-LeaveTeamCommandHandler ..> ITeammateSessions : ends sessions
-LeaveTeamCommandHandler ..> IAppDbContext : saves
-ITeammateSessions <|.. TeammateSessions
-Team "1" *-- "0..500" Teammate
-Teammate *-- PostalCode
-Teammate *-- City
+LeaveTeamCommandHandler ..> ITeammateSessions : ends the session
+LeaveTeamCommandHandler ..> IAppDbContext : removes the Teammate and their SignInLinks
+ITeammateSessions <|.. CookieTeammateSessions
+Team "1" o-- "0..500" Teammate : kept when the last leaves
+Teammate --> City
+SignInLink ..> Teammate : same fingerprint
 Teammate *-- TeammateSettings
 @enduml

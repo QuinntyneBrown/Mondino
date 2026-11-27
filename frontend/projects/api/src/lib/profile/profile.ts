@@ -52,6 +52,12 @@ export interface ProfileApi {
    * `validation_failed`, and nothing is stored.
    */
   updateProfile(teamId: string, update: ProfileUpdate, signal: AbortSignal): Promise<Profile>;
+
+  /**
+   * Leaves the team (L2-036): the viewer's pin and everything held about them are deleted, and
+   * their session ends. Refused with 401 when the session has ended, 404 for another team.
+   */
+  leaveTeam(teamId: string, signal: AbortSignal): Promise<void>;
 }
 
 export const PROFILE_API = new InjectionToken<ProfileApi>('ProfileApi');

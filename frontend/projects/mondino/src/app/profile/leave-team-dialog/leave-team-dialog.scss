@@ -1,0 +1,87 @@
+// "Leave Northwind?" (docs/design-system/components/dialog; docs/mocks/dialogs/leave-team):
+// a sheet from the bottom under 576 px, in the middle from 576 px. The CDK pane fills the window;
+// the dialog places its panel in it.
+:host {
+  display: block;
+}
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-backdrop);
+  animation: fade-in var(--duration-slow) var(--ease-standard);
+}
+.dialog {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  justify-items: stretch;
+  pointer-events: none;
+}
+.dialog__panel {
+  pointer-events: auto;
+  width: 100%;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-6) max(var(--space-6), env(safe-area-inset-bottom));
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-4);
+  animation: fade-in var(--duration-slow) var(--ease-standard);
+}
+.dialog__title {
+  font: var(--text-h2);
+}
+.dialog__body {
+  margin-top: var(--space-3);
+  color: var(--color-fg-muted);
+  font: var(--text-body-sm);
+}
+.dialog__body > mo-alert {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+.dialog__footer {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.icon--spin {
+  animation: spin var(--duration-deliberate) linear infinite;
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .dialog__panel,
+  .icon--spin {
+    animation: none;
+  }
+}
+@media (min-width: 36rem) {
+  .dialog {
+    align-items: center;
+    justify-items: center;
+    padding: var(--space-6);
+  }
+  .dialog__panel {
+    max-width: var(--layout-overlay-max);
+    border-radius: var(--radius-2xl);
+    box-shadow:
+      0 0 0 var(--border-width-hairline) var(--color-border-default),
+      var(--shadow-5);
+  }
+  .dialog__footer {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}

@@ -43,6 +43,15 @@ export async function post(url: string, body: unknown, signal: AbortSignal): Pro
   );
 }
 
+/** Deletes what `url` names; the endpoint answers with no body. Sends the antiforgery token, as every change does. */
+export async function remove(url: string, signal: AbortSignal): Promise<void> {
+  await send<null>(
+    url,
+    { signal, method: 'DELETE', headers: { accept: 'application/json' } },
+    false,
+  );
+}
+
 /** The cookie the backend gives a session's antiforgery token in, and the header it is returned in (docs/adr/0010). */
 const antiforgeryCookie = '__Host-mondino-xsrf';
 const antiforgeryHeader = 'x-xsrf-token';

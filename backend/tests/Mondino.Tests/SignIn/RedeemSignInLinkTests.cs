@@ -94,7 +94,8 @@ public sealed class RedeemSignInLinkTests
     [Fact]
     public async Task A_good_link_for_an_email_on_no_team_names_the_email_and_issues_no_session()
     {
-        // Given a sign-in link mailed to Sofia, who has since left Northwind
+        // Given a sign-in link mailed to Sofia, whose teammate row has since gone and left the link
+        // behind. (Leaving through the API takes her links too, docs/adr/0024: LeaveTeamTests.)
         await using var api = new MondinoApi();
         using var client = api.CreateSecureClient();
         var made = await api.MakeTeamAsync(client, "Northwind", "sofia@northwind.co");
