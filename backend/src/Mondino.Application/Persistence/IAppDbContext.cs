@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Mondino.Domain.SignIn;
 using Mondino.Domain.Teams;
 
 namespace Mondino.Application.Persistence;
@@ -14,6 +15,8 @@ public interface IAppDbContext
     DbSet<Teammate> Teammates { get; }
 
     DbSet<City> Cities { get; }
+
+    DbSet<SignInLink> SignInLinks { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

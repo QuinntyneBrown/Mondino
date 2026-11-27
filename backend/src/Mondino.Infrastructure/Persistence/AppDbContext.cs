@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mondino.Application.Persistence;
+using Mondino.Domain.SignIn;
 using Mondino.Domain.Teams;
 
 namespace Mondino.Infrastructure.Persistence;
@@ -12,6 +13,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Teammate> Teammates => Set<Teammate>();
 
     public DbSet<City> Cities => Set<City>();
+
+    public DbSet<SignInLink> SignInLinks => Set<SignInLink>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +45,18 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             teammate.HasIndex(t => new { t.TeamId, t.JoinRequestId }).IsUnique();
             teammate.Property(t => t.EmailFingerprint).HasMaxLength(64);
             teammate.HasIndex(t => t.EmailFingerprint);
+        });
+
+        modelBuilder.Entity<SignInLink>(link =>
+        {
+            link.HasKey(l => l.Id);
+            link.Property(l => l.Id).ValueGeneratedNever();
+            link.Property(l => l.TokenHash).HasMaxLength(64).IsRequired();
+            link.HasIndex(l => l.TokenHash).IsUnique();
+            link.Property(l => l.EmailFingerprint).HasMaxLength(64).IsRequired();
+            link.HasIndex(l => l.EmailFingerprint);
+            link.Property(l => l.SealedEmail).HasMaxLength(512).IsRequired();
+            link.Property(l => l.UsedAt).IsConcurrencyToken();
         });
 
         modelBuilder.Entity<City>(city =>
