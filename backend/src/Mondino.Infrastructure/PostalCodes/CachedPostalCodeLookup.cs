@@ -1,0 +1,100 @@
+using Mondino.Application.Joining;
+
+namespace Mondino.Infrastructure.PostalCodes;
+
+/// <summary>
+/// The postal code source behind a 5-second timeout (L2-049), a cache and a breaker
+/// (docs/adr/0006). <c>Found</c> is kept 30 days and <c>NotFound</c> 1 day, by country and postal
+/// code, at most 10,000 entries; <c>Unavailable</c> is never kept. After 5 failures in a row the
+/// breaker opens for 30 seconds, and the lookup is <c>Unavailable</c> without a call.
+/// </summary>
+internal sealed class CachedPostalCodeLookup(GeoNamesPostalCodeLookup source, TimeProvider time) : IPostalCodeLookup
+{
+    public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
+    public static readonly TimeSpan FoundLifetime = TimeSpan.FromDays(30);
+    public static readonly TimeSpan NotFoundLifetime = TimeSpan.FromDays(1);
+    public static readonly TimeSpan BreakerOpenFor = TimeSpan.FromSeconds(30);
+    public const int FailuresToOpen = 5;
+    public const int MaxEntries = 10_000;
+
+    private readonly Dictionary<string, (PostalCodeLookupOutcome Outcome, DateTimeOffset Expires)> cache = [];
+    private readonly Lock gate = new();
+    private int failures;
+    private DateTimeOffset openUntil = DateTimeOffset.MinValue;
+
+    public async Task<PostalCodeLookupOutcome> FindCityAsync(PostalCode postalCode, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(postalCode);
+        if (!source.CanLookUp(postalCode.CountryCode))
+        {
+            return PostalCodeLookupOutcome.Unavailable;
+        }
+
+        var key = $"{postalCode.CountryCode} {postalCode.Value}";
+        lock (gate)
+        {
+            var now = time.GetUtcNow();
+            if (cache.TryGetValue(key, out var kept) && kept.Expires > now)
+            {
+                return kept.Outcome;
+            }
+
+            if (now < openUntil)
+            {
+                return PostalCodeLookupOutcome.Unavailable;
+            }
+        }
+
+        PostalCodeLookupOutcome outcome;
+        using (var timeout = new CancellationTokenSource(Timeout, time))
+        using (var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token))
+        {
+            try
+            {
+                outcome = await source.FindCityAsync(postalCode, linked.Token);
+            }
+            catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                outcome = PostalCodeLookupOutcome.Unavailable;
+            }
+        }
+
+        Record(key, outcome);
+        return outcome;
+    }
+
+    private void Record(string key, PostalCodeLookupOutcome outcome)
+    {
+        lock (gate)
+        {
+            var now = time.GetUtcNow();
+            if (outcome.Status == PostalCodeLookupStatus.Unavailable)
+            {
+                if (++failures >= FailuresToOpen)
+                {
+                    openUntil = now + BreakerOpenFor;
+                    failures = 0;
+                }
+
+                return;
+            }
+
+            failures = 0;
+            if (cache.Count >= MaxEntries)
+            {
+                foreach (var expired in cache.Where(entry => entry.Value.Expires <= now).Select(entry => entry.Key).ToList())
+                {
+                    cache.Remove(expired);
+                }
+
+                if (cache.Count >= MaxEntries)
+                {
+                    cache.Remove(cache.MinBy(entry => entry.Value.Expires).Key);
+                }
+            }
+
+            var lifetime = outcome.Status == PostalCodeLookupStatus.Found ? FoundLifetime : NotFoundLifetime;
+            cache[key] = (outcome, now + lifetime);
+        }
+    }
+}

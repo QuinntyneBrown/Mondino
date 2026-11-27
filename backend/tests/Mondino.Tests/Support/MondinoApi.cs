@@ -8,6 +8,7 @@ using Microsoft.Extensions.Time.Testing;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
+using Mondino.Infrastructure.PostalCodes;
 
 namespace Mondino.Tests.Support;
 
@@ -28,8 +29,19 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>Who the API takes the browser to be: no one, until a test signs a teammate in.</summary>
     public FakeCurrentTeammate CurrentTeammate { get; } = new();
 
-    /// <summary>The postal code source, answering as the test tells it.</summary>
+    /// <summary>The postal code lookup, answering as the test tells it.</summary>
     public FakePostalCodeLookup PostalCodes { get; } = new();
+
+    /// <summary>
+    /// The outside postal code service. Set <see cref="UsesPostalCodeSource"/> before the first
+    /// request to run the real lookup, with its city directory, cache and breaker, against it.
+    /// </summary>
+    public FakePostalCodeSource PostalCodeSource { get; } = new();
+
+    public bool UsesPostalCodeSource { get; set; }
+
+    /// <summary>The GeoNames account the real lookup is configured with; null leaves it unset.</summary>
+    public string? PostalCodeSourceUsername { get; set; } = "mondino-tests";
 
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
@@ -39,6 +51,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.UseSetting("Database:Provider", "InMemory");
         builder.UseSetting("Database:Name", $"mondino-tests-{Guid.NewGuid():N}");
+
+        if (UsesPostalCodeSource && PostalCodeSourceUsername is not null)
+        {
+            builder.UseSetting("PostalCodeSource:Username", PostalCodeSourceUsername);
+        }
 
         builder.ConfigureTestServices(services =>
         {
@@ -51,8 +68,16 @@ public class MondinoApi : WebApplicationFactory<Program>
             services.RemoveAll<ICurrentTeammate>();
             services.AddSingleton<ICurrentTeammate>(CurrentTeammate);
 
-            services.RemoveAll<IPostalCodeLookup>();
-            services.AddSingleton<IPostalCodeLookup>(PostalCodes);
+            if (UsesPostalCodeSource)
+            {
+                services.AddHttpClient(GeoNamesPostalCodeLookup.ClientName)
+                    .ConfigurePrimaryHttpMessageHandler(() => PostalCodeSource);
+            }
+            else
+            {
+                services.RemoveAll<IPostalCodeLookup>();
+                services.AddSingleton<IPostalCodeLookup>(PostalCodes);
+            }
 
             if (DatabaseFails)
             {
