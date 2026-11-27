@@ -73,8 +73,9 @@ A moment is one of four kinds: a holiday, Formula 1, a local event, or sport.
 ## What Mondino leaves out
 
 Chat, a calendar or meeting scheduler, presence or activity tracking, precise location, a social
-feed and adverts. Inviting a teammate, messaging one, sign-in and making a team are not designed
-yet, and none is built before its design exists.
+feed, adverts, and admins or roles. There is no "Message" button. Three things are not designed
+yet, and none is built before its design exists: how a teammate who joined by invite link signs
+in again, what a used or expired sign-in link shows, and what "Reset link" asks before it acts.
 
 ## Design
 
@@ -97,16 +98,10 @@ source of truth for the code.
 
 ## Project status
 
-Mondino is designed and not yet built. The repository holds the agent instructions
-([`AGENTS.md`](AGENTS.md)), the skills that drive the work (`.claude/skills/`, `.agents/skills/`)
-and the community files. What comes next, in order:
-
-1. The requirements in `docs/specs/`, from the prototype.
-2. The mocks in `docs/mocks/`, transcribed from the prototype, and the design system extracted
-   from them.
-3. The detailed designs, the journeys and their slices.
-4. The scaffold: the Angular workspace, the .NET solution, the test harness and CI.
-5. The app, one slice at a time, each with its failing acceptance test first.
+Mondino is designed, and its scaffold is built: the Angular workspace, the .NET solution, the
+test harnesses, `tools/verify/verify.mjs` and CI, with Not Found as the first screen.
+[`docs/journeys.md`](docs/journeys.md) lists the thirty journeys that build the rest, in order,
+each with its prompt in `docs/prompts/` and its share complete.
 
 ## How it works
 
@@ -126,14 +121,14 @@ Teammate ──▶ mondino (screens) ──▶ api clients (HTTP) ──▶ back
 | `frontend/projects/mondino` | The app: pages, dialogs and the composition root |
 | `backend/src/Mondino.*` | `Domain` ← `Application` ← `Infrastructure` ← `Api` |
 
-This is the planned structure; each project is added by the first change that needs it.
+`globe` joins when the globe is first drawn; the rest exist.
 Dependencies run one way, and ESLint enforces it. Every route is lazy-loaded. The browser
 calls only the backend, which alone calls the postal code lookup, the weather and the calendars,
 and a postal code is never sent to another teammate. The full rules are in [`AGENTS.md`](AGENTS.md).
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org) 24 or later, with npm, for the frontend
+- [Node.js](https://nodejs.org) 22 or later (CI uses 24), with npm, for the frontend
 - The [.NET SDK](https://dotnet.microsoft.com/download) 10, for the backend
 - A current browser
 
@@ -144,25 +139,34 @@ git clone https://github.com/QuinntyneBrown/Mondino.git
 cd Mondino
 ```
 
-There is nothing to run yet. The scaffold adds `frontend/` and `backend/`, and from then on:
+The scaffold is in place: `frontend/` and `backend/` run, and the only screen so far is Not
+Found.
 
 ```shell
-cd frontend && npm ci && npm start        # http://localhost:4200
-cd backend && dotnet run --project src/Mondino.Api
+cd frontend && npm ci && npm start                    # http://localhost:4200
+cd backend && dotnet run --project src/Mondino.Api    # http://localhost:5080
+```
+
+`npm start` proxies `/api` to the backend. The database engine is not chosen yet, so the backend
+keeps nothing between runs; migrations and seed data are applied by a command, never by the API
+on startup:
+
+```shell
+cd backend && dotnet run --project src/Mondino.Cli -- migrate
+cd backend && dotnet run --project src/Mondino.Cli -- seed
 ```
 
 ## Build and test
-
-These commands arrive with the scaffold; the table is what the project holds itself to.
 
 | Task | Command | Scope |
 |---|---|---|
 | Format and lint | `cd frontend && npm run format:check && npm run lint` | Prettier, angular-eslint and its dependency boundaries |
 | Unit tests | `cd frontend && npm test` | The unit tests of every frontend project, on a fake clock |
 | Build | `cd frontend && npm run build` | The production build, within the `angular.json` bundle budgets |
-| Behaviour specs | `cd frontend && npx playwright install chromium && npm run e2e` | Playwright on Chromium, with page objects, against fixtures and a set time, with no request off localhost |
+| Behaviour specs | `cd frontend && npx playwright install chromium && npm run e2e` (once built, `npm run e2e:only`) | Playwright on Chromium, with page objects, against fixtures and a set time, with no request off localhost |
 | Backend | `cd backend && dotnet format --verify-no-changes && dotnet test` | Format, build and acceptance tests through the API on EF Core InMemory, with fakes for the outside sources |
-| Everything | `node tools/verify/verify.mjs` | All of the above, side by side; run it before you push |
+| Sweeps | `cd frontend && npm run e2e:visual`, `e2e:responsive`, `e2e:accessibility` | Written with each screen; run only when a person asks |
+| Everything | `node tools/verify/verify.mjs` | All of the above but the sweeps, side by side, after `npm ci`; run it before you push |
 
 No automated test uses a real backend, database, clock or outside service, or a network beyond
 localhost. CI runs lint,
@@ -170,20 +174,6 @@ the builds and one critical acceptance path per feature in under 5 minutes. Unit
 locally.
 
 ## Repository structure
-
-Today:
-
-```
-Mondino/
-├── AGENTS.md                        The purpose, the design, the architecture rules and the workflow
-├── CLAUDE.md                        Points to AGENTS.md
-├── .claude/skills/                  The skills, for Claude Code
-├── .agents/skills/                  The same skills, for other coding agents
-├── .github/                         Issue and pull request templates
-└── README.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, SUPPORT.md, LICENSE
-```
-
-As it is built:
 
 ```
 Mondino/
@@ -193,7 +183,7 @@ Mondino/
 ├── backend/                         The .NET service: Domain, Application, Infrastructure, Api, tests
 ├── docs/
 │   ├── journeys.md                  The journeys, by value added, with % complete
-│   ├── detailed-journeys.md         Each journey split into slices
+│   ├── prompts/                     One prompt per journey
 │   ├── lessons-learned.md           What each slice taught
 │   ├── specs/                       Requirements: L1 (high level), L2 (acceptance criteria)
 │   ├── detailed-designs/            One design per feature, grouped by subsystem

@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Mondino.Api/Mondino.Api.csproj" />
+    <Project Path="src/Mondino.Application/Mondino.Application.csproj" />
+    <Project Path="src/Mondino.Cli/Mondino.Cli.csproj" />
+    <Project Path="src/Mondino.Domain/Mondino.Domain.csproj" />
+    <Project Path="src/Mondino.Infrastructure/Mondino.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Mondino.Tests/Mondino.Tests.csproj" />
+  </Folder>
+</Solution>

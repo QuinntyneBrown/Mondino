@@ -1,0 +1,81 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.globe-stage {
+  position: relative;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.globe {
+  position: relative;
+  width: min(100cqw, 100cqh);
+  aspect-ratio: 1;
+  flex: none;
+  user-select: none;
+}
+.globe__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.globe__shadow {
+  fill: var(--color-globe-shadow);
+}
+.globe__ocean {
+  fill: var(--color-globe-ocean);
+}
+.globe__rim {
+  fill: none;
+  stroke: var(--color-globe-ocean-deep);
+  stroke-opacity: 0.55;
+}
+.globe__graticule {
+  fill: none;
+  stroke: var(--color-globe-graticule);
+  stroke-width: 1;
+}
+.globe__coast {
+  fill: none;
+  stroke: var(--color-globe-coast);
+  stroke-linejoin: round;
+}
+.globe__land {
+  fill: var(--color-globe-land);
+}
+.globe__sand {
+  fill: var(--color-globe-sand);
+}
+.globe__forest {
+  fill: var(--color-globe-land-deep);
+  fill-opacity: 0.45;
+}
+.globe__ice {
+  fill: var(--color-globe-ice);
+}
+.globe__shore {
+  fill: none;
+  stroke: var(--color-globe-land-deep);
+  stroke-linejoin: round;
+}
+.globe__cloud {
+  fill: var(--color-globe-cloud);
+  fill-opacity: 0.92;
+}
+.globe__night {
+  fill: var(--color-globe-night);
+  fill-opacity: 0.38;
+}
+.globe__shine {
+  fill: var(--color-globe-shine);
+}
+.globe__outline {
+  fill: none;
+  stroke: var(--color-globe-outline);
+}

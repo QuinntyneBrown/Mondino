@@ -1,0 +1,5 @@
+{
+  "name": "@mondino/components",
+  "private": true,
+  "sideEffects": false
+}

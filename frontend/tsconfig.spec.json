@@ -1,0 +1,8 @@
+/* One unit-test configuration for the workspace: the specs of every project run together. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["vitest/globals"]
+  },
+  "include": ["projects/**/*.d.ts", "projects/**/*.spec.ts"]
+}

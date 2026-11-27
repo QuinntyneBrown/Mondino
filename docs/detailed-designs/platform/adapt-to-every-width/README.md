@@ -80,9 +80,11 @@ therefore leads to the same screen as no membership.
 
 **`NoticePage`** (`mo-notice-page`, block `notice-page`) — presentation component in
 `components` for a page that says one thing: the mark and wordmark, a small still picture of
-the globe (`notice-page__art`, named "A small globe"), a title (`notice-page__title`), one
-text (`notice-page__text`) and an actions slot (`notice-page__actions`) for one or two ways
-on. It renders no header and loads no renderer. `InviteNeededPage`, `NotFoundPage` and
+the globe (`GlobeFallback` in `notice-page__art`, named "A small globe"), a title
+(`notice-page__title`), one text (`notice-page__text`) and an actions slot
+(`notice-page__actions`) for one or two ways on. The text is the inputs `lead`, `emphasis`
+(in strong) and `rest`, all rendered as text. It renders the screen's `main`, and no header,
+and loads no renderer. `InviteNeededPage`, `NotFoundPage` and
 `LeftPage` (`leave-team`) render it.
 
 **`InviteNeededPage`** — lazy route component. Its title reads "You need an invite link". Its
@@ -97,7 +99,8 @@ team's name or data.
 reads "This page fell off the map" and its text "There’s nothing at
 **mondino.app/team/northwind/pins/old**. It may have moved, or the link was mistyped." The
 address is the app's host and the path that was opened, rendered as text, never as markup, and
-without its query string or fragment. Its one action is "Back to the globe", a link to
+without its query string or fragment (`shownAddress`). Its one action is "Back to the globe", a
+link to
 `/globe`; a person on no team is then shown `InviteNeededPage` there. It reads no API.
 
 **`App`** — root component of the `mondino` application. It renders the "Skip to content"

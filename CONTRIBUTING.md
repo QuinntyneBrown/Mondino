@@ -66,7 +66,7 @@ behaviour).
 
 ## Development setup
 
-Follow [Getting started](README.md#getting-started) in the README. You need Node.js 24 with npm,
+Follow [Getting started](README.md#getting-started) in the README. You need Node.js 22 or later with npm (CI uses 24),
 the .NET SDK 10 and a current Chrome or Edge.
 
 ## Coding conventions

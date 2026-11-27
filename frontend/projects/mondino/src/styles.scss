@@ -1,0 +1,125 @@
+// Global styles are foundations only: the tokens and @font-face (docs/design-system/tokens/
+// tokens.css, added in angular.json), the reset and a few utilities. A component's look lives in
+// its own stylesheet.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--color-fg-default);
+  background: var(--color-bg-canvas);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+h1 {
+  font: var(--text-h1-sm);
+  letter-spacing: var(--letter-spacing-tight);
+  text-wrap: balance;
+}
+h2 {
+  font: var(--text-h2);
+  text-wrap: balance;
+}
+h3 {
+  font: var(--text-h3);
+}
+h4 {
+  font: var(--text-h4);
+}
+p {
+  text-wrap: pretty;
+}
+a {
+  color: var(--color-fg-link);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--color-fg-link-hover);
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+::selection {
+  background: var(--color-moment-subtle);
+}
+@media (min-width: 36rem) {
+  h1 {
+    font: var(--text-h1);
+  }
+}
+@media (min-width: 62rem) {
+  h1 {
+    font: var(--text-h1-lg);
+  }
+}
+
+// One focus ring everywhere.
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+// A page's main takes focus from "Skip to content"; it is not a control and shows no ring.
+main:focus-visible {
+  outline: none;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Times and temperatures never shift as they change.
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+.text-muted {
+  color: var(--color-fg-muted);
+}
+.nowrap {
+  white-space: nowrap;
+}
