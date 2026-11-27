@@ -75,8 +75,21 @@ export class JoinPage {
     return invite ? stillPlacements(invite.positions) : [];
   });
 
+  /** The new pin at the city found, until joining puts it on the team (journey 4). */
+  protected readonly you = computed(() => {
+    const lookup = this.store.lookup();
+    if (lookup.kind !== 'Found') return null;
+    const [placement] = stillPlacements([lookup.result.city.position]);
+    return placement ? { ...placement, label: `You · ${lookup.result.city.name}` } : null;
+  });
+
   protected readonly globeLabel = computed(() => {
     const invite = this.store.invite();
+    const lookup = this.store.lookup();
+    if (invite && lookup.kind === 'Found') {
+      const count = invite.positions.length;
+      return `The globe, with your new pin in ${lookup.result.city.name} and ${count} ${count === 1 ? 'teammate’s pin' : 'teammates’ pins'}`;
+    }
     if (!invite || invite.positions.length === 0) return 'The globe, with no pins';
     const count = invite.positions.length;
     return `The globe, with ${count} ${count === 1 ? 'pin' : 'pins'}: one for each teammate already in ${invite.teamName}`;

@@ -57,6 +57,17 @@
     </svg>
     @if (pins(); as pins) {
       <div class="globe__pins" aria-hidden="true">
+        @if (you(); as you) {
+          <span
+            class="globe__pin globe__pin--lifted"
+            [style.--x.%]="you.x"
+            [style.--y.%]="you.y"
+            ><span class="pin-dot pin-dot--you pin-dot--new"></span
+            ><span class="pin-label pin-label--lifted pin-label--right"
+              ><span class="pin-label__name">{{ you.label }}</span></span
+            ></span
+          >
+        }
         @for (pin of pins; track $index) {
           <span
             class="globe__pin"
