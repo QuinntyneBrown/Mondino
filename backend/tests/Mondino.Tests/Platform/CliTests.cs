@@ -92,6 +92,8 @@ public sealed class CliTests
         public DbSet<Mondino.Domain.SignIn.SignInLink> SignInLinks => throw new NotSupportedException();
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken) => Task.FromResult(0);
+
+        public Task<bool> CanConnectAsync(CancellationToken cancellationToken) => Task.FromResult(true);
     }
 
     private sealed class OnceSeedStep : ISeedStep

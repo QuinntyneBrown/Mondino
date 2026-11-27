@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.StaticFiles;
 using Mondino.Api.Errors;
+using Mondino.Api.Health;
 using Mondino.Api.RateLimiting;
 using Mondino.Api.Security;
 using Mondino.Application;
@@ -17,7 +17,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers(options => options.Filters.Add<AntiforgeryFilter>());
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemCodes.Customize);
 builder.Services.AddExceptionHandler<RefusalHandler>();
-builder.Services.AddHealthChecks();
+builder.Services.AddMondinoHealth();
 builder.Services.AddSingleton<AppShell>();
 builder.Services.AddRateLimitPolicies();
 
@@ -58,8 +58,8 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Liveness: the process is running. It checks nothing else, so it never fails with a dependency.
-app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+// Liveness and readiness, each a status and nothing else (L2-051).
+app.MapMondinoHealth();
 app.MapControllers();
 
 // An unknown /api route stays a 404, never the app shell.
