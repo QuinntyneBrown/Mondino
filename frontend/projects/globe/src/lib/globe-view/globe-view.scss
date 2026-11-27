@@ -27,6 +27,15 @@
   width: 100%;
   height: 100%;
 }
+// The Globe screen's globe is dragged to spin; a vertical touch drag stays the page's to scroll
+// until the globe takes it (ADR 0013).
+.globe--interactive {
+  touch-action: pan-y;
+  cursor: grab;
+}
+.globe--interactive:active {
+  cursor: grabbing;
+}
 // Until the first frame is drawn the placeholder holds the place; the box itself never moves.
 .globe--loading .globe__frame,
 .globe--loading .globe__art {
