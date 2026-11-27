@@ -8,6 +8,7 @@ import { expect, test } from '../fixtures/test';
 import { rememberTeam } from '../support/membership';
 import { makeTheTabHideable, setTheTabHidden } from '../support/turning';
 import type { ApiFixture } from '../fixtures/api';
+import { SOFIA_SETTINGS, type SettingsJson } from '../fixtures/profile';
 
 /** Northwind before Jordan joined: the cast without him. */
 const beforeJordan = [
@@ -140,5 +141,34 @@ test.describe('Keep the team fresh', () => {
     await expect(momentsPage.todayTitles).toHaveText(['Design week']);
     await expect(momentsPage.groupRowTitles('This week')).toHaveText(['Derby della Madonnina']);
     await expect(momentsPage.groupRowTitles('Later')).toHaveCount(0);
+  });
+
+  test('the viewer’s saved settings come with the team to a browser that never opened Profile & Settings, and a change saved elsewhere arrives at the next refresh', async ({
+    api,
+    page,
+    teamPage,
+  }) => {
+    // Given Sofia saved °F and the 12-hour clock on another browser, and this one keeps nothing
+    await rememberTeam(page);
+    const withSettings = (settings: SettingsJson) => {
+      const answer = northwindPins();
+      return { json: { ...(answer.json as object), viewerSettings: settings } };
+    };
+    let reads = 0;
+    api.answer('GET', NORTHWIND_PINS, () =>
+      ++reads === 1
+        ? withSettings({ ...SOFIA_SETTINGS, temperatureUnit: 'fahrenheit', clockFormat: '12-hour' })
+        : withSettings(SOFIA_SETTINGS),
+    );
+
+    // When she opens Team, Tomás's row is on her saved clock and in her saved unit
+    await teamPage.open();
+    await expect(teamPage.row('Tomás Herrera')).toContainText('8:05 am');
+    await expect(teamPage.row('Tomás Herrera')).toContainText('72°');
+
+    // And when she has gone back to °C and the 24-hour clock elsewhere, the next refresh brings them
+    await page.clock.fastForward('15:00');
+    await expect(teamPage.row('Tomás Herrera')).toContainText('08:20');
+    await expect(teamPage.row('Tomás Herrera')).toContainText('22°');
   });
 });

@@ -3,10 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import {
   ApiError,
   CLOCK,
+  SETTINGS_STORE,
   TEAM_API,
   TEAM_MEMBERSHIP,
   type Moment,
   type Pin,
+  type Settings,
   type TeamApi,
   type TeamPins,
 } from '@mondino/api';
@@ -46,6 +48,7 @@ describe('TeamStore', () => {
   let reads: number;
   let now: ReturnType<typeof signal<number>>;
   let store: TeamStore;
+  let replaced: Settings[];
 
   /** The clock's minute moves on, as the shell's clock ticks; effects then run. */
   async function tickTo(minutes: number): Promise<void> {
@@ -59,6 +62,7 @@ describe('TeamStore', () => {
   beforeEach(async () => {
     answers = [];
     reads = 0;
+    replaced = [];
     now = signal(start);
     const api: TeamApi = {
       getPins: () => {
@@ -73,6 +77,7 @@ describe('TeamStore', () => {
         TeamStore,
         { provide: TEAM_API, useValue: api },
         { provide: CLOCK, useValue: { now: () => now(), minute: now } },
+        { provide: SETTINGS_STORE, useValue: { replace: (each: Settings) => replaced.push(each) } },
         {
           provide: TEAM_MEMBERSHIP,
           useValue: {
@@ -151,5 +156,19 @@ describe('TeamStore', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(store.refreshing()).toBe(false);
+  });
+
+  it('hands the viewer’s own settings to the settings store, and keeps them when an answer has none', async () => {
+    expect(replaced).toEqual([]);
+    const settings: Settings = {
+      temperatureUnit: 'fahrenheit',
+      clockFormat: '12-hour',
+      momentKinds: ['holiday'],
+      sharesWeather: true,
+      sharesStatus: false,
+    };
+    answers.push(() => Promise.resolve({ ...team('sofia'), viewerSettings: settings }));
+    await tickTo(15);
+    expect(replaced).toEqual([settings]);
   });
 });

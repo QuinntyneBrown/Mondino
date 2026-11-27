@@ -2,6 +2,7 @@ import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } f
 import {
   ApiError,
   CLOCK,
+  SETTINGS_STORE,
   TEAM_API,
   TEAM_MEMBERSHIP,
   type Moment,
@@ -35,6 +36,7 @@ export class TeamStore {
   private readonly api = inject(TEAM_API);
   private readonly membership = inject(TEAM_MEMBERSHIP);
   private readonly clock = inject(CLOCK);
+  private readonly settings = inject(SETTINGS_STORE);
   private readonly releasing = new AbortController();
 
   readonly team = signal<TeamPins | null>(null);
@@ -75,8 +77,7 @@ export class TeamStore {
     this.state.set('Loading');
     void this.loadMoments();
     try {
-      this.team.set(await this.api.getPins(teamId, this.releasing.signal));
-      this.refreshedAt.set(this.clock.minute());
+      this.take(await this.api.getPins(teamId, this.releasing.signal));
       this.state.set('Ready');
     } catch (error) {
       if (this.releasing.signal.aborted) return;
@@ -105,8 +106,7 @@ export class TeamStore {
       this.arrivedIds.set(
         next.pins.filter((pin) => !held.has(pin.teammateId)).map((pin) => pin.teammateId),
       );
-      this.team.set(next);
-      this.refreshedAt.set(this.clock.minute());
+      this.take(next);
       this.refreshFailed.set(false);
       const read = await moments;
       if (read && !signal.aborted) {
@@ -119,6 +119,16 @@ export class TeamStore {
     } finally {
       this.refreshing.set(false);
     }
+  }
+
+  /**
+   * Holds the pins read, at this minute, and the viewer's own saved settings they carry, so a
+   * browser that never opened Profile & Settings draws in them (ADR 0025).
+   */
+  private take(team: TeamPins): void {
+    this.team.set(team);
+    this.refreshedAt.set(this.clock.minute());
+    if (team.viewerSettings) this.settings.replace(team.viewerSettings);
   }
 
   /** Refreshes when the last good read is 15 minutes old or more, or the last refresh failed. */
