@@ -19,7 +19,8 @@ stopped.
 
 ## Decision
 
-- **The numbers**, named constants in `globe/src/lib/motion/globe-motion.ts`:
+- **The numbers**, named constants in the `globe` library (`motion/globe-motion.ts`, with
+  `TapThresholdPx` in `motion/globe-gestures.ts` and `MaxFrameMs` in `scene/globe-scene.ts`):
   - `TurnRateDegreesPerSecond = 6`: a whole turn a minute, slow enough to read a label as it
     passes, fast enough that 5 seconds visibly move the globe (30°, two time zones).
   - `StepDegrees = 15`: one press of an arrow key turns the globe by one time zone.

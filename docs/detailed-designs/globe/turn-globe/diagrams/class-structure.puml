@@ -21,10 +21,10 @@ enum MotionMode {
 }
 
 enum ArrowDirection {
-  North
-  East
-  South
-  West
+  Left
+  Right
+  Up
+  Down
 }
 
 class GlobeOrientation {
@@ -45,7 +45,7 @@ class GlobeMotion {
   +canTurn(deltaLongitude: number, deltaTilt: number): boolean
   +dragBy(deltaLongitude: number, deltaTilt: number): void
   +dragEnd(): void
-  +step(direction: ArrowDirection): void
+  +step(direction: ArrowDirection): boolean
   +hold(position: Position): void
   +release(): void
   +setReducedMotion(reduced: boolean): void
