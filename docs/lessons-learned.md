@@ -1631,3 +1631,11 @@ kept, weather never zero), 2 (the Team row's status), 3 (cache under 3 hours), 4
 cached moments), 5 (the 6-second ceiling), 6 (a breaker on the weather, no unbounded queue), 8 (the Globe's
 "Loading your team…", and that it is polite) and 9 (the Globe's error, no stale data); L2-050 criterion 4
 (requests recorded on Team, Moments, Profile & Settings and Sign In). Total: 85.
+
+## Fix: flaky just-joined toast spec
+
+- *Stop the clock before the step that starts a timer, not when its result is seen*: the just-joined spec
+  paused the clock once the toast was read, so the real time between the toast appearing and the pause
+  counted towards its 4 seconds; on a slow CI runner that was over a second and the toast was gone at the
+  3 second check. The clock now stops before "Join" is pressed and the spec runs it frame by frame until the
+  toast is there.
