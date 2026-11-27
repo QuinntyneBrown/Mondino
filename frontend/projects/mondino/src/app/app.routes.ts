@@ -3,6 +3,8 @@ import { teammateGuard } from './membership/teammate-guard';
 
 // Every route is lazy. A screen joins this list with the journey that builds it.
 export const routes: Routes = [
+  // The site's own address is the Globe's: a teammate sees the team, anyone else the invite notice.
+  { path: '', pathMatch: 'full', redirectTo: 'globe' },
   {
     path: 'join/:inviteToken',
     loadChildren: () => import('./join/join.routes').then((m) => m.joinRoutes),
