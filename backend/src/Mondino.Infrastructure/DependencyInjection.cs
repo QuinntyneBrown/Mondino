@@ -109,6 +109,7 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentTeammate, CurrentTeammate>();
+        services.AddScoped<ITeammateSessions, CookieTeammateSessions>();
         services.AddTeammateSessions(configuration);
         return services;
     }

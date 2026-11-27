@@ -128,7 +128,7 @@ exist (journeys 6, 22 and 23); the parts below are added to them or are new.
 - **`AppDbContext`** — maps `Teammate` to its own row, with its values in it, so removing the
   teammate deletes the row and nothing is left behind. The removal is a deletion, not a mark on
   the row.
-- **`TeammateSessions`** — implementation of `ITeammateSessions` beside
+- **`CookieTeammateSessions`** — implementation of `ITeammateSessions` beside
   `TeammateSessionHandler`: it signs the current answer out of the cookie scheme and deletes the
   antiforgery cookie. Sessions are not stored (ADR 0008); a session ended here, or any copy of
   it, is refused on its next use because its teammate is gone (L2-043).

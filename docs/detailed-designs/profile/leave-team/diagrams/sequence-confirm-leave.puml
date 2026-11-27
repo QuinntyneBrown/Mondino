@@ -29,7 +29,7 @@ box "Backend — Mondino Application and Domain" #ECFDF3
   participant "LeaveTeamCommandHandler" as handler
 end box
 box "Backend — Mondino Infrastructure" #FFF4E5
-  participant "TeammateSessions" as sessions
+  participant "CookieTeammateSessions" as sessions
   database "Mondino database" as db
 end box
 actor -> page : Choose "Leave Northwind"

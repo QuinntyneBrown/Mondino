@@ -13,7 +13,7 @@ Container_Boundary(spa, "Mondino web app") {
 Container_Boundary(api, "Mondino API") {
   Component(ctrl, "ProfileController", "ASP.NET Core controller", "DELETE /api/teams/{teamId}/me")
   Component(handler, "LeaveTeamCommandHandler", "MediatR handler", "Removes the current teammate and their sign-in links")
-  Component(sessions, "TeammateSessions", "ITeammateSessions", "Expires the session and antiforgery cookies")
+  Component(sessions, "CookieTeammateSessions", "ITeammateSessions", "Expires the session and antiforgery cookies")
   ComponentDb(db, "Mondino database", "EF Core", "Teammate rows and sign-in links")
 }
 

@@ -31,6 +31,17 @@ public sealed class ProfileController(ISender sender) : ControllerBase
         sender.Send(new UpdateProfileCommand(teamId, request.CountryCode, request.PostalCode, request.Settings), cancellationToken);
 
     /// <summary>
+    /// Leaves the team (L2-036): the asker's own pin and everything held about them go, and their
+    /// session ends. Answers 204 with no body.
+    /// </summary>
+    [HttpDelete]
+    public async Task<IActionResult> Delete(Guid teamId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new LeaveTeamCommand(teamId), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>
     /// Looks a new postal code up for the asker's own pin (L2-032) and changes nothing. The postal
     /// code travels in the body; the lookups are counted for the teammate (docs/adr/0022).
     /// </summary>

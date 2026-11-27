@@ -60,7 +60,7 @@ package "Backend" {
   interface ITeammateSessions {
     +EndAsync(): Task
   }
-  class TeammateSessions
+  class CookieTeammateSessions
   interface IAppDbContext {
     +Teammates: DbSet<Teammate>
     +SignInLinks: DbSet<SignInLink>
@@ -102,7 +102,7 @@ LeaveTeamCommandHandler ..> LeaveTeamCommand : handles
 LeaveTeamCommandHandler ..> ICurrentTeammate : who leaves
 LeaveTeamCommandHandler ..> ITeammateSessions : ends the session
 LeaveTeamCommandHandler ..> IAppDbContext : removes the Teammate and their SignInLinks
-ITeammateSessions <|.. TeammateSessions
+ITeammateSessions <|.. CookieTeammateSessions
 Team "1" o-- "0..500" Teammate : kept when the last leaves
 Teammate --> City
 SignInLink ..> Teammate : same fingerprint

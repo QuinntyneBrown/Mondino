@@ -325,7 +325,31 @@ public class MondinoApi : WebApplicationFactory<Program>
         return await database.Teammates.AsNoTracking().Include(t => t.City).SingleAsync(t => t.Id == teammateId);
     }
 
-    /// <summary>Takes a teammate out of their team, as leaving does (journey 24).</summary>
+    /// <summary>Whether a teammate's row is stored.</summary>
+    public async Task<bool> TeammateExistsAsync(Guid teammateId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        return await database.Teammates.AnyAsync(t => t.Id == teammateId);
+    }
+
+    /// <summary>How many sign-in links are stored for an email's fingerprint.</summary>
+    public async Task<int> SignInLinkCountAsync(string emailFingerprint)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        return await database.SignInLinks.CountAsync(l => l.EmailFingerprint == emailFingerprint);
+    }
+
+    /// <summary>The invite token of a team, as stored.</summary>
+    public async Task<string> InviteTokenAsync(Guid teamId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        return await database.Teams.Where(t => t.Id == teamId).Select(t => t.InviteToken).SingleAsync();
+    }
+
+    /// <summary>Takes a teammate out of their team, without leaving: no sign-in link or cookie is touched.</summary>
     public async Task RemoveTeammateAsync(Guid teammateId)
     {
         await using var scope = Services.CreateAsyncScope();

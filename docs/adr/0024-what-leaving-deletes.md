@@ -53,7 +53,11 @@ settings their browser keeps in `mondino.settings` (ADR 0023).
   they are about the team, not about anyone in it. An operator who wants empty teams gone has no
   tool for it yet.
 - A teammate who left and opens a sign-in link mailed before leaving sees Sign In's form, as for
-  any link that cannot be used (ADR 0011), not "You need an invite link" naming the email.
+  any link that cannot be used (ADR 0011), not "You need an invite link" naming the email. Since a
+  sign-in mail is sent only to an email on a team, L2-052 criterion 10 (a good link for an email on
+  no team) is now reached by no flow the app offers; the redemption still answers it, and its test
+  removes the teammate's row directly. Whether L2-052 criterion 10 should go is for the
+  requirements to decide.
 - Rejected: keeping a session list in the database to delete. It would add a read to every
   request for what the teammate's own row already answers. Rejected: deleting the team with its
   last teammate. It would break an invite link someone may still hold, and L2-036 asks only that
