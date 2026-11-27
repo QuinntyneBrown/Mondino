@@ -1350,3 +1350,9 @@ waits for Profile & Settings, journey 22), L2-007 criterion 2's Moments part (jo
 90), L2-022 criterion 3 (journey 20, 11 of 13, still 80), the Moments part of L2-054 criterion 1 and
 L2-025 criterion 7 (journey 16 stays at 50 until Profile & Settings proves the fourth screen), and
 Moments' part of L2-047 criterion 5, which with Team's completes it (journey 29, 1 of 14: 10).
+
+## Fix: flaky postal code breaker test
+
+- *Keep wall-clock timeouts out of the request path*: the postal code form's regex had a 100 ms match
+  timeout, so on a loaded machine one of the five failing lookups could be refused before the source, the
+  breaker never opened and the sixth answered 200; a linear-time (`NonBacktracking`) match needs no timeout.

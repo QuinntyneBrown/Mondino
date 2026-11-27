@@ -184,8 +184,11 @@ public sealed class PostalCodeSourceTests
         using var client = api.CreateClient();
         for (var attempt = 0; attempt < 5; attempt++)
         {
-            using var _ = await client.PostAsJsonAsync(Lookups, new { countryCode = "IT", postalCode = "20121" });
+            using var failed = await client.PostAsJsonAsync(Lookups, new { countryCode = "IT", postalCode = "20121" });
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, failed.StatusCode);
         }
+
+        Assert.Equal(5, api.PostalCodeSource.Requests.Count);
 
         // When a sixth lookup comes, the source is not asked and the lookup is unavailable
         api.PostalCodeSource.Behaviour = SourceBehaviour.Answers;
