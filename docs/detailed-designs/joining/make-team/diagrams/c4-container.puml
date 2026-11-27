@@ -13,7 +13,7 @@ System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
 System_Ext(weather, "Open-Meteo", "Weather")
 
 Rel(person, web, "Fills the form, copies the invite link", "HTTPS")
-Rel(web, api, "GET /api/countries, POST /api/postal-code-lookups, POST /api/city-searches, POST /api/teams", "JSON/HTTPS, email and postal code in the body")
+Rel(web, api, "POST /api/postal-code-lookups, POST /api/city-searches, POST /api/teams", "JSON/HTTPS, email and postal code in the body")
 Rel(api, db, "Writes the team and its first teammate", "EF Core")
 Rel(api, postal, "Country and postal code only", "HTTPS, timeout, cached")
 Rel(api, weather, "The city's position only", "HTTPS, timeout, cached")

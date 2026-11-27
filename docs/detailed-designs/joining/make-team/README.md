@@ -40,14 +40,24 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 **Frontend (`mondino` application, `@mondino/api`, `@mondino/components`, `@mondino/globe`)**
 
 - **`CreateTeamPage`** — page at the lazy route `/new`, not behind `teammateGuard`. It provides
-  `CreateTeamStore` and binds `TEAM_CREATION_API`, so neither is in the initial bundle. It
-  renders `AuthLayout` (`sign-in`) with the form or, once the team is made, the invite link,
-  and the footer "Already have a team? Sign in", which leads to `/sign-in`.
+  `CreateTeamStore`, and its route binds `TEAM_CREATION_API` and `CLIPBOARD`, so none is in the
+  initial bundle. It draws the `auth` block itself, as Join draws `join` (ADR 0009): the mark and
+  wordmark, the form or, once the team is made, the invite link, the footer "Already have a
+  team? Sign in", which leads to `/sign-in`, and the globe stage.
   - A submit with a problem sends no request. Each field that is wrong is marked
     `aria-invalid` and carries its message in a `role="alert"` element under it, and focus
     moves to the first of them. A missing team name reads "Give your team a name — teammates
-    see it when they join." The words for a missing name, email and postal code are said the
-    same way, under their fields; their exact wording is `<TO SUPPLY>`.
+    see it when they join.", a missing name "Add your name so teammates know whose pin this
+    is.", a missing email "Add your work email — we’ll send sign-in links there.", an email not
+    in the form of an address "That doesn’t look like an email address." and a missing postal
+    code "Enter a postal code."
+  - The postal code is looked up as on Join, through `LookupMessage` and `CityField`, with
+    Join's words: `create-team/locating`, `found`, `not-found` and `lookup-unavailable`. The
+    button keeps reading "Create team" and waits, disabled and `aria-busy`, while the lookup
+    runs. A found city puts the pin "You · Milan" on the globe.
+  - `RateLimited` shows Join's alert, "Too many tries from this device." and "You can try again
+    in" the time left, and disables the button until it reaches zero
+    (`create-team/rate-limited`).
   - `Creating` disables the button, marks it `aria-busy` and reads "Creating your team…".
   - `Failed` shows an alert with the team's name rendered as text, "We couldn’t create
     Northwind. Nothing was saved — try again.", and the button reads "Try again". What was
@@ -55,10 +65,12 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
   - `Created` replaces the form. The kicker "Northwind is on the map" is a `role="status"`
     element, the title "Now bring everyone in." takes focus, and the lead reads "Send this link
     to your team. Each person places their own pin with a postal code." Under it are
-    `CopyField` with the invite link and the link "Go to the globe", which leads to `/globe`.
+    `CopyField` with the invite link, shown without its scheme and copied with it, and the link
+    "Go to the globe", which leads to `/globe`.
     On reaching `Created` the page calls `TeamMembership.remember(membership)` with the
     `teamId`, `teammateId` and `teamName` of the `CreatedTeam`.
-  - "Copy link" copies the invite link through the CDK `Clipboard`. When the copy succeeds the
+  - "Copy link" copies the invite link through `CLIPBOARD` (`navigator.clipboard.writeText`,
+    ADR 0009). When the copy succeeds the
     button reads "Copied", with a tick. When the browser refuses it, the page calls
     `CopyField.select()` and shows the `Toast` of the invite dialog, which stays: "Couldn’t
     copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself."
@@ -66,20 +78,21 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 - **`CreateTeamStore`** — service provided at the `/new` route, so its state goes when the
   person leaves the screen. It holds the writable signals `teamName`, `name`, `email`,
   `countryCode` and `postalCode`, the signals `lookupState`, `problems` and `createState`, the
-  `countries` it read, and one `createRequestId`, made with `crypto.randomUUID()` when the
-  store is created.
+  `countries` bundled in `@mondino/domain` (`supportedCountries`, ADR 0009), and one
+  `createRequestId`, made with `crypto.randomUUID()` when the store is created.
   - `lookUp()` runs when the person leaves the postal code field, and before `create()` when
     no city is found yet. It maps the answer to a `LookupState` as `JoinStore` does. One lookup
     runs at a time, and a new one aborts the pending one.
   - `create()` sets `Creating` and calls `TeamCreationApi.createTeam`. A retry sends the same
     `createRequestId`, so a request whose response was lost does not make a second team.
   - A failure maps the `code` of the `ApiError`: `postal_code_not_found` and
-    `postal_code_unavailable` set the `lookupState`, and any other failure sets `Failed`. The
-    state for the code `rate_limited` is `<TO SUPPLY>`.
+    `postal_code_unavailable` set the `lookupState`, `rate_limited` sets `RateLimited` with the
+    time its `Retry-After` gives and counts down from the injected `CLOCK`, and any other
+    failure sets `Failed`.
 - **`CreateTeamState`** — feature-local union of `Idle`, `Creating`, `Created` and `Failed`.
 - **`TeamCreationApi` / `TEAM_CREATION_API`, `HttpTeamCreationApi`** — contract, injection
-  token and HTTP client in `@mondino/api`: `getCountries()`, `lookUpPostalCode(countryCode,
-  postalCode, signal)`, `searchCities(countryCode, text, signal)` and `createTeam(request)`.
+  token and HTTP client in `@mondino/api`: `lookUpPostalCode(countryCode, postalCode,
+  signal)`, `searchCities(countryCode, text, signal)` and `createTeam(request, signal)`.
   The email and the postal code travel in a request body, never in a URL, and neither is
   written to browser storage.
 - **`CreateTeamRequest`** — `teamName`, `name`, `email`, `countryCode`, `postalCode` or
@@ -88,43 +101,42 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
   invite link from its own origin and the token.
 - **`PostalCodeField`** and **`CityField`** — the presentation components Join uses, in the
   same shape and with Join's messages (`place-pin-from-postal-code`). While the postal code
-  lookup is down, "Your city" takes the postal code's place as it does on Join. No mock draws
-  a found city on this screen before the team is made; whether the screen names it then is
-  `<TO SUPPLY>`.
+  lookup is down, "Your city" takes the postal code's place as it does on Join. A found city is
+  named, as on Join (`create-team/found`).
+- **`Clipboard` / `CLIPBOARD`** — contract and token in `@mondino/api`: `write(text)`, which
+  rejects when the browser refuses. `NavigatorClipboard` in `@mondino/domain` calls
+  `navigator.clipboard.writeText`.
 - **`CopyField`** (`mo-copy-field`, block `copy-field`) — presentation component in
   `@mondino/components`: a read-only input with the link (`copy-field__value`) and a button.
   Its inputs are `value`, `label` and `copied`; it emits `copy`, and `select()` selects the
   link and moves focus to it. The invite dialog uses the same component.
 - **`GlobeView`** (`mo-globe`) — imported dynamically inside a `@defer` block, not interactive.
-  It has no pins until the team is made ("The globe, with no pins"). In `Created` the page
-  passes it the maker's pin, selected and marked as new, so the globe turns to the city, holds
-  there, and the pin labelled "You · Milan" pulses once, and not under reduced motion.
+  It has no pins until a city is found ("The globe, with no pins"). Once it is found, and in
+  `Created`, the page passes it the maker's pin, selected and marked as new, so the globe turns
+  to the city, holds there, and the pin labelled "You · Milan" pulses once, and not under
+  reduced motion. Until journeys 8 and 9 draw it, the stage shows the still globe
+  (`GlobeFallback`) with the pin lifted and pulsing, and does not turn.
 
 **Backend**
 
-- **`TeamCreationController`** — four actions, each marked as open to anyone, each with a
-  policy of `RateLimitPolicies` (`protect-team-data`, L2-045), each sending one MediatR
-  request.
+- **`TeamCreationController`** — three actions, each marked as open to anyone, each with a
+  policy of `RateLimitPolicies` (L2-045), each sending one MediatR request.
 
   | Action | Request | Policy |
   |--------|---------|--------|
-  | `GET /api/countries` | `GetCountriesQuery` | `Countries`, limit `<TO SUPPLY>` |
-  | `POST /api/postal-code-lookups` | `LookUpPostalCodeQuery` with no invite token | `PostalCodeLookup`, 10 a minute for one client, as on Join |
-  | `POST /api/city-searches` | `SearchCitiesQuery` with no invite token | `CitySearch`, limit `<TO SUPPLY>` |
-  | `POST /api/teams` | `CreateTeamCommand` | `CreateTeam`, 5 teams an hour for one client |
+  | `POST /api/postal-code-lookups` | `LookUpPostalCodeQuery` with no invite token | `lookup`, 10 a minute for one client, shared with Join's |
+  | `POST /api/city-searches` | `SearchCitiesQuery` with no invite token | `city-search`, 30 a minute for one client, shared with Join's |
+  | `POST /api/teams` | `CreateTeamCommand` | `create-team`, 5 teams an hour for one client |
 
-  `POST /api/teams` signs the returned teammate in through `TeammateSessionHandler` and
-  answers 201 for a new team and 200 for a repeated request. Fields the body does not define
-  are ignored.
-- **`GetCountriesQuery` / `GetCountriesQueryHandler`** — projects `PostalCodeFormats` to the
-  `CountryDto` list that Join receives on its `InviteDto`.
+  `POST /api/teams` carries `[SameSiteOnly]` (ADR 0008), signs the returned teammate in through
+  `TeammateSessionHandler` and answers 201 for a new team and 200 for a repeated request.
+  Fields the body does not define are ignored.
 - **`LookUpPostalCodeQuery`** — the query Join sends. Its `InviteToken` is optional; with none,
   the handler skips the check of the invite token and runs its other steps unchanged.
 - **`CreateTeamCommand`** — `TeamName`, `Name`, `Email`, `CountryCode`, `PostalCode` or
   `CityId`, and `CreateRequestId`.
 - **`CreateTeamCommandValidator`** — after `NameNormaliser` has cleaned the team's name and the
-  maker's name, refuses a team name or a name that is empty or over 60 characters (the mock's
-  field stops a team name at 60 characters; L2-053 leaves the longest team name undecided), an
+  maker's name, refuses a team name or a name that is empty or over 60 characters (ADR 0009), an
   email
   over 254 characters or not in the form of an address, a country outside the supported list,
   a postal code over 12 characters, a command with neither a postal code nor a city id, and an
@@ -136,20 +148,28 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
   2. It resolves the city: from the postal code through `PostalCodeFormats` and
      `IPostalCodeLookup`, or from the city id through `ICityDirectory`. `NotFound` and
      `Unavailable` are refused with `postal_code_not_found` and `postal_code_unavailable`.
-  3. It calls `Team.Create` with the name, a token from `IInviteTokens.Create()`, the
-     `CreateRequestId` and the time from `TimeProvider`.
-  4. It picks the pin's colour with `PinColourPicker`, calls `Team.AddTeammate` and sets the
-     teammate's `Email`.
+  3. It calls `Team.Create` with the name, a token from `IInviteTokens.Create()` and the
+     `CreateRequestId`.
+  4. It picks the pin's colour with `PinColourPicker`, calls `Team.AddTeammate` with the time
+     from `TimeProvider` and sets the teammate's `EmailFingerprint` from
+     `IEmailFingerprints.Of(email)`.
   5. It saves through `IAppDbContext` in one unit of work. When the save is rejected by the
      unique index on `Team.CreateRequestId`, it loads the team the other request made and
      returns it.
-- **`Team.Create(name, inviteToken, createRequestId, createdAt)`** — creates the `Team` with a
-  random `Guid` id and no teammates.
+- **`Team.Create(name, inviteToken, createRequestId)`** — creates the `Team` with a random
+  `Guid` id and no teammates. `Team.CreateRequestId` carries a unique index.
 - **`IInviteTokens`** — interface in `Mondino.Application`. `InviteTokens` in
   `Mondino.Infrastructure` makes a token of at least 128 bits from `RandomNumberGenerator`,
-  encoded for a URL. `invite-teammates` uses it to reset a team's invite link.
-- **`Teammate.Email`** — optional `EmailAddress` (`sign-in`). It is returned in no DTO to
-  another teammate.
+  encoded for a URL (16 bytes, 22 characters). `invite-teammates` uses it to reset a team's
+  invite link.
+- **`EmailAddress`** — value object in `Mondino.Domain`: `TryParse` trims and lower-cases an
+  address and checks its form.
+- **`IEmailFingerprints`** — interface in `Mondino.Application`. `HmacEmailFingerprints` in
+  `Mondino.Infrastructure` gives `HMAC-SHA256` of the address under the key
+  `EmailProtection:Key`, hex encoded (ADR 0009).
+- **`Teammate.EmailFingerprint`** — optional, indexed. It is how the email is protected at rest:
+  the address itself is stored nowhere, logged nowhere and returned to no one; sign-in
+  (`sign-in`) fingerprints the address it is given and finds the teammates who have it.
 - **`CreatedTeamDto`** — `TeamId`, `TeammateId`, `TeamName` and `InviteToken`. It echoes
   neither the email nor the postal code.
 - **`TeammateSessionHandler`** — issues the session cookie, as it does after a join.
@@ -161,20 +181,17 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 | Postal code in the wrong form, or unknown to the source | 422 | `postal_code_not_found` | Join's message, naming the postal code, the country and the form |
 | Postal code source timed out or circuit open | 503 | `postal_code_unavailable` | Join's "Your city" search in the postal code's place |
 | A value outside its limits | 400 | `validation_failed` | "We couldn’t create Northwind. Nothing was saved — try again." |
-| Over the limit for one client | 429 | `rate_limited` | `<TO SUPPLY>`: what Create Team shows for this refusal is not drawn (L2-045) |
+| Over the limit for one client | 429 | `rate_limited` | Join's countdown: "Too many tries from this device. You can try again in 9:42." (`create-team/rate-limited`) |
 | Network failure or any other error | — | — | The same alert, with "Try again" |
 
 In each case the person stays on the Create Team screen and what they typed is kept. No refusal
-says whether the email is already on a team.
+says whether the email is already on a team: an email that is already a teammate's on another
+team makes a team like any other (ADR 0009).
 
 **Open points**
 
-- The limits of the `Countries` and `CitySearch` policies, and what Create Team shows for a
-  429, are `<TO SUPPLY>`.
-- What an email that is already on a team means for a second team, and which team its sign-in
-  link then opens, are `<TO SUPPLY>` (`sign-in`).
-- The protection of this pre-session, state-changing request against cross-site request
-  forgery follows the session design: `<TO SUPPLY>`.
+- Which team a sign-in link opens when its email is on more than one team is `<TO SUPPLY>`
+  (`sign-in`).
 - What becomes of a team when its last teammate leaves is `<TO SUPPLY>` (`leave-team`).
 
 ## Requirements

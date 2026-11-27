@@ -57,3 +57,4 @@ https://mondino-app-27660.azurewebsites.net
 | `ASPNETCORE_ENVIRONMENT` | `Production` | the default; set it only to override |
 | `Database__Provider` | `InMemory` | the only value accepted until journey 2 chooses an engine |
 | `DataProtection__KeysPath` | `/home/data-protection-keys` | the key ring that protects the session cookie, kept on the App Service's shared, persistent `/home` so a restart or a second instance keeps teammates signed in (ADR [0008](../adr/0008-session-and-cross-site-requests.md)) |
+| `EmailProtection__Key` | 32 random bytes, base64 (`openssl rand -base64 32`), as an App Service setting or a Key Vault reference | the secret key of the email fingerprint; Create Team fails until it is set, and it must never change once teams exist (ADR [0009](../adr/0009-making-a-team.md)) |
