@@ -96,8 +96,9 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
   `POST /api/teams/{teamId}/me/postal-code-lookups`.
 - `LookupState`, in `@mondino/api`, is the state of a postal code lookup on Join, on Create
   Team and on Profile & Settings: `Idle`, `Locating`, `Found` (with its `PostalCodeResult`),
-  `NotFound`, `Unavailable` or `RateLimited`. `PostalCodeField` takes it as `lookupState` and
-  has one shape on the three screens, with a `mode` (`Join` or `Move`) that chooses its words.
+  `NotFound`, `Unavailable` or `RateLimited`. The postal code field (`PostalCodeField` in the
+  designs: `TextField` with `LookupMessage` under it) takes it and has one shape on the three
+  screens; `LookupMessage`'s `mode` (`Join` or `Move`) chooses its words.
   On Join and Create Team the lookup starts when the field is left; on Profile & Settings it
   starts from the "Look up" button.
 - While the postal code lookup is down, Join and Create Team offer "Your city" (`CityField`).

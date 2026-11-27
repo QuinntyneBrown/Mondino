@@ -29,5 +29,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0019](0019-moment-calendars.md) | Holidays come from OpenHolidays and Mondino's own calendar; races, events and sport from Mondino's own calendar | Accepted |
 | [0020](0020-chosen-kinds-in-the-browser.md) | The viewer's chosen kinds of moment are read through `SETTINGS_STORE`, kept in the browser until Profile & Settings saves them | Accepted |
 | [0021](0021-a-window-of-moments.md) | A long Moments list keeps a window of 60 rows in the page, moved by the page itself rather than by CDK virtual scrolling | Accepted |
+| [0022](0022-a-teammates-own-lookup-limit.md) | A teammate's own postal code lookup is limited to 10 a minute for the teammate, so the rate limiter runs after the session is read | Accepted |
 
 Not decided yet: nothing a journey has reached.

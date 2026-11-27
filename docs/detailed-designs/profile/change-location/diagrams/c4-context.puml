@@ -5,7 +5,7 @@ title System Context — Change location
 
 Person(teammate, "Teammate", "A person on a team, looking at their own pin")
 System(mondino, "Mondino", "Shows a team on a 3D globe with each teammate's local time, weather and moments")
-System_Ext(postal, "Postal code source", "Turns a country and a postal code into a city. Provider TO SUPPLY")
+System_Ext(postal, "Postal code source", "Turns a country and a postal code into a city. GeoNames (ADR 0006)")
 System_Ext(meteo, "Open-Meteo", "Current weather at a position")
 
 Rel(teammate, mondino, "Sees own pin and changes country and postal code using")

@@ -16,7 +16,7 @@ skinparam package {
 }
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
-  participant "PostalCodeField" as field
+  participant "ProfilePage" as field
   participant "ProfileStore" as store
   participant "HttpProfileApi" as client
 end box
