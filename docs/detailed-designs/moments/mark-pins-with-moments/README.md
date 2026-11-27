@@ -34,73 +34,75 @@ rule and the drawing of the marker.
 
 ## Description
 
-The rule lives in `domain`'s `moments/`. The `globe` library draws the result and holds no rule.
+The rule lives in `domain`'s `moments/`. The components draw the result and hold no rule.
 
 - **`EmblemCatalogue`** — backend application service. It sets `Moment.EmblemKey` where Mondino
   holds the right to use the emblem of the moment's subject, and leaves it empty otherwise. Mondino
-  holds the right to no emblem (ADR 0019), so it sets none.
-- **`Pin`** — `api` type. Each pin carries its `timeZoneId`; its teammate's moments are
-  `TeamStore.moments` with its `teammateId` (`find-moments`), so a pin carries none itself.
-- **`Settings.momentKinds`** — the viewer's chosen kinds. `ProfileApi` reads and saves them, and
-  `SettingsCache` holds them in the browser for the next visit.
-- **`markerFor(pin, kinds, now)`** — pure function. It drops the moments whose kind is not in
-  `kinds`. It keeps the moments dated today or 1 to 7 days ahead, counted in the pin's own time
-  zone by `daysUntil`. With none left it returns nothing. Otherwise it returns a `MomentMarker`
-  holding the moments left, nearest first. `now` comes from the injected `Clock`.
-- **`daysUntil(date, timeZoneId, now)`** — number of whole days from today in the given time
-  zone to the date.
-- **`emblemFor(moment)`** — pure function returning an `Emblem`. It returns the held emblem when
-  the moment's `emblemKey` is in `HELD_EMBLEMS`, and the icon of the moment's kind otherwise.
-- **`HELD_EMBLEMS`** — set of emblem keys whose pictures are bundled with the app. It is empty
-  (ADR 0019). A key the backend sends that is not in the set falls back to the kind's
-  icon. Emblem pictures are served with the app and never loaded from a third party.
-- **`Emblem`** — `api` type: whether the picture is a held emblem or a kind's icon, its key and
-  the kind.
-- **`MarkedMoment`** — `api` type: a `moment` and its `when` label from `whenLabel` ("Today",
-  "In 5 days").
-- **`MomentMarker`** — `api` type: the `moments` of the window as `MarkedMoment`s, nearest
-  first; the `emblem` of the nearest; the `count` of the moments; and a `today` flag, true
-  when the nearest moment is today. The type sits in `api` so `globe` can read it without
-  importing `domain`.
-- **`GlobePage`** — page in the `mondino` application. A computed signal maps each teammate id
-  to its marker from `TeamStore`'s pins, the chosen kinds and the clock's minute tick. The page
-  passes the map to `GlobeView`.
-- **`GlobeView`** — `mo-globe`. It takes the markers as an input beside the pins and hands them
-  to `PinLayer`.
-- **`PinLayer`** — draws each marker beside its pin in the sun colour, as the mocks'
-  `moment-marker` block. When `count` is 1 the marker shows the emblem: the kind's icon, or a
-  held emblem. When `count` is 2 or more it shows the count in figures and no emblem
+  holds the right to no emblem (ADR 0019), so it sets none, and the browser shows the kind's icon
+  whatever key arrives. When an emblem is first held, the change that bundles its picture adds the
+  set of held keys and the choice between them and the kind's icon.
+- **`Moment`** — `api` type (`find-moments`). A pin carries no moments; its teammate's are
+  `TeamStore.moments` with its `teammateId`.
+- **`SettingsStore`** — `api` contract and `SETTINGS_STORE` injection token: the viewer's chosen
+  kinds, `momentKinds`, as a signal, all four to begin with. The teammate screens read it; the
+  token is bound by `TeamShell`, so its code stays out of the initial bundle (ADR 0020).
+- **`SettingsCache`** — `domain`'s `storage/`, the `SettingsStore` kept in the browser's local
+  storage under `mondino.settings` with the viewer's teammate id (ADR 0020). It reads the kinds
+  kept for the teammate the membership names and drops any it does not know; with nothing kept,
+  or storage blocked, all four kinds are on. Profile & Settings (`choose-display-and-sharing`)
+  writes it on a save and replaces it with the backend's copy once a profile is read.
+- **`ALL_MOMENT_KINDS`** — `api` constant: the four kinds, in the order the switches list them.
+- **`markerFor(moments, kinds, now)`** — pure function over one teammate's moments. It drops the
+  moments whose kind is not in `kinds`. It keeps the moments dated today or 1 to 7 days ahead,
+  counted in each moment's own place by `daysUntil`. With none left it returns null. Otherwise it
+  returns a `MarkerView` of the moments left, nearest first, and on the same day by title.
+- **`MarkerView`** — `api` type: the nearest moment's `kind`, `title` and `when` label from
+  `whenLabel` ("Today", "In 5 days"); the `count` of the moments; a `today` flag, true when the
+  nearest moment is today; and `spoken`, the words the pin's accessible name ends with. It sits in
+  `api` so the components can read it without importing `domain`.
+- **`PinView.marker`** — `pinViews` (`globe/show-pins`) takes the team's moments and the chosen
+  kinds and gives each pin its `MarkerView`, or null, in the same pass as its local time, once a
+  minute. The moments are grouped by teammate once, so a team of 500 is one pass over its pins
+  and one over its moments.
+- **`GlobePage`** — page in the `mondino` application. It reads the moments from `TeamStore`,
+  the chosen kinds from `SETTINGS_STORE` and the minute from the one clock, and passes them to
+  `pinViews`. The pins, with their markers, go to `PinLayer` over the 3D globe and over the
+  still picture alike.
+- **`MomentMarker`** — `components`, `span[mo-moment-marker]`, the design system's
+  `moment-marker` block, drawn inside the pin's button after the initials. With a `count` of 1 it
+  shows the kind's icon (`MomentIcon`). With 2 or more it shows the count in figures and no icon
   (`moment-marker--count`): Tomás, with Día de Muertos in 5 days and the Clásico Nacional in 6,
-  carries "2". A marker whose nearest moment is today is larger and carries a ring
-  (`moment-marker--today`), with an emblem or with a count. A marker is at least 16 px across
-  at every globe size and sits clear of the pin's initials. A marker is not a control of its
-  own: when its pin is pointed at, focused or selected and lifts, the label shows the nearest
-  moment's title and `when` label as text ("Día de Muertos · In 5 days"). A group pin
+  carries "2". A marker whose nearest moment is today is larger and carries an ink ring
+  (`moment-marker--today`), with an icon or with a count. It is 16 px across, 20 px today, at
+  every globe size, and on a globe under 500 px it moves further out so it is clear of the pin.
+  It is hidden from assistive technology and is not a control of its own.
+- **`PinLayer`** — draws a pin's `MomentMarker` when its view has one. A group pin
   (`globe/show-pins`) carries no marker; its teammates' moments are in "This week around the
-  world" and on each teammate's own pin once it is selected. `dispose()` releases what the
-  layer created.
-  The marker is in the pin's text too, and is hidden from assistive technology itself. The
-  accessible name of the pin's button, built by `describePin` (`make-accessible`), ends with
-  the moment's title and `when` label for one moment ("October Bank Holiday, today"), and for
-  two or more with the count and each moment in turn: "2 moments this week: Día de Muertos, in
-  5 days; Clásico Nacional, in 6 days". The count is therefore never given by the figure
-  alone.
-- **`GlobeFallback`** — draws the same markers beside the pins of the still picture
-  (`globe/draw-globe`).
+  world" and on each teammate's own pin once it is selected.
+- **`PinLabel`** — a lifted label of a marked pin ends with the nearest moment's line
+  (`pin-label__moment`): the kind's icon and the title and `when` label as one text, "Día de
+  Muertos · In 5 days".
+- **`describePin`** — the accessible name of the pin's button (`make-accessible`) ends with the
+  marker's `spoken` words: for one moment its title and `when` label, "October Bank Holiday,
+  today"; for two or more the count and each moment in turn, "2 moments this week: Día de
+  Muertos, in 5 days; Clásico Nacional, in 6 days". The count is therefore never given by the
+  figure alone.
 
 When the viewer turns a kind off, `markerFor` no longer sees moments of that kind. A pin whose
-only moment this week is of that kind carries no marker. `WeekPanel` receives the same chosen
-kinds, so the moment is absent from "This week around the world". A pin with two moments this
-week, one of a kind turned off, carries the other's emblem and no count.
+only moment this week is of that kind carries no marker. `GlobePage` gives `weekMoments` only the
+moments of the chosen kinds, so the moment is absent from "This week around the world". A pin with
+two moments this week, one of a kind turned off, carries the other's icon and no count. The
+Moments screen (`list-moments`) does not read the chosen kinds and lists every kind.
 
-With every kind off, no pin carries a marker. In place of the week's moments the panel shows a
-note (`panel__note`): "Every kind of moment is switched off", "Holidays, races, events and
-sport won’t show on pins until you turn some back on." and the link "Choose moments", which
-leads to Profile & Settings (`team/view-week-around-the-world`). The legend under the globe
-then has no "Moment this week" item, since there is nothing for it to explain; "Night side",
-"Teammates close together" and "Drag to spin" stay.
+With every kind off, no pin carries a marker. In place of the week's lead, its moments and "All
+moments", `WeekPanel` shows a note (`panel__note`): "Every kind of moment is switched off",
+"Holidays, races, events and sport won’t show on pins until you turn some back on." and the link
+"Choose moments", which leads to Profile & Settings (`/profile`). `GlobeLegend` then has no
+"Moment this week" item, since there is nothing for it to explain; "Night side", "Teammates close
+together" and "Drag to spin" stay.
 
-When two moments fall on the same day, the order between them is `<TO SUPPLY>`.
+When two moments of one teammate fall on the same day, they are ordered by title, so the marker,
+the label and the accessible name read the same on every visit.
 
 ## Requirements
 
@@ -130,26 +132,26 @@ each pin's marker and draws it.
 
 ### Components
 
-`GlobePage` reads the pins from `TeamStore` and the chosen kinds from `SettingsCache`. It calls
-`markerFor`, which calls `emblemFor`, and passes the markers to `GlobeView`. `PinLayer` draws
-them, with an emblem or a count, and each pin's accessible name gives its marker as text.
+`GlobePage` reads the pins and moments from `TeamStore` and the chosen kinds from
+`SETTINGS_STORE`, which `SettingsCache` keeps. `pinViews` calls `markerFor` for each pin, and
+`PinLayer` draws each marker with `MomentMarker`, with the kind's icon or a count; each pin's
+accessible name gives its marker as text.
 
 ![C4 component view for marking pins with moments](diagrams/c4-component.png)
 
 ### Class structure
 
-`markerFor` reads a `Pin` and the chosen kinds and returns a `MomentMarker`, which holds its
-`Moment`s, their count and the `Emblem` of the nearest. `GlobePage` passes the markers to `GlobeView`, and `PinLayer`
-presents them.
+`markerFor` reads a teammate's `Moment`s and the chosen kinds and returns a `MarkerView`: the
+nearest moment's kind, title and when, the count and the today flag. `pinViews` puts it on the
+`PinView`, and `PinLayer` presents it with `MomentMarker`.
 
 ![Class diagram for marking pins with moments](diagrams/class-structure.png)
 
 ### Behaviour — choose a marker and its emblem for a pin
 
-The backend sets an emblem key only where the right is held. In the browser, `markerFor` drops
-the kinds the viewer turned off (`L2-022`) and keeps the moments of the next 7 days, nearest
-first (`L2-021`). `emblemFor` returns the held emblem or the icon of the kind. `PinLayer` draws
-the emblem for one moment and the count for two or more. A pin with no moment left carries no
-marker.
+The backend sets an emblem key only where the right is held, which is nowhere (ADR 0019). In
+the browser, `markerFor` drops the kinds the viewer turned off (`L2-022`) and keeps the moments of
+the next 7 days, nearest first (`L2-021`). `MomentMarker` draws the kind's icon for one moment and
+the count for two or more. A pin with no moment left carries no marker.
 
 ![Sequence diagram for choosing a marker and its emblem](diagrams/sequence-choose-marker.png)

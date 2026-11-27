@@ -107,8 +107,13 @@ until then all four are on.
   `docs/detailed-journeys.md` if it exists), and update the total.
 
 ## Deferred (not in this journey)
-- A count on a marker is not drawn in the mocks (no teammate in the cast has two moments in a week): draw it
-  in a mock first, as `AGENTS.md` requires, then build it.
+- The switches that turn kinds off (journey 23): until then the chosen kinds are read through `SETTINGS_STORE`
+  from the browser (ADR 0020), and the specs set what a save would leave.
+- The Moments screen listing every kind whatever the viewer chose (L2-022 criterion 3, journey 21), and
+  "Choose moments" arriving on Profile & Settings (L2-022 criterion 4, journey 22).
+
+(The count on a marker is drawn: `pages/globe/default` gives Tomás "2", and design decision 8 of
+`docs/mocks/README.md` settles it, so it is built here.)
 
 ## Built by journey 19
 - A pin carries no moments: they are `TeamStore.moments`, joined to pins by `teammateId` (`find-moments`).
@@ -117,7 +122,7 @@ until then all four are on.
   with `northwindMoments()` (`e2e/fixtures/moments.ts`); without it Northwind has none.
 
 ## Done means
-- The cast's seven moments this week mark their pins as `pages/globe/default` draws them.
+- The cast's eight moments this week mark their seven pins as `pages/globe/default` draws them.
 - With every kind off, no pin is marked and the panel says so.
 - All the new and existing tests pass: `node tools/verify/verify.mjs` is green, and CI is green and under
   5 minutes.

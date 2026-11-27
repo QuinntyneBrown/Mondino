@@ -101,8 +101,8 @@ exist yet; each part below is introduced by this design.
   read the clock format and the unit from it, so a saved choice applies on every screen without
   a reload (L2-033). It starts from `SettingsCache` and is replaced when a profile is read or
   saved.
-- **`SettingsCache`** (`@mondino/domain`, `storage/`) — keeps the display settings in browser
-  storage so the first screen of a later visit is drawn in the chosen unit and clock before the
+- **`SettingsCache`** (`@mondino/domain`, `storage/`) — keeps the display settings, and the chosen kinds of
+  moment, in browser storage (ADR 0020) so the first screen of a later visit is drawn in the chosen unit and clock before the
   profile arrives. It never holds a postal code. The backend's copy is the one that holds
   (L2-033).
 - **`statusFor(pin, time)`** (`@mondino/domain`, `time/`) — returns the status to show
