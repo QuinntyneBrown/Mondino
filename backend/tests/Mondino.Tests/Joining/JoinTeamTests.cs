@@ -53,7 +53,7 @@ public sealed class JoinTeamTests
         Assert.Equal("20121", sofia.PostalCode);
 
         // And her session is a cookie scripts cannot read, sent only over HTTPS and not cross-site
-        var cookie = Assert.Single(response.Headers.GetValues("Set-Cookie"));
+        var cookie = Assert.Single(response.Headers.GetValues("Set-Cookie"), c => c.StartsWith("__Host-mondino-session=", StringComparison.Ordinal));
         Assert.StartsWith("__Host-mondino-session=", cookie, StringComparison.Ordinal);
         Assert.Contains("httponly", cookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("secure", cookie, StringComparison.OrdinalIgnoreCase);

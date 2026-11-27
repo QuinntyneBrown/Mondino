@@ -42,6 +42,9 @@ public class MondinoApi : WebApplicationFactory<Program>
 
     public bool UsesPostalCodeSource { get; set; }
 
+    /// <summary>The changes the test-only session endpoint was asked to make.</summary>
+    public TestOnlyChanges Changes { get; } = new();
+
     /// <summary>The GeoNames account the real lookup is configured with; null leaves it unset.</summary>
     public string? PostalCodeSourceUsername { get; set; } = "mondino-tests";
 
@@ -99,6 +102,8 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.RemoveAll<IAppDbContext>();
                 services.AddScoped<IAppDbContext, FailingAppDbContext>();
             }
+
+            services.AddSingleton(Changes);
 
             // Endpoints that exist only so a test can see how the API answers a failure.
             services.AddControllers().AddApplicationPart(typeof(MondinoApi).Assembly);

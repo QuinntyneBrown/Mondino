@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -21,8 +22,17 @@ public sealed class TeammateSessionHandler
     public const string CookieName = "__Host-mondino-session";
     public static readonly TimeSpan Lifetime = TimeSpan.FromDays(365);
 
-    /// <summary>Signs the browser in as one teammate of one team.</summary>
-    public static Task SignInAsync(HttpContext http, Guid teamId, Guid teammateId)
+    /// <summary>The cookie the antiforgery request token is given to the browser in: scripts may read it (docs/adr/0010).</summary>
+    public const string AntiforgeryCookieName = "__Host-mondino-xsrf";
+
+    /// <summary>The header the browser returns the antiforgery request token in.</summary>
+    public const string AntiforgeryHeaderName = "X-XSRF-TOKEN";
+
+    /// <summary>
+    /// Signs the browser in as one teammate of one team, and gives it the antiforgery token its
+    /// changes will need.
+    /// </summary>
+    public static async Task SignInAsync(HttpContext http, Guid teamId, Guid teammateId)
     {
         ArgumentNullException.ThrowIfNull(http);
         var identity = new ClaimsIdentity(
@@ -31,7 +41,26 @@ public sealed class TeammateSessionHandler
                 new Claim(CurrentTeammate.TeamIdClaim, teamId.ToString()),
             ],
             Scheme);
-        return http.SignInAsync(Scheme, new ClaimsPrincipal(identity), new AuthenticationProperties { IsPersistent = true });
+        var principal = new ClaimsPrincipal(identity);
+        await http.SignInAsync(Scheme, principal, new AuthenticationProperties { IsPersistent = true });
+
+        // The token is bound to the session's claims, so it is made for the teammate just signed in.
+        http.User = principal;
+        IssueAntiforgeryToken(http);
+    }
+
+    /// <summary>Gives the signed-in browser an antiforgery request token, in a cookie scripts can read.</summary>
+    public static void IssueAntiforgeryToken(HttpContext http)
+    {
+        ArgumentNullException.ThrowIfNull(http);
+        var tokens = http.RequestServices.GetRequiredService<IAntiforgery>().GetAndStoreTokens(http);
+        http.Response.Cookies.Append(AntiforgeryCookieName, tokens.RequestToken!, new CookieOptions
+        {
+            HttpOnly = false,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/",
+        });
     }
 }
 
@@ -44,6 +73,16 @@ internal static class TeammateSessions
         {
             protection.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
         }
+
+        services.AddAntiforgery(options =>
+        {
+            options.HeaderName = TeammateSessionHandler.AntiforgeryHeaderName;
+            options.Cookie.Name = "__Host-mondino-antiforgery";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = SameSiteMode.Strict;
+            options.Cookie.Path = "/";
+        });
 
         services.AddAuthentication(TeammateSessionHandler.Scheme)
             .AddCookie(TeammateSessionHandler.Scheme, options =>

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Mondino.Api.Errors;
 using Mondino.Api.RateLimiting;
+using Mondino.Api.Security;
 using Mondino.Application;
 using Mondino.Infrastructure;
 
@@ -12,7 +13,7 @@ builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add<AntiforgeryFilter>());
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemCodes.Customize);
 builder.Services.AddExceptionHandler<RefusalHandler>();
 builder.Services.AddHealthChecks();
