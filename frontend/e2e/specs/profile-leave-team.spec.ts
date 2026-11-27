@@ -166,15 +166,14 @@ test.describe('Profile & Settings: leaving the team', () => {
       'Your pin is off the team’s globe and they can no longer see your time, weather or moments. To come back, ask a teammate for the team’s invite link.',
     );
 
-    // And opening the Globe or Profile & Settings shows "You need an invite link" in place
-    await page.goto('/globe');
-    await expect(inviteNeededPage.title).toHaveText('You need an invite link');
-    await page.goto('/profile');
-    await expect(inviteNeededPage.title).toHaveText('You need an invite link');
+    // And opening the Globe, Team, Moments or Profile & Settings shows "You need an invite link" in place
+    for (const address of ['/globe', '/team', '/moments', '/profile']) {
+      await page.goto(address);
+      await expect(inviteNeededPage.title).toHaveText('You need an invite link');
+    }
 
     // And from Left Team, "Start a new team" leads to Create Team
-    await page.goBack();
-    await page.goBack();
+    await page.goto('/left');
     await expect(leftTeamPage.title).toBeVisible();
     await leftTeamPage.startANewTeam.click();
     await expect(page).toHaveURL('/new');

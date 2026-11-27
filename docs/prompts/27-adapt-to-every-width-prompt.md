@@ -112,6 +112,11 @@ the shell and what is left.
   `sessionExpiredInterceptor`: until it exists the save bar says "Couldn’t save." Prove that a 401 on
   `PUT /api/teams/{teamId}/me` shows "You need an invite link" in place, and decide in the design whether
   `unsavedChangesGuard` asks "Leave without saving?" first.
+- Journey 24 left two things here. A leave on Profile & Settings refused with 401 shows the dialog's
+  alert with "Try again", as any failure does (`profile/leave-team`'s errors table); decide with the save
+  whether an ended session there shows "You need an invite link" instead. And "Leave Northwind?" is a
+  sheet from the bottom under 576 px (L2-037 criterion 9), which no spec measures yet. L2-038 criterion 10
+  (Left Team, not "You need an invite link", after leaving) is proven by `profile-leave-team.spec.ts`.
 - Set journey 27 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
