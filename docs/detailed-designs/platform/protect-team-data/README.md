@@ -8,7 +8,8 @@ feature covers how Mondino keeps that data to the people it belongs to. A teamma
 the team they are in and changes only their own pin. A postal code is returned only to the
 teammate it belongs to. Every value a person types is validated by the backend and rendered as
 text. What is open to anyone (opening an invite link, looking up a postal code, joining,
-asking for a sign-in link and making a team) is marked as open and rate limited. An email is
+asking for a sign-in link and making a team) is marked as open, and all of it but making a team
+is rate limited ([ADR 0016](../../../adr/0016-no-limit-on-making-a-team.md)). An email is
 the teammate's own, as a postal code is, and no screen and no answer says whether Mondino
 knows an email.
 
@@ -48,7 +49,8 @@ behind them.
   request's body.
 - **Fallback policy.** The API's fallback authorisation policy requires an authenticated
   teammate. `InvitesController`, `SignInController` and `TeamCreationController` are the only
-  controllers marked `[AllowAnonymous]`, and each of their actions names a rate limit policy.
+  controllers marked `[AllowAnonymous]`, and each of their actions names a rate limit policy,
+  but for making a team (`POST /api/teams`), which has none (ADR 0016).
   The health endpoints, the app's own files (`AppShell`) and the 404 for an unknown `/api`
   address are marked the same way. No endpoint is open by omission (L2-045,
   [ADR 0010](../../../adr/0010-protecting-team-data.md)).
@@ -159,8 +161,11 @@ behind them.
 
 **Rate limits (L2-045).**
 
-**`RateLimitPolicies`** registers one fixed-window policy for each open endpoint with the
-ASP.NET Core rate limiter, each partitioned by client address. The rate limiter runs before
+**`RateLimitPolicies`** registers one fixed-window policy for each open endpoint but
+`POST /api/teams` with the ASP.NET Core rate limiter, each partitioned by client address.
+Making a team is the one open request with no rate limit, at the product owner's request
+([ADR 0016](../../../adr/0016-no-limit-on-making-a-team.md)), which supersedes the `create-team`
+policy of ADR 0009. The rate limiter runs before
 authentication, the controller and any outside source.
 
 | Policy | Endpoint | Limit per client |
@@ -169,7 +174,6 @@ authentication, the controller and any outside source.
 | `Lookup` | `POST /api/invites/{inviteToken}/postal-code-lookups`, `POST /api/postal-code-lookups` | 10 a minute |
 | `Join` | `POST /api/invites/{inviteToken}/teammates` | 5 a minute |
 | `CitySearch` | `POST /api/invites/{inviteToken}/city-searches`, `POST /api/city-searches` | 30 a minute |
-| `CreateTeam` | `POST /api/teams` | 5 an hour |
 | `SignInLink` | `POST /api/sign-in-links` (journey 7) | 5 in 15 minutes |
 | `SignInRedemption` | `POST /api/sign-in-links/redemptions` (journey 7) | 10 a minute |
 
@@ -180,8 +184,8 @@ A refused request is answered 429 with a `Retry-After` header and the code `rate
 For a lookup or a join request, `JoinPage` shows "Too many tries from this device. You can try
 again in 9:42.", counts down from `Retry-After`, disables its button until the countdown ends
 and keeps what was typed. For an open of an invite link, nothing has been typed yet, and
-`JoinPage` shows "We couldn’t open this invite" with "Try again" (L2-001). Create Team shows
-Join's countdown (ADR 0009); what Sign In shows is not drawn yet, and until it is, Sign In
+`JoinPage` shows "We couldn’t open this invite" with "Try again" (L2-001). For Create Team's
+postal code lookup, Create Team shows Join's countdown (ADR 0009); what Sign In shows is not drawn yet, and until it is, Sign In
 shows its drawn failure, "We couldn’t send the link." (ADR 0011). Beside the limit per client,
 `RequestSignInLinkCommandHandler` sends no further mail once more than 3 sign-in links were
 asked for one email in 15 minutes, from any number of clients, and answers as for any other
@@ -211,7 +215,7 @@ level-1 (L1) requirement, cited by identifier.
 | `L2-007` | `L1-002` | A postal code is returned only to the teammate it belongs to, on their own Join and Profile & Settings screens. Everything another teammate receives carries the city and country only. |
 | `L2-043` | `L1-014` | The backend decides what is allowed. Every request must come from a teammate of the team it concerns, except those that are open to anyone (L2-045): opening an invite link, looking up a postal code or finding a city while joining or making a team, joining, making a team, asking for a sign-in link and opening one. What the browser shows or hides is a convenience and never the rule. Mondino has no roles: the teammate who made a team is a teammate like any other. |
 | `L2-044` | `L1-014` | Every value from a browser is validated by the backend whatever the frontend checked. A teammate's name, a team's name, an email, a city, a moment's title and detail, what is typed in a search and the address of a page that is not there are rendered as text, never as HTML, wherever they appear. |
-| `L2-045` | `L1-014` | Opening an invite link, looking up a postal code or finding a city while joining, and joining are open to anyone who holds an invite link. Sign In (asking for a sign-in link and opening one) and Create Team (its postal code lookup and making the team) are open to anyone at all. Each is marked as open explicitly and is rate limited. |
+| `L2-045` | `L1-014` | Opening an invite link, looking up a postal code or finding a city while joining, and joining are open to anyone who holds an invite link. Sign In (asking for a sign-in link and opening one) and Create Team (its postal code lookup, its search for a city and making the team) are open to anyone at all. Each is marked as open explicitly and is rate limited, with one exception: making a team is the one open request with no rate limit (ADR 0016). Create Team's postal code lookup and its search for a city stay limited. |
 
 ## Diagrams
 

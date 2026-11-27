@@ -266,7 +266,8 @@ Clean architecture, strict dependency direction: `Mondino.Domain` (entities, zer
 - The API does not apply migrations on startup; a CLI command does. Seed data is idempotent.
 - Endpoints accept only what a team's own teammate may do; anything open to anyone (opening an
   invite link, looking up a postal code while joining, asking for a sign-in link, making a
-  team) is marked so explicitly and is rate limited.
+  team) is marked so explicitly and is rate limited, except making a team, the one open request
+  with no rate limit ([ADR 0016](docs/adr/0016-no-limit-on-making-a-team.md)).
 - Errors are ProblemDetails with a `code` extension where a client branches on them.
 - Telemetry is OpenTelemetry. No log, metric or span carries a name, an email, a postal code, a
   position, a token, a query string or a body; a route is recorded as its template.

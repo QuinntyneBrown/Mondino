@@ -61,7 +61,6 @@ class RateLimitPolicies {
   +{static} string Lookup = 10 per minute
   +{static} string CitySearch = 30 per minute
   +{static} string Join = 5 per minute
-  +{static} string CreateTeam = 5 per hour
   +{static} AddRateLimitPolicies(services): IServiceCollection
 }
 

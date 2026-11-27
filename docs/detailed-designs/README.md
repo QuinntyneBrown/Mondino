@@ -120,7 +120,8 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
   `invite_not_found` like one that was never issued.
 - The open endpoints are those of `InvitesController`, `SignInController` and
   `TeamCreationController`. Each is marked as open and carries a policy of
-  `RateLimitPolicies` (`protect-team-data`).
+  `RateLimitPolicies` (`protect-team-data`), but for making a team (`POST /api/teams`), the one
+  open request with no rate limit (ADR 0016).
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
   15 minutes. Open-Meteo is given a city's position rounded to two decimal places and nothing
@@ -200,8 +201,9 @@ The designs mark these as `<TO SUPPLY>`:
 - Resetting the invite link (`joining/invite-teammates`): what "Reset link" asks before it
   acts, and what the dialog shows while the reset is pending, when it fails and once it is
   done. Resetting is not built before that design exists.
-- What Sign In shows when a request is refused with 429 (Create Team shows Join's countdown,
-  ADR 0009).
+- What Sign In shows when a request is refused with 429 (Create Team shows Join's countdown
+  for a refused postal code lookup, ADR 0009; making a team is never refused for coming too
+  often, ADR 0016).
 - On Join: the words of the found line when a city is chosen through "Your city", the words
   for a name over 60 characters, and whether the lookup's rate limit window lengthens to match
   the mock's countdown ("9:42").

@@ -35,9 +35,7 @@ actor -> page : Type a team name, choose "Create team"
 page -> store : create()
 store -> client : createTeam(request)
 client -> controller : POST /api/teams
-alt over the limit for one client
-  controller --> client : 429 ProblemDetails, code rate_limited, Retry-After (L2-045)
-else a value the browser did not check
+alt a value the browser did not check
   controller -> validator : CreateTeamCommand
   validator --> controller : validation_failed
   controller --> client : 400 ProblemDetails, code validation_failed (L2-044)
@@ -47,8 +45,8 @@ else valid
   controller --> client : 422 or 503 ProblemDetails
 end
 client --> store : ApiError
-store --> page : lookupState NotFound, Unavailable or RateLimited, or createState Failed
-page --> actor : The postal code's own message, Join's countdown "Too many tries from this device.",\nor "We couldn’t create Northwind. Nothing was saved — try again." with "Try again"; what was typed is kept
+store --> page : lookupState NotFound or Unavailable, or createState Failed\n(a 429, should one arrive, is Failed too: ADR 0016)
+page --> actor : The postal code's own message,\nor "We couldn’t create Northwind. Nothing was saved — try again." with "Try again"; what was typed is kept
 note over controller, handler
   No refusal says whether the email is already on a team.
 end note

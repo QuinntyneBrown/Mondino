@@ -23,5 +23,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0013](0013-turning-the-globe.md) | The globe turns from one frame loop, at numbers of its own, and only the Globe screen's globe turns on its own | Accepted |
 | [0014](0014-drawing-the-pins.md) | The page places the pins over the globe, and the numbers that group, fade and label them | Accepted |
 | [0015](0015-weather-source.md) | The weather comes from Open-Meteo, asked once per city and kept 15 minutes | Accepted |
+| [0016](0016-no-limit-on-making-a-team.md) | Making a team has no rate limit, the one open request without one | Accepted; supersedes part of 0009 |
 
 Not decided yet, by the journey that first needs it: the providers of the calendars (journey 19).
