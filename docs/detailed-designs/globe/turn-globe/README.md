@@ -46,7 +46,8 @@ selected pin.
     reduced motion, or after a drag while a pin is held.
 
   Its methods are `advance(elapsedMs)`, `dragStart()`, `dragBy(deltaLongitude, deltaTilt)`,
-  `dragEnd()`, `canTurn(deltaLongitude, deltaTilt)`, `step(direction)`, `hold(position)`,
+  `dragEnd()`, `canTurn(deltaLongitude, deltaTilt)`, `step(direction)` (an `ArrowDirection`:
+  `Left`, `Right`, `Up` or `Down`; false when the tilt is at its limit that way), `hold(position)`,
   `release()`, `setReducedMotion(reduced)` and `isMoving()`. It is made with `turnsOnItsOwn`
   (the `interactive` input) and the starting orientation. The tilt is limited so a pole never
   passes the centre of the view; `canTurn` reports whether a turn would exceed the limit.
@@ -79,8 +80,9 @@ selected pin.
   turn to and hold, or null. In the `Fallback` state it creates neither `GlobeMotion` nor
   `GlobeGestures` and registers no frame listener: `GlobeFallback`, the still picture, has no
   drag, no arrow keys and no focus of its own, and its pins stay where they are.
-- **`GlobeScene`** — draws the globe at the orientation it is given and owns the render loop
-  (`start`, `stop`, `onFrame`). It decides nothing about motion.
+- **`GlobeScene`** — draws the globe at the orientation it is given (`setOrientation`) and owns
+  the render loop (`start`, `stop`, `onFrame`, `requestFrame`), drawing a frame only when one is
+  asked for. It decides nothing about motion.
 
 **In the `mondino` application and the `domain` library**
 

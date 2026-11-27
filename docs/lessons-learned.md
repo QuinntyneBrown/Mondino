@@ -463,3 +463,67 @@ apply the lessons that fit.
   a triple-slash reference ESLint refuses and the just-joined spec's order.
 - *Read a mock's markup before the app is open* (journey 7, lesson 5): the Join spec that compares
   pins with the mock still reads it first, and now runs on the still picture the mock draws.
+
+## Journey 9: Turn the globe
+
+**What slowed it**
+
+- A globe that turns on its own moves everything the journey-8 specs read: the pixel specs sample
+  places at the starting orientation, and the just-joined spec looked for the new pin after the
+  toast's 4 seconds, by which time, under load, the real time the clock also runs had turned Milan
+  to the far side. The pixel specs now emulate reduced motion, and the just-joined spec stops the
+  clock before it looks at the pin.
+- Playwright's clock fakes `requestAnimationFrame`, and Angular's zoneless scheduler races it with
+  `setTimeout`: with the clock paused, nothing renders until `runFor`. A spec that drives a turn
+  pauses the clock and polls with short `runFor` steps until what it waits for is drawn.
+- `pauseAt` refuses a moment already past, and the page's clock runs on between reading it and
+  pausing: `pauseAt(now + 1)` failed under load. The helper pauses 20 ms ahead and retries.
+- `emulateMedia` changes `matches` at once but fires the query's `change` event only at the
+  browser's next rendering, which a paused fake clock never brings; a one-pixel screenshot does.
+- The Globe screen is no taller than a phone until its panel is built, so a vertical drag left to
+  the page had nothing to scroll; the spec makes room, as the panel will.
+- Each faked frame of the 3D globe takes about 25 ms in SwiftShader whatever the window's size, so
+  a spec that runs 5 seconds of turning takes about 8 seconds. The turning specs share their
+  frames: one auto-turn spec, and the rest assert within a second of frames.
+- Holding at once under reduced motion changed the orientation between frames, and the frame loop
+  compared the orientation before and after `advance`, so it never drew it. It compares with what
+  is drawn.
+
+**Lessons**
+
+1. **Pause the clock before a spec measures motion, and poll with `runFor`.** Real time ticking
+   under the fake clock moves an animation by however long the machine took; a paused clock and
+   steps of 16 ms make every frame the spec's own.
+2. **A changed media query needs a rendering to be reported.** After `emulateMedia`, bring about a
+   frame (a one-pixel screenshot) before expecting the page to have heard of it.
+3. **Read touch from touch events when a drag may be handed to the page.** The browser cancels a
+   touch pointer as soon as it pans; a non-passive `touchmove` decides on its first move, and CDP's
+   `Input.dispatchTouchEvent` drives it, scrolling and all.
+4. **Compare a frame's result with what is drawn, not with what came before it.** Something may
+   have moved the model between frames.
+5. **When a feature makes the screen move on its own, list the specs that look at it still.** Hold
+   them still on purpose (reduced motion, a paused clock), rather than relying on their speed.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0013, the turn-globe design and its
+  diagrams, the draw-globe inputs and the design system's globe page were one commit before any
+  code; the design was touched again only for the names the code chose (`ArrowDirection`'s
+  values, `requestFrame`).
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6; journey 8, lesson 1):
+  259.64 kB before and after every slice; the motion, the gestures and the frame loop are in the
+  pages' lazy chunks. No budget moved.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice ran red first, by its
+  missing code, by stashing the app code and building again (the drag), or by removing the line
+  under test (the reduced motion listener). Two proofs passed on first run because they hold
+  something already true (the globe still under reduced motion before it turned at all, the still
+  picture taking no focus) and were kept as the proof.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it
+  caught a CDP type in the page object, and the just-joined spec the turning globe broke, which
+  one commit had been made over before the code was read and was fixed in the next.
+- *Count what a screen holds through the browser* (journey 8, lesson 3): the release spec still
+  counts the media query listeners, now with the reduced motion one, and every pointer, touch and
+  key listener is registered with the screen's `AbortSignal`.
+- *Leave a screen in a spec the way a person would* (journey 8, lesson 4): the turning specs come to
+  the Globe by joining, the one way the Globe draws a pin before journey 10.
+
