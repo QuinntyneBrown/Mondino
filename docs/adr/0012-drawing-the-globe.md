@@ -97,7 +97,7 @@ The constraints are the requirements' and the instructions':
 - **The still picture** is `GlobeFallback`'s bundled SVG, drawn at the one orientation it has
   (`STILL_ORIENTATION`, 10.1° E, 17.4° N, Europe and Africa) and with its night side at one fixed
   hour, the mocks' "now". It shows where `getContext('webgl2')` gives nothing, the assets fail
-  to load, the context is lost, or the `globe` library's chunk fails to load. The 3D globe faces
+  to load, the context is lost, or the renderer's chunk fails to load. The 3D globe faces
   the same point when it starts, so the two show the same half of the world.
 
 ## Consequences
