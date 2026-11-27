@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mondino.Application.Persistence;
@@ -46,6 +47,7 @@ public sealed class FakeCurrentTeammate : ICurrentTeammate
 /// <summary>Throws, carrying what must never reach a response.</summary>
 [ApiController]
 [Route("api/test-only")]
+[AllowAnonymous]
 public sealed class TestOnlyController : ControllerBase
 {
     public const string Secret = "Sofia Bianchi 20121";

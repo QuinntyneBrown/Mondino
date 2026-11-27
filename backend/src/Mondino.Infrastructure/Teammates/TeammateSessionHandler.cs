@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Mondino.Application.Persistence;
 
 namespace Mondino.Infrastructure.Teammates;
 
@@ -54,6 +56,9 @@ internal static class TeammateSessions
                 options.ExpireTimeSpan = TeammateSessionHandler.Lifetime;
                 options.SlidingExpiration = true;
 
+                // A session whose teammate no longer exists in its team (they left) is no session.
+                options.Events.OnValidatePrincipal = RejectWhenGoneAsync;
+
                 // An API answers 401 and 403; it never redirects to a sign-in page.
                 options.Events.OnRedirectToLogin = context =>
                 {
@@ -67,5 +72,18 @@ internal static class TeammateSessions
                 };
             });
         return services;
+    }
+
+    private static async Task RejectWhenGoneAsync(CookieValidatePrincipalContext context)
+    {
+        var principal = context.Principal;
+        var found = Guid.TryParse(principal?.FindFirstValue(CurrentTeammate.TeammateIdClaim), out var teammateId)
+            & Guid.TryParse(principal?.FindFirstValue(CurrentTeammate.TeamIdClaim), out var teamId);
+        var database = context.HttpContext.RequestServices.GetRequiredService<IAppDbContext>();
+        if (!found || !await database.Teammates.AsNoTracking()
+                .AnyAsync(t => t.Id == teammateId && t.TeamId == teamId, context.HttpContext.RequestAborted))
+        {
+            context.RejectPrincipal();
+        }
     }
 }

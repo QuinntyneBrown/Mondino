@@ -156,12 +156,29 @@ public class MondinoApi : WebApplicationFactory<Program>
         await database.SaveChangesAsync(CancellationToken.None);
     }
 
+    /// <summary>The id of the team of the invite token.</summary>
+    public async Task<Guid> TeamIdAsync(string inviteToken)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        return await database.Teams.Where(t => t.InviteToken == inviteToken).Select(t => t.Id).SingleAsync();
+    }
+
     /// <summary>A teammate as stored, with their city.</summary>
     public async Task<Teammate> TeammateAsync(Guid teammateId)
     {
         await using var scope = Services.CreateAsyncScope();
         var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         return await database.Teammates.AsNoTracking().Include(t => t.City).SingleAsync(t => t.Id == teammateId);
+    }
+
+    /// <summary>Takes a teammate out of their team, as leaving does (journey 24).</summary>
+    public async Task RemoveTeammateAsync(Guid teammateId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        database.Teammates.Remove(await database.Teammates.SingleAsync(t => t.Id == teammateId));
+        await database.SaveChangesAsync(CancellationToken.None);
     }
 
     /// <summary>Makes the browser's session one of the team's teammates: the one who joined first.</summary>
