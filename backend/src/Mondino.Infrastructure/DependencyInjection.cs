@@ -10,6 +10,7 @@ using Mondino.Application.Teammates;
 using Mondino.Application.Teams;
 using Mondino.Infrastructure.Cities;
 using Mondino.Infrastructure.Moments;
+using Mondino.Infrastructure.OutsideSources;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.Persistence.Seeds;
 using Mondino.Infrastructure.PostalCodes;
@@ -60,6 +61,9 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseMigrator, DatabaseMigrator>();
         services.AddScoped<ISeedStep, NorthwindSeed>();
 
+        // The breaker every outside source has, each its own (<c>OutsideSources:*</c>, docs/adr/0026).
+        services.Configure<OutsideSourceOptions>(configuration.GetSection(OutsideSourceOptions.Section));
+
         // The cities Mondino holds, and the postal code source behind its timeout, cache and
         // breaker (docs/adr/0006). The source's client logs nothing: its address carries the postal code.
         services.AddSingleton<ICityDirectory, BundledCityDirectory>();
@@ -70,7 +74,7 @@ public static class DependencyInjection
         services.AddSingleton<GeoNamesPostalCodeLookup>();
         services.AddSingleton<IPostalCodeLookup, CachedPostalCodeLookup>();
 
-        // The weather source behind its timeout and cache (<c>WeatherSource:*</c>, docs/adr/0015).
+        // The weather source behind its timeout, cache and breaker (<c>WeatherSource:*</c>, docs/adr/0015).
         // Its client logs nothing: its address carries a city's position.
         services.Configure<WeatherSourceOptions>(configuration.GetSection(WeatherSourceOptions.Section));
         services.AddHttpClient(OpenMeteoWeatherSource.ClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
