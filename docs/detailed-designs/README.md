@@ -124,21 +124,20 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
   15 minutes.
-- The `globe` library depends on `api` only. `GlobePage` hands `GlobeView` what `domain` works
-  out: the pin and label templates, the moment markers, the pin descriptions and, through
-  `PIN_GROUPER` (`PinGrouper`, `groupPins(points, options)`), the grouping of pins that would
-  cover each other into group pins with a count. `PinLayer` injects the token and `GlobePage`
-  binds it. `GlobeView` takes `selectedGroupIds`, and selecting a group pin turns the globe to
-  it.
+- The `globe` library depends on `api` only (ADR 0014). `GlobeView` reports where things are on
+  the globe as a `GlobeViewport` (`viewChange`) and a tap on no pin (`blankTap`); `GlobePage`
+  places the pins itself with `placePins` (`domain`'s `pins/`), which groups pins that would
+  cover each other into group pins with a count (`groupPins`) and sides their labels
+  (`placeLabels`), and hands the placements to `PinLayer` (`components`) in `GlobeView`'s
+  `[pins]` slot. Selecting a pin or a group pin turns the globe to it (`facing`).
 - The pins on the globe are the accessible list. `PinLayer` renders them as the mocks'
-  `ul.globe__pins > li.globe__pin > button.pin`; each button is named by `describePin` and
-  carries `aria-pressed`, and the visible label is `aria-hidden`. There is no separate hidden
-  list. `GlobeFallback` (the still picture) and `GlobePlaceholder` are in `components`, so
-  they show when the `globe` library's chunk fails to load. The still picture keeps its pins,
-  in place and working: `GlobeFallback` takes `placements` (from `stillPlacements(pins, size,
-  options)` in `domain`'s `pins/`), `descriptions`, `markers` and `selectedId`, and emits
-  `select` and `selectGroup`. Its pins lift and open their panels; it does not turn and is
-  not dragged.
+  `ul.globe__pins > li.globe__pin > button.pin`; each button is named by `describePin` or
+  `describeGroup` and carries `aria-pressed`, and the visible label is `aria-hidden`. There
+  is no separate hidden list. `GlobeFallback` (the still picture) and `GlobePlaceholder` are
+  in `components`, so they show when the `globe` library's chunk fails to load. The still
+  picture keeps its pins, in place and working: it takes the same `PinLayer` in its own
+  `[pins]` slot, placed by `placePins` from `stillViewport(width)`. Its pins lift and are
+  selected; it does not turn and is not dragged.
 - `TeamShell`, in the app, is the component of the route that holds Globe, Team, Moments and
   Profile & Settings. It provides `TeamStore` and renders `AppHeader` (`mo-app-header`, block
   `app-header`), the refresh banner and the toast. The header avatar's initials and colour come

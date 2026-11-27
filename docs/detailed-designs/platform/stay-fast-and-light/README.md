@@ -124,7 +124,7 @@ renderer is chosen.
   (`view-week-around-the-world`).
 - `TeamStore` replaces its pins on each refresh; it keeps no history. A team has at most 500
   teammates (`Team.MaxTeammates`).
-- `PinLayer` groups close pins (`groupPins`, through `PIN_GROUPER`), so the pins and labels
+- `GlobePage` groups close pins (`groupPins`, through `placePins`), so the pins and labels
   drawn at once are bounded by the globe's size, not the team's: a team of 500 is drawn as
   group pins with counts.
 
