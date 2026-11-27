@@ -1,5 +1,18 @@
 import type { Locator, Page } from '@playwright/test';
 
+/** The `--x` and `--y` of each pin, in %, west to east. Runs in the browser. */
+function placesOf(pins: Element[]): { x: number; y: number }[] {
+  return pins
+    .map((pin) => {
+      const style = (pin as HTMLElement).style;
+      return {
+        x: parseFloat(style.getPropertyValue('--x')),
+        y: parseFloat(style.getPropertyValue('--y')),
+      };
+    })
+    .sort((a, b) => a.x - b.x);
+}
+
 /** Join: the screen an invite link opens, in each of its states. */
 export class JoinPage {
   readonly main: Locator;
@@ -29,6 +42,7 @@ export class JoinPage {
   readonly stage: Locator;
   readonly globe: Locator;
   readonly pins: Locator;
+  readonly pinLayer: Locator;
 
   constructor(readonly page: Page) {
     this.main = page.locator('main.join');
@@ -57,6 +71,7 @@ export class JoinPage {
     this.stage = this.main.getByRole('region', { name: 'The team on the globe' });
     this.globe = this.stage.locator('.globe');
     this.pins = this.stage.locator('.globe__pin .pin-dot');
+    this.pinLayer = this.stage.locator('.globe__pins');
   }
 
   async open(inviteToken: string): Promise<void> {
@@ -73,16 +88,21 @@ export class JoinPage {
     return this.country.locator('option').allTextContents();
   }
 
-  /** Where each pin is drawn, as a percentage of the globe's width and height. */
+  /** Where each pin is drawn, as a percentage of the globe's width and height, west to east. */
   pinPlaces(): Promise<{ x: number; y: number }[]> {
-    return this.stage.locator('.globe__pin').evaluateAll((pins) =>
-      pins.map((pin) => {
-        const style = (pin as HTMLElement).style;
-        return {
-          x: parseFloat(style.getPropertyValue('--x')),
-          y: parseFloat(style.getPropertyValue('--y')),
-        };
-      }),
+    return this.stage.locator('.globe__pin').evaluateAll(placesOf);
+  }
+
+  /** Where a mock draws each pin on Join's globe, from the mock's markup, west to east. */
+  async pinPlacesIn(mock: string): Promise<{ x: number; y: number }[]> {
+    const pins = await this.page.evaluateHandle(
+      (markup) => [
+        ...new DOMParser()
+          .parseFromString(markup, 'text/html')
+          .querySelectorAll('.join__stage .globe__pin'),
+      ],
+      mock,
     );
+    return pins.evaluate(placesOf);
   }
 }

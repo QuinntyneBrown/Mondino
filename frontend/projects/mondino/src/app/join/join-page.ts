@@ -14,6 +14,7 @@ import {
   TextField,
   Wordmark,
 } from '@mondino/components';
+import { stillPlacements } from '@mondino/domain';
 import { JoinStore } from './join-store';
 
 /**
@@ -55,7 +56,18 @@ export class JoinPage {
     })),
   );
 
-  protected readonly globeLabel = computed(() => 'The globe, with no pins');
+  /** The team's bare pins on the still globe, until the 3D globe draws them (journey 8). */
+  protected readonly pins = computed(() => {
+    const invite = this.store.invite();
+    return invite ? stillPlacements(invite.positions) : [];
+  });
+
+  protected readonly globeLabel = computed(() => {
+    const invite = this.store.invite();
+    if (!invite || invite.positions.length === 0) return 'The globe, with no pins';
+    const count = invite.positions.length;
+    return `The globe, with ${count} ${count === 1 ? 'pin' : 'pins'}: one for each teammate already in ${invite.teamName}`;
+  });
 
   constructor() {
     void this.store.open(this.inviteToken);

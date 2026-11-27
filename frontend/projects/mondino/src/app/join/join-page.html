@@ -110,7 +110,7 @@
     @if (store.inviteState() === 'Loading') {
       <mo-globe-placeholder />
     } @else {
-      <mo-globe-fallback [label]="globeLabel()" />
+      <mo-globe-fallback [label]="globeLabel()" [pins]="pins()" />
     }
   </section>
 </main>

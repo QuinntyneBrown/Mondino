@@ -79,3 +79,27 @@
   fill: none;
   stroke: var(--color-globe-outline);
 }
+.globe__pins {
+  position: absolute;
+  inset: 0;
+}
+.globe__pin {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: var(--z-raised);
+  opacity: var(--depth, 1);
+}
+// A pin with no name: the team as a newcomer sees it on Join, in the pin colour.
+.pin-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  box-sizing: content-box;
+  width: var(--pin-dot-size);
+  height: var(--pin-dot-size);
+  border: var(--border-width-thick) solid var(--color-pin-ring);
+  border-radius: var(--radius-full);
+  background: var(--color-people);
+}
