@@ -114,6 +114,12 @@ Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then
 - Journey 13 waits for this screen to prove the Team row's weather icon, a `WeatherIcon` that stands alone
   and is read as its word (L2-018 criterion 5), and the row's "55°" for a viewer in °F (L2-019 criterion 1,
   with the panel's from journey 14) in Playwright; raise journey 13's % by the criteria proven here.
+- Journey 15 links "2 more on the Team page" to `/team?filter=working` and waits for this screen to prove
+  that it opens the Team screen with "Working now" chosen (L2-024 criterion 3); add Team to `TeamShell`'s
+  children, so the header's "Team" link reaches it. Raise journey 15's % by the criterion proven here.
+- Journey 11 waits for this screen to prove that a teammate who does not share their status is listed under
+  All only, not under Working now nor Asleep nor in their counts (L2-015 criterion 4; the Globe's half is
+  proven by journey 15); raise journey 11's % when it is.
 - Set journey 17 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 
