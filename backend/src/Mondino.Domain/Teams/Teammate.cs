@@ -73,6 +73,12 @@ public sealed class Teammate
     /// </summary>
     public bool SharesStatus { get; private set; } = true;
 
+    /// <summary>
+    /// Whether the teammate shares their weather ("Share my local weather", L2-011, L2-034): on to
+    /// begin with. Off, their teammates are shown no weather for them (docs/adr/0015).
+    /// </summary>
+    public bool SharesWeather { get; private set; } = true;
+
     /// <summary>The id the browser gave its join request, so a repeated request makes no second pin. Never returned.</summary>
     public Guid? JoinRequestId { get; private set; }
 
