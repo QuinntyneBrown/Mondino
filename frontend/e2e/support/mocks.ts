@@ -300,3 +300,21 @@ export function mockPinMarkers(path: string): MockPinMarker[] {
     icon: inside.startsWith('<svg') ? shapesOf(inside) : [],
   }));
 }
+
+/** A mock's lifted pin label, whose name line is `nameAndCity`: its text, and its moment line's icon. */
+export function mockLiftedLabel(
+  path: string,
+  nameAndCity: string,
+): { text: string; momentIcon: string[] } {
+  const found = new RegExp(
+    `<span class="pin-label pin-label--lifted[^"]*"[^>]*><span class="pin-label__name">${nameAndCity}</span>([\\s\\S]*?)</span></li>`,
+  ).exec(mockMarkup(path));
+  if (!found) throw new Error(`No lifted label for ${nameAndCity} in ${path}`);
+  const moment = /<span class="pin-label__moment">(<svg[\s\S]*?<\/svg>)/.exec(found[1]);
+  return {
+    text: (
+      nameAndCity + found[1].replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, '')
+    ).replace(/\s+/g, ''),
+    momentIcon: moment ? shapesOf(moment[1]) : [],
+  };
+}

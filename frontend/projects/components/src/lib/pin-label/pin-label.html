@@ -13,6 +13,11 @@
       ><span>{{ weather.word }}</span>
     }
   </span>
+  @if (pin().marker; as marker) {
+    <span class="pin-label__moment"
+      ><svg mo-moment-icon decorative size="xs" [kind]="marker.kind"></svg>{{ momentLine() }}</span
+    >
+  }
 } @else {
   <strong>{{ pin().localTime }}</strong>
   @if (pin().weather; as weather) {

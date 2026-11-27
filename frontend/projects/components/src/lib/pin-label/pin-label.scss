@@ -65,10 +65,15 @@ strong {
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
 }
-.pin-label__line {
+.pin-label__line,
+.pin-label__moment {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
+}
+// The nearest moment this week, in sun on the lifted label's ink.
+.pin-label__moment {
+  color: var(--color-fg-inverse-accent);
 }
 @container globe (max-width: 31.249rem) {
   :host(:not(.pin-label--lifted)) {

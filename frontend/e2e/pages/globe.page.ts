@@ -23,6 +23,8 @@ export class GlobePage {
   /** The list of pins over the globe, a keyboard's and a screen reader's way to the teammates. */
   readonly pinList: Locator;
   readonly pinButtons: Locator;
+  /** Everything over the globe a person can press or focus. */
+  readonly pinControls: Locator;
   /** The pins that are lifted, and the labels shown at rest and lifted. */
   readonly liftedPins: Locator;
   /** The pins placed just now, which pulse once. */
@@ -136,6 +138,7 @@ export class GlobePage {
     this.allPins = this.stage.locator('.globe__pin');
     this.pinList = this.stage.locator('ul.globe__pins');
     this.pinButtons = this.pinList.locator('li.globe__pin > button.pin');
+    this.pinControls = this.pinList.locator('button, a, [tabindex], [role="button"]');
     this.liftedPins = this.pinList.locator('li.globe__pin--lifted');
     this.newPins = this.pinList.locator('.pin--new');
     this.restingLabels = this.pinList.locator('.pin-label:not(.pin-label--lifted)');
@@ -279,6 +282,27 @@ export class GlobePage {
         ];
       }),
     );
+  }
+
+  /** The moment line of a pin's lifted label, and the shapes of its icon. */
+  labelMomentOf(name: string): Locator {
+    return this.labelOf(name).locator('.pin-label__moment');
+  }
+
+  async labelMomentIconShapes(name: string): Promise<string[]> {
+    return this.labelMomentOf(name)
+      .locator('svg')
+      .evaluate((svg) =>
+        [...svg.children].map((shape) =>
+          [
+            shape.tagName,
+            ...[...shape.attributes]
+              .filter((attribute) => !attribute.name.startsWith('_ng'))
+              .map((attribute) => `${attribute.name}=${attribute.value}`)
+              .sort(),
+          ].join(' '),
+        ),
+      );
   }
 
   /** Where a pin's marker and initials are drawn, and the marker's ring. */

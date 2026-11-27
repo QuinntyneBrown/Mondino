@@ -5,7 +5,7 @@
 import { expect, test } from '../fixtures/test';
 import { idOf, NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { momentOf, NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
-import { mockPinMarkers } from '../support/mocks';
+import { mockLiftedLabel, mockPinMarkers } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
 
 interface Box {
@@ -64,6 +64,44 @@ test.describe('Globe: moment markers on the pins', () => {
     expect(today.marker.width).toBe(20);
     expect(later.marker.width).toBe(16);
     expect(today.ring).not.toBe(later.ring);
+  });
+
+  test('a marked pin lifted gives its nearest moment and when as text; the marker is no control', async ({
+    api,
+    globePage,
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    api.answer('GET', NORTHWIND_MOMENTS, northwindMoments());
+    await globePage.open();
+    await expect(globePage.markerOf('Liam O’Connor')).toBeVisible();
+
+    // When the pointer is over Liam's pin, as pages/globe/pin-lifted draws it
+    await globePage.pin('Liam O’Connor').hover();
+
+    // Then his lifted label ends with the holiday's icon and "October Bank Holiday · Today" as text
+    const mock = mockLiftedLabel('pages/globe/pin-lifted.html', 'Liam O’Connor · Dublin');
+    await expect(globePage.labelMomentOf('Liam O’Connor')).toHaveText(
+      'October Bank Holiday · Today',
+    );
+    expect((await globePage.labelOf('Liam O’Connor').innerText()).replace(/\s+/g, '')).toBe(
+      mock.text,
+    );
+    expect(await globePage.labelMomentIconShapes('Liam O’Connor')).toEqual(mock.momentIcon);
+
+    // And focused, with the pointer gone, Mara's lifts with "Alla helgons dag · In 5 days"
+    await page.mouse.move(0, 0);
+    await globePage.pin('Mara Lindqvist').focus();
+    await expect(globePage.labelMomentOf('Mara Lindqvist')).toHaveText(
+      'Alla helgons dag · In 5 days',
+    );
+
+    // And a marker is no control of its own: the pins are the only things to press or focus, and
+    // the marker is hidden from assistive technology
+    const marker = globePage.markerOf('Liam O’Connor');
+    await expect(marker).toHaveAttribute('aria-hidden', 'true');
+    expect(await marker.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(-1);
+    await expect(globePage.pinControls).toHaveCount(await globePage.pinButtons.count());
   });
 
   test.describe('on the 3D globe', () => {
