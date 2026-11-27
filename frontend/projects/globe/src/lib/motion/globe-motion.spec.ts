@@ -1,6 +1,7 @@
 import {
   GlobeMotion,
   IdleDelayMs,
+  StepDegrees,
   TiltLimitDegrees,
   TurnRateDegreesPerSecond,
 } from './globe-motion';
@@ -91,5 +92,39 @@ describe('GlobeMotion: dragging', () => {
     motion.dragBy(0, 500);
     expect(motion.orientation.tilt).toBe(TiltLimitDegrees);
     expect(motion.canTurn(0, 1)).toBe(false);
+  });
+});
+
+describe('GlobeMotion: arrow keys', () => {
+  it('turns the front one step the way each arrow points, as a drag that way would', () => {
+    const motion = new GlobeMotion(true, { longitude: 0, tilt: 0 });
+    expect(motion.step('Left')).toBe(true);
+    expect(motion.orientation).toEqual({ longitude: StepDegrees, tilt: 0 });
+    motion.step('Right');
+    motion.step('Right');
+    expect(motion.orientation).toEqual({ longitude: -StepDegrees, tilt: 0 });
+    motion.step('Down');
+    expect(motion.orientation).toEqual({ longitude: -StepDegrees, tilt: StepDegrees });
+    motion.step('Up');
+    motion.step('Up');
+    expect(motion.orientation).toEqual({ longitude: -StepDegrees, tilt: -StepDegrees });
+  });
+
+  it('rests for 5 seconds after a step, as after a drag', () => {
+    const motion = new GlobeMotion(true, { longitude: 0, tilt: 0 });
+    motion.step('Left');
+    expect(motion.motionMode).toBe('Waiting');
+    motion.advance(IdleDelayMs);
+    expect(motion.motionMode).toBe('TurningOnItsOwn');
+  });
+
+  it('takes no step past the tilt limit', () => {
+    const motion = new GlobeMotion(true, { longitude: 0, tilt: TiltLimitDegrees });
+    expect(motion.step('Down')).toBe(false);
+    expect(motion.orientation.tilt).toBe(TiltLimitDegrees);
+    motion.step('Up');
+    motion.step('Down');
+    motion.step('Down');
+    expect(motion.orientation.tilt).toBe(TiltLimitDegrees);
   });
 });

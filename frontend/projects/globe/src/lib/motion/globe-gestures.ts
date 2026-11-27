@@ -1,4 +1,11 @@
-import type { GlobeMotion } from './globe-motion';
+import type { ArrowDirection, GlobeMotion } from './globe-motion';
+
+const arrows: Readonly<Record<string, ArrowDirection>> = {
+  ArrowLeft: 'Left',
+  ArrowRight: 'Right',
+  ArrowUp: 'Up',
+  ArrowDown: 'Down',
+};
 
 /** A pointer that moves less than this is a tap, kept for selecting a pin (ADR 0013). */
 export const TapThresholdPx = 6;
@@ -7,7 +14,7 @@ const degreesPerRadian = 180 / Math.PI;
 
 /**
  * Turns input on the globe's box into calls on `GlobeMotion`: a mouse or a pen through pointer
- * events, a finger through touch events (ADR 0013). Every listener is registered with the
+ * events, a finger through touch events (ADR 0013), and the arrow keys while it has focus. Every listener is registered with the
  * signal given to `attach`, so aborting it removes them all.
  */
 export class GlobeGestures {
@@ -25,6 +32,22 @@ export class GlobeGestures {
   attach(target: HTMLElement, signal: AbortSignal): void {
     this.attachPointer(target, signal);
     this.attachTouch(target, signal);
+    this.attachKeys(target, signal);
+  }
+
+  /** With focus on the globe, each arrow key turns it a step; the page scrolls only past the limit. */
+  private attachKeys(target: HTMLElement, signal: AbortSignal): void {
+    target.addEventListener(
+      'keydown',
+      (event) => {
+        const direction = arrows[event.key];
+        if (!direction || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        if (!this.motion.step(direction)) return;
+        event.preventDefault();
+        this.turned();
+      },
+      { signal },
+    );
   }
 
   /** Turns the globe's front by a drag of `dx`, `dy` CSS px. */

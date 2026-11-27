@@ -11,8 +11,9 @@ export class GlobePage {
   readonly placeholder: Locator;
   /** The 3D globe's canvas. */
   readonly canvas: Locator;
-  /** The still picture, where the 3D globe cannot be drawn. */
+  /** The still picture, where the 3D globe cannot be drawn, and the box that holds it. */
   readonly stillPicture: Locator;
+  readonly stillGlobe: Locator;
   /** The legend over the stage, from 640 px, and its entries. */
   readonly legend: Locator;
   readonly legendEntries: Locator;
@@ -41,6 +42,7 @@ export class GlobePage {
     this.placeholder = this.stage.getByRole('img', { name: 'The globe is loading' });
     this.canvas = this.stage.locator('canvas.globe__art');
     this.stillPicture = this.stage.locator('svg.globe__art');
+    this.stillGlobe = this.stage.locator('.globe:has(svg.globe__art)');
     this.legend = this.stage.locator('.globe-screen__legend');
     this.legendEntries = this.legend.locator('li');
     this.stillLine = this.stage.locator('.globe-screen__still');

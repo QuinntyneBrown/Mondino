@@ -76,6 +76,11 @@ export class GlobeView {
 
   readonly stateChange = output<GlobeState>();
 
+  /** The globe's name: an interactive globe says how it is turned, as the mocks name it. */
+  protected readonly name = computed(() =>
+    this.interactive() ? `${this.label()}. Drag to spin, or use the arrow keys.` : this.label(),
+  );
+
   protected readonly state = signal<GlobeState>('Loading');
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
