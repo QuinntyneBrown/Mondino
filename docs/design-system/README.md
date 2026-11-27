@@ -1,6 +1,6 @@
 # Mondino design system
 
-Extracted from [docs/mocks](../mocks/README.md) on 26 November 2026, as the mocks were transcribed again from the second pass of the Mondino App prototype in Magic Patterns. Open [index.html](index.html) locally; nothing needs a server or a network.
+Extracted from [docs/mocks](../mocks/README.md) on 26 November 2026, as the mocks were transcribed again from the second pass of the Mondino App prototype in Magic Patterns. Its colours were brought to the prototype's indigo and violet palette on 27 November 2026. Open [index.html](index.html) locally; nothing needs a server or a network.
 
 The mocks are the design and the source of truth. This system is what they already decided, written down once: the tokens, the component CSS, and a page for every foundation, component and pattern. The mocks render through this system's `tokens.css` and `components.css`, so the two cannot drift apart.
 
@@ -10,7 +10,7 @@ It holds 12 foundations, 38 components and 8 patterns, extracted from 82 mocks o
 
 | Page | Covers |
 |---|---|
-| [Colour](foundations/color.html) | Paper, ink, pin, sun, leaf, the globe in light and in dark; 13 teammate colours; both themes; contrast |
+| [Colour](foundations/color.html) | Lavender paper, deep indigo ink, violet pin, yellow sun, teal leaf, the globe in light and in dark; 13 teammate colours; both themes; contrast |
 | [Typography](foundations/typography.html) | Gabarito and Inter, the roles, tabular figures |
 | [Spacing](foundations/spacing.html) | The 4 px scale and component sizes |
 | [Layout](foundations/layout.html) | Breakpoints, the grid, each screen’s template |
@@ -93,6 +93,30 @@ Components from the skill's core set that Mondino does not have, and so are not 
 
 ## Changelog
 
+### 27 November 2026: the prototype's indigo and violet palette
+
+The Mondino App and Mondino Brand prototypes changed palette: deep indigo ink and sea, a violet pin, a teal leaf, a lavender paper, and a sun a shade warmer, in light and in dark. Colours only: no layout, type, spacing, motion or copy changed, and no token, class or page was renamed. The globe's colours and the 13 teammate colours are unchanged. Values are in `tokens/tokens.css`.
+
+**Tokens changed (light).**
+
+| Token | Change |
+|---|---|
+| `--palette-paper`, `-land`, `-line`, `-line-strong`, `-muted`, `-ink-soft`, `-ink`, `-sea`, `-night` | The prototype's paper, land, line, edge, muted, ink-soft, ink, sea and night. |
+| `--palette-pin`, `-pin-soft`, `-sun`, `-sun-soft`, `-leaf`, `-leaf-soft` | The prototype's violet pin, sun and teal leaf, and their soft fills. |
+| `--palette-pin-strong` | The prototype's pin-ink, `#5a22c2`: pin as text and links, and now the danger button. |
+| `--palette-pin-solid` | `#4519a0`, the prototype's "Leave Northwind" when pointed at. `--color-danger-solid` points at pin-strong and `--color-danger-solid-hover` at pin-solid; they pointed the other way, but the prototype draws the button in its pin-ink and darkens it on hover. |
+| `--palette-leaf-strong` | `#0c6e7c`, the mocks' own: leaf is 4.06:1 on leaf-soft, under 4.5:1 for the status's text. |
+| `--palette-sun-strong` | Worked out again and kept, `#7a5200`: 6.1:1 on the new sun-soft. |
+| `--color-bg-backdrop`, `--color-night-band`, `--color-globe-shadow`, `--shadow-color` | Rebuilt from the new night (`21 10 61`) or ink (`26 20 102`), each with its alpha kept. |
+
+**Tokens changed (dark).** `--palette-pin-dark`, `-pin-light`, `-pin-deep`, `-sun-dark`, `-sun-deep`, `-leaf-light`, `-leaf-deep` and `--palette-night-canvas`, `-surface`, `-line`, `-line-strong`, `-muted`, `-fg` take the prototype's dark values. `--palette-night-raised` is the mocks' own step again, `#241a4f`. `--color-danger-border` points at `--palette-pin-dark` in dark: the light pin is 2.6:1 on the dark surface, and the prototype's own pin is the brighter one in dark.
+
+**Tokens added.** `--shadow-5`, a centred dialog's shadow (`0 24px 60px`, the shadow colour at 30%), in place of a raw `rgb(0 0 0 / .3)` in `assets/components.css`, which `check_design_system.py` reported.
+
+**Assets changed.** The seven logo files are drawn in the new ink, paper and pin. The brand sheet prints the new values; sea is "Brand indigo".
+
+**Pages changed.** Colour (the description, and the primitives' notes), Theming (the example value), Elevation (`--shadow-5`), Globe and Day ribbon (prose that named the old colours).
+
 ### 26 November 2026: the mocks transcribed again from the prototype's second pass
 
 Page URLs and existing token names are unchanged. Values are in `tokens/tokens.css`.
@@ -148,6 +172,8 @@ Page URLs and existing token names are unchanged. Values are in `tokens/tokens.c
 | `assets/components.css` | Component tokens (`--btn-*`, `--toast-*`, `--dialog-*`, …) were declared at `:root` only, so a dark sample inside a light page kept the light values: in the side-by-side theme panels a primary button and a toast were drawn in the wrong theme. | They are declared at `:root, [data-theme]`, so they resolve again inside any themed scope. |
 | `components/person-panel`, `components/button` (this system) | Both pages showed the prototype's “Message” button, which no mock has drawn. | Removed from both; the button page shows buttons the mocks draw. |
 | `assets/components.css` | `.app-header--bare` and `.empty--left` are in no mock since the pages before a team and the pages that say one thing were redrawn. | Left in the stylesheet, undocumented; remove them when the mocks' kit drops them. |
+| `assets/components.css` | The centred dialog's shadow was a raw `rgb(0 0 0 / .3)`, and the app's invite dialog copied it. | Token `--shadow-5`; both read it. |
+| `assets/components.css` | The mocks' `.backdrop` is the night at 45% in both themes, as the prototype draws it, written with `--palette-night`; `--color-bg-backdrop`, which the app reads, is the night at 55% in light and black at 65% in dark. | Found while changing the palette and left as it is: it predates this change, and the palette keeps every alpha. |
 | `pages/team/hundreds` | The line under a city's 50th teammate (`.city-section__more`) is styled and described in the mock's note, but no mock draws it. | Documented as a class on City section, without a specimen. |
 | `pages/globe/selected`, `pages/moments/default` | The sport moment “Clásico Nacional” is drawn with a trophy on its moment card and its Moments row, and with the sport kind's own icon on the Globe's panel row. | Not resolved here. A kind has one icon; Iconography lists the kind's own. |
 
@@ -159,15 +185,15 @@ Still open, carried from the mocks: what “Reset link” asks before it acts; w
 
 ## Verification
 
-Run on 26 November 2026:
+Run on 27 November 2026, after the palette change:
 
 | Check | Command | Result |
 |---|---|---|
-| Contrast, both themes | `python .claude/skills/extracting-design-systems/scripts/check_contrast.py docs/design-system/tokens/tokens.css --pairs docs/design-system/tokens/contrast-pairs.json` | 128 passed, 0 failed, 0 unresolved |
+| Contrast, both themes | `python .claude/skills/extracting-design-systems/scripts/check_contrast.py docs/design-system/tokens/tokens.css --pairs docs/design-system/tokens/contrast-pairs.json` | 128 passed, 0 failed, 0 unresolved (64 pairs in each theme; none removed, no minimum lowered) |
 | Structure, sections, tokens-only colour, links | `python .claude/skills/extracting-design-systems/scripts/check_design_system.py docs/design-system` | 59 pages (38 components, 8 patterns), 0 errors, 0 warnings |
-| Mocks, rendering through this system | `python .claude/skills/writing-html-mocks/scripts/check_mocks.py docs/mocks` | 17 screens, 82 mocks, 0 errors, 0 warnings |
+| Mocks, rendering through this system | `python .claude/skills/writing-html-mocks/scripts/check_mocks.py docs/mocks` | 17 screens, 89 mocks, 0 errors, 0 warnings |
 | `tokens.json` | Generated again from `tokens.css` and compared | Identical |
-| Pages in a browser | Headless Chromium at 320, 360, 768 and 1280 px, light and dark | All 59 pages opened at the four widths in both themes: no page error, no failed request, no sideways scroll, no token without a value, and every live contrast ratio on the pages passes. Looked at by eye: Auth, City section, App header and Day ribbon (light), Notice page (dark), Toast (both). |
+| Pages in a browser | Headless Chromium at 320, 360, 768 and 1280 px, light and dark | All 59 pages opened at the four widths in both themes: no page error, no failed request, no sideways scroll, no token without a value, and every live contrast ratio on the pages passes. Looked at by eye in the mocks, light and dark: Join (default and invalid), Sign In, Create Team, Globe (default, selected, hundreds), Team, Moments, Profile & Settings, the invite dialog, “Leave Northwind?”, both invite toasts and the brand sheet. |
 
 To regenerate `tokens.json` after changing a token:
 
