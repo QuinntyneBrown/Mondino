@@ -14,13 +14,29 @@
   }
   <div class="section-head">
     <h2>Everyone, west to east</h2>
-  </div>
-  <div id="team-list">
-    <mo-team-table
-      caption="Everyone, west to east"
-      [rows]="rows()"
-      [address]="addressOf"
-      (teammateChosen)="choose($event)"
+    <mo-segmented
+      label="Filter by status"
+      controls="team-list"
+      [options]="tabs()"
+      [value]="filter()"
+      (valueChange)="chooseFilter($event)"
     />
+  </div>
+  <div id="team-list" role="tabpanel" [attr.aria-labelledby]="'tab-' + filter()">
+    @if (rows().length === 0 && note(); as note) {
+      <mo-list-note
+        [title]="note.title"
+        [text]="note.text"
+        action="Show everyone"
+        (actionChosen)="chooseFilter('all')"
+      />
+    } @else {
+      <mo-team-table
+        [caption]="caption()"
+        [rows]="rows()"
+        [address]="addressOf"
+        (teammateChosen)="choose($event)"
+      />
+    }
   </div>
 </main>

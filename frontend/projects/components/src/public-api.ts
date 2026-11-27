@@ -29,3 +29,5 @@ export * from './lib/app-header/app-header';
 export * from './lib/invite-card/invite-card';
 export * from './lib/team-table/team-table';
 export * from './lib/day-ribbon/day-ribbon';
+export * from './lib/segmented/segmented';
+export * from './lib/list-note/list-note';

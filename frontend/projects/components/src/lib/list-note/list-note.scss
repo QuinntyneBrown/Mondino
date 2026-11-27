@@ -1,0 +1,18 @@
+// Said in a list's place when it holds no row (docs/design-system/components/team-table).
+:host {
+  display: block;
+}
+.list-note {
+  padding: var(--space-12) 0;
+  text-align: center;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.list-note__title {
+  display: block;
+  color: var(--color-fg-default);
+  font: var(--text-h3);
+}
+.list-note .btn {
+  margin-top: var(--space-4);
+}
