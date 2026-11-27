@@ -640,3 +640,46 @@ apply the lessons that fit.
 - *When a screen starts a request, list every spec that reaches the screen* (journey 10, lesson 3): the pins'
   new `sharesStatus` went into the shared fixture, and the three specs that read a pin's name were brought in
   line with the mock's names.
+
+## Journey 12: Show offset and overlap
+
+**What slowed it**
+
+- No screen built so far shows an offset or an overlap: the panel is journey 14's and the Team table
+  journey 17's. Every criterion of L2-016 and L2-017 is read off one of them, so the journey built the rules,
+  the bar and the one function pages call, proved them by direct tests against the cast, and stands at 0
+  until those screens' Playwright specs prove them. Prompts 14 and 17 now say which criteria they raise.
+- The prompt wrote the offset as "7 h behind" and "4 h 30 min ahead"; the mocks, L2-016 and the design say
+  "7h behind" and "4h 30m ahead". The mock won and the prompt was corrected.
+- The design put `Offset`, `DaySpan`, `Overlap` and `OverlapText` in `domain`, but `OverlapBar` in
+  `components` takes them and `components` may read only `api`'s types. They, and `WorkingDay`, were moved
+  to `api`, so the status, the overlap and the bar read one working day rather than three copies.
+- The design still gave the clock as `Date`s; it was brought in line with the numbers journey 11 built.
+- `formatTime`'s 12-hour form keeps ":00" ("4:00 pm") for a local time, while the overlap drops it ("4 pm").
+  The overlap has its own `formatMinuteOfDay` rather than a flag on `formatTime`.
+
+**Lessons**
+
+1. **Before planning a journey, find the screen each criterion is read off.** When none exists yet, build
+   and unit-test the rules, record in the later journeys' prompts which criteria they will prove, and
+   count none as proven.
+2. **Put a type where its lowest reader can import it.** A presentation component that draws a domain
+   value needs that value's type, and any constant it draws by, in `api`.
+3. **Prove a drawing by the mock's own numbers.** The bar's parts are compared with the `--from` and
+   `--span` the mock writes (66.67%, 4.17%, 62.85%), rounded as it rounds them.
+4. **Give the one rule of who gets what a function of its own.** `compareWithViewer` decides the
+   viewer's own pin and a teammate who does not share their status once, for the panel and the Team row.
+
+**Earlier lessons applied**
+
+- *Read the prompt against the mock too* (journey 3, lesson 1): caught "7 h behind"; one line of the prompt
+  changed, before any code.
+- *Bring the docs in line first* (journey 1, lesson 6): the design's clock, the types' library and the
+  overlap's 12-hour form were one commit before any code; the design was touched again for `WorkingDay`'s
+  move and `compareWithViewer`, as the code chose them.
+- *Run the spec before the page exists* (journey 1, lesson 5): each slice's tests ran red first on the
+  missing module, then green.
+- *Measure the initial chunk after each template change* (journey 10, lesson 1): `OverlapBar` is used by
+  no route yet; the initial total stayed 259.64 kB.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit was chained
+  with `&&` on the verify script's `rc`.

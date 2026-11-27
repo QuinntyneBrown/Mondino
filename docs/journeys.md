@@ -83,6 +83,15 @@ screens of later journeys: the panel's "Tuesday 28 Oct" (L2-014 criterion 5; `fo
 and the `status` badge come with journey 14, and the counts and filters that leave out a teammate who
 does not share their status (L2-015 criterion 4) with journeys 15 and 17; the switch that turns sharing
 off, and the clock chosen in Profile & Settings, with journey 23.
+Journey 12 stands at 0 (none of its 14 criteria is yet proven by an acceptance test): the offset, the
+overlap and the overlap bar are built and proven by direct unit tests against the cast at the mocks' "now"
+(every offset `pages/team/default` gives, "7h behind you", "4h 30m ahead", "Same time", a daylight-saving
+change on one side, Tomás's 16:00 to 18:00 and "4 pm–6 pm", Noah's "None today" with 23:00 to 08:00, the bar's
+parts placed as `pages/globe/selected` places them, its text read aloud with start, end and length, nothing
+for the viewer's own pin and no overlap for a teammate who does not share their status), but every criterion
+of L2-016 and L2-017 is read off a teammate's panel or a Team row, which come with journey 14 (L2-016
+criteria 1 to 5, L2-017 criteria 1 to 8) and journey 17 (L2-016 criteria 1 to 4 and 6); their Playwright
+specs raise this number.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
