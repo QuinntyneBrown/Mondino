@@ -31,6 +31,14 @@ describe('BrowserClock', () => {
     expect(TestBed.inject(BrowserClock).minute()).toBe(minute('2025-10-27T14:05:00Z'));
   });
 
+  it('holds one timer, however many local times read it', () => {
+    const clock = TestBed.inject(BrowserClock);
+    for (let pin = 0; pin < 500; pin++) clock.minute();
+    expect(vi.getTimerCount()).toBe(1);
+    vi.advanceTimersByTime(60_000);
+    expect(vi.getTimerCount()).toBe(1);
+  });
+
   it('ticks when the next minute begins, and once a minute after', () => {
     const clock = TestBed.inject(BrowserClock);
     vi.advanceTimersByTime(39_999);
