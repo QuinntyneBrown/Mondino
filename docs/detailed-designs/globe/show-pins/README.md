@@ -132,9 +132,10 @@ decides how they are drawn.
 
 - **`PinLayer`** (`mo-pin-layer`) — draws the placements as HTML over the globe, the mocks'
   `ul.globe__pins`, with one `li.globe__pin` for each placement, holding a `button.pin` and,
-  for a pin with a label, its `span.pin-label`. It takes `placements`, `selectedId`,
-  `selectedGroupKey` and `compact`, and emits `select` with a teammate id and `selectGroup`
-  with a placement. The pins it draws are the list a keyboard and a screen reader reach
+  for a pin with a label, its `PinLabel`. It takes `placements`, `selectedId` and
+  `selectedGroupKey`, and emits `selectPin` with a teammate id and `selectGroup` with a
+  placement (an output cannot be named `select`, a DOM event). Whether the globe is compact
+  is read by the styles, from the globe's box as the `globe` container. The pins it draws are the list a keyboard and a screen reader reach
   (L2-040): a button's accessible name is its pin's `description`, it carries `aria-pressed`,
   which is true while its pin or group is selected, and the visible label beside it is
   `aria-hidden`. Each is a Tab stop; Enter or Space, or a click or a tap, selects it. A pin's
@@ -145,7 +146,11 @@ decides how they are drawn.
   list, so it takes no focus; its teammate is reached through the panel and the Team screen. A
   far placement (`globe__pin--far`) is drawn fainter and without its label until it is
   lifted. The viewer's own pin carries `pin--you`, a new pin `pin--new`.
-- **`GlobeFallback`** — takes the same `[pins]` slot over the still picture.
+- **`PinLabel`** (`mo-pin-label`, block `pin-label`) — the label beside a pin: at rest its
+  local time (`pin-label--right`, `--left`, `--below` or `--above`); lifted
+  (`pin-label--lifted`), the name and city over the local time. It is `aria-hidden`.
+- **`GlobeFallback`** — takes the same `[pins]` slot over the still picture, and emits
+  `widthChange` with its box's width, which `stillViewport` needs.
 
 **In the `mondino` application**
 

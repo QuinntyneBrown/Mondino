@@ -35,7 +35,7 @@ grouper --> placer : Pins alone and group pins with a count
 placer -> labels : placements, width, compact = box under 500 px
 labels --> placer : A side for each pin alone's label, inside the globe\nand clear of other pins, or none (L2-013)
 placer --> page : PinPlacement[], west to east
-page -> layer : placements, selectedId, selected group key, compact
+page -> layer : placements, selectedId, selected group key
 layer -> layer : Reuse the elements that stay, by key; remove the rest
 layer --> actor : No pin covers another; a pin alone keeps its label
 actor -> layer : Select a group pin

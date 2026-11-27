@@ -90,12 +90,18 @@ package "components library" {
     +placements: InputSignal<PinPlacement[]>
     +selectedId: InputSignal<string | null>
     +selectedGroupKey: InputSignal<string | null>
-    +compact: InputSignal<boolean>
-    +select: OutputEmitterRef<string>
+    +selectPin: OutputEmitterRef<string>
     +selectGroup: OutputEmitterRef<PinPlacement>
     +liftedKey: Signal<string | null>
   }
-  class GlobeFallback
+  class PinLabel {
+    +pin: InputSignal<PinView>
+    +side: InputSignal<LabelSide>
+    +lifted: InputSignal<boolean>
+  }
+  class GlobeFallback {
+    +widthChange: OutputEmitterRef<number>
+  }
 }
 
 package "mondino application" {
@@ -147,6 +153,7 @@ GlobeView ..> GlobeScene : projects with
 GlobeView ..> GlobeViewport : emits
 GlobeView ..> PinLayer : [pins] slot
 GlobeFallback ..> PinLayer : [pins] slot
+PinLayer *-- PinLabel
 PinPlacement "1" o-- "1..*" PinView
 GetPinsQueryHandler ..> GetPinsQuery : handles
 GetPinsQueryHandler ..> TeamPinsDto : returns
