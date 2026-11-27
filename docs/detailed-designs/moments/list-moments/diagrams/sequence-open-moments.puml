@@ -17,6 +17,7 @@ skinparam package {
 actor "Teammate" as actor
 box "Frontend — Mondino web app" #E0F2FE
   participant "MomentsPage" as page
+  participant "TeamStore" as store
   participant "HttpTeamApi" as client
   participant "groupMoments" as group
   participant "MomentList" as list
@@ -33,7 +34,8 @@ box "Backend — Mondino Infrastructure" #FFF4E5
 end box
 
 actor -> page : Open /moments
-page -> client : getMoments(teamId, signal)
+note over store : TeamShell's store reads the pins and the moments\nonce for the teammate screens
+store -> client : getMoments(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/moments
 controller -> handler : Send GetMomentsQuery
 handler -> db : Load the team of the current teammate
@@ -43,13 +45,15 @@ finder --> handler : Moments of each city
 handler --> controller : MomentDto list
 alt moments returned
   controller --> client : 200 with the moments
-  client --> page : Moment list
-  page -> group : groupMoments(moments, TeamStore pins, clock.now())
+  client --> store : Moment list
+  store --> page : moments, momentsState Ready
+  page -> group : groupMoments(moments, TeamStore pins, clock.now())\non each minute of the clock
   group -> group : Days ahead of each moment,\nfrom today in the moment's own place (L2-020)
   group -> group : Drop moments before today\nor more than 90 days ahead (L2-029)
   group -> group : 0 days: today; 1 to 7: this week;\n8 to 90: later; each in date order,\nthen west to east by teammate (L2-029)
   group --> page : MomentGroups with a when label on each moment
-  page -> list : groups
+  page -> page : momentWindow(total, start): at most 60 rows (ADR 0021)
+  page -> list : groups in the window
   alt at least one moment
     list --> actor : "Today in" and its city first, then "This week"\nand "Later"; a heading with no moments is absent
   else no upcoming moment
@@ -57,8 +61,9 @@ alt moments returned
   end
 else request refused or failed
   controller --> client : ProblemDetails with a code
-  client --> page : ApiError
-  page --> actor : "Moments didn’t load" and "Try again"
+  client --> store : ApiError
+  store --> page : momentsState Failed
+  page --> actor : "Moments didn’t load" and "Try again"\n(which calls TeamStore.loadMoments())
 end
 actor -> list : Choose a moment
 list --> page : select(moment)

@@ -31,3 +31,5 @@ export * from './lib/pins/city-sections';
 export * from './lib/moments/moment-days';
 export * from './lib/moments/moment-marker';
 export * from './lib/storage/settings-cache';
+export * from './lib/moments/moment-list';
+export * from './lib/moments/moment-window';

@@ -4,17 +4,21 @@ LAYOUT_WITH_LEGEND()
 title Components — List moments
 
 Container_Boundary(web, "Mondino web app") {
-  Component(page, "MomentsPage", "Angular page, lazy route /moments", "Loads the moments, holds the chosen filter")
+  Component(page, "MomentsPage", "Angular page, lazy route /moments", "Groups and windows the moments, holds the chosen filter")
+  Component(store, "TeamStore", "provided by TeamShell", "Holds the team's pins and moments for the teammate screens")
+  Component(window, "momentWindow", "domain moments/", "Keeps at most 60 rows in the page")
   Component(client, "HttpTeamApi", "api library, bound to TEAM_API", "Calls the moments endpoint")
   Component(group, "groupMoments", "domain moments/", "Sorts moments into today, this week and later")
-  Component(when, "whenLabel", "domain moments/", "Says Today, Tomorrow or In 3 days")
+  Component(when, "daysAheadLabel", "domain moments/", "Says Today, Tomorrow or In 3 days")
   Component(chips, "FilterChips", "components library", "Everything and the four kinds, as pressed buttons")
   Component(list, "MomentList", "components library", "Shows the groups and the empty messages")
   Component(card, "MomentRow", "components library", "Shows one moment")
 }
 Container(api, "Mondino API", "ASP.NET Core", "TeamsController and GetMomentsQueryHandler")
 
-Rel(page, client, "Asks for the team's moments")
+Rel(page, store, "Reads the moments and pins")
+Rel(store, client, "Asks for the team's moments")
+Rel(page, window, "Windows the rows with")
 Rel(client, api, "GET /api/teams/{teamId}/moments", "JSON/HTTPS")
 Rel(page, group, "Calls with the filtered moments")
 Rel(group, when, "Labels each moment with")

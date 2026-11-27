@@ -46,12 +46,28 @@ interface Clock {
 }
 
 interface DatedMoment {
-  +moment: Moment
-  +daysAhead: number
+  +key: string
+  +teammateId: string
+  +kind: MomentKind
+  +kindName: string
+  +title: string
+  +detail: string
+  +cityName: string
   +when: string
-  +teammateFirstName: string
-  +teammateInitials: string
-  +teammateColour: string
+  +weekday: string
+  +day: number
+  +month: string
+  +firstName: string
+  +initials: string
+  +colour: string
+  +who: string
+}
+
+interface MomentWindowView {
+  +from: number
+  +to: number
+  +before: number
+  +after: number
 }
 
 interface MomentGroups {
@@ -61,18 +77,21 @@ interface MomentGroups {
 }
 
 class "moments/ (domain)" as moments <<functions>> {
-  +groupMoments(moments: Moment[], pins: Pin[], now: Date): MomentGroups
-  +whenLabel(daysAhead: number): string
-  +daysUntil(date: string, timeZoneId: string, now: Date): number
+  +groupMoments(moments: Moment[], pins: Pin[], now: number): MomentGroups
+  +daysAheadLabel(daysAhead: number): string
+  +daysUntil(date: string, timeZoneId: string, now: number): number
+  +momentWindow(total: number, start: number): MomentWindowView
+  +followWindow(total: number, start: number, first: number, last: number): number
+  +windowGroups(groups: MomentGroups, view: MomentWindowView): MomentGroups
 }
 
 class MomentsPage {
-  -moments: Signal<Moment[]>
   -filter: Signal<MomentKind | 'everything'>
   -groups: Signal<MomentGroups>
-  -state: Signal<'loading' | 'loaded' | 'failed'>
+  -start: Signal<number>
   +chooseFilter(filter): void
-  +openMoment(moment: Moment): void
+  +choose(teammateId: string): void
+  +tryAgain(): void
 }
 
 class FilterChips {
@@ -83,29 +102,40 @@ class FilterChips {
 
 class MomentList {
   +groups: MomentGroups
-  +filtered: boolean
-  +select: Output<Moment>
+  +address: (teammateId) => string
+  +teammateChosen: Output<string>
 }
 
 class MomentRow {
-  +item: DatedMoment
-  +prominent: boolean
-  +select: Output<Moment>
+  +moment: DatedMoment
+  +address: string
+  +chosen: Output<void>
+}
+
+class TodayMoment {
+  +moment: DatedMoment
+  +address: string
+  +chosen: Output<void>
 }
 
 class TeamStore {
-  +pins: Signal<Pin[]>
+  +team: Signal<TeamPins>
+  +moments: Signal<Moment[]>
+  +momentsState: Signal<'Loading' | 'Ready' | 'Failed'>
+  +loadMoments(): Promise<void>
 }
 
 HttpTeamApi ..|> TeamApi
-MomentsPage --> TeamApi : TEAM_API
+TeamStore --> TeamApi : TEAM_API
 MomentsPage --> Clock : CLOCK
 MomentsPage ..> moments : calls groupMoments
 MomentsPage --> FilterChips
 MomentsPage --> MomentList
-MomentsPage --> TeamStore : reads pins for order and avatars
+MomentsPage --> TeamStore : reads moments, pins and momentsState
 MomentList "1" --> "*" MomentRow
+MomentList "1" --> "*" TodayMoment
 moments ..> MomentGroups : returns
+moments ..> MomentWindowView : returns
 MomentGroups "1" --> "*" DatedMoment
 DatedMoment --> Moment
 Moment --> MomentKind

@@ -1,0 +1,84 @@
+// A moment on the Moments screen (docs/design-system/components/moment-row): the date, what and
+// when, and whose, the whole row one link.
+:host {
+  display: block;
+}
+.moment-row {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  gap: var(--space-4);
+  margin: 0 calc(-1 * var(--space-3));
+  padding: var(--space-4) var(--space-3);
+  border-radius: var(--radius-lg);
+  color: var(--color-fg-default);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.moment-row:hover {
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+}
+.moment-row__kind {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-muted);
+}
+.moment-row__title,
+.moment-row__detail {
+  display: block;
+}
+.moment-row__title {
+  margin-top: var(--space-0-5);
+  font: var(--text-h3);
+}
+.moment-row__detail {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.moment-row__who {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-body-sm);
+  white-space: nowrap;
+}
+.date-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: start;
+  padding: var(--space-2) 0;
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+.date-block__weekday {
+  font: var(--text-caption);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+}
+.date-block__day {
+  font: var(--text-h1-sm);
+  line-height: var(--line-height-none);
+}
+.date-block__month {
+  font: var(--text-caption);
+  font-size: var(--font-size-2xs);
+  color: var(--color-fg-muted);
+}
+@media (min-width: 40rem) {
+  .moment-row {
+    grid-template-columns: var(--date-block-width) minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+  }
+  .moment-row__who {
+    grid-column: 3;
+  }
+}

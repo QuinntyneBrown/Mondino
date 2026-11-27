@@ -1,0 +1,72 @@
+// Today's moment on the Moments screen (docs/design-system/components/moment-row): a card in the
+// moment colour, the whole of it one link.
+:host {
+  display: block;
+  margin-top: var(--space-8);
+}
+.today-moment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+  background: var(--color-moment);
+  color: var(--color-fg-on-moment);
+  text-decoration: none;
+  transition: box-shadow var(--duration-fast) var(--ease-standard);
+}
+.today-moment:hover {
+  color: var(--color-fg-on-moment);
+  box-shadow: var(--shadow-3);
+}
+.today-moment__body {
+  flex: 1;
+  min-width: 0;
+}
+.today-moment__kicker,
+.today-moment__title,
+.today-moment__detail {
+  display: block;
+}
+.today-moment__kicker {
+  font: var(--text-label-strong);
+}
+.today-moment__title {
+  margin-top: var(--space-0-5);
+  font: var(--text-h1-sm);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.today-moment__detail {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+}
+.today-moment__go {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--text-label-strong);
+  white-space: nowrap;
+}
+.icon {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (min-width: 40rem) {
+  .today-moment {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-7);
+  }
+  .today-moment__title {
+    font: var(--text-h1);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+}

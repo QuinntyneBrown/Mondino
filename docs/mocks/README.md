@@ -122,6 +122,7 @@ kind's icon, darker pin text and control edges, all four kinds of moment on. Wha
 | The globe calculates the night side from the clock at render time. | The default globe shows the night side at 14:05 UTC on 27 October 2025. | A fixed instant keeps the globe, local times and working-hour counts consistent across captures. |
 | Moments on the same date keep the prototype’s sample-team order. | On 1 November, Mexico City comes first, followed by Stockholm and Bengaluru. | Both the Globe panel and Moments order same-date entries from west to east, as required by the L2 acceptance criteria. |
 | Luca, in Milan like Sofia, has no moment, and only Sofia has “Monza tickets on sale”. | Luca has it too: on Team his “Coming up” is “Monza tickets on sale · 12 Nov”, and Moments lists it once for each of them, Luca first. | A moment belongs to every teammate where it happens, and appears once for each, naming them (L2-020). |
+| On Moments, the Clásico Nacional’s kind icon is an image named “Sport”, beside the word “Sport”. | Hidden from assistive technology, as every other row’s icon. | The kind is said once, in words; an icon beside its own word is decorative (L2-030). |
 | Join colours each nameless pin in its teammate’s colour. | Every nameless pin on Join is in the pin colour. | The initials beside the team’s name carry their teammates’ colours, so a coloured pin would tie a set of initials to a city; the initials are not tied to any pin (L2-001). |
 | The globe fetches its land from a CDN and is drawn live with d3-geo. | A still SVG of the same cartoon globe, drawn into each mock. | Mocks open from disk with no network. |
 | Fonts from Google Fonts. | Gabarito and Inter bundled in the design system. | Fonts are self-hosted, never from a CDN. |
@@ -191,7 +192,8 @@ still picture keeps its pins.
    clipboard. "Message" stays out: Mondino has no chat.
 7. **A team of hundreds.** Decided for 500: group pins on the Globe, the day ribbon as a bar
    chart past 40 teammates, and Team with a search and a section per city. Moments for a team
-   of 500 is not drawn (L2-047).
+   of 500 looks as `moments/default` draws it: the page holds a window of its rows as the list
+   is scrolled, which the eye does not see, so nothing more is drawn (L2-047, ADR 0021).
 8. **A count on a moment marker.** Decided: two or more moments this week show their number.
 9. **Create Team's postal code lookup.** Decided (journey 5): Create Team looks its postal code
    up as Join does and shows Join's words, `create-team/locating`, `found`, `not-found` and

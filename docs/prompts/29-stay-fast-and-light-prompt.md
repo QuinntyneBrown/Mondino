@@ -96,7 +96,8 @@ Builds on: journeys 8 to 21.
      the 95th percentile.
      Team's part of L2-047 criterion 5 is proven by journey 18 (`e2e/specs/team-large.spec.ts`: scrolled to
      the bottom and searched, the page holds the open cities' rows only, at most 50 each); Moments' part
-     waits for journey 21, and the criterion is counted when both are proven.
+     is proven by journey 21 (`e2e/specs/moments-large.spec.ts`: 1,502 moments, at most 60 in the page
+     from top to bottom and back, ADR 0021), so the criterion is counted.
   5. Release: one shared clock, requests cancelled on leaving a screen, nothing left from an earlier visit to
      the Globe; nothing drawn while the tab is hidden.
   6. Keep the heap checks current (8 simulated hours; 20 enters and leaves) (written, not run).

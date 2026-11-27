@@ -1,0 +1,20 @@
+<div class="chips" role="group" aria-label="Filter by kind">
+  <button
+    class="chip"
+    type="button"
+    [attr.aria-pressed]="value() === 'everything'"
+    (click)="choose('everything')"
+  >
+    Everything
+  </button>
+  @for (each of kinds; track each.kind) {
+    <button
+      class="chip"
+      type="button"
+      [attr.aria-pressed]="value() === each.kind"
+      (click)="choose(each.kind)"
+    >
+      <svg mo-moment-icon decorative size="xs" [kind]="each.kind"></svg>{{ each.word }}
+    </button>
+  }
+</div>

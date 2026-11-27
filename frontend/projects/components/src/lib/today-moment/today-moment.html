@@ -1,0 +1,14 @@
+<a class="today-moment" [attr.href]="address()" (click)="choose($event)">
+  <mo-emblem size="lg" [kind]="moment().kind" />
+  <span class="today-moment__body"
+    ><span class="today-moment__kicker">{{ kicker() }}</span
+    ><span class="today-moment__title">{{ moment().title }}</span
+    ><span class="today-moment__detail">{{ detail() }}</span></span
+  >
+  <span class="today-moment__go"
+    >On the globe
+    <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+      <path d="M7 7h10v10" />
+      <path d="M7 17 17 7" /></svg
+  ></span>
+</a>

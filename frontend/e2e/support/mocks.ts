@@ -42,13 +42,17 @@ function textOf(markup: string, className: string): string | null {
     .trim();
 }
 
-/** The shapes of an icon's markup, each as its tag and its attributes in order of name. */
-function shapesOf(svg: string): string[] {
+/**
+ * The shapes of an icon's markup, each as its tag and its attributes in order of name; Angular's
+ * own attributes in a screen's markup are left out.
+ */
+export function shapesOf(svg: string): string[] {
   const inner = /<svg[^>]*>([\s\S]*?)<\/svg>/.exec(svg)?.[1] ?? '';
   return [...inner.matchAll(/<(\w+)([^>]*?)\/?>/g)].map(([, tag, attributes]) =>
     [
       tag,
       ...[...attributes.matchAll(/([\w-]+)="([^"]*)"/g)]
+        .filter(([, name]) => !name.startsWith('_ng'))
         .map(([, name, value]) => `${name}=${value}`)
         .sort(),
     ].join(' '),
@@ -317,4 +321,87 @@ export function mockLiftedLabel(
     ).replace(/\s+/g, ''),
     momentIcon: moment ? shapesOf(moment[1]) : [],
   };
+}
+
+/** A moment of a mock's Moments screen, part by part, as a spec compares it with the screen's. */
+export interface MockMomentRow {
+  /** "Fri 31 Oct". */
+  date: string;
+  /** The kind and when: "Local event · In 4 days". */
+  kind: string;
+  /** The shapes of the kind's icon. */
+  icon: string[];
+  title: string;
+  detail: string;
+  /** "Jordan · Austin". */
+  who: string;
+  initials: string;
+  /** The avatar's colour class: "hue-12". */
+  hue: string;
+}
+
+/** Today's moment card of a mock's Moments screen, part by part; or null. */
+export interface MockTodayMoment {
+  kicker: string;
+  title: string;
+  detail: string;
+  go: string;
+  icon: string[];
+}
+
+/** The headings of a mock's moment groups, in order: "This week", "Later". */
+export function mockMomentGroups(path: string): string[] {
+  return [...mockMarkup(path).matchAll(/<h2 class="moment-group__title"[^>]*>([^<]*)<\/h2>/g)].map(
+    ([, title]) => title,
+  );
+}
+
+/** Every moment row of a mock's Moments screen, in order. */
+export function mockMomentRows(path: string): MockMomentRow[] {
+  return [...mockMarkup(path).matchAll(/<a class="moment-row"[^>]*>([\s\S]*?)<\/a>/g)].map(
+    ([, row]) => {
+      const kind = /<span class="moment-row__kind">([\s\S]*?)<\/span>/.exec(row)?.[1] ?? '';
+      const avatar = /<span class="avatar avatar--xs (hue-\d+)"[^>]*>([^<]*)<\/span>/.exec(row);
+      return {
+        date: [
+          textOf(row, 'date-block__weekday'),
+          textOf(row, 'date-block__day'),
+          textOf(row, 'date-block__month'),
+        ].join(' '),
+        kind: kind.replace(/<svg[\s\S]*?<\/svg>/g, '').trim(),
+        icon: shapesOf(kind),
+        title: textOf(row, 'moment-row__title') ?? '',
+        detail: textOf(row, 'moment-row__detail') ?? '',
+        who: /<span class="moment-row__who">[\s\S]*?<\/span>([^<]*)<\/span>/.exec(row)?.[1] ?? '',
+        initials: avatar?.[2] ?? '',
+        hue: avatar?.[1] ?? '',
+      };
+    },
+  );
+}
+
+/** The mock's card for today's moment; or null when it draws none. */
+export function mockTodayMoment(path: string): MockTodayMoment | null {
+  const card = /<a class="today-moment"[^>]*>([\s\S]*?)<\/a>/.exec(mockMarkup(path))?.[1];
+  if (!card) return null;
+  return {
+    kicker: textOf(card, 'today-moment__kicker') ?? '',
+    title: textOf(card, 'today-moment__title') ?? '',
+    detail: textOf(card, 'today-moment__detail') ?? '',
+    go: textOf(card, 'today-moment__go') ?? '',
+    icon: shapesOf(card),
+  };
+}
+
+/** The filters of a mock's Moments screen: each one's name, whether it is pressed, its icon. */
+export function mockFilterChips(path: string): { name: string; pressed: string; icon: string[] }[] {
+  return [
+    ...mockMarkup(path).matchAll(
+      /<button class="chip" type="button" aria-pressed="(\w+)">([\s\S]*?)<\/button>/g,
+    ),
+  ].map(([, pressed, inner]) => ({
+    name: inner.replace(/<svg[\s\S]*?<\/svg>/g, '').trim(),
+    pressed,
+    icon: shapesOf(inner),
+  }));
 }

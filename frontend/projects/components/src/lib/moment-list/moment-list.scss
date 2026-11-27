@@ -1,0 +1,20 @@
+// The Moments screen's groups (docs/design-system/components/moment-row).
+:host {
+  display: block;
+}
+.moment-group {
+  margin-top: var(--space-10);
+}
+.moment-group__title {
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+  font: var(--text-h3);
+}
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+li + li {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
