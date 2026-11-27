@@ -20,6 +20,8 @@ export class InviteDialogPage {
   readonly controls: Locator;
   readonly fields: Locator;
   readonly backdrop: Locator;
+  /** Whatever in the dialog has focus: none when focus has left it. */
+  readonly focused: Locator;
 
   constructor(readonly page: Page) {
     this.dialog = page.getByRole('dialog');
@@ -35,6 +37,7 @@ export class InviteDialogPage {
     this.controls = this.dialog.locator('button, a[href], input, select, textarea');
     this.fields = this.dialog.locator('input, select, textarea');
     this.backdrop = page.locator('.backdrop');
+    this.focused = this.dialog.locator(':focus');
   }
 
   /**

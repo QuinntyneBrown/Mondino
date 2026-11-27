@@ -57,4 +57,31 @@ test.describe('Invite teammates', () => {
     await expect(inviteDialog.copyLink).toBeFocused();
     expect(await inviteDialog.copies()).toEqual([]);
   });
+
+  test('focus stays inside the dialog, and Escape or Close return it to “Invite teammate”', async ({
+    globePage,
+    inviteDialog,
+    page,
+  }) => {
+    await globePage.open();
+    await globePage.inviteTeammate.click();
+    await expect(inviteDialog.copyLink).toBeFocused();
+
+    // Tab goes round the dialog and never leaves it
+    for (let step = 0; step < 4; step++) {
+      await page.keyboard.press('Tab');
+      await expect(inviteDialog.focused).toHaveCount(1);
+    }
+
+    await page.keyboard.press('Escape');
+    await expect(inviteDialog.dialog).toHaveCount(0);
+    await expect(globePage.inviteTeammate).toBeFocused();
+
+    await globePage.inviteTeammate.press('Enter');
+    await expect(inviteDialog.copyLink).toBeFocused();
+    await inviteDialog.close.click();
+    await expect(inviteDialog.dialog).toHaveCount(0);
+    await expect(globePage.inviteTeammate).toBeFocused();
+    expect(await inviteDialog.copies()).toEqual([]);
+  });
 });
