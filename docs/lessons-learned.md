@@ -1705,6 +1705,13 @@ stalled reads sharing one call per city), 8 (the Globe's placeholders and polite
 9 (the Globe's error with "Try again" and nothing of the team); L2-050 criterion 4 (Sign In, Team, Moments
 and Profile & Settings call no outside source). No other journey's count changes. Total: 86.
 
+## Fix: flaky Sign In double-press spec
+
+- *Wait for a redrawn control before acting on it again*: Sign In draws its button again as "Sending link…"
+  after the first press, and the spec pressed a second time at once, so on a slow runner the forced click
+  landed on the button being taken away ("Element is not visible"). The spec now waits for the disabled
+  button before the second press; journey 27 then made the two presses one double-click.
+
 ## Journey 27: Adapt to every width
 
 **What slowed it**
