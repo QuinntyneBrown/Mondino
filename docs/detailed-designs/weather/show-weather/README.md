@@ -37,10 +37,11 @@ weather is available, unavailable or not shared, so the web app can say which.
   held in °C only; conversion to °F is a matter of display.
 - **`WeatherCondition`** — enumeration of the eight conditions: `Clear`, `PartlyCloudy`,
   `Cloudy`, `Rain`, `Showers`, `Storm`, `Fog`, `Wind`.
-- **`TeammateSettings`** — value object holding `TemperatureUnit` and `ShareWeather`. Its
-  `DefaultsFor(countryCode)` gives a new teammate `Fahrenheit` for the United States and
-  `Celsius` elsewhere (L2-019), with `ShareWeather` on. `JoinTeamCommandHandler` calls it when a
-  teammate joins.
+- **`Teammate`** — entity. Its `SharesWeather` records the teammate's choice for "Share my
+  local weather", on to begin with, beside `SharesStatus`. The switch that changes it comes with
+  Profile & Settings (`choose-display-and-sharing`), which moves both into `TeammateSettings`
+  beside the unit and the clock. Until then no unit is stored: the browser starts the unit from
+  the country (`defaultTemperatureUnit`), as it starts the clock (ADR 0015).
 
 ### Backend — `Mondino.Application`
 
@@ -48,14 +49,17 @@ weather is available, unavailable or not shared, so the web app can say which.
   `GetCurrentAsync(Position position, CancellationToken ct): Task<Weather?>`. It takes a
   position and no teammate. It returns `null` when no weather can be given.
 - **`GetPinsQueryHandler`** — MediatR handler for `GetPinsQuery`. It loads the team's teammates,
-  collects the distinct cities among those whose weather the viewer may see, and calls
-  `IWeatherSource` once per city, in parallel. It then builds each `PinDto` and returns them in
-  the `TeamPinsDto`. A teammate whose `ShareWeather` is off gets `Weather` `null` and
+  collects the distinct cities among those whose weather the viewer may see, by their position
+  rounded to two decimal places, and calls `IWeatherSource` once per city, in parallel. It then builds each `PinDto` and returns them in
+  the `TeamPinsDto`. A teammate whose `SharesWeather` is off gets `Weather` `null` and
   `WeatherState` `NotShared`, except on the viewer's own pin. A city whose weather is `null`
   gives `Weather` `null`, `WeatherState` `Unavailable` and the rest of the pin unchanged; the
   handler does not fail. Every other pin has its `Weather` and `WeatherState` `Available`.
 - **`WeatherDto`** — `TemperatureC`, `Condition` and `ObservedAt`, carried as `PinDto.Weather`
-  and in `PostalCodeResultDto`. It carries no unit and no temperature in °F.
+  and as `PostalCodeResultDto.Weather`, the weather at the city a postal code was found in
+  (`LookUpPostalCodeQueryHandler` asks `IWeatherSource` for it; none when it has none). It
+  carries no unit and no temperature in °F. `Condition` travels as the web app's word for it:
+  `clear`, `partly-cloudy`, `cloudy`, `rain`, `showers`, `storm`, `fog` or `wind`.
 - **`WeatherState`** — enumeration carried as `PinDto.WeatherState`: `Available`, `Unavailable`
   or `NotShared`. `PinDto.Weather` is `null` unless the state is `Available`.
 - **`WeatherConditionMapper`** — service with
@@ -78,8 +82,8 @@ weather is available, unavailable or not shared, so the web app can say which.
 | any other | — | `Cloudy` |
 
   The WMO codes hold no code for wind. When the code maps to `Clear`, `PartlyCloudy` or `Cloudy`
-  and `windSpeedKmh` is at or above the wind threshold, the mapper returns `Wind`. The wind
-  threshold is `<TO SUPPLY>`.
+  and `windSpeedKmh` is at or above the wind threshold, 39 km/h (Beaufort force 6, a strong
+  breeze; ADR 0015), the mapper returns `Wind`.
 
 ### Backend — `Mondino.Infrastructure`
 
@@ -88,16 +92,19 @@ weather is available, unavailable or not shared, so the web app can say which.
   longitude from Open-Meteo's forecast endpoint. The latitude and longitude are the city's
   position rounded to two decimal places, and the request carries nothing else about a
   teammate. It passes the weather code and wind speed to `WeatherConditionMapper` and returns a
-  `Weather`. The base address is a documented setting of the deployed system.
+  `Weather`, observed at the answer's `current.time` (GMT). No answer, a status other than 200 or
+  an answer without a temperature or a code is `null`. Its settings are
+  `WeatherSource:BaseAddress` and, for a commercial subscription, `WeatherSource:ApiKey`, sent as
+  `apikey` (ADR 0015). Its client logs nothing.
 - **`CachedWeatherSource`** — decorator implementing `IWeatherSource` over
   `OpenMeteoWeatherSource`; it is the implementation registered for the interface. Its key is
   the position rounded to two decimal places, so two teammates in one city share one entry and
   one call (L2-018). An entry younger than 15 minutes is returned without calling the source.
   Age is measured with `TimeProvider`. Concurrent requests for one key share one call. A call
-  runs under a 5 second timeout and a circuit breaker. When a call fails or times out, the
-  decorator returns the entry it holds if that entry is less than 3 hours old, and `null`
-  otherwise (L2-049). Entries are dropped at 3 hours, so the cache holds at most one entry per
-  city with a teammate.
+  runs under a 5 second timeout; a call that fails or times out gives `null`, and is not kept.
+  At most 10,000 entries are held, one per city with a teammate. The circuit breaker, and
+  returning an entry up to 3 hours old while the source fails (L2-049), come with
+  `survive-source-failure` (journey 26), which keeps entries 3 hours for it.
 
 ### Backend — `Mondino.Api`
 
@@ -112,6 +119,9 @@ weather is available, unavailable or not shared, so the web app can say which.
 - **`Pin`** — its `weather` is a `Weather` or `null`, and its `weatherState` a `WeatherState`.
 - **`WeatherState`** — `'Available' | 'Unavailable' | 'NotShared'`, the names `PinDto.WeatherState` carries.
 - **`TemperatureUnit`** — `'celsius' | 'fahrenheit'`, in the viewer's `Settings`.
+- **`PostalCodeResult`** — its `weather` is a `Weather` or `null`.
+- **`PinView`** — its `weather` is a `PinWeather` (`degrees`, `condition`, `word`, `night`) or
+  `null` when the pin's weather is not `Available`.
 
 ### Frontend — `domain` library, `pins/`
 
@@ -123,6 +133,9 @@ weather is available, unavailable or not shared, so the web app can say which.
   `formatTemperature` does and appends the degree sign alone: 13 °C gives "13°" and, for
   `fahrenheit`, "55°". This is the form a pin's label, a pin's accessible name and a Team row
   show.
+- **`defaultTemperatureUnit(country): TemperatureUnit`** — pure function: `fahrenheit` for the
+  United States, `celsius` elsewhere (L2-019), until Profile & Settings stores a choice.
+- **`weatherWord(condition): string`** — pure function: the condition's word, "Partly cloudy".
 - **`weatherLabel(condition, cityName): string`** — pure function. It gives the condition's
   word with the city ("Foggy in Milan"). The city's name is data and is rendered as text. The
   words are the mocks': "Clear", "Partly cloudy", "Cloudy", "Rainy", "Showers", "Stormy",
@@ -135,18 +148,25 @@ weather is available, unavailable or not shared, so the web app can say which.
 
 - **`GlobePage`**, **`TeamPage`** and **`JoinPage`** — pages in the `mondino` application. Each
   derives, in a `computed`, the temperature text from `pin.weather` and the viewer's
-  `TemperatureUnit`, the label, and the night flag from the pin's local hour. The viewer's
+  `TemperatureUnit`, the label, and the night flag from the pin's local hour. `GlobePage` does it
+  through `pinViews`, which gives each `PinView` its `PinWeather` and puts the word and the
+  degrees in the pin's accessible name after the status ("Partly cloudy 22°"). `JoinPage` and
+  `CreateTeamPage` give `LookupMessage` the found line's weather, `foundWeather(weather, unit)`:
+  "13° and foggy right now.", in the unit of the country chosen in the form, the word in lower
+  case; nothing when the lookup has no weather. The viewer's
   settings are a signal held by `SettingsCache` and updated when `ProfilePage` saves, so a saved
   change of unit reaches every temperature on every screen (L2-019).
-- **`WeatherIcon`** (`mo-weather-icon`) — presentation component with inputs `condition` and
-  `night`. It draws one bundled SVG per condition, with a night form for `clear` and
+- **`WeatherIcon`** (`svg[mo-weather-icon]`, the mocks' `svg.icon`) — presentation component
+  with inputs `condition` and `night`. It draws one bundled SVG per condition, with a night form for `clear` and
   `partly-cloudy`; `night` has no effect on the other six. The icon is exposed as an image whose
-  accessible name is the condition's word (L2-018). Icons are bundled with the app and never
-  loaded from a CDN.
+  accessible name is the condition's word (L2-018), unless it is `decorative`: beside its word,
+  or in a pin's label, whose pin names the word, it is hidden, as the mocks draw it. Icons are
+  bundled with the app and never loaded from a CDN.
 - **`PinLabel`**, **`TeammatePanel`** and **`TeamTable`** — presentation components. Each takes
   the temperature text, the condition and the night flag as inputs and sets the temperature in
-  tabular figures. A pin's label shows the degrees beside the local time and, when the pin is
-  lifted, the icon and the condition's word as well. The panel shows the icon, the temperature
+  tabular figures. A pin's label shows the icon and the degrees beside the local time, and,
+  when the pin is lifted, the condition's word as well (`pages/globe/default`,
+  `pages/globe/selected`). The label placer allows a label with weather the width it is drawn at. The panel shows the icon, the temperature
   with its unit and the label. A Team row shows the icon and the degrees.
 
 When `pin.weather` is `null` no temperature and no condition is shown, and a pin's label and
@@ -166,6 +186,9 @@ alone. The teammate is named by `firstName(name)` from `pins/`, the first word o
 it is data and is rendered as text. What the panel says for a teammate who shares their
 status and not their weather is `<TO SUPPLY>`: the mocks draw only the teammate who shares
 neither.
+
+Open questions: where Open-Meteo's attribution (CC BY 4.0) is shown; no mock draws it
+(ADR 0015).
 
 ## Requirements
 
