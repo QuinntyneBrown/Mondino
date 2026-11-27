@@ -15,6 +15,7 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0006](0006-postal-code-source.md) | The postal code source is GeoNames, and the city comes from Mondino's own list | Accepted |
 | [0007](0007-join-form-runtime-in-the-initial-bundle.md) | Join's form brings Angular's runtime for outputs and render effects into the initial bundle | Accepted |
 | [0004](0004-azure-hosting.md) | Hosted on one Azure App Service, deployed on every commit to main | Accepted |
+| [0008](0008-session-and-cross-site-requests.md) | The session is a year-long sliding cookie, and the open requests refuse other sites | Accepted |
 
 Not decided yet, each by the journey that first needs it: the globe's renderer and asset format
 (journey 8), the providers of the calendars (journey 19) and the sender of sign-in emails

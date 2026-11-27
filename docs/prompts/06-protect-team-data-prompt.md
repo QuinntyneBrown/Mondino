@@ -81,7 +81,8 @@ Builds on: journeys 1 to 4.
   mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- Session lifetime and CSRF for the join request (`<TO SUPPLY>`), decided with journey 4 in one ADR.
+- Session lifetime and CSRF for the pre-session requests were decided by journey 4 in
+  [ADR 0008](../adr/0008-session-and-cross-site-requests.md); apply it, and record anything it leaves open.
 
 ## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.

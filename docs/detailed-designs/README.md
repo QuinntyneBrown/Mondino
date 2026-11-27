@@ -204,9 +204,7 @@ The designs mark these as `<TO SUPPLY>`:
   for a name over 60 characters, and whether the lookup's rate limit window lengthens to match
   the mock's countdown ("9:42").
 - Which emblems Mondino holds the right to use.
-- Protection against cross-site request forgery for the requests made before a session
-  exists: joining, making a team, asking for a sign-in link and opening one.
 - What becomes of a team when its last teammate leaves.
-- Numbers the requirements do not give: the session's lifetime, the circuit breaker's threshold,
+- Numbers the requirements do not give: the circuit breaker's threshold,
   the globe's turning rate and detail steps, the rate limit on a teammate's own postal code
   lookup, and the limits on the city search and on reading the countries.

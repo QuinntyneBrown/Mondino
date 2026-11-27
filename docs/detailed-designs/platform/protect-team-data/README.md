@@ -39,7 +39,9 @@ behind them.
   `Secure` and `SameSite=Lax`. The cookie's protected payload names the teammate id and the
   team id and nothing else. On each request the handler reads the cookie and confirms through
   `IAppDbContext` that the teammate still exists in that team. A teammate who has left no
-  longer exists, so an old session is refused with 401. The session's lifetime is `<TO SUPPLY>`.
+  longer exists, so an old session is refused with 401. The cookie is `__Host-mondino-session`;
+  it lasts 365 days and slides
+  ([ADR 0008](../../../adr/0008-session-and-cross-site-requests.md)).
 - **`ICurrentTeammate`** — interface in `Mondino.Application` with `TeammateId`, `TeamId` and
   `IsAuthenticated`. **`CurrentTeammate`** in `Mondino.Infrastructure` implements it from the
   authenticated principal. Handlers read the current teammate from it and never from a
@@ -53,7 +55,9 @@ behind them.
   antiforgery token: the API issues it in a script-readable cookie, and Angular's `HttpClient`
   returns it in a request header. The open endpoints carry no session. How the requests that
   change state before a session exists (joining, making a team, asking for a sign-in link and
-  opening one) are protected is `<TO SUPPLY>`.
+  opening one) are protected is decided in ADR 0008: each carries `[SameSiteOnly]`, which
+  refuses a request from another site by its `Sec-Fetch-Site` or `Origin` with 403 and the code
+  `cross_site_request`.
 
 **Team scope (L2-043, L2-007).**
 

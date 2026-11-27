@@ -110,8 +110,8 @@ source.
   that was reset (`invite-teammates`) receives the same refusal as one that was never issued.
   When `ICurrentTeammate` reports a session on this team, the handler returns an `InviteDto`
   with `AlreadyJoined` set and no positions or avatars. From `join-team` on, when the team has `Team.MaxTeammates`
-  (500) teammates, it returns an `InviteDto` with `Full` set, the team's name and no count,
-  positions or avatars. Otherwise it builds the full `InviteDto`: the positions ordered by
+  (500) teammates, it returns an `InviteDto` with `Full` set, the team's name, a count of 0 and
+  no positions or avatars. Otherwise it builds the full `InviteDto`: the positions ordered by
   latitude and longitude, so their order says nothing of when anyone joined.
 - **`InviteDto`** — `TeamName`, `TeammateCount`, `Positions`, `Avatars`, `AlreadyJoined`, `Full`
   and `Countries`. `Positions` holds one `Position` for each teammate: the position of the
