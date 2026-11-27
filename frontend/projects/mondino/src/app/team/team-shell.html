@@ -24,7 +24,12 @@
 <div class="toast-region" role="status" aria-live="polite">
   @if (toaster.current(); as toast) {
     @if (toast.tone === 'success') {
-      <mo-toast [strong]="toast.strong" [text]="toast.text" (dismiss)="toaster.dismiss()" />
+      <mo-toast
+        [strong]="toast.strong"
+        [text]="toast.text"
+        (dismiss)="toaster.dismiss()"
+        (held)="$event ? toaster.hold() : toaster.release()"
+      />
     }
   }
 </div>

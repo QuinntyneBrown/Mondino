@@ -8,6 +8,7 @@ import { mockMarkup } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
 
 const mock = 'dialogs/invite/default.html';
+const link = 'http://127.0.0.1:4310/join/northwind-7Kq2';
 
 /** The text of the first element in the mock that opens with `opening`, its tags taken out. */
 function mockText(opening: RegExp): string {
@@ -83,5 +84,41 @@ test.describe('Invite teammates', () => {
     await expect(inviteDialog.dialog).toHaveCount(0);
     await expect(globePage.inviteTeammate).toBeFocused();
     expect(await inviteDialog.copies()).toEqual([]);
+  });
+
+  test('“Copy link” copies the link, closes the dialog, and a toast says so for 4 seconds, held while pointed at or focused', async ({
+    globePage,
+    inviteDialog,
+    page,
+  }) => {
+    await globePage.open();
+    await globePage.inviteTeammate.click();
+    await inviteDialog.copyLink.click();
+
+    await expect(inviteDialog.dialog).toHaveCount(0);
+    await expect(globePage.inviteTeammate).toBeFocused();
+    await expect(globePage.statusToast).toHaveText(
+      'Invite link copied. Paste it wherever your team talks.',
+    );
+    await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now())));
+    expect(await inviteDialog.copies()).toEqual([link]);
+    expect(await globePage.clipboardText()).toBe(link);
+
+    // Pointed at, its time stands still; let go, the rest of the 4 seconds runs
+    await page.clock.runFor(1_000);
+    await globePage.toast.hover();
+    await page.clock.runFor(10_000);
+    await expect(globePage.toast).toBeVisible();
+    await page.mouse.move(0, 0);
+    await page.clock.runFor(2_900);
+    await expect(globePage.toast).toBeVisible();
+
+    // Focused, too
+    await globePage.dismiss.focus();
+    await page.clock.runFor(10_000);
+    await expect(globePage.toast).toBeVisible();
+    await globePage.inviteTeammate.focus();
+    await page.clock.runFor(100);
+    await expect(globePage.toast).toHaveCount(0);
   });
 });
