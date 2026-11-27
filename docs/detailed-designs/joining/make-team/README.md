@@ -30,7 +30,9 @@ a pin at the city, never at the postal code. The email is where sign-in links ar
 (`sign-in`) and is never shown to a teammate. Mondino has no roles: the maker can do nothing
 another teammate cannot.
 
-The endpoints behind the screen are open to anyone and are rate limited.
+The endpoints behind the screen are open to anyone. The postal code lookup and the city search
+are rate limited; making the team has no rate limit
+([ADR 0016](../../../adr/0016-no-limit-on-making-a-team.md)).
 
 ## Description
 
@@ -55,9 +57,9 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
     Join's words: `create-team/locating`, `found`, `not-found` and `lookup-unavailable`. The
     button keeps reading "Create team" and waits, disabled and `aria-busy`, while the lookup
     runs. A found city puts the pin "You · Milan" on the globe.
-  - `RateLimited` shows Join's alert, "Too many tries from this device." and "You can try again
-    in" the time left, and disables the button until it reaches zero
-    (`create-team/rate-limited`).
+  - `RateLimited`, the lookup's state when a postal code lookup is refused with 429, shows
+    Join's alert, "Too many tries from this device." and "You can try again in" the time left,
+    and disables the button until it reaches zero (`create-team/rate-limited`).
   - `Creating` disables the button, marks it `aria-busy` and reads "Creating your team…".
   - `Failed` shows an alert with the team's name rendered as text, "We couldn’t create
     Northwind. Nothing was saved — try again.", and the button reads "Try again". What was
@@ -86,9 +88,11 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
   - `create()` sets `Creating` and calls `TeamCreationApi.createTeam`. A retry sends the same
     `createRequestId`, so a request whose response was lost does not make a second team.
   - A failure maps the `code` of the `ApiError`: `postal_code_not_found` and
-    `postal_code_unavailable` set the `lookupState`, `rate_limited` sets `RateLimited` with the
-    time its `Retry-After` gives and counts down from the injected `CLOCK`, and any other
-    failure sets `Failed`.
+    `postal_code_unavailable` set the `lookupState`, and any other failure sets `Failed`,
+    `rate_limited` among them: making a team is never refused for coming too often (ADR 0016),
+    so a 429 from it is an ordinary failure (L2-053 criterion 12). Only the lookup's
+    `rate_limited` sets `RateLimited`, with the time its `Retry-After` gives, counted down from
+    the injected `CLOCK`.
 - **`CreateTeamState`** — feature-local union of `Idle`, `Creating`, `Created` and `Failed`.
 - **`TeamCreationApi` / `TEAM_CREATION_API`, `HttpTeamCreationApi`** — contract, injection
   token and HTTP client in `@mondino/api`: `lookUpPostalCode(countryCode, postalCode,
@@ -119,14 +123,15 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 
 **Backend**
 
-- **`TeamCreationController`** — three actions, each marked as open to anyone, each with a
-  policy of `RateLimitPolicies` (L2-045), each sending one MediatR request.
+- **`TeamCreationController`** — three actions, each marked as open to anyone and each sending
+  one MediatR request. The lookup and the city search each have a policy of
+  `RateLimitPolicies` (L2-045); making the team has none (ADR 0016).
 
   | Action | Request | Policy |
   |--------|---------|--------|
   | `POST /api/postal-code-lookups` | `LookUpPostalCodeQuery` with no invite token | `lookup`, 10 a minute for one client, shared with Join's |
   | `POST /api/city-searches` | `SearchCitiesQuery` with no invite token | `city-search`, 30 a minute for one client, shared with Join's |
-  | `POST /api/teams` | `CreateTeamCommand` | `create-team`, 5 teams an hour for one client |
+  | `POST /api/teams` | `CreateTeamCommand` | none: never refused for coming too often (ADR 0016) |
 
   `POST /api/teams` carries `[SameSiteOnly]` (ADR 0008), signs the returned teammate in through
   `TeammateSessionHandler` and answers 201 for a new team and 200 for a repeated request.
@@ -181,8 +186,8 @@ sources, the Postal code source and Open-Meteo. The browser calls only the Mondi
 | Postal code in the wrong form, or unknown to the source | 422 | `postal_code_not_found` | Join's message, naming the postal code, the country and the form |
 | Postal code source timed out or circuit open | 503 | `postal_code_unavailable` | Join's "Your city" search in the postal code's place |
 | A value outside its limits | 400 | `validation_failed` | "We couldn’t create Northwind. Nothing was saved — try again." |
-| Over the limit for one client | 429 | `rate_limited` | Join's countdown: "Too many tries from this device. You can try again in 9:42." (`create-team/rate-limited`) |
-| Network failure or any other error | — | — | The same alert, with "Try again" |
+| A postal code lookup over the limit for one client | 429 | `rate_limited` | Join's countdown: "Too many tries from this device. You can try again in 9:42." (`create-team/rate-limited`) |
+| Network failure or any other error, a 429 from making the team among them | — | — | The same alert, with "Try again" |
 
 In each case the person stays on the Create Team screen and what they typed is kept. No refusal
 says whether the email is already on a team: an email that is already a teammate's on another
@@ -258,9 +263,9 @@ opens the Globe of a team of one (`L2-053`).
 
 ### Behaviour — refuse a team that cannot be made
 
-A form with a field that is wrong sends no request. A request over the limit is refused with
-429 before the handler runs, and a value the browser did not check is refused with
-`validation_failed` (L2-044, L2-045). A postal code that cannot be found or checked receives
+A form with a field that is wrong sends no request. A value the browser did not check is
+refused with `validation_failed` (L2-044). A request to make a team is never refused for coming
+too often (ADR 0016); a 429, should one arrive, is shown as any other failure. A postal code that cannot be found or checked receives
 the postal code's own refusal. Nothing is saved in any of these cases.
 
 ![Sequence diagram for refusing a team that cannot be made](diagrams/sequence-refuse-team.png)

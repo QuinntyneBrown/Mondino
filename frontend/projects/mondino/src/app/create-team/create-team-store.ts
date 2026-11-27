@@ -90,7 +90,7 @@ export class CreateTeamStore {
     return problems;
   });
 
-  /** Whole seconds until a rate-limited request may be tried again, while it is. */
+  /** Whole seconds until a rate-limited postal code lookup may be tried again, while it is. */
   readonly secondsToWait = computed(() => {
     const lookup = this.lookup();
     if (lookup.kind !== 'RateLimited') return 0;
@@ -247,12 +247,9 @@ export class CreateTeamStore {
     } catch (error) {
       if (pending.signal.aborted) return;
       const code = error instanceof ApiError ? error.code : 'unexpected';
-      this.stateValue.set(code === 'rate_limited' ? { kind: 'Idle' } : { kind: 'Failed' });
-      if (
-        code === 'postal_code_not_found' ||
-        code === 'postal_code_unavailable' ||
-        code === 'rate_limited'
-      )
+      // Making a team has no rate limit (ADR 0016): a 429 from it is a failure like any other.
+      this.stateValue.set({ kind: 'Failed' });
+      if (code === 'postal_code_not_found' || code === 'postal_code_unavailable')
         this.refused(error, this.postalCode());
     } finally {
       if (this.pendingCreate === pending) this.pendingCreate = null;

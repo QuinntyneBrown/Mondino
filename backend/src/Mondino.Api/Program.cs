@@ -22,7 +22,8 @@ builder.Services.AddSingleton<AppShell>();
 builder.Services.AddRateLimitPolicies();
 
 // Closed by default: every endpoint needs a teammate's session unless it is marked open with
-// [AllowAnonymous] and a rate limit (L2-045, docs/adr/0010).
+// [AllowAnonymous] and a rate limit, or, for making a team alone, with no limit (L2-045,
+// docs/adr/0010, docs/adr/0016).
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 

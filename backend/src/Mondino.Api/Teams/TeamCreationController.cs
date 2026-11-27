@@ -13,7 +13,8 @@ namespace Mondino.Api.Teams;
 
 /// <summary>
 /// Create Team (L2-053). Open to anyone at all: the person making a team has no session and no
-/// invite link yet, so every action is rate limited (L2-045).
+/// invite link yet. The postal code lookup and the city search are rate limited (L2-045); making
+/// the team is not, and is never refused for coming too often (docs/adr/0016).
 /// </summary>
 [ApiController]
 [Route("api")]
@@ -40,7 +41,6 @@ public sealed class TeamCreationController(ISender sender) : ControllerBase
     /// </summary>
     [HttpPost("teams")]
     [SameSiteOnly]
-    [EnableRateLimiting(RateLimitPolicies.CreateTeam)]
     public async Task<ActionResult<CreatedTeamDto>> Create(
         [FromBody] CreateTeamRequest request, CancellationToken cancellationToken)
     {

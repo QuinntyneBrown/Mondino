@@ -166,9 +166,10 @@ still picture keeps its pins.
 8. **A count on a moment marker.** Decided: two or more moments this week show their number.
 9. **Create Team's postal code lookup.** Decided (journey 5): Create Team looks its postal code
    up as Join does and shows Join's words, `create-team/locating`, `found`, `not-found` and
-   `lookup-unavailable`, while its button keeps reading "Create team". A request refused with
-   429, a lookup or the request to make the team, shows Join's countdown,
-   `create-team/rate-limited` ([ADR 0009](../adr/0009-making-a-team.md)).
+   `lookup-unavailable`, while its button keeps reading "Create team". A postal code lookup
+   refused with 429 shows Join's countdown, `create-team/rate-limited`
+   ([ADR 0009](../adr/0009-making-a-team.md)). The request to make the team has no rate limit
+   and is never refused for coming too often ([ADR 0016](../adr/0016-no-limit-on-making-a-team.md)).
 10. **Time zones.** The Globe counts distinct IANA time zones, as the prototype does: twelve for
     the cast, worked out at 14:05 UTC.
 11. **The Team filter** is a tab list and the Moments filter a set of pressed buttons, as L2-028

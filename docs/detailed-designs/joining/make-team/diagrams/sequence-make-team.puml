@@ -37,7 +37,7 @@ page -> store : create()
 store --> page : createState Creating, button "Creating your team…" disabled
 store -> client : createTeam(teamName, name, email, countryCode, postalCode, createRequestId)
 client -> controller : POST /api/teams, everything in the body
-controller -> controller : Apply the CreateTeam rate limit policy (L2-045)
+note over controller : No rate limit: never refused for coming too often (ADR 0016)
 controller -> handler : Send CreateTeamCommand (validated in the pipeline, L2-044)
 handler -> db : Find a team with this CreateRequestId
 db --> handler : None

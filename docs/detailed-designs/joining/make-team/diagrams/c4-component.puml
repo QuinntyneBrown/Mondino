@@ -5,7 +5,7 @@ title Components — Make a team
 
 Container(web, "Mondino web app", "Angular", "CreateTeamPage, CreateTeamStore, HttpTeamCreationApi, CopyField, Toast, GlobeView")
 Container_Boundary(api, "Mondino API") {
-  Component(ctrl, "TeamCreationController", "ASP.NET Core controller", "Open to anyone, rate limited")
+  Component(ctrl, "TeamCreationController", "ASP.NET Core controller", "Open to anyone; the lookup and city search rate limited, making a team not")
   Component(lookupq, "LookUpPostalCodeQueryHandler", "MediatR handler", "The lookup Join uses, with no invite token")
   Component(validator, "CreateTeamCommandValidator", "Validator", "Team name, name, email, country and postal code limits")
   Component(fingerprints, "HmacEmailFingerprints", "IEmailFingerprints", "Keyed fingerprint of the email; the address is not kept")

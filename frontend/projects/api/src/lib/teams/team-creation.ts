@@ -46,8 +46,9 @@ export interface TeamCreationApi {
 
   /**
    * Makes the team and starts its maker's session, an `HttpOnly` cookie. The email and the postal
-   * code travel in the body. Refused with `validation_failed`, `rate_limited` (with
-   * `retryAfterSeconds`), `postal_code_not_found` or `postal_code_unavailable`.
+   * code travel in the body. Refused with `validation_failed`, `postal_code_not_found` or
+   * `postal_code_unavailable`; it has no rate limit and is never refused for coming too often
+   * (ADR 0016).
    */
   createTeam(request: CreateTeamRequest, signal: AbortSignal): Promise<CreatedTeam>;
 }

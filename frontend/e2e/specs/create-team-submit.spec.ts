@@ -1,6 +1,6 @@
 // Acceptance Test
 // Traces to: L2-053, L2-045
-// Description: "Create team" waits while the team is made, a failure keeps what was typed and tries again with the same request, and too many teams ask to wait
+// Description: "Create team" waits while the team is made, a failure keeps what was typed and tries again with the same request, and a 429 from making the team, never sent for coming too often, is an ordinary failure
 
 import type { Request } from '@playwright/test';
 import { expect, test } from '../fixtures/test';
@@ -123,7 +123,10 @@ test.describe('Create Team: making the team', () => {
     expect(sent).toBe(1);
   });
 
-  test('too many teams ask to wait with what was typed kept', async ({ api, createTeamPage }) => {
+  test('a 429 from making the team is an ordinary failure, with "Try again" and no countdown', async ({
+    api,
+    createTeamPage,
+  }) => {
     api.answer('POST', TEAMS, {
       status: 429,
       headers: { 'content-type': 'application/problem+json', 'retry-after': '582' },
@@ -132,12 +135,17 @@ test.describe('Create Team: making the team', () => {
 
     await createTeamPage.submit.click();
 
-    await expect(createTeamPage.rateLimit).toContainText('Too many tries from this device.');
-    await expect(createTeamPage.rateLimitCountdown).toHaveText('9:42');
-    await expect(createTeamPage.submit).toHaveText('Create team');
-    await expect(createTeamPage.submit).toBeDisabled();
+    await expect(createTeamPage.failed).toHaveText(
+      'We couldn’t create Northwind. Nothing was saved — try again.',
+    );
+    await expect(createTeamPage.submit).toHaveText('Try again');
+    await expect(createTeamPage.submit).toBeEnabled();
+    await expect(createTeamPage.rateLimit).toHaveCount(0);
     await expect(createTeamPage.teamName).toHaveValue('Northwind');
+    await expect(createTeamPage.name).toHaveValue('Sofia Bianchi');
     await expect(createTeamPage.email).toHaveValue('sofia@northwind.co');
+    await expect(createTeamPage.country).toHaveValue('IT');
+    await expect(createTeamPage.postalCode).toHaveValue('20121');
   });
 
   test('"Create team" pressed while the postal code is looked up waits for it, then makes the team', async ({
