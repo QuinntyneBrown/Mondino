@@ -25,6 +25,9 @@ internal static class RateLimitPolicies
     /// <summary>Joining a team: 5 a minute.</summary>
     public const string Join = "join";
 
+    /// <summary>Making a team: 5 an hour.</summary>
+    public const string CreateTeam = "create-team";
+
     public static IServiceCollection AddRateLimitPolicies(this IServiceCollection services) =>
         services.AddRateLimiter(options =>
         {
@@ -32,6 +35,7 @@ internal static class RateLimitPolicies
             options.AddPolicy(Lookup, context => PerClient(context, permits: 10, window: TimeSpan.FromMinutes(1)));
             options.AddPolicy(CitySearch, context => PerClient(context, permits: 30, window: TimeSpan.FromMinutes(1)));
             options.AddPolicy(Join, context => PerClient(context, permits: 5, window: TimeSpan.FromMinutes(1)));
+            options.AddPolicy(CreateTeam, context => PerClient(context, permits: 5, window: TimeSpan.FromHours(1)));
             options.OnRejected = RefuseAsync;
         });
 

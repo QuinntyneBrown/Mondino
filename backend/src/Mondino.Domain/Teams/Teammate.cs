@@ -55,6 +55,18 @@ public sealed class Teammate
     /// </summary>
     public string? PostalCode { get; private set; }
 
+    /// <summary>
+    /// A keyed fingerprint of the teammate's work email, by which a sign-in request recognises them.
+    /// The address itself is kept nowhere (docs/adr/0009). Only a teammate who made a team has one.
+    /// </summary>
+    public string? EmailFingerprint { get; private set; }
+
+    public void SetEmailFingerprint(string fingerprint)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fingerprint);
+        EmailFingerprint = fingerprint;
+    }
+
     /// <summary>The id the browser gave its join request, so a repeated request makes no second pin. Never returned.</summary>
     public Guid? JoinRequestId { get; private set; }
 

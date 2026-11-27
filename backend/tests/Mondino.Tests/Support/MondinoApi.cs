@@ -44,6 +44,9 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>The GeoNames account the real lookup is configured with; null leaves it unset.</summary>
     public string? PostalCodeSourceUsername { get; set; } = "mondino-tests";
 
+    /// <summary>The key of the email fingerprint (<c>EmailProtection:Key</c>); null leaves it unset.</summary>
+    public string? EmailKey { get; set; } = Convert.ToBase64String(new byte[32]);
+
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
 
@@ -52,6 +55,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.UseSetting("Database:Provider", "InMemory");
         builder.UseSetting("Database:Name", $"mondino-tests-{Guid.NewGuid():N}");
+
+        if (EmailKey is not null)
+        {
+            builder.UseSetting("EmailProtection:Key", EmailKey);
+        }
 
         if (UsesPostalCodeSource && PostalCodeSourceUsername is not null)
         {
@@ -115,6 +123,14 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// </summary>
     public HttpClient CreateSecureClient() =>
         CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
+
+    /// <summary>How many teams are stored.</summary>
+    public async Task<int> TeamCountAsync()
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        return await database.Teams.CountAsync();
+    }
 
     /// <summary>How many teammates the team of the invite token has, as stored.</summary>
     public async Task<int> TeammateCountAsync(string inviteToken)

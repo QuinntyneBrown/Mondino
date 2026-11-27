@@ -67,6 +67,9 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("CreateRequestId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("InviteToken")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -78,6 +81,9 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(80)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreateRequestId")
+                        .IsUnique();
 
                     b.HasIndex("InviteToken")
                         .IsUnique();
@@ -97,6 +103,10 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");
+
+                    b.Property<string>("EmailFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<Guid?>("JoinRequestId")
                         .HasColumnType("uuid");
@@ -119,6 +129,8 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CityId");
+
+                    b.HasIndex("EmailFingerprint");
 
                     b.HasIndex("TeamId", "JoinRequestId")
                         .IsUnique();

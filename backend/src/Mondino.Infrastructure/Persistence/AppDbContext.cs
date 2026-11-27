@@ -24,6 +24,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             team.Property(t => t.Name).HasMaxLength(80).IsRequired();
             team.Property(t => t.InviteToken).HasMaxLength(64).IsRequired();
             team.HasIndex(t => t.InviteToken).IsUnique();
+            team.HasIndex(t => t.CreateRequestId).IsUnique();
             team.HasMany(t => t.Teammates).WithOne().HasForeignKey(t => t.TeamId);
             team.Navigation(t => t.Teammates).HasField("teammates");
         });
@@ -39,6 +40,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             teammate.HasIndex(t => new { t.TeamId, t.JoinedAt });
             teammate.Property(t => t.PostalCode).HasMaxLength(12);
             teammate.HasIndex(t => new { t.TeamId, t.JoinRequestId }).IsUnique();
+            teammate.Property(t => t.EmailFingerprint).HasMaxLength(64);
+            teammate.HasIndex(t => t.EmailFingerprint);
         });
 
         modelBuilder.Entity<City>(city =>
