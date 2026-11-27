@@ -20,6 +20,28 @@
   margin-inline: auto;
   aspect-ratio: 1;
 }
+// The heading: over the globe on a phone, and in its top-left corner from 40 rem.
+.globe-screen__heading {
+  padding: var(--space-5) var(--layout-margin) 0;
+}
+.globe-screen__counts {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+@media (min-width: 40rem) {
+  .globe-screen__heading {
+    position: absolute;
+    left: var(--space-6);
+    top: var(--space-6);
+    z-index: var(--z-raised);
+    max-width: 60%;
+    padding: 0;
+  }
+  .globe-screen__heading h1 {
+    font: var(--text-h1);
+  }
+}
 // The panel: under the globe, and beside it from 64 rem (docs/design-system/components/person-panel).
 .globe-screen__panel {
   border-top: var(--border-width-hairline) solid var(--color-border-default);

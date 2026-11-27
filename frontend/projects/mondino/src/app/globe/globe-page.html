@@ -1,5 +1,11 @@
 <main id="main" class="globe-screen" tabindex="-1">
   <section class="globe-screen__stage" aria-label="The team on the globe">
+    @if (heading(); as heading) {
+      <div class="globe-screen__heading">
+        <h1>{{ heading.title }}</h1>
+        <p class="globe-screen__counts tnum">{{ heading.line }}</p>
+      </div>
+    }
     @if (globeState() === 'Fallback') {
       <div class="globe-screen__globe">
         <mo-globe-fallback

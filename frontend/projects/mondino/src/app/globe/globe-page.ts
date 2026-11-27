@@ -34,6 +34,7 @@ import {
 import { GlobeView, type GlobeState } from '@mondino/globe';
 import {
   BrowserClock,
+  countsWords,
   defaultClockFormat,
   defaultTemperatureUnit,
   groupCities,
@@ -41,6 +42,7 @@ import {
   placePins,
   stillViewport,
   teammatePanelView,
+  teamCounts,
 } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
 import { TeamStore } from './team-store';
@@ -127,6 +129,23 @@ export class GlobePage {
       this.justJoined?.teammateId ?? null,
       this.clockFormat(),
       this.unit(),
+    );
+  });
+
+  /**
+   * The heading over the globe (L2-025): "13 teammates" and "12 time zones · 8 working · 2 asleep",
+   * worked out again as the one clock's minute changes, so a count follows an hour that changes a
+   * status with no reload.
+   */
+  protected readonly heading = computed(() => {
+    this.clock.minute();
+    const team = this.store.team();
+    if (!team) return null;
+    return countsWords(
+      teamCounts(
+        team.pins,
+        untracked(() => this.clock.now()),
+      ),
     );
   });
 

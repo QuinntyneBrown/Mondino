@@ -69,6 +69,9 @@ export class GlobePage {
   readonly groupRows: Locator;
   /** The one polite announcement of what was selected. */
   readonly announcement: Locator;
+  /** The heading over the globe: the number of teammates, and the counts under it. */
+  readonly title: Locator;
+  readonly counts: Locator;
   readonly toastRegion: Locator;
   readonly toast: Locator;
   readonly dismiss: Locator;
@@ -132,6 +135,8 @@ export class GlobePage {
     this.groupCityTimes = this.group.locator('.panel__city-time');
     this.groupRows = this.group.locator('.row-list a.row .row__name');
     this.announcement = this.main.locator('p.visually-hidden[role="status"]');
+    this.title = this.stage.locator('.globe-screen__heading h1');
+    this.counts = this.stage.locator('.globe-screen__counts');
     this.toastRegion = page.locator('.toast-region');
     this.toast = this.toastRegion.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
