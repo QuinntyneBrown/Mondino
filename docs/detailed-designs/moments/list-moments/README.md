@@ -59,9 +59,15 @@ The screen is a lazy route in the `mondino` application. The backend supplies th
   styled through that attribute, with a mark that does not depend on colour. It emits the
   choice.
 - **`MomentList`** — presentation component. It renders the three groups and omits the heading
-  of a group with no moments. With no moment at all the page shows no filter and says "Nothing is coming up
-  for your team", with a link back to the globe. With a kind chosen and no moment of it, it says "Nothing of this kind coming up for your
-  team." It emits a chosen moment.
+  of a group with no moments. It emits a chosen moment.
+- **Nothing to list** — with no moment at all the page shows no filter and, in the mocks'
+  `empty` block, "Nothing coming up" and "No holidays, races or local events in the next 90
+  days where your teammates live. We’ll add them here as they’re announced.", with "Back to
+  the globe". With a kind chosen and no moment of it, the filters stay and a note in a
+  `role="status"` region (`list-note`) names the kind: "No sport moments coming up" and "None
+  of your teammates’ cities have one in the next 90 days.", with the button "Show everything",
+  which returns the filter to Everything. The wording of the note's title for the other three
+  kinds is `<TO SUPPLY>`; the mocks draw it for Sport.
 - **`MomentRow`** — presentation component for one moment (`moment-row`): the date, kind icon
   and `when` label, title, detail, and the teammate's `Avatar` with their first name and city
   ("Jordan · Austin"). The prominent form (`today-moment`) is used for a moment today: "Today
@@ -81,8 +87,9 @@ on each load. How a long list is windowed in the page for a team of up to 500 te
 `<TO SUPPLY>`.
 
 While the request is pending the page is marked busy and announces "Loading moments…". When it
-fails the page says "We couldn’t load moments", with "Try again", which asks again, and "Back
-to the globe".
+fails the page says "Moments didn’t load" and "We couldn’t fetch holidays and events for your
+team. Check your connection and try again.", with "Try again", which asks again, and "Back to
+the globe".
 
 ## Requirements
 
@@ -91,8 +98,8 @@ requirement cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-029` | `L1-010` | The Moments screen lists the team's upcoming moments. A moment today is shown first and most prominently, "Today in" and its city; then "This week" (1 to 7 days ahead) and "Later" (8 to 90 days ahead), each in date order and, on one date, west to east by their teammate. Each moment gives its kind, when it happens, its title, its detail, and its teammate's first name and city. |
-| `L2-030` | `L1-010` | The Moments screen is filtered by Everything, Holiday, Formula 1, Local event or Sport. |
+| `L2-029` | `L1-010` | The Moments screen, "Holidays, races and local happenings where your teammates live.", lists the team's upcoming moments. A moment today is shown first and most prominently, "Today in" and its city; then "This week" (1 to 7 days ahead) and "Later" (8 to 90 days ahead), each in date order and, on one date, west to east by their teammate. Each moment gives its kind, when it happens, its title, its detail, and its teammate's first name and city. |
+| `L2-030` | `L1-010` | The Moments screen is filtered by "Everything", "Holiday", "Formula 1", "Local event" or "Sport". |
 
 ## Diagrams
 
@@ -138,7 +145,7 @@ teammate's pin selected.
 ### Behaviour — filter moments by kind
 
 Choosing a filter narrows the loaded moments in the browser and regroups them; no request is
-sent. The chosen filter is exposed as pressed. A kind with no upcoming moment shows "Nothing of
-this kind coming up for your team." (`L2-030`).
+sent. The chosen filter is exposed as pressed. A kind with no upcoming moment shows a note,
+"No sport moments coming up" for Sport, with "Show everything" (`L2-030`).
 
 ![Sequence diagram for filtering moments by kind](diagrams/sequence-filter-by-kind.png)

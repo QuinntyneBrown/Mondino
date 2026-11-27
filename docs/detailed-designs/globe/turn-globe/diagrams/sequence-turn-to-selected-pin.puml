@@ -22,12 +22,19 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "GlobeMotion" as motion
   participant "GlobeScene" as scene
 end box
-actor -> view : Select a pin
-view --> page : select(teammateId)
-page -> store : Set the selected teammate id
-store --> page : selectedId changed
-page -> view : selectedId input
-view -> motion : hold(pin.position)
+alt a teammate's pin
+  actor -> view : Select a pin
+  view --> page : select(teammateId)
+  page -> store : Set the selected teammate id
+  store --> page : selectedId changed
+  page -> view : selectedId input
+  view -> motion : hold(pin.position)
+else a group pin
+  actor -> view : Select a group pin
+  view --> page : selectGroup(teammate ids)
+  page -> view : selectedId input = null, selectedGroupIds input
+  view -> motion : hold(the group pin's anchor)
+end
 alt reduced motion requested (L2-009 AC5)
   motion -> motion : Set the orientation to face the pin, mode = Holding
   view -> scene : setOrientation(orientation), draw()

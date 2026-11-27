@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Search a large team by name or city
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "SearchField" as search
+  participant "TeamPage" as page
+  participant "filterByStatus / searchRows" as fn
+  participant "citySections" as sections
+  participant "CitySection" as city
+  participant "ListNote" as note
+end box
+note over page : A team of more than 40: the list has a search\nand one section for each city (L2-056)
+actor -> search : Type in "Find a person or city"
+search -> page : valueChange(text) on each input event
+page -> page : query.set(text); no request, no timer
+page -> fn : filterByStatus(rows, filter)
+fn --> page : Rows of the chosen filter, west to east
+page -> fn : searchRows(rows, query)
+fn -> fn : Keep rows whose name or city contains the text,\nwithout regard to case
+fn --> page : visibleRows
+alt at least one row matches
+  page -> sections : citySections(visibleRows, toggled, clock.now(), settings)
+  sections -> sections : One section for each city with a match, west to east;\nthe first two open, at most 50 rows in each
+  sections --> page : CitySectionContent[]
+  page -> city : content, for each section
+  city --> actor : The matching teammates, still under their cities (L2-056)
+else no row matches
+  page -> note : title, text and action
+  note --> actor : "No one matches “Reykjavik”", "Try another filter."\nand "Show everyone", in a status region; the text typed shown as text (L2-044)
+  actor -> note : Use "Show everyone"
+  note -> page : actionChosen
+  page -> page : query.set(""); navigate /team (All)
+  page --> actor : Every city section again
+end
+note over page : The filter's counts stay the team's:\n"All 500", "Working now 324", "Asleep 42"
+@enduml

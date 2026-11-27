@@ -39,7 +39,7 @@ alt More than 10 lookups from this client in the minute (L2-045)
   limits --> client : 429 ProblemDetails, code rate_limited, Retry-After
   note over controller, source : No controller, handler or outside source is called
   client --> page : ApiError rate_limited
-  page --> actor : "That was a lot of tries in a short time. Wait a moment, then try again."; what was typed is kept
+  page --> actor : "Too many tries from this device. You can try again in 9:42.";\nthe button is disabled until the countdown ends; what was typed is kept
 else Within the limit
   limits -> controller : Request
   controller -> handler : Send LookUpPostalCodeQuery

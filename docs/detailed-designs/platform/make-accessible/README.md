@@ -34,10 +34,30 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   against its surroundings. No component removes it.
 - Each interactive element in `components` has a minimum size of 44 × 44 CSS px, set in its own
   stylesheet from a foundation token.
-- `LeaveTeamDialog` and `DiscardChangesDialog` open through the CDK Dialog, which keeps focus
-  inside the dialog, closes on Escape and returns focus to the control that opened it.
-  `LeaveTeamDialog` stays open while its request is pending or has failed: while it is
-  pending both buttons are disabled and Escape does not close it (`leave-team`, L2-036).
+- `InviteDialog`, `LeaveTeamDialog` and `DiscardChangesDialog` open through the CDK Dialog,
+  which keeps focus inside the dialog, closes on Escape and returns focus to the control that
+  opened it. Each is named by its title (`aria-labelledby`) and described by its text
+  (`aria-describedby`), is modal, and makes the screen behind it inert.
+
+  | Dialog | Role | Focus starts on |
+  |--------|------|-----------------|
+  | `InviteDialog` (`invite-teammates`) | `dialog`; it has a "Close" button | "Copy link" |
+  | `LeaveTeamDialog` (`leave-team`) | `alertdialog` | "Stay"; "Try again" after a failure |
+  | `DiscardChangesDialog` (`choose-display-and-sharing`) | `alertdialog` | "Keep editing" |
+
+  The two that ask before something is lost are alert dialogs, and focus starts on the choice
+  that loses nothing. `LeaveTeamDialog` stays open while its request is pending or has failed:
+  while it is pending both buttons are disabled and Escape does not close it (L2-036). When a
+  copy is refused, `InviteDialog` stays open and moves focus to the selected link.
+- The header's "Invite teammate" button keeps its accessible name under 768 px, where it is an
+  icon alone (`adapt-to-every-width`).
+- "Your city", the field Join shows while the postal code lookup is down, is a combobox:
+  `role="combobox"`, `aria-autocomplete="list"`, `aria-expanded` and `aria-controls`, with its
+  list operated by the arrow keys and Enter (`place-pin-from-postal-code`).
+- On Sign In and Create Team a field that is wrong carries `aria-invalid` and its message in a
+  `role="alert"` element linked with `aria-describedby`, and focus moves to the first such
+  field. When a screen's form gives way to a result ("Check your inbox", "Now bring everyone
+  in."), focus moves to the new title.
 - On the globe, one finger spins and one tap selects. No interaction needs a multi-finger or
   path-based gesture; each pin is a button, and selecting one turns the globe to it, which is
   the single-pointer and keyboard alternative to dragging.
@@ -54,13 +74,19 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   the selected pin. Each button is a Tab stop, in a fixed order from west to east; Enter or
   Space selects. The arrow keys stay with the globe, which they turn (`turn-globe`). There is
   no separate, visually hidden list. A pin with focus lifts and carries the focus indicator,
-  with a contrast of at least 3:1 over the day side and the night side. Where the still
-  picture stands in for the globe (`draw-globe`) there is no list of pins; the teammates are
-  reached through the panel and the Team screen.
+  with a contrast of at least 3:1 over the day side and the night side.
+- **The still picture keeps its pins.** Where the still picture stands in for the globe
+  (`draw-globe`), `GlobeFallback` draws the same list of pins over it, placed by
+  `stillPlacements` and named by the same `descriptions`: each pin is still a button, lifts,
+  and opens its panel through the outputs `select` and `selectGroup`. The group is named "A still picture of the
+  globe, with 13 teammates’ pins." and is not a Tab stop itself, since it does not turn and
+  is not dragged. The legend says why it is still, in words: "Still view — 3D isn’t available
+  in this browser"; on a phone a line under the globe reads the same and adds "Pins still
+  open."
 - **`describePin(pin, now, settings)`** — function in `domain`'s `pins/`. It returns one
   sentence: the teammate's name, city, local time, status, weather and any moment this week,
-  as in "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°, Día de Muertos,
-  in 5 days". It calls `localTime`, `formatTime` and `statusFor` from `time/`. It leaves the
+  as in "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°, 2 moments this
+  week: Día de Muertos, in 5 days; Clásico Nacional, in 6 days". It calls `localTime`, `formatTime` and `statusFor` from `time/`. It leaves the
   status out when `statusFor` gives none, and the weather out when the pin has none. `globe` depends on `api` only, so `GlobePage` computes
   the descriptions and passes them to `GlobeView` as the input `descriptions`, keyed by
   teammate id.
@@ -71,11 +97,21 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
   `TeammatePanel` is not itself a live region.
 - **A minute tick is silent.** The descriptions and the panel update in place when the clock
   ticks. Neither is inside a live region, and `GlobePage` announces only a change of selection.
+- **A toast is announced once.** `Toast` sits in the mocks' `toast-region`. A toast that
+  confirms ("Invite link copied. Paste it wherever your team talks.", "You’re on the map.
+  Northwind can now see your pin in Milan.") is in a `role="status"` region, polite, and
+  dismisses itself after 4 s; the timer pauses while the toast is pointed at or focused, and
+  "Dismiss" closes it at once. A toast that reports a failure ("Couldn’t copy the link. It’s
+  selected — press Ctrl+C or ⌘C to copy it yourself.") is in a `role="alert"` region,
+  assertive, and stays until it is dismissed. No toast takes focus.
+- **A countdown is announced once.** The rate limit alert on Join ("Too many tries from this
+  device. You can try again in 9:42.") is announced when it appears and not at each second.
 - **The postal code lookup is announced.** `PostalCodeField` renders its result inside a
   polite live region and its error in an element with `role="alert"`, linked to the input
   with `aria-describedby`; the input carries `aria-invalid` when the postal code is not
   found, and not when the lookup is unavailable or rate limited, since nothing is wrong with
-  what was typed.
+  what was typed. The help of "Your city" is a `role="status"` element, so the switch from the
+  postal code to the city is announced.
 
 **Colour, contrast and text size (L2-041).**
 
@@ -123,7 +159,7 @@ level-1 (L1) requirement, cited by identifier.
 |-------|--------------|-------------|
 | `L2-039` | `L1-013` | Every control is reachable and operable by keyboard alone and by touch alone, in an order that follows the screen, with a visible focus indicator. |
 | `L2-040` | `L1-013` | Nothing is available only as a picture on the globe. Every teammate and moment shown on the globe can be reached as text by a screen reader, and the globe itself does not flood it. |
-| `L2-041` | `L1-013` | Text and controls meet WCAG 2.2 AA contrast, colour never carries a meaning on its own, and the interface holds together when text is enlarged. |
+| `L2-041` | `L1-013` | Text and controls meet WCAG 2.2 AA contrast, colour never carries a meaning on its own, and the interface holds together when text is enlarged. Mondino is designed in a light theme and a dark theme, and both meet every criterion here. |
 | `L2-042` | `L1-013` | When the system asks for reduced motion, Mondino removes motion that is not needed to understand the screen. |
 
 ## Diagrams

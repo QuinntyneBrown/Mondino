@@ -6,9 +6,9 @@ Mondino is where a team spread around the world sees each other. A person joins 
 its invite link with a name, a country and a postal code, and from then on appears to their
 teammates as a pin on a 3D globe.
 
-A teammate can undo that. At the foot of Profile & Settings, "Remove my pin and leave" followed
-by the team's name opens a dialog. The dialog names the team, says the pin will be removed, and
-offers to cancel or to leave. Nothing is removed until the teammate confirms. On confirming,
+A teammate can undo that. At the foot of Profile & Settings, "Leave" followed by the team's
+name ("Leave Northwind") opens a dialog. The dialog names the team, says the pin comes off the
+globe for every teammate, and offers to stay or to leave. Nothing is removed until the teammate confirms. On confirming,
 the backend deletes everything Mondino holds about the teammate in that team: their name, their
 postal code, their city, their settings and their session. The pin is gone for every other
 teammate at their next read of the team, and the teammate who left sees a screen confirming it.
@@ -20,7 +20,9 @@ The terms used below:
 - **leave** — removal of a teammate and their pin from a team, with everything held about them
 
 Leaving is final for that pin. A person who has left and holds the invite link can join again
-as a new teammate; nothing of the earlier pin comes back.
+as a new teammate; nothing of the earlier pin comes back. The screen that confirms leaving
+offers two ways on: starting a new team (`make-team`) and signing in to another team
+(`sign-in`).
 
 ## Description
 
@@ -29,20 +31,22 @@ exist yet; each part below is introduced by this design.
 
 ### Frontend — `mondino` application
 
-- **`ProfilePage`** — lazy route `/profile`. It shows the button "Remove my pin and leave
-  Northwind", with the team's name from `Profile.teamName` rendered as text. The button opens
+- **`ProfilePage`** — lazy route `/profile`. It shows the button "Leave Northwind"
+  (`settings__leave`), with the team's name from `Profile.teamName` rendered as text. The button opens
   `LeaveTeamDialog` through the CDK `Dialog` service, with the page's injector so the dialog
   reads the route's `ProfileStore`. The page makes no request itself.
-- **`LeaveTeamDialog`** — CDK Dialog, loaded with the `/profile` route, titled "Leave" and the
-  team's name ("Leave Northwind?"). It receives the team's name as dialog data. It says the pin
-  will be removed for everyone in the team and what Mondino deletes, and offers "Cancel" and
-  "Remove my pin and leave". Focus starts on "Cancel". "Remove my pin and leave" calls
-  `ProfileStore.leave()` and the dialog stays open: while `leaving` is true both buttons are
-  disabled, the action reads "Removing your pin…" and Escape does not close it; when
-  `leaveFailed` is true an alert in the dialog reads "We couldn’t remove your pin just now.
-  Nothing has changed — you’re still in Northwind." and the action reads "Try again". The CDK
-  traps focus inside it, closes it on Escape, and returns focus to the button that opened it
-  (L2-036). Under 576 px it is a sheet from the bottom.
+- **`LeaveTeamDialog`** — CDK Dialog with `role="alertdialog"`, loaded with the `/profile`
+  route, titled "Leave" and the team's name ("Leave Northwind?"). It receives the team's name
+  and the number of other teammates as dialog data, the number from `TeamStore`. It reads
+  "Your pin comes off the globe for all 12 teammates, along with your weather and moments. To
+  come back you’ll need the team’s invite link." and offers "Stay" and "Leave Northwind".
+  Focus starts on "Stay". "Leave Northwind" calls `ProfileStore.leave()` and the dialog stays
+  open: while `leaving` is true both buttons are disabled, the action reads "Leaving…" and is
+  marked `aria-busy`, and Escape does not close it; when `leaveFailed` is true an alert in the
+  dialog reads "We couldn’t take your pin off. You’re still on Northwind — try again.", the
+  action reads "Try again" and takes focus. The CDK traps focus inside it, closes it on Escape
+  or "Stay", and returns focus to the button that opened it (L2-036). Under 576 px it is a
+  sheet from the bottom.
 - **`ProfileStore`** — store provided at the `/profile` route. `leave()` calls
   `ProfileApi.leaveTeam(teamId)` and holds a `leaving` signal that disables the dialog's buttons
   while the request is pending, so a second request is not sent. On success it discards the
@@ -50,16 +54,19 @@ exist yet; each part below is introduced by this design.
   `SettingsStore` and `SettingsCache`, calls `TeamMembership.forget()`, and navigates to `/left` with the team's name in the
   navigation state, replacing `/profile` in the history, which closes the dialog. On failure it leaves everything as it was and sets
   `leaveFailed`, and the dialog says so and offers to try again.
-- **`LeftPage`** — lazy route `/left`, not behind `teammateGuard`. It confirms that the team is
-  left ("You’ve left Northwind"), that the pin is gone from the globe and what Mondino has
-  deleted, and says the team's invite link is the way back. It reads nothing from the backend;
+- **`LeftPage`** — lazy route `/left`, not behind `teammateGuard`. It renders `NoticePage`
+  (`adapt-to-every-width`): the wordmark, a small globe, a title, one text and its actions,
+  with no app header. The title reads "You’ve left Northwind" and the text "Your pin is off
+  Northwind’s globe and they can no longer see your time, weather or moments. To come back,
+  ask a teammate for the team’s invite link." Its actions are the links "Start a new team",
+  to `/new`, and "Sign in to another team", to `/sign-in`. It reads nothing from the backend;
   the team's name comes in the navigation state from `ProfileStore`, never in the URL, and is
-  rendered as text. Opened or reloaded without it, the title reads "You’ve left the team". It
-  shows no other team data.
+  rendered as text. Opened or reloaded without it, the title reads "You’ve left the team" and
+  the text says "the team’s globe". It shows no other team data.
 - **`teammateGuard`** — guards `/globe`, `/team`, `/moments` and `/profile`. After leaving, the
   browser holds no membership and no session, so the guard refuses those routes and the team is not shown
-  (L2-036). The guard sends the person nowhere: the address they opened shows the no-team page
-  (`InviteNeededPage`, "You need an invite link") in place.
+  (L2-036). The guard sends the person nowhere: the address they opened shows
+  `InviteNeededPage`, "You need an invite link", in place.
 
 ### Frontend — libraries
 
@@ -103,7 +110,7 @@ exist yet; each part below is introduced by this design.
   teammate's own row, so removing the teammate deletes the row and nothing is left behind. The
   removal is a deletion, not a mark on the row.
 - **`TeammateSessions`** — implementation of `ITeammateSessions` beside
-  `TeammateSessionHandler`. How a session is stored is `<TO SUPPLY>` with the design of sign-in;
+  `TeammateSessionHandler`. How a session is stored is `<TO SUPPLY>`;
   whatever the form, a session ended here shall be refused on its next use (L2-043).
 
 ### What is deleted, and what is not
@@ -118,15 +125,16 @@ exist yet; each part below is introduced by this design.
 | Cached weather, cities and moments | Kept: they are keyed by place and carry nothing about a teammate |
 | Telemetry | Kept: it carries no name, postal code or position (L2-051) |
 
-What becomes of a team when its last teammate leaves is `<TO SUPPLY>`; how a team is made is
-not designed.
+A teammate's `Email`, where they have one (`make-team`), is deleted with the `Teammate`, and
+so is any `SignInLink` sent to it. What becomes of a team when its last teammate leaves is
+`<TO SUPPLY>`.
 
 ### Errors
 
 | Case | Status | `code` | What the screen shows |
 |------|--------|--------|-----------------------|
 | `teamId` is not the teammate's own team | 404 | none | The alert in `LeaveTeamDialog` |
-| No session, or the teammate has already left | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows the no-team page in place |
+| No session, or the teammate has already left | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows "You need an invite link" in place |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | The alert in `LeaveTeamDialog`, which stays open, with "Try again"; the pin stays |
 
 ## Requirements
@@ -136,7 +144,7 @@ requirement cited beside it.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-036` | `L1-011` | A teammate can remove their pin and leave the team. It is confirmed in a dialog, and it deletes everything Mondino holds about them in that team. |
+| `L2-036` | `L1-011` | A teammate can leave the team, which takes their pin off the globe. It is confirmed in a dialog, and it deletes everything Mondino holds about them in that team. |
 
 ## Diagrams
 
@@ -181,7 +189,7 @@ dialog, which offers "Try again". Other teammates no longer receive the pin at t
 
 ### Behaviour — cancel leaving the team
 
-Escape or "Cancel" closes the dialog. No request is sent, focus returns to the button that
+Escape or "Stay" closes the dialog. No request is sent, focus returns to the button that
 opened the dialog, and nothing has changed (L2-036).
 
 ![Sequence diagram for cancelling leaving the team](diagrams/sequence-cancel-leave.png)

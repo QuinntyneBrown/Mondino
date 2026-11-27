@@ -40,7 +40,12 @@ else another teammate
   offset -> offset : zoneOffsetMinutes of each zone at now, subtract
   offset --> page : Offset: minutes, direction
   page -> offset : formatOffset(offset, 'panel')
-  offset --> page : "7 h behind you", "10 h ahead of you" or "Same time as you" (L2-016)
+  offset --> page : "7h behind you", "10h ahead of you" or "same time as you" (L2-016)
+
+  alt the teammate does not share their status
+    page -> panel : Bind offset text, and overlap, working day and overlap text null
+    panel --> actor : Offset as text; no working-hours overlap (L2-017)
+  else the teammate shares their status
 
   page -> overlap : workingDayOnViewerClock(now, pin.timeZoneId, viewerPin.timeZoneId)
   overlap -> overlap : Move the teammate's 09:00 to 18:00 onto the viewer's clock
@@ -59,5 +64,6 @@ else another teammate
   panel -> bar : Bind overlap, theirDay, nowMinute, first name and text
   bar --> actor : Both working days on the viewer's day, with the overlap as text (L2-017)
   panel --> actor : Offset as text (L2-016)
+  end
 end
 @enduml

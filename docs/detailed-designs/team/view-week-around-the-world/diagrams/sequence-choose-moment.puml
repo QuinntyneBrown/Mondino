@@ -26,18 +26,23 @@ end box
 actor -> page : Open the Globe screen with no pin selected
 page -> store : pins, counts
 store --> page : Pin[], TeamCounts
-page --> actor : "12 teammates" and "12 time zones · 7 working · 2 asleep" (L2-025)
-page -> fn : weekMoments(pins, clock.now(), 8)
+page --> actor : "13 teammates" and "12 time zones · 8 working · 2 asleep" (L2-025)
+page -> fn : weekMoments(pins, clock.now(), 6)
 fn -> fn : Keep moments from today to 7 days ahead in each city, in date order, then west to east (L2-024)
-fn --> page : WeekMoments (first 8, more flag)
-page -> fn : workingNow(pins, clock.now())
+fn --> page : WeekMoments (first 6, more flag)
+page -> fn : workingNow(pins, clock.now(), 6)
 fn -> fn : Keep status Working hours, order by local hour, then west to east (L2-024)
-fn --> page : WorkingTeammate[]
+fn --> page : WorkingNow (count 8, first 6, 2 more)
 page -> panel : moments, working
+alt every kind of moment is switched off (L2-022)
+  panel --> actor : "Every kind of moment is switched off" and "Choose moments"
+else
+  panel --> actor : "This week around the world": at most six moments, then "All moments"
+end
 alt no teammate in working hours
   panel --> actor : "Nobody — it’s quiet everywhere."
 else
-  panel --> actor : "This week around the world" and "In working hours now"
+  panel --> actor : "In working hours now", its count, at most six teammates,\nthen "2 more on the Team page" (L2-024)
 end
 actor -> panel : Choose a moment, or a teammate in working hours
 panel -> page : teammateChosen(teammateId)
@@ -50,5 +55,10 @@ opt the teammate wants every moment
   actor -> panel : Choose "All moments"
   panel -> page : allMoments
   page -> router : navigate /moments
+end
+opt the teammate wants everyone in working hours
+  actor -> panel : Choose "2 more on the Team page"
+  panel -> page : moreWorking
+  page -> router : navigate /team?filter=working
 end
 @enduml

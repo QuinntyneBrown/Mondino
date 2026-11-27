@@ -29,9 +29,9 @@ placeholder --> actor : Placeholder, heading, counts and panel
 page -> origin : Dynamic import of the globe library (@defer)
 alt globe chunk fails to load
   origin --> page : Error
-  page -> fallback : Show in the globe's box (@error)
-  fallback --> actor : Still picture of the globe (L2-008 AC3)
-  page --> actor : Notice that this is a still picture, with a link to Team
+  page -> fallback : Show in the globe's box (@error),\nwith the placements from stillPlacements
+  fallback --> actor : Still picture with the team's pins, which lift\nand open their panels; it does not turn (L2-008)
+  page --> actor : Legend: "Still view — 3D isn’t available in this browser"
 else globe chunk loaded
 origin --> page : Globe chunk
 page -> view : Create mo-globe in the same box, placeholder and still picture projected
@@ -42,22 +42,22 @@ alt WebGL context available
   alt assets loaded
     origin --> scene : Renderer chunk, model, textures
     scene --> view : GlobeScene
-    view -> scene : resize, setSun, start
+    view -> scene : resize, setPalette, setSun, start
     scene --> view : First frame drawn
     view -> view : state = Ready, remove the placeholder
     view --> actor : 3D globe, no layout shift (L2-008 AC1, AC5)
   else assets fail to load
     origin --> scene : Error or timeout
     scene --> view : Reject with GlobeUnavailableError(AssetsFailed)
-    view -> fallback : state = Fallback, show the still picture
-    fallback --> actor : Still picture of the globe (L2-008 AC3)
-    page --> actor : Notice that this is a still picture, with a link to Team
+    view -> fallback : state = Fallback, show the still picture\nwith the placements the page gives it
+    fallback --> actor : Still picture with the team's pins, which lift\nand open their panels; it does not turn (L2-008)
+    page --> actor : Legend: "Still view — 3D isn’t available in this browser"
   end
 else no WebGL context
   scene --> view : Reject with GlobeUnavailableError(NoWebGL)
-  view -> fallback : state = Fallback, show the still picture
-  fallback --> actor : Still picture of the globe (L2-008 AC3)
-  page --> actor : Notice that this is a still picture, with a link to Team
+  view -> fallback : state = Fallback, show the still picture\nwith the placements the page gives it
+  fallback --> actor : Still picture with the team's pins, which lift\nand open their panels; it does not turn (L2-008)
+  page --> actor : Legend: "Still view — 3D isn’t available in this browser"
 end
 end
 actor -> page : Leave the Globe screen

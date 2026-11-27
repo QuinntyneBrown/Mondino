@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — Open the invite dialog and copy the link
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "AppHeader" as header
+  participant "TeamShell" as shell
+  participant "InviteDialogOpener" as opener
+  participant "InviteDialog" as dialog
+  participant "CopyField" as field
+  participant "InviteLinkCopier" as copier
+  participant "Toast" as toast
+end box
+actor -> header : Choose "Invite teammate", on any teammate screen
+header -> shell : invite(the button)
+shell -> opener : open(the button)
+opener -> opener : import the dialog's chunk on first use
+opener -> dialog : Dialog.open, role dialog, modal
+dialog --> actor : "Invite teammates to Northwind", the link, "13 on the team · link never expires";\nfocus on "Copy link" (L2-054)
+actor -> field : Choose "Copy link"
+field -> dialog : copy
+dialog -> copier : copy()
+alt the browser accepts the copy
+  copier --> dialog : Copied
+  dialog -> opener : close
+  opener --> actor : Focus returns to "Invite teammate"
+  shell -> toast : Show the success toast for 4 s
+  toast --> actor : "Invite link copied. Paste it wherever your team talks." (L2-054)
+else the browser refuses the copy
+  copier --> dialog : Refused
+  dialog -> field : select()
+  field --> actor : The dialog stays; the link is selected and focused
+  shell -> toast : Show the danger toast, which stays
+  toast --> actor : "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself." (L2-054)
+end
+note over header, toast
+  Escape and Close close the dialog and return focus to the control that opened it.
+  No request is sent to the Mondino API: the link is built from the invite token TeamStore holds.
+end note
+@enduml

@@ -26,9 +26,9 @@ class App {
 
 class TeamShell {
   +navItems: NavItem[]
-  provides TeamStore and InviteLinkCopier
+  provides TeamStore, InviteLinkCopier and InviteDialogOpener
   renders the refresh banner and the toast
-  +onInvite(): void
+  +onInvite(trigger: HTMLElement): void
 }
 
 class NavItem {
@@ -73,6 +73,10 @@ class InviteNeededPage {
 class NotFoundPage {
 }
 
+class NoticePage <<mo-notice-page, components>> {
+  +title: string
+}
+
 class TeamStore {
 }
 
@@ -80,7 +84,9 @@ App ..> TeamShell : router outlet
 TeamShell --> AppHeader : renders
 TeamShell "1" *-- "3" NavItem
 TeamShell ..> TeamStore : provides; reads the viewer's pin for the avatar
-InviteNeededPage --> AppHeader : renders without navigation
+InviteNeededPage --> NoticePage : renders
+NotFoundPage --> NoticePage : renders
+NoticePage --> Wordmark : shows
 AppHeader --> Wordmark : shows
 AppHeader ..> Breakpoint : styled by
 teammateGuard ..> TeamMembership : reads

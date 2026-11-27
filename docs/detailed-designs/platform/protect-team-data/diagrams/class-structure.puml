@@ -74,7 +74,7 @@ class PinDto {
   +string Country
   +Position Position
   +string TimeZoneId
-  no postal code
+  no postal code, no email
 }
 
 class ProfileDto {

@@ -33,6 +33,7 @@ class GlobeView {
   -startScene(): Promise<void>
   -onResize(entry: ResizeObserverEntry): void
   -onMinute(): void
+  -onThemeChange(): void
   -release(): void
 }
 
@@ -41,6 +42,7 @@ class GlobeScene {
   +resize(width: number, height: number, pixelRatio: number): void
   +setSun(subsolar: Position): void
   +setDetail(step: DetailStep): void
+  +setPalette(palette: GlobePalette): void
   +setOrientation(orientation: GlobeOrientation): void
   +project(position: Position): ProjectedPoint
   +onFrame(listener: (elapsedMs: number) => void): void
@@ -76,6 +78,35 @@ class DetailStep {
 }
 
 class GlobeFallback <<mo-globe-fallback, components>> {
+  +placements: InputSignal<StillPlacement[]>
+  +descriptions: InputSignal<Map<string, string>>
+  +markers: InputSignal<Map<string, MomentMarker>>
+  +selectedId: InputSignal<string | null>
+  +select: OutputEmitterRef<string | null>
+  +selectGroup: OutputEmitterRef<string[]>
+}
+
+class StillPlacement <<domain, pins/>> {
+  +placement: PinPlacement
+  +x: number
+  +y: number
+  +labelSide: LabelSide
+}
+
+class "stillPlacements" as stillPlacements << (F,#D1FADF) function >> {
+  +stillPlacements(pins: Pin[], size: number, options: GroupOptions): StillPlacement[]
+}
+
+class GlobePalette {
+  +ocean: string
+  +oceanDeep: string
+  +land: string
+  +landDeep: string
+  +sand: string
+  +ice: string
+  +cloud: string
+  +night: string
+  +outline: string
 }
 
 interface Clock {
@@ -100,4 +131,8 @@ GlobeUnavailableError --> GlobeUnavailableReason : has
 DetailLevel --> DetailStep : current
 GlobeSceneOptions --> DetailStep : starts at
 SunPosition ..> Position : returns
+GlobeView ..> GlobePalette : reads from the tokens
+GlobeScene ..> GlobePalette : coloured by
+stillPlacements ..> StillPlacement : returns
+GlobeFallback ..> StillPlacement : presents
 @enduml

@@ -40,20 +40,20 @@ alt more than 30 opens in a minute from this client
   problems --> client : 429 ProblemDetails, code rate_limited, Retry-After
   client --> store : ApiError rate_limited
   store --> page : inviteState Failed
-  page --> actor : Say the invite link could not be opened; offer "Try again" (L2-001)
+  page --> actor : "We couldn’t open this invite"; offer "Try again" (L2-001)
 else within the limit
   controller -> handler : Send GetInviteQuery
   handler -> db : Load the team by invite token
-  db --> handler : No team (never issued, or withdrawn)
+  db --> handler : No team (never issued, mistyped, or reset)
   handler --> controller : Refuse with invite_not_found
   controller -> problems : Write the refusal
   problems --> client : 404 ProblemDetails, code invite_not_found
   client --> store : ApiError invite_not_found
   store --> page : inviteState NotFound
-  page --> actor : Say the invite link cannot be used; no team name, count or pins (L2-001)
+  page --> actor : "This invite link no longer works", "Start your own team";\nno team name, count or pins (L2-001)
 end
 note over page, client
   When the request gets no answer, JoinStore sets inviteState Failed and JoinPage says
-  the invite link could not be opened and offers "Try again", which calls open() again (L2-001).
+  "We couldn’t open this invite" and offers "Try again", which calls open() again (L2-001).
 end note
 @enduml

@@ -59,6 +59,7 @@ class GlobeGestures {
 
 class GlobeView {
   +selectedId: InputSignal<string | null>
+  +selectedGroupIds: InputSignal<string[]>
   +interactive: InputSignal<boolean>
   -onFrame(elapsedMs: number): void
   -onSelectedChange(): void

@@ -14,9 +14,11 @@ day with the day of the teammate who is looking.
   viewer's own clock
 - **time zone id** — IANA name of a city's time zone, such as `America/Mexico_City`
 
-The offset appears on a selected teammate's panel and on each row of the Team screen. The
-overlap appears on a selected teammate's panel, as text and as a bar that draws both working
-days and the part they share across the viewer's day. The viewer's own pin and row show neither.
+The offset appears on a selected teammate's panel and on each row of the Team screen, in the
+column "Compared to you". The overlap appears on a selected teammate's panel, as text and as a
+bar that draws both working days and the part they share across the viewer's day. The viewer's
+own pin and row show neither. A teammate who does not share their status has an offset and no
+overlap: the overlap would say when they are working.
 
 Both are worked out in the browser, in the `domain` library's `time/` folder, from two time zone
 ids and the one injected clock. The Mondino API supplies only each pin's time zone id. The
@@ -37,7 +39,9 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
 ### Frontend — `api` library
 
 - **`Clock`** and **`CLOCK`** — the one injected clock: `now(): Date` and `minute: Signal<Date>`.
-- **`Pin`** — carries `teammateId` and `timeZoneId`.
+- **`Pin`** — carries `teammateId`, `timeZoneId` and `sharesStatus`, which is false for a
+  teammate who has switched off "Share whether I’m working or asleep"
+  (`show-local-time-and-status`).
 - **`ClockFormat`** — `'24-hour' | '12-hour'`, the viewer's choice in `Settings`.
 
 ### Frontend — `domain` library
@@ -55,10 +59,11 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
   minutes and `behind`; a teammate in Bengaluru has 270 minutes and `ahead`.
 - **`formatOffset(offset, form): string`** (`time/`) — pure function; `form` is `'row'` or
   `'panel'`. It gives whole hours, adds minutes only when the difference has a part of an hour,
-  and gives the words for the same time when `direction` is `same`; it never gives "0 h". The
-  words are the mocks': "7 h behind", "4 h 30 min ahead" and "Same time" on a Team row, and on
-  the panel, which adds the viewer, "7 h behind you", "10 h ahead of you" and "Same time as
-  you".
+  and gives the words for the same time when `direction` is `same`; it never gives "0h". The
+  hours and minutes are written with no space before their letter. The words are the mocks':
+  "7h behind", "4h 30m ahead" and "Same time" on a Team row, and on the panel, which adds the
+  viewer and follows the day in one line ("Monday 27 Oct · 7h behind you"), "7h behind you",
+  "10h ahead of you" and "same time as you".
 - **`WorkingDay`** (`time/`) — the constants of the working day in minutes from midnight:
   `startMinute` 540 and `endMinute` 1080. `statusAt` and `overlapBetween` read the same
   constants, so "Working hours" and the overlap cannot disagree.
@@ -101,15 +106,19 @@ instant comes from `CLOCK`.
 
 - **`GlobePage`** — holds one `computed` over the selected pin, `viewerPin`, `CLOCK`'s `minute`
   and the viewer's `ClockFormat`. When the selected pin is the viewer's own, or `viewerPin` is
-  absent, it binds no offset and no overlap. Otherwise it calls `offsetBetween`, `formatOffset`,
-  `workingDayOnViewerClock`, `overlapBetween` and `formatOverlap`.
+  absent, it binds no offset and no overlap. Otherwise it calls `offsetBetween` and
+  `formatOffset`, and, when the selected pin's `sharesStatus` is true,
+  `workingDayOnViewerClock`, `overlapBetween` and `formatOverlap`. When `sharesStatus` is false
+  it binds the offset and no overlap, no working day and no overlap text, so the panel shows no
+  "Working-hours overlap" section for that teammate.
 - **`TeamPage`** — derives the offset text of each row in the same way and binds none for the
-  viewer's own row.
+  viewer's own row. Under 768 px a row gives the offset after the city ("Dubai · 3h ahead").
 - **`TeammatePanel`** — presentation component. It takes the offset text, the `Overlap`, the
   teammate's `DaySpan` and the `OverlapText` in its `content` (`TeammatePanelContent`, designed
-  in `team/view-teammate-panel`) and shows no offset or overlap section when the offset text
-  and the `OverlapText` are `null`.
-- **`TeamTable`** — presentation component. Its offset column shows the offset text of each row.
+  in `team/view-teammate-panel`). It shows no offset when the offset text is `null` and no
+  overlap section when the `OverlapText` is `null`.
+- **`TeamTable`** — presentation component. Its column "Compared to you" shows the offset text
+  of each row.
 - **`OverlapBar`** — presentation component, the `overlap` block of the mocks, under the title
   "Working-hours overlap". It takes the `Overlap` or `null`, the teammate's `DaySpan`, the
   viewer's minute of the day, the teammate's first name and the `OverlapText`. It draws the
@@ -129,7 +138,7 @@ level-1 (L1) requirement, cited by identifier.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-016` | `L1-005` | A teammate's offset is the difference between their local time and the viewer's, in hours and, where the zones differ by part of an hour, minutes. |
+| `L2-016` | `L1-005` | A teammate's offset is the difference between their local time and the viewer's, in hours and, where the zones differ by part of an hour, minutes. It is written with "h" and "m" straight after the numbers ("7h", "4h 30m"), followed by "behind" or "ahead". |
 | `L2-017` | `L1-005` | The overlap between the viewer and a teammate is the part of both their working days (09:00 to 18:00 local) that coincides, given on the viewer's own clock, with a bar that draws both working days, the part they share and the time now across the viewer's day. |
 
 ## Diagrams
@@ -166,9 +175,10 @@ read the `WorkingDay` constants. `TeammatePanel` contains an `OverlapBar` and sh
 ### Behaviour — work out the offset and the overlap for a selected teammate
 
 Selecting the viewer's own pin gives a panel with no offset and no overlap. Selecting another
-teammate works out the offset from the two zones (L2-016), moves the teammate's working day onto
-the viewer's clock and intersects it with the viewer's (L2-017), and gives the bar both working
-days and its text.
+teammate works out the offset from the two zones (L2-016). Where that teammate shares their
+status, the page moves their working day onto the viewer's clock, intersects it with the
+viewer's (L2-017) and gives the bar both working days and its text. Where they do not, the
+panel shows the offset and no overlap.
 
 ![Sequence diagram for working out the offset and the overlap](diagrams/sequence-work-out-offset-and-overlap.png)
 

@@ -15,7 +15,7 @@ is it like where my teammate is, right now": the teammate's local time and their
 - **time zone id** — IANA name of a city's time zone, such as `Europe/Rome`
 
 The feature lives almost wholly in the browser. The Mondino API gives each pin its time zone id
-and a flag that says whether the teammate's status outside working hours may be shown. The API
+and a flag that says whether the teammate shares their status. The API
 stores and sends no local time. The Mondino web app works out every local time and status
 itself, from that time zone id and one shared clock, in the `domain` library's `time/` folder.
 
@@ -36,15 +36,14 @@ presentation components that show a time and a status.
 
 - **`City`** — value object in `Mondino.Domain`. Its `TimeZoneId` holds the IANA name found when
   the teammate's postal code was looked up.
-- **`TeammateSettings`** — value object in `Mondino.Domain`. Its `ShowOutsideWorkingHours`
-  records the teammate's choice for "Show when I’m outside working hours".
+- **`TeammateSettings`** — value object in `Mondino.Domain`. Its `ShareStatus` records the
+  teammate's choice for "Share whether I’m working or asleep", on to begin with.
 - **`GetPinsQueryHandler`** — MediatR handler in `Mondino.Application`. It returns one `PinDto`
   per teammate of the viewer's team.
-- **`PinDto`** — carries `TimeZoneId` and `ShowsStatusOutsideWorkingHours`, and no local time
-  (L2-014). The handler sets `ShowsStatusOutsideWorkingHours` to the teammate's
-  `ShowOutsideWorkingHours`, except on the viewer's own pin, where it is `true`: a teammate
-  still sees their own status. The backend therefore applies the choice, and the frontend only
-  follows the flag.
+- **`PinDto`** — carries `TimeZoneId` and `SharesStatus`, and no local time (L2-014). The
+  handler sets `SharesStatus` to the teammate's `ShareStatus`, except on the viewer's own pin,
+  where it is `true`: a teammate still sees their own status. The backend therefore applies
+  the choice, and the frontend only follows the flag.
 - **`TeamsController`** — exposes `GET /api/teams/{teamId}/pins`, checks nothing itself and
   sends one `GetPinsQuery`.
 
@@ -53,8 +52,7 @@ presentation components that show a time and a status.
 - **`Clock`** and **`CLOCK`** — contract and injection token of the one clock. `now(): Date`
   returns the current instant. `minute: Signal<Date>` holds the instant of the latest minute
   boundary and changes once per minute.
-- **`Pin`** — type mirroring `PinDto`, with `timeZoneId: string` and
-  `showsStatusOutsideWorkingHours: boolean`.
+- **`Pin`** — type mirroring `PinDto`, with `timeZoneId: string` and `sharesStatus: boolean`.
 - **`Status`** — `'early-morning' | 'working-hours' | 'evening' | 'probably-asleep'`.
 - **`ClockFormat`** — `'24-hour' | '12-hour'`, the viewer's choice in `Settings`.
 
@@ -86,10 +84,13 @@ presentation components that show a time and a status.
   `early-morning`, 9 to 17 give `working-hours`, 18 to 22 give `evening`, and 23 and 0 to 6 give
   `probably-asleep`. It takes no day of the week.
 - **`statusFor(pin, time): Status | null`** — pure function. It returns `statusAt(time.hour)`
-  when that status is `working-hours` or when `pin.showsStatusOutsideWorkingHours` is `true`,
-  and `null` otherwise. A `null` status is shown nowhere and is counted neither as working nor
-  as asleep: such a teammate is listed under the Team screen's All filter only, not under
-  Asleep and not in its count. Anything that shows, counts or filters by status calls
+  when `pin.sharesStatus` is `true`, and `null` otherwise, at every hour: a teammate who has
+  switched off "Share whether I’m working or asleep" has no status in working hours either. A
+  `null` status is shown nowhere and is counted neither as working nor as asleep. Such a
+  teammate is not listed under "In working hours now" on the Globe screen, and on the Team
+  screen is listed under All only: not under Working now or Asleep, and not in either count.
+  Their local time, city and offset are still shown, and no working-hours overlap is
+  (`show-offset-and-overlap`). Anything that shows, counts or filters by status calls
   `statusFor`, never `statusAt` directly.
 
 No function in `time/` calls `new Date()`. Each takes the instant as an argument, and the
@@ -133,8 +134,8 @@ time zone rules come from the browser.
 ### Containers
 
 The Mondino web app reads the team's pins from the Mondino API, which reads teammates, their
-cities and their settings from the Mondino database. The API gives a time zone id and a status
-visibility flag per pin; the web app works out the time and the status.
+cities and their settings from the Mondino database. The API gives a time zone id and a
+status sharing flag per pin; the web app works out the time and the status.
 
 ![C4 container view for showing local time and status](diagrams/c4-container.png)
 
@@ -165,7 +166,7 @@ once.
 ### Behaviour — a status changes at its hour
 
 When the clock reaches 09:00 at a teammate's city, `statusFor` returns `working-hours` and the
-badge reads "Working hours" with no reload. Outside 09:00 to 18:00, a pin whose flag is `false`
-gets no status (L2-015).
+badge reads "Working hours" with no reload. A pin whose `sharesStatus` is `false` gets no
+status at any hour (L2-015).
 
 ![Sequence diagram for a status changing at its hour](diagrams/sequence-change-status.png)

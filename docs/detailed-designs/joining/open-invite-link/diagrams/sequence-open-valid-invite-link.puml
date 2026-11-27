@@ -48,6 +48,12 @@ alt the session belongs to a teammate of this team (L2-001)
   client --> store : Invite
   store --> page : inviteState AlreadyJoined
   page --> actor : Navigate to /globe, no second pin
+else the team has 500 teammates
+  handler --> controller : InviteDto, Full true, the team's name only
+  controller --> client : 200 InviteDto
+  client --> store : Invite
+  store --> page : inviteState Full
+  page --> actor : "Northwind is full", no count or pins
 else no session on this team
   handler -> handler : Build bare positions: one city position per teammate, no id, name or city; avatars of the five who joined most recently (L2-001)
   handler --> controller : InviteDto
@@ -55,6 +61,6 @@ else no session on this team
   client --> store : Invite
   store --> page : inviteState Ready
   page -> globe : Load dynamically, pass bare pins, not interactive
-  page --> actor : "Put yourself on the map.", "Joining Northwind · 11 already here", avatars, globe with 11 pins
+  page --> actor : "Put yourself on the map.", "Joining Northwind · 12 already here", avatars, globe with 12 pins,\nfooter "Already on Mondino? Sign in"
 end
 @enduml

@@ -20,23 +20,26 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "TeamPage" as page
   participant "filterByStatus" as fn
   participant "TeamTable" as table
+  participant "ListNote" as note
+  participant "Router" as router
   participant "Clock" as clock
 end box
 actor -> chips : Move with the arrow keys and choose "Working now"
 chips -> chips : Roving focus in one tab list; aria-selected on the chosen tab (L2-028)
 chips -> page : valueChange("working")
-page -> page : filter.set(Working)
+page -> router : navigate /team?filter=working, replacing the entry
+router --> page : filter input = working (L2-028)
 page -> fn : filterByStatus(rows, Working)
-fn --> page : Rows whose statusFor is Working hours, still west to east;\na row with no status shown is under All only
+fn --> page : Rows whose statusFor is Working hours, still west to east;\na teammate who does not share their status is under All only
 alt at least one row
-  page -> table : rows, emptyMessage = null
+  page -> table : rows, caption "Teammates in working hours, west to east"
   table --> actor : The teammates in working hours
 else no row for Working now
-  page -> table : rows = [], "Nobody is in working hours right now."
-  table --> actor : The empty message
+  page -> note : "No one is in working hours right now"
+  note --> actor : The note, with "It’s the quiet gap between time zones.\nCheck back in an hour."
 else no row for Asleep
-  page -> table : rows = [], "Everyone is awake right now."
-  table --> actor : The empty message
+  page -> note : "No one is asleep right now", "Try another filter."
+  note --> actor : The note, with "Show everyone", which returns to All
 end
 == The clock passes an hour that changes a status ==
 clock -> page : Minute tick

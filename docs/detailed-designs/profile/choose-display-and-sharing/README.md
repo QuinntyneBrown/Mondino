@@ -12,9 +12,11 @@ to them and what teammates see of them. This feature covers four things on that 
 - **Display.** Under "Display", the viewer chooses °C or °F ("Temperature") and a 24-hour or
   12-hour clock ("Clock"). The choice belongs to the teammate, is stored by the backend, and
   applies on every screen.
-- **Sharing.** Under "Privacy", two switches, both on to begin with: "Share my local weather"
-  and "Show when I’m outside working hours". The backend applies both, so what a teammate
-  switched off never reaches another teammate's browser as something to hide.
+- **Sharing.** Under "What teammates see", two switches, both on to begin with: "Share my
+  local weather" and "Share whether I’m working or asleep". With the second off, teammates see
+  no status for the viewer at any hour, and no working-hours overlap with them. The backend
+  applies both, so what a teammate switched off never reaches another teammate's browser as
+  something to hide.
 - **Saving.** Nothing on the screen is applied until it is saved. A bar says when there are
   unsaved changes, confirms a save, and reports a save that failed.
 - **Leaving with unsaved changes.** A viewer who tries to leave the screen with unsaved changes
@@ -45,9 +47,17 @@ exist yet; each part below is introduced by this design.
 - **`ProfilePage`** — lazy route `/profile`. It binds the draft's settings to two `Segmented`
   controls and two `Switch` controls, and binds the save state to `SaveBar`. A change is an
   output from a presentation component that the page passes to `ProfileStore`. Each switch
-  carries a line under its label that says what its state means for teammates. While either
-  switch is off in the saved profile, the card of the viewer's own pin adds the note "You still
-  see your own weather and status. Teammates don’t." (L2-034).
+  carries a line under its label (`switch-row__hint`) that says what its state means for
+  teammates, and the word "On" or "Off" beside it; the table below gives the lines. While both
+  switches are off in the draft, a note under them reads "Teammates will see only your name,
+  city and local time." While either switch is off in the saved profile, the card of the
+  viewer's own pin adds the note "You still see your own weather and status. Teammates don’t."
+  (L2-034).
+
+  | Switch | Line when on | Line when off |
+  |--------|--------------|---------------|
+  | "Share my local weather" | "Shown on your pin and in your panel." | "Teammates see your local time and no weather." |
+  | "Share whether I’m working or asleep" | "Worked out from your local time — 09:00 to 18:00 counts as working." | "Teammates see no status for you, at any hour." |
 - **`ProfileStore`** — store provided at the `/profile` route. It holds the saved `Profile` and
   the draft as signals. `hasUnsavedChanges` is computed by comparing the draft with the saved
   profile field by field, so a setting changed back to what was saved removes the bar (L2-035).
@@ -59,10 +69,13 @@ exist yet; each part below is introduced by this design.
 - **`SaveState`** — feature-local union: `idle`, `saving`, `saved`, `failed`.
 - **`unsavedChangesGuard`** — `CanDeactivateFn` on the `/profile` route. When
   `hasUnsavedChanges` is true it opens `DiscardChangesDialog` and lets the navigation continue
-  only on "Leave without saving" (L2-035).
-- **`DiscardChangesDialog`** — CDK Dialog titled "Leave without saving?". It names the settings
-  that have unsaved changes, says they are dropped on leaving, and offers "Leave without saving"
-  and "Keep editing". Escape and "Keep editing" close it and return focus to where it was.
+  only on "Discard and leave" (L2-035). It is asked on every way out of the screen inside the
+  app: a tab in the header and the browser's back button.
+- **`DiscardChangesDialog`** — CDK Dialog with `role="alertdialog"`, titled "Leave without
+  saving?". It reads "You changed your settings but haven’t saved them. If you leave now,
+  those changes are lost and your pin stays as it was." and offers "Discard and leave" and
+  "Keep editing". Focus starts on "Keep editing". Escape and "Keep editing" close it and
+  return focus to where it was.
 - **Closing the tab** — while `hasUnsavedChanges` is true, `ProfilePage` holds a `beforeunload`
   listener so the browser asks before a reload or a closed tab. The listener is removed when the
   changes are saved and when the page is destroyed.
@@ -93,15 +106,18 @@ exist yet; each part below is introduced by this design.
   profile arrives. It never holds a postal code. The backend's copy is the one that holds
   (L2-033).
 - **`statusFor(pin, time)`** (`@mondino/domain`, `time/`) — returns the status to show
-  for a pin, or none. When the pin's status visibility flag is false, it returns a status only
-  for "Working hours". The pin, the panel, the Team row and the day ribbon call it instead of
-  showing `statusAt` directly (L2-034).
+  for a pin, or none. When `Pin.sharesStatus` is false it returns none, at every hour. The
+  pin, the panel, the Team row and the day ribbon call it instead of showing `statusAt`
+  directly. Whatever counts or filters by status calls it too, so a teammate who does not
+  share their status is counted neither as working nor as asleep, and is listed under All
+  only: not under "In working hours now", "Working now" or "Asleep". The panel of such a
+  teammate shows no working-hours overlap (L2-034).
 
 | `SaveBar` state | When | Text | Action |
 |-----------------|------|------|--------|
 | `hidden` | The draft equals the saved profile and no confirmation is showing | none | none |
 | `unsaved` | `hasUnsavedChanges` is true | "You have unsaved changes" | "Save changes" |
-| `saving` | A save is pending | "Saving your changes…" | "Saving…", disabled and marked busy |
+| `saving` | A save is pending | "Saving…" | "Saving", disabled and marked busy |
 | `saved` | For 4 seconds after a save succeeds | "Saved — your pin is up to date" | none |
 | `failed` | A save failed and the changes are still unsaved; it stays until a save succeeds or the changes are undone | "Couldn’t save. Your changes are still here." | "Try again" |
 
@@ -130,8 +146,9 @@ exist yet; each part below is introduced by this design.
   - `ShareWeather` is false and the pin is another teammate's: the `PinDto` carries a null
     `Weather` (no weather and no temperature) and the `WeatherState` `NotShared`, and the
     handler does not ask `IWeatherSource` for it (L2-034).
-  - `ShowOutsideWorkingHours` is false and the pin is another teammate's: the `PinDto`'s status
-    visibility flag, `ShowsStatusOutsideWorkingHours`, is false.
+  - `ShareStatus` is false and the pin is another teammate's: `PinDto.SharesStatus` is false.
+    The browser then shows no status for that pin at any hour and no working-hours overlap.
+    The time zone still travels, since the local time is still shown.
   - The pin is the viewer's own: the `PinDto` carries the weather and a true flag whatever the
     switches say. The viewer's own screens read the switches from `Settings` and add the note
     that teammates do not see them (L2-034).
@@ -145,10 +162,11 @@ exist yet; each part below is introduced by this design.
 ### Backend — `Mondino.Domain`
 
 - **`TeammateSettings`** — value object: `TemperatureUnit`, `ClockFormat`, `MomentKinds`,
-  `ShareWeather`, `ShowOutsideWorkingHours`. `DefaultsFor(countryCode)` gives a new teammate's
+  `ShareWeather`, `ShareStatus`. `DefaultsFor(countryCode)` gives a new teammate's
   settings: Fahrenheit for the United States and Celsius elsewhere (L2-019), the 12-hour clock
   for the United States and Canada and the 24-hour clock otherwise (L2-033), all four kinds of
-  moment, and both sharing switches on (L2-034). `JoinTeamCommandHandler` calls it.
+  moment, and both sharing switches on (L2-034). `JoinTeamCommandHandler` and
+  `CreateTeamCommandHandler` call it.
 - **`Teammate`** — `ChangeSettings(settings)` replaces the value object whole.
 
 ### Errors
@@ -157,7 +175,7 @@ exist yet; each part below is introduced by this design.
 |------|--------|--------|-----------------------|
 | A setting outside its allowed values | 400 | `validation_failed` | `SaveBar` in `failed` |
 | The backend cannot be reached, or answers 5xx | none or 5xx | none | `SaveBar` in `failed`; the draft stays |
-| The session has ended | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows the no-team page in place; how a teammate signs in again is not designed |
+| The session has ended | 401 | none | `sessionExpiredInterceptor` forgets the membership and the address shows "You need an invite link" in place (`adapt-to-every-width`); the teammate signs in again through `sign-in` |
 
 ## Requirements
 
@@ -167,7 +185,7 @@ requirement cited beside it.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-033` | `L1-011` | The viewer chooses °C or °F and a 24-hour or 12-hour clock. The choice belongs to the teammate and applies on every screen. |
-| `L2-034` | `L1-011` | Two switches, both on to begin with, decide what teammates see of the viewer: "Share my local weather" and "Show when I’m outside working hours". The backend applies both. |
+| `L2-034` | `L1-011` | Under "What teammates see", two switches, both on to begin with, decide what teammates see of the viewer: "Share my local weather" ("Shown on your pin and in your panel.") and "Share whether I’m working or asleep" ("Worked out from your local time — 09:00 to 18:00 counts as working."). The backend applies both. A teammate's name, city and local time are always seen. |
 | `L2-035` | `L1-011` | A change in Profile & Settings is not applied until it is saved. While there are unsaved changes a bar says so and offers "Save changes"; once saved it confirms and then dismisses itself. |
 
 ## Diagrams
@@ -214,8 +232,8 @@ offers to try again (L2-035).
 ### Behaviour — another teammate reads the pins after sharing is switched off
 
 `GetPinsQueryHandler` applies both switches for the viewer who asks. The response to another
-teammate carries no weather, and the `WeatherState` `NotShared`, for a teammate who does not share it, and a false status visibility
-flag for one who does not show when they are outside working hours (L2-034).
+teammate carries no weather, and the `WeatherState` `NotShared`, for a teammate who does not share it, and a false
+`SharesStatus` for one who does not share whether they are working or asleep (L2-034).
 
 ![Sequence diagram for reading pins after sharing is switched off](diagrams/sequence-read-pins-after-sharing-off.png)
 

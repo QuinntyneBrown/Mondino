@@ -54,6 +54,8 @@ package "Frontend" {
     +value: string
     +country: Country
     +lookupState: LookupState
+    +disabled: boolean
+    +mode: Join | Move
     +valueChange: string
     +blurred: void
     +retry: void

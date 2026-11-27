@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Make a team
+
+Person(person, "Person starting a team", "Gives a team name, a name, a work email, a country and a postal code")
+System(mondino, "Mondino", "Makes the team, its invite link and the maker's pin at their city")
+System_Ext(postal, "Postal code source", "Resolves a postal code to its city; provider TO SUPPLY")
+System_Ext(weather, "Open-Meteo", "Current weather at a position")
+
+Rel(person, mondino, "Starts a team and receives its invite link")
+Rel(mondino, postal, "Country and postal code only", "HTTPS")
+Rel(mondino, weather, "The city's position only", "HTTPS")
+@enduml

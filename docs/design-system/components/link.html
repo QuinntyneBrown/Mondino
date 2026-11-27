@@ -36,6 +36,7 @@
       <li><a href="../components/select.html">Select</a></li>
       <li><a href="../components/form-field.html">Form field</a></li>
       <li><a href="../components/lookup-message.html">Lookup message</a></li>
+      <li><a href="../components/copy-field.html">Copy field</a></li>
       <li><a href="../components/switch.html">Switch</a></li>
       <li><a href="../components/chip.html">Chip</a></li>
       <li><a href="../components/avatar.html">Avatar</a></li>
@@ -51,6 +52,8 @@
       <li><a href="../components/empty-state.html">Empty state</a></li>
       <li><a href="../components/skip-link.html">Skip link</a></li>
       <li><a href="../components/app-header.html">App header</a></li>
+      <li><a href="../components/auth.html">Auth</a></li>
+      <li><a href="../components/notice-page.html">Notice page</a></li>
       <li><a href="../components/logo.html">Logo</a></li>
       <li><a href="../components/globe.html">Globe</a></li>
       <li><a href="../components/pin.html">Pin</a></li>
@@ -63,6 +66,7 @@
       <li><a href="../components/overlap-bar.html">Overlap bar</a></li>
       <li><a href="../components/day-ribbon.html">Day ribbon</a></li>
       <li><a href="../components/team-table.html">Team table</a></li>
+      <li><a href="../components/city-section.html">City section</a></li>
     </ul></details>
     <details open><summary>Patterns</summary><ul>
       <li><a href="../patterns/forms.html">Forms</a></li>
@@ -84,7 +88,7 @@
       <ul class="ds-toc"><li><a href="#overview">Overview</a></li><li><a href="#anatomy">Anatomy</a></li><li><a href="#variants">Variants</a></li><li><a href="#sizes">Sizes</a></li><li><a href="#states">States</a></li><li><a href="#responsive">Responsive behaviour</a></li><li><a href="#theming">Theming</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#content">Content</a></li><li><a href="#do-dont">Do and don’t</a></li><li><a href="#tokens">Tokens</a></li><li><a href="#code">Code</a></li><li><a href="#sources">Sources</a></li></ul>
     </header>
 <section class="ds-section" id="overview"><h2><a href="#overview">Overview</a></h2>
-<p>Use a link for navigation. Inline links are underlined and pin-coloured. “All moments” in the panel is a standalone link with a trailing arrow. A whole row that opens a teammate is a <a href="panel-row.html">panel row</a>, not a link in text.</p>
+<p>Use a link for navigation. Inline links are underlined and pin-coloured: “Sign in” and “Start a team” under a form, “Choose moments” in the panel’s note. “All moments” and “2 more on the Team page” in the panel are standalone links with a trailing arrow. A whole row that opens a teammate is a <a href="panel-row.html">panel row</a>, not a link in text.</p>
 </section>
 
 <section class="ds-section" id="anatomy"><h2><a href="#anatomy">Anatomy</a></h2>
@@ -92,14 +96,14 @@
 </section>
 
 <section class="ds-section" id="variants"><h2><a href="#variants">Variants</a></h2>
-<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><p>Nothing to show: every kind of moment is turned off for your globe. <a href="../../mocks/pages/moments/default.html">Choose what shows</a></p><a class="panel__more" href="../../mocks/pages/moments/default.html">All moments <svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div><div class="ds-example__caption"><span>Inline, and standalone with an arrow</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;p&gt;Nothing to show: every kind of moment is turned off for your globe. &lt;a href=&quot;../../mocks/pages/moments/default.html&quot;&gt;Choose what shows&lt;/a&gt;&lt;/p&gt;&lt;a class=&quot;panel__more&quot; href=&quot;../../mocks/pages/moments/default.html&quot;&gt;All moments &lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;/a&gt;</code></pre></details></div>
+<div class="ds-example"><div class="ds-example__canvas ds-example__canvas--stack"><p class="join__footer" style="margin-top: 0; padding-top: 0;">Already on Mondino? <a href="../../mocks/pages/sign-in/default.html">Sign in</a></p><p class="auth__footer" style="margin-top: 0; padding-top: 0;">New here? <a href="../../mocks/pages/create-team/default.html">Start a team</a> or open the invite link a teammate sent you.</p><div class="panel" style="width: 100%; max-width: var(--layout-panel-width);"><div class="panel__note"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/></svg><div><strong>Every kind of moment is switched off</strong>Holidays, races, events and sport won’t show on pins until you turn some back on. <a href="../../mocks/pages/profile/default.html">Choose moments</a></div></div></div><a class="panel__more" href="../../mocks/pages/moments/default.html">All moments <svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a><a class="panel__more" href="../../mocks/pages/team/working.html">2 more on the Team page <svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div><div class="ds-example__caption"><span>Inline: the other way in, under a form, and “Choose moments” in a note. Standalone with an arrow: “All moments”, “2 more on the Team page”.</span></div><details class="ds-example__code"><summary>HTML</summary><pre><code>&lt;p class=&quot;join__footer&quot; style=&quot;margin-top: 0; padding-top: 0;&quot;&gt;Already on Mondino? &lt;a href=&quot;../../mocks/pages/sign-in/default.html&quot;&gt;Sign in&lt;/a&gt;&lt;/p&gt;&lt;p class=&quot;auth__footer&quot; style=&quot;margin-top: 0; padding-top: 0;&quot;&gt;New here? &lt;a href=&quot;../../mocks/pages/create-team/default.html&quot;&gt;Start a team&lt;/a&gt; or open the invite link a teammate sent you.&lt;/p&gt;&lt;div class=&quot;panel&quot; style=&quot;width: 100%; max-width: var(--layout-panel-width);&quot;&gt;&lt;div class=&quot;panel__note&quot;&gt;&lt;svg class=&quot;icon&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;div&gt;&lt;strong&gt;Every kind of moment is switched off&lt;/strong&gt;Holidays, races, events and sport won’t show on pins until you turn some back on. &lt;a href=&quot;../../mocks/pages/profile/default.html&quot;&gt;Choose moments&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;a class=&quot;panel__more&quot; href=&quot;../../mocks/pages/moments/default.html&quot;&gt;All moments &lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;/a&gt;&lt;a class=&quot;panel__more&quot; href=&quot;../../mocks/pages/team/working.html&quot;&gt;2 more on the Team page &lt;svg class=&quot;icon icon--sm&quot; aria-hidden=&quot;true&quot; viewBox=&quot;0 0 24 24&quot;&gt;…&lt;/svg&gt;&lt;/a&gt;</code></pre></details></div>
 </section>
 
 <section class="ds-section" id="sizes" data-na="It has one size."><h2><a href="#sizes">Sizes</a></h2><p class="ds-na">It has one size.</p></section>
 
 <section class="ds-section" id="states"><h2><a href="#states">States</a></h2>
-<div class="ds-matrix"><table><thead><tr><th scope="col">Variant</th><th scope="col">Default</th><th scope="col">Hover</th><th scope="col">Focus</th></tr></thead><tbody><tr><th scope="row">Inline</th><td><a href="../../mocks/pages/moments/default.html">Choose what shows</a></td><td><a href="../../mocks/pages/moments/default.html" style="color: var(--color-fg-link-hover);">Choose what shows</a></td><td><a href="../../mocks/pages/moments/default.html" data-state="focus">Choose what shows</a></td></tr></tbody></table></div>
-<div class="ds-themes"><div data-theme="light"><p>Everyone is still here: in the panel, and on <a href="../../mocks/pages/moments/default.html">Team</a>.</p></div><div data-theme="dark"><p>Everyone is still here: in the panel, and on <a href="../../mocks/pages/moments/default.html">Team</a>.</p></div></div>
+<div class="ds-matrix"><table><thead><tr><th scope="col">Variant</th><th scope="col">Default</th><th scope="col">Hover</th><th scope="col">Focus</th></tr></thead><tbody><tr><th scope="row">Inline</th><td><a href="../../mocks/pages/profile/default.html">Choose moments</a></td><td><a href="../../mocks/pages/profile/default.html" style="color: var(--color-fg-link-hover);">Choose moments</a></td><td><a href="../../mocks/pages/profile/default.html" data-state="focus">Choose moments</a></td></tr></tbody></table></div>
+<div class="ds-themes"><div data-theme="light"><p class="join__footer" style="margin-top: 0; padding-top: 0;">Already on Mondino? <a href="../../mocks/pages/sign-in/default.html">Sign in</a></p></div><div data-theme="dark"><p class="join__footer" style="margin-top: 0; padding-top: 0;">Already on Mondino? <a href="../../mocks/pages/sign-in/default.html">Sign in</a></p></div></div>
 </section>
 
 <section class="ds-section" id="responsive"><h2><a href="#responsive">Responsive behaviour</a></h2>
@@ -122,11 +126,11 @@
 </section>
 
 <section class="ds-section" id="content"><h2><a href="#content">Content</a></h2>
-<p>Name the destination: “All moments”, “Team”, “Back to the globe”. Sentence case, no full stop.</p>
+<p>Name the destination: “All moments”, “Sign in”, “Start a team”, “Choose moments”, “Back to the globe”. Sentence case, no full stop. A link in a note is at least 44 px tall.</p>
 </section>
 
 <section class="ds-section" id="do-dont"><h2><a href="#do-dont">Do and don’t</a></h2>
-<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p><a href="../../mocks/pages/moments/default.html">Choose what shows</a></p></div><figcaption>Underline a link in text so it does not rely on colour.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p><a href="../../mocks/pages/moments/default.html" style="text-decoration: none;">Choose what shows</a></p></div><figcaption>Remove the underline from an inline link.</figcaption></figure></div>
+<div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><p><a href="../../mocks/pages/moments/default.html">Choose moments</a></p></div><figcaption>Underline a link in text so it does not rely on colour.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><p><a href="../../mocks/pages/moments/default.html" style="text-decoration: none;">Choose moments</a></p></div><figcaption>Remove the underline from an inline link.</figcaption></figure></div>
 <div class="ds-dodont"><figure class="ds-do"><div class="ds-example__canvas"><a class="panel__more" href="../../mocks/pages/moments/default.html">All moments <svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div><figcaption>Use a link to go to another screen.</figcaption></figure><figure class="ds-dont"><div class="ds-example__canvas"><button class="btn btn--link" type="button">All moments</button></div><figcaption>Use a button to navigate.</figcaption></figure></div>
 </section>
 
@@ -141,7 +145,7 @@
 
 <section class="ds-section" id="sources"><h2><a href="#sources">Sources</a></h2>
 <p>Extracted from these mocks:</p>
-<ul><li><a href="../../mocks/pages/globe/default.html">pages/globe/default</a> (“All moments”)</li><li><a href="../../mocks/pages/globe/quiet.html">pages/globe/quiet</a> (inline link)</li><li><a href="../../mocks/pages/globe/globe-unavailable.html">pages/globe/globe-unavailable</a> (inline link in an alert)</li></ul>
+<ul><li><a href="../../mocks/pages/globe/default.html">pages/globe/default</a> (“All moments”, “2 more on the Team page”)</li><li><a href="../../mocks/pages/globe/quiet.html">pages/globe/quiet</a> (“Choose moments”)</li><li><a href="../../mocks/pages/join/default.html">pages/join/default</a> (“Sign in”)</li><li><a href="../../mocks/pages/sign-in/default.html">pages/sign-in/default</a> (“Start a team”)</li></ul>
 <p>Drift fixed during extraction: the prototype’s “All moments” used the pin colour at 3.4:1. Links use <code>--color-fg-link</code>, a darker pin at 4.5:1.</p>
 </section>
     <footer class="ds-footer"><span>Mondino design system · extracted from <a href="../../mocks/index.html">docs/mocks</a></span><a href="#top">Back to top</a></footer>

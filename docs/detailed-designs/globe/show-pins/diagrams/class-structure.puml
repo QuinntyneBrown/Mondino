@@ -23,25 +23,35 @@ package "api library" {
     +timeZoneId: string
     +weather: Weather | null
     +weatherState: WeatherState
-    +showsStatusOutsideWorkingHours: boolean
+    +sharesStatus: boolean
     +isViewer: boolean
     +moments: Moment[]
+  }
+  class PlacePoint {
+    +position: Position
+    +pins: Pin[]
+    +x: number
+    +y: number
+    +depth: number
   }
   class PinPlacement {
     +kind: 'pin' | 'group'
     +position: Position
     +pins: Pin[]
-    +offsetX: number
-    +offsetY: number
   }
-  interface PinSpreader {
-    +spread(pins: Pin[], globeSize: number): PinPlacement[]
+  class GroupOptions {
+    +radiusPx: number
+    +selectedId: string | null
+    +heldGroupIds: string[]
+  }
+  interface PinGrouper {
+    +group(points: PlacePoint[], options: GroupOptions): PinPlacement[]
   }
 }
 
 package "domain library" {
-  class "spreadPins" as spreadPins << (F,#D1FADF) function >> {
-    +spreadPins(pins: Pin[], globeSize: number): PinPlacement[]
+  class "groupPins" as groupPins << (F,#D1FADF) function >> {
+    +groupPins(points: PlacePoint[], options: GroupOptions): PinPlacement[]
   }
 }
 
@@ -50,21 +60,25 @@ package "globe library" {
     +pins: InputSignal<Pin[]>
     +descriptions: InputSignal<Map<string, string>>
     +selectedId: InputSignal<string | null>
+    +selectedGroupIds: InputSignal<string[]>
     +interactive: InputSignal<boolean>
     +select: OutputEmitterRef<string | null>
     +selectGroup: OutputEmitterRef<string[]>
-    +placements: Signal<PinPlacement[]>
     +globeSize: Signal<number>
   }
   class PinLayer {
-    +placements: InputSignal<PinPlacement[]>
+    +pins: InputSignal<Pin[]>
+    +globeSize: InputSignal<number>
     +descriptions: InputSignal<Map<string, string>>
     +selectedId: InputSignal<string | null>
+    +selectedGroupIds: InputSignal<string[]>
     +compact: InputSignal<boolean>
     +select: OutputEmitterRef<string | null>
     +selectGroup: OutputEmitterRef<string[]>
     +liftedId: Signal<string | null>
+    +placements: Signal<PinPlacement[]>
     +update(scene: GlobeScene): void
+    +anchorOf(teammateIds: string[]): Position | null
   }
   class LabelPlacer {
     {static} +place(points: ProjectedPin[], globe: DOMRect): LabelSide[]
@@ -77,6 +91,7 @@ package "globe library" {
   class ProjectedPoint {
     +x: number
     +y: number
+    +depth: number
     +facing: boolean
   }
 }
@@ -105,17 +120,20 @@ package "Mondino.Application" {
     +string TimeZoneId
     +WeatherDto? Weather
     +WeatherState WeatherState
-    +bool ShowsStatusOutsideWorkingHours
+    +bool SharesStatus
     +bool IsViewer
     +IReadOnlyList<MomentDto> Moments
   }
 }
 
-spreadPins ..|> PinSpreader : bound to PIN_SPREADER
-PinSpreader ..> PinPlacement : returns
+groupPins ..|> PinGrouper : bound to PIN_GROUPER
+PinGrouper ..> PlacePoint : reads
+PinGrouper ..> GroupOptions : reads
+PinGrouper ..> PinPlacement : returns
+PlacePoint "1" o-- "1..*" Pin
 PinPlacement "1" o-- "1..*" Pin
-GlobeView ..> PinSpreader : injects
 GlobeView *-- PinLayer
+PinLayer ..> PinGrouper : injects
 GlobeView ..> PinMarkTemplate : content
 GlobeView ..> PinLabelTemplate : content
 PinLayer ..> LabelPlacer : places labels with

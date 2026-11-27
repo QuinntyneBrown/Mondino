@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — Open the emailed sign-in link
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Teammate" as actor
+box "Frontend — Mondino web app" #E0F2FE
+  participant "SignInPage" as page
+  participant "SignInStore" as store
+  participant "HttpSignInApi" as client
+end box
+box "Backend — Mondino API" #D1FADF
+  participant "SignInController" as controller
+end box
+box "Backend — Mondino Application and Domain" #ECFDF3
+  participant "RedeemSignInLinkCommandHandler" as handler
+  participant "SignInLink" as link
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  database "Mondino database" as db
+  participant "TeammateSessionHandler" as session
+end box
+actor -> page : Open the link from the email: /sign-in with the token in the fragment
+page -> page : Read the token, remove it from the address
+page -> store : open(signInToken)
+store -> client : redeem(signInToken)
+client -> controller : POST /api/sign-in-links/redemptions, token in the body
+controller -> controller : Apply the SignInRedemption rate limit policy (L2-045)
+controller -> handler : Send RedeemSignInLinkCommand
+handler -> db : Load the SignInLink by the token's hash
+alt no link, expired, or already used
+  handler --> controller : Refuse with sign_in_link_unusable
+  controller --> client : 410 ProblemDetails, code sign_in_link_unusable
+  client --> store : ApiError
+  store --> page : state LinkUnusable
+  page --> actor : What is shown is TO SUPPLY
+else usable
+  handler -> link : TryUse(now from TimeProvider)
+  link --> handler : Used once (L2-052)
+  handler -> db : Find the teammate with this email; save
+  alt the email is on a team
+    db --> handler : Teammate and Team
+    handler --> controller : SignInResultDto with team id, teammate id and team name
+    controller -> session : Sign in the teammate
+    session --> controller : Session cookie: HttpOnly, Secure, SameSite
+    controller --> client : 200 SignInResultDto, Set-Cookie
+    client --> store : SignInResult with a membership
+    store --> page : Membership
+    page -> page : TeamMembership.remember(membership)
+    page --> actor : Navigate to /globe (L2-052)
+  else the email is on no team
+    db --> handler : None
+    handler --> controller : SignInResultDto with the email only
+    controller --> client : 200 SignInResultDto, no cookie
+    client --> store : SignInResult with no membership
+    store --> page : The email
+    page --> actor : Navigate to /globe with the email in the navigation state:\n"You need an invite link" (L2-052)
+  end
+end
+@enduml

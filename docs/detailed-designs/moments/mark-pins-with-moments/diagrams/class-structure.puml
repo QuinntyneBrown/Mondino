@@ -44,12 +44,16 @@ interface Emblem {
   +kind: MomentKind
 }
 
-interface MomentMarker {
+interface MarkedMoment {
   +moment: Moment
+  +when: string
+}
+
+interface MomentMarker {
+  +moments: MarkedMoment[]
   +emblem: Emblem
   +count: number
   +today: boolean
-  +when: string
 }
 
 class "moments/ (domain)" as moments <<functions>> {
@@ -88,7 +92,8 @@ GlobePage --> GlobeView : passes pins and markers
 moments ..> Pin : reads
 moments ..> Settings : takes momentKinds from
 moments ..> MomentMarker : returns
-MomentMarker --> Moment
+MomentMarker "1" o-- "1..*" MarkedMoment
+MarkedMoment --> Moment
 MomentMarker --> Emblem
 Pin "1" --> "*" Moment
 Moment --> MomentKind

@@ -1,0 +1,164 @@
+@startuml
+set namespaceSeparator none
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure — Make a team
+
+package "mondino application" {
+  class CreateTeamPage
+  class CreateTeamStore {
+    +teamName: WritableSignal<string>
+    +name: WritableSignal<string>
+    +email: WritableSignal<string>
+    +countryCode: WritableSignal<string>
+    +postalCode: WritableSignal<string>
+    +lookupState: Signal<LookupState>
+    +problems: Signal<FieldProblem[]>
+    +createState: Signal<CreateTeamState>
+    -createRequestId: string
+    +lookUp(): Promise<void>
+    +create(): Promise<void>
+  }
+  enum CreateTeamState {
+    Idle
+    Creating
+    Created
+    Failed
+  }
+}
+package "@mondino/domain" {
+  class TeamMembership {
+    +remember(membership: Membership): void
+  }
+}
+package "@mondino/components" {
+  class AuthLayout
+  class CopyField {
+    +value: string
+    +label: string
+    +copied: boolean
+    +copy: Output<void>
+    +select(): void
+  }
+  class PostalCodeField
+}
+package "@mondino/api" {
+  interface TeamCreationApi {
+    +getCountries(): Promise<Country[]>
+    +lookUpPostalCode(countryCode, postalCode, signal): Promise<PostalCodeResult>
+    +searchCities(countryCode, text, signal): Promise<CityResult[]>
+    +createTeam(request: CreateTeamRequest): Promise<CreatedTeam>
+  }
+  class CreateTeamRequest {
+    +teamName: string
+    +name: string
+    +email: string
+    +countryCode: string
+    +postalCode: string | null
+    +cityId: string | null
+    +createRequestId: string
+  }
+  class CreatedTeam {
+    +teamId: string
+    +teammateId: string
+    +teamName: string
+    +inviteToken: string
+  }
+}
+package "Mondino.Api" {
+  class TeamCreationController {
+    +GetCountries(): Task<ActionResult<CountryDto[]>>
+    +LookUpPostalCode(body): Task<ActionResult<PostalCodeResultDto>>
+    +SearchCities(body): Task<ActionResult<CityResultDto[]>>
+    +Create(body: CreateTeamRequest): Task<ActionResult<CreatedTeamDto>>
+  }
+}
+package "Mondino.Application" {
+  class CreateTeamCommand {
+    +string TeamName
+    +string Name
+    +string Email
+    +string CountryCode
+    +string? PostalCode
+    +string? CityId
+    +Guid CreateRequestId
+  }
+  class CreateTeamCommandValidator
+  class CreateTeamCommandHandler {
+    +Handle(command: CreateTeamCommand): Task<CreatedTeamDto>
+  }
+  class CreatedTeamDto {
+    +Guid TeamId
+    +Guid TeammateId
+    +string TeamName
+    +string InviteToken
+  }
+  interface IInviteTokens {
+    +Create(): string
+  }
+  class PostalCodeFormats
+  interface IPostalCodeLookup
+  interface ICityDirectory
+  class PinColourPicker
+  interface IAppDbContext
+}
+package "Mondino.Domain" {
+  class Team {
+    +Guid Id
+    +string Name
+    +string InviteToken
+    +Guid CreateRequestId
+    +{static} Create(name, inviteToken, createRequestId, createdAt): Team
+    +AddTeammate(name, postalCode, city, colour, joinRequestId, joinedAt): Teammate
+  }
+  class Teammate {
+    +Guid Id
+    +string Name
+    +EmailAddress? Email
+    +PostalCode? PostalCode
+    +City City
+    +SetEmail(email: EmailAddress): void
+  }
+  class EmailAddress
+  class City
+}
+package "Mondino.Infrastructure" {
+  class InviteTokens
+  class TeammateSessionHandler
+}
+
+CreateTeamPage --> CreateTeamStore
+CreateTeamPage ..> AuthLayout
+CreateTeamPage ..> CopyField
+CreateTeamPage ..> PostalCodeField
+CreateTeamPage ..> TeamMembership : remembers the team once it is made
+CreateTeamStore --> CreateTeamState
+CreateTeamStore ..> TeamCreationApi : TEAM_CREATION_API
+TeamCreationApi ..> CreateTeamRequest
+TeamCreationApi ..> CreatedTeam
+TeamCreationController ..> CreateTeamCommand : sends
+TeamCreationController ..> TeammateSessionHandler : signs in through
+CreateTeamCommandValidator ..> CreateTeamCommand : validates
+CreateTeamCommandHandler ..> CreateTeamCommand : handles
+CreateTeamCommandHandler ..> CreatedTeamDto : returns
+CreateTeamCommandHandler ..> IInviteTokens
+CreateTeamCommandHandler ..> PostalCodeFormats
+CreateTeamCommandHandler ..> IPostalCodeLookup
+CreateTeamCommandHandler ..> ICityDirectory
+CreateTeamCommandHandler ..> PinColourPicker
+CreateTeamCommandHandler ..> IAppDbContext
+CreateTeamCommandHandler --> Team : creates
+InviteTokens ..|> IInviteTokens
+Team "1" *-- "1..500" Teammate
+Teammate --> EmailAddress
+Teammate --> City
+@enduml

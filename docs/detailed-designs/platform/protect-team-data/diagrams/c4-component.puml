@@ -6,9 +6,9 @@ title Components — Protect team data
 Container(spa, "Mondino web app", "Angular", "Sends requests")
 Container_Boundary(api, "Mondino API") {
   Component(headers, "SecurityHeadersMiddleware", "ASP.NET Core middleware", "CSP, nosniff, no-referrer and HSTS on each response")
-  Component(limits, "RateLimitPolicies", "ASP.NET Core rate limiter", "Limits per client on the three open endpoints")
+  Component(limits, "RateLimitPolicies", "ASP.NET Core rate limiter", "Limits per client on each open endpoint")
   Component(session, "TeammateSessionHandler", "Authentication handler", "Turns the session cookie into the current teammate, or 401")
-  Component(controllers, "InvitesController, TeamsController, ProfileController", "Controllers", "Check nothing and send one MediatR request")
+  Component(controllers, "InvitesController, SignInController, TeamCreationController, TeamsController, ProfileController", "Controllers", "Check nothing and send one MediatR request")
   Component(scope, "TeamScopeBehaviour", "MediatR pipeline behaviour", "Refuses a request for a team the current teammate is not in")
   Component(validation, "ValidationBehaviour", "MediatR pipeline behaviour", "Runs the request's validator before its handler")
   Component(handlers, "Request handlers", "MediatR handlers", "Read and change only what the current teammate may")

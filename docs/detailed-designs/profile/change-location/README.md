@@ -12,8 +12,10 @@ Profile & Settings, titled "Your pin", is the screen where a teammate sees and c
 Mondino holds about them. This feature covers the top of that screen. It shows the viewer's own
 pin on a small globe with their city, country, local time and time zone, and the reminder
 "Teammates see your city, never your postal code." It also lets a teammate who has moved change
-their country and postal code. The new postal code is looked up as it is on Join. On saving, the
-pin moves to the new city and takes that city's time zone, weather and moments.
+their country and postal code, under "Location" and its note "Moved? Look up your new postal
+code and your pin follows when you save." The new postal code is looked up as it is on Join,
+here when the teammate chooses the button "Look up" beside the field. On saving, the pin moves
+to the new city and takes that city's time zone, weather and moments.
 
 The terms used below:
 
@@ -35,11 +37,16 @@ not exist yet; each part below is introduced by this design.
 ### Frontend — `mondino` application
 
 - **`ProfilePage`** — lazy route `/profile`, guarded by `teammateGuard`. It reads the profile
-  through `PROFILE_API`, lays out "Your pin" beside the settings from tablet width up and in one
-  column on a phone, and passes values to presentation components. It holds no rule of its own.
+  through `PROFILE_API`, lays out "Your pin" beside the settings from 992 px and in one
+  column under it, and passes values to presentation components. It holds no rule of its own.
   While the profile is being read it shows a placeholder for the globe and for each section, and
-  announces "Loading your pin and settings…". When the read fails it shows "We couldn’t load
-  your pin" in place of the screen, with "Try again" and "Back to the globe".
+  announces "Loading your pin and settings…". When the read fails it shows "Your settings
+  didn’t load" and "We couldn’t reach Mondino. Your pin is unchanged — try again in a moment."
+  in place of the screen, with "Try again" and "Back to the globe".
+- **"Look up"** — button that `ProfilePage` renders in the row of the country and postal code
+  fields (`field-row__action`). It calls `ProfileStore.lookUp()`. Leaving the postal code field
+  starts no lookup on this screen. While the lookup runs the button is disabled and marked
+  `aria-busy`.
 - **`ProfileStore`** — store provided at the `/profile` route, so its state goes when the viewer
   leaves the screen. It holds the saved `Profile`, the draft, the state of the postal code lookup
   and the state of the save as signals. `changeCountry(countryCode)` and
@@ -70,10 +77,12 @@ not exist yet; each part below is introduced by this design.
 - **`ApiError`** — error with a `code`. `ProfileStore` branches on `postal_code_not_found`,
   `postal_code_unavailable` and `rate_limited`; the page shows its own message for each.
 - **`PostalCodeField`** (`@mondino/components`) — the postal code field that Join also uses, in
-  the same shape: inputs `value`, `country` and `lookupState`, outputs `valueChange`, `blurred`
-  and `retry`. It injects nothing. The states are Join's, with this screen's own copy:
-  - `Locating`: "Finding M5V 2T6…".
-  - `Found`: "Toronto, Ontario — your pin moves here when you save. 9° and cloudy right now."
+  the same shape: inputs `value`, `country`, `lookupState`, `disabled` and `mode`, outputs
+  `valueChange`, `blurred` and `retry`. It injects nothing. Here the mode is `Move`: the line
+  under the row is empty while idle, and the states carry this screen's own copy:
+  - `Locating`: "Finding M5V 2T6 in Canada…".
+  - `Found`: "Toronto, Canada. Your pin moves here when you save.", with the city and country
+    in bold. The line names no weather.
   - `NotFound`: the alert of L2-004, ending "Your pin stays in Milan." ("We couldn’t find
     “M5V 2T” in Canada. Canadian postal codes look like A1A 1A1. Your pin stays in Milan."),
     with `aria-invalid` on the input.
@@ -83,8 +92,10 @@ not exist yet; each part below is introduced by this design.
   - `RateLimited` (mock `profile/rate-limited`): "That was a lot of tries in a short time. Wait
     a moment, then try again. Your pin stays in Milan."
 
-  In the last three states what the viewer typed is kept, saving is not offered for it, and
-  the pin stays where it was.
+  In the last three states what the viewer typed is kept, the postal code has not been looked
+  up, so there is nothing to save and no save bar for it, and the pin stays where it was.
+  "Look up" works again after a moment. The city search that Join offers while the lookup is
+  down (`place-pin-from-postal-code`) is not drawn on this screen and is not offered here.
 - **`localTime` and `formatTime`** (`@mondino/domain`, `time/`) — work out the viewer's local
   time from the pin's time zone id and the injected `CLOCK`, in the clock format the viewer chose.
 
@@ -117,7 +128,8 @@ not exist yet; each part below is introduced by this design.
 - **`UpdateProfileCommandValidator`** — refuses a country outside the supported list and a
   postal code over 12 characters with `validation_failed`.
 - **`ProfileDto`** — `TeamName`, the teammate's own `PinDto`, `CountryCode`, `PostalCode` and
-  `Settings`. The own `PinDto` always carries the weather, whatever the sharing switches say.
+  `Settings`. The `PostalCode` is null for a teammate whose pin was placed through the city
+  search (`join-team`), and the field is then empty. The own `PinDto` always carries the weather, whatever the sharing switches say.
 - **`PostalCodeResultDto`** — city name, region and weather, or weather as null when
   `IWeatherSource` fails.
 
@@ -166,7 +178,7 @@ requirement cited beside it.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-031` | `L1-011` | Profile & Settings, "Your pin", shows the viewer's own pin on a small globe, their city and country, their local time and time zone, and the reminder that teammates see the city and never the postal code. |
-| `L2-032` | `L1-011` | A teammate who has moved changes their country and postal code. The new postal code is looked up as when joining, and on saving the pin moves to the new city with its time zone, weather and moments. |
+| `L2-032` | `L1-011` | A teammate who has moved changes their country and postal code in the Location section ("Moved? Look up your new postal code and your pin follows when you save."). A "Look up" button beside the postal code field starts the lookup; on this screen leaving the field does not. On saving, the pin moves to the new city with its time zone, weather and moments. |
 
 ## Diagrams
 
@@ -210,7 +222,7 @@ draws one pin on a globe that does not turn and cannot be dragged.
 
 ### Behaviour — change the postal code
 
-Leaving the postal code field starts a lookup. A found postal code shows its city and offers
+"Look up" starts a lookup. A found postal code shows its city and offers
 saving. A postal code that cannot be found shows the alert of L2-004, one that cannot be
 checked says so and offers "Try again", and a lookup refused with 429 asks the viewer to wait;
 in each case the message ends "Your pin stays in Milan.", saving is not offered and the pin

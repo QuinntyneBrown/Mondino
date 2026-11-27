@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Sign in with an emailed link
+
+Person(teammate, "Teammate", "Has come back on a new browser or device")
+System_Boundary(mondino, "Mondino") {
+  Container(web, "Mondino web app", "Angular", "Sign In screen, then the Globe screen")
+  Container(api, "Mondino API", "ASP.NET Core", "Issues and redeems sign-in links; issues the session cookie")
+  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams, teammates and sign-in links")
+}
+System_Ext(email, "Email source", "Provider TO SUPPLY")
+
+Rel(teammate, web, "Gives a work email; opens the emailed link", "HTTPS")
+Rel(web, api, "POST /api/sign-in-links and POST /api/sign-in-links/redemptions", "JSON/HTTPS, email and token in the body")
+Rel(api, db, "Writes the link's hash and expiry; reads the teammate by email", "EF Core")
+Rel(api, email, "The address and the sign-in link only", "HTTPS, 5 s timeout")
+@enduml

@@ -27,6 +27,7 @@ package "mondino application" {
     Ready
     AlreadyJoined
     NotFound
+    Full
     Failed
   }
 }
@@ -41,6 +42,7 @@ package "@mondino/api" {
     +positions: Position[]
     +avatars: InviteAvatar[]
     +alreadyJoined: boolean
+    +full: boolean
     +countries: Country[]
   }
   class InviteAvatar {
@@ -69,6 +71,7 @@ package "Mondino.Application" {
     +IReadOnlyList<Position> Positions
     +IReadOnlyList<InviteAvatarDto> Avatars
     +bool AlreadyJoined
+    +bool Full
     +IReadOnlyList<CountryDto> Countries
   }
   class InviteAvatarDto {
