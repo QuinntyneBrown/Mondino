@@ -4,12 +4,13 @@
 
 With no pin selected, the Globe screen's panel shows "This week around the world" (the team's moments from
 today to 7 days ahead) and "In working hours now". The heading gives the team's counts ("12 teammates", "12
-time zones · 7 working · 2 asleep"). A team of one shows "Just you, for now" and the invite link to copy.
+time zones · 8 working · 2 asleep"). A team of one shows "Just you, for now" and the invite link to copy.
 
 Journey 15 of `docs/journeys.md`. Requirements: L2-024, L2-025 (`docs/specs/L2.md`).
 
 Builds on: journeys 10, 11 and 14. The moments list fills with journey 19; until then it shows its empty
-wording.
+wording, "No moments this week." (`pages/globe/no-moments`). This journey also builds `TeamShell` and
+`AppHeader` (the header the mocks draw over the four teammate screens), which journey 16 builds on.
 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
@@ -68,7 +69,7 @@ wording.
   refines in `docs/specs/L1.md`.
 - The detailed design: `docs/detailed-designs/team/view-week-around-the-world/README.md` and its diagrams, and
   "Contracts the features share" in `docs/detailed-designs/README.md`.
-- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/globe/quiet.html`,
+- The mocks (the source of truth), under `docs/mocks/`: `pages/globe/default.html`, `pages/globe/quiet.html`, `pages/globe/no-moments.html`,
   `pages/globe/empty.html`, `notifications/invite-link/success.html`, `notifications/invite-link/danger.html`.
   Read `docs/mocks/README.md` for the cast and its "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures
   use that cast and that time.
@@ -89,8 +90,9 @@ wording.
      on the hour with no reload.
   2. "In working hours now": by local hour then west to east, each row selecting its pin; "Nobody — it's quiet
      everywhere."
-  3. "This week around the world": the first 8 moments in date order then west to east, each selecting its
-     teammate's pin; "All moments" always under it; the every-kind-off copy with "Choose what shows".
+  3. "This week around the world": its lead, "No moments this week." until journey 19 brings the first 6
+     moments in date order then west to east (each selecting its teammate's pin), and "All moments" always
+     under it. The every-kind-off note with "Choose moments" comes with the viewer's chosen kinds (journey 23).
   4. The team of one: `InviteCard` with the invite link and "Copy"; no panel.
   5. Copying from the card through `InviteLinkCopier`: `Toast` hosted by `TeamShell`, success announced for
      4 seconds, refusal as an alert that stays until dismissed.
