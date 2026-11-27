@@ -20,7 +20,7 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "HttpTeamApi" as client
   participant "TeamShell" as shell
   participant "GlobePage" as page
-  participant "GlobeView" as globe
+  participant "PinLayer" as globe
 end box
 box "Backend — Mondino API" #D1FADF
   participant "TeamsController" as controller
@@ -34,7 +34,7 @@ box "Backend — Mondino Infrastructure" #FFF4E5
   database "Mondino database" as db
 end box
 participant "Open-Meteo" as meteo
-clock -> store : Minute tick, tab visible
+clock -> store : Minute tick, tab visible (CLOCK bound by TeamShell)
 store -> store : refreshIfDue: 15 minutes since refreshedAt (L2-048)
 store -> client : getPins(teamId, signal)
 client -> controller : GET /api/teams/{teamId}/pins
@@ -55,12 +55,11 @@ handler --> controller : TeamPinsDto (no postal code, L2-007)
 controller --> client : 200 with the pins
 client --> store : TeamPins
 alt refresh succeeded
-  store -> store : merge: replace pins, keep selectedTeammateId, note ids not held before
-  store --> page : pins, counts, arrivedTeammateIds
-  page -> globe : pins, selectedId unchanged, arrivedIds
-  globe -> globe : Add the new pin and pulse it once; keep the globe's position (L2-048)
-  globe -> page : arrivedShown
-  page -> store : acknowledgeArrived()
+  store -> store : Replace the pins, keep the selection, arrivedIds = ids not held before;\nSETTINGS_STORE.replace(viewerSettings)
+  store --> page : team, arrivedIds
+  page -> page : Counts again; pinViews marks arrived pins new
+  page -> globe : placements, facing unchanged
+  globe -> globe : Draw the new pin with pin--new, which pulses once;\nno toast; the globe keeps its position (L2-048)
 else refresh failed
   client --> store : ApiError
   store -> store : Keep the pins held; refreshFailed = true; try again at the next minute tick that is due

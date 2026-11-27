@@ -28,60 +28,68 @@ The slice runs from the `TeamStore` in the browser to the Mondino database and O
 
 Frontend:
 
-- **`TeamStore`** — signal store in `domain`'s `pins/`, provided at the route that holds the
-  Globe, Team, Moments and Profile & Settings screens. It injects `TEAM_API` and `CLOCK`.
-  `load(teamId)` reads the pins once when the route opens. An effect on the clock's minute tick
-  calls `refreshIfDue(now)`, which calls `refresh()` when `RefreshIntervalMinutes` (15) or more
-  have passed since `refreshedAt` and no request is pending (L2-048). The store has no
-  timer of its own.
-- **`BrowserClock`** — the one shared clock, bound to `CLOCK`. It ticks each minute, stops its
-  timer while the tab is hidden and ticks at once when the tab is shown again. Because the
-  store refreshes only on a tick, a hidden tab makes no refresh, and a tab hidden for 15 minutes
-  or more refreshes at once on return, with no visibility listener in the store.
-- **`merge(next)`** — replaces `pins` with the pins received. It keeps `selectedTeammateId` when
-  that teammate is still on the team and clears it when they have left. It records in
-  `arrivedTeammateIds` each teammate id that was not held before; the first load records none.
-  `pins` holds one team's pins, at most 500, and each refresh replaces them, so nothing
-  accumulates over a day.
-- **`arrivedTeammateIds`** — ids whose pins are new since the last refresh. `GlobePage` passes
-  them to `GlobeView` as `arrivedIds`; the globe pulses each new pin once (not under reduced
-  motion) and emits `arrivedShown`, and `GlobePage` calls `acknowledgeArrived()`, which empties
-  the list. `arrivedIds` and `arrivedShown` are an input and an output this design adds to
-  `GlobeView`.
-- **`loadState`** — `Loading`, `Ready` or `Failed`, for the first load only. A refresh never
-  changes it: a failed refresh keeps the pins held, sets `refreshFailed`, and the store tries
-  again at the next minute tick. `Loading` shows skeletons, on the Globe screen under the heading "Your team", and announces
-  "Loading your team…".
+- **`TeamStore`** — signal store in the app's `team/`, provided by `TeamShell`, the route
+  component that holds the Globe, Team, Moments and Profile & Settings screens. It injects
+  `TEAM_API`, `TEAM_MEMBERSHIP`, `SETTINGS_STORE` and `CLOCK`. `load()` reads the pins and the
+  moments once when the route opens. An effect on the clock's minute tick calls
+  `refreshIfDue(minute)`, which calls `refresh()` when `RefreshIntervalMinutes` (15) or more have
+  passed since `refreshedAt` and no request is pending (L2-048). The store has no timer of its
+  own.
+- **`BrowserClock`** — the one shared clock, bound to `CLOCK` by `TeamShell` for its four
+  screens, which no longer bind one each (ADR 0025). It ticks each minute, stops its timer while
+  the tab is hidden and ticks at once when the tab is shown again. Because the store refreshes
+  only on a tick, a hidden tab makes no refresh, and a tab hidden for 15 minutes or more
+  refreshes at once on return, with no visibility listener in the store.
+- **`refresh()`** — reads the pins and the moments again, side by side, with the same
+  `AbortSignal` as the first load. When the pins answer it replaces `team`: the selection
+  (`selectedId`, `heldIds`) is the screen's and is kept; a selected teammate who has left is
+  cleared by the Globe, as an address naming no pin is. It sets `arrivedIds` to each teammate id
+  that was not held before; the first load sets none. When the moments answer it replaces them;
+  when they fail the last ones stay. `team` holds one team's pins, at most 500, and each refresh
+  replaces them, so nothing accumulates over a day. A 401 or 404 forgets the membership, as the
+  first load does (`show-pins`).
+- **`arrivedIds`** — ids whose pins are new since the last refresh. `GlobePage` passes them,
+  with the just-joined teammate's id, to `pinViews` as the pins that are new; `PinLayer` draws
+  each with `pin--new`, which pulses once (not under reduced motion). No toast is shown for
+  them. The next refresh replaces the list.
+- **`state`** — `Loading`, `Ready`, `Failed` or `Forgotten`, for the first load only. A refresh
+  never changes it but to `Forgotten`: a failed refresh keeps the pins held, sets
+  `refreshFailed`, and the store tries again at the next minute tick. `Loading` shows skeletons,
+  on the Globe screen under the heading "Your team", and announces "Loading your team…".
   `Failed` shows the open screen's own message with "Try again", which calls `load` again: on
   the Globe screen "The globe didn’t load" and "We couldn’t reach Mondino to fetch your team.
   Check your connection — nothing you set has been lost."; on the Team screen "The team didn’t
   load" and "We couldn’t reach Mondino. Check your connection and try again.", with "Back to
   the globe".
 - **`refreshFailed`**, **`refreshing`** and **`refreshedAt`** — whether the last refresh
-  failed, whether one is pending, and when the pins held were read. While `refreshFailed` is true a banner (`Alert` as a banner, block `banner`,
-  `role="status"`) sits under the header of whichever screen is open: "Couldn’t refresh.
-  Clocks are live; weather and moments are from 14:50.", the time being `refreshedAt` on the
-  viewer's clock in tabular figures, with the button "Try again", which calls `refresh()` at
-  once. On the Team screen, which shows no list of moments, the banner names the weather alone
-  ("weather is from 14:50"). While that request is pending (`refreshing`) the button reads
-  "Trying…" and is not used again. `TeamShell`, the route component that provides the
-  `TeamStore`, renders it under `AppHeader`, where it also renders the toast. The screen keeps everything it showed. The next
+  failed, whether one is pending, and the minute the pins held were read. While
+  `refreshFailed` is true `TeamShell` renders `Banner` (`mo-banner`, block
+  `banner`, `role="status"`) under `AppHeader`, where it also renders the toast: "Couldn’t
+  refresh. Clocks are live; weather and moments are from 14:50.", the time being `refreshedAt`
+  on the viewer's clock in tabular figures, with the button "Try again", which calls
+  `refresh()` at once. On the Team screen, which shows no list of moments, the banner names the
+  weather alone ("weather is from 14:50"). While that request is pending (`refreshing`) the
+  button reads "Trying…" and is disabled. The screen keeps everything it showed. The next
   refresh that succeeds clears `refreshFailed` and the banner goes, with no message (L2-048,
   L2-049).
+- **The viewer's settings** — `TeamPins.viewerSettings` carries the viewer's own saved settings
+  (ADR 0025). Each load and refresh hands them to `SETTINGS_STORE.replace`, so a browser that
+  has never opened Profile & Settings draws in the saved unit, clock and kinds, and a choice
+  saved in another browser reaches this one at the next refresh. An answer without them leaves
+  the store as it was.
 - **`TeamApi`** (`TEAM_API`) and **`HttpTeamApi`** — contract and HTTP client in the `api`
   library. `getPins(teamId, signal)` calls `GET /api/teams/{teamId}/pins` and returns a
   `TeamPins`. The store passes an `AbortSignal` and aborts the pending request when the route
-  is destroyed.
-- **`TeamPins`** — type in `api`: `teamId`, `teamName`, `inviteToken`, `viewerTeammateId` and
-  `pins`. It mirrors `TeamPinsDto`.
-- **Moments across midnight** — `groupMoments(moments, pins, now)` in `moments/` is called from
-  computed signals that read the clock's minute tick, with today taken in the teammate's city.
-  When the clock passes a teammate's midnight, their moments move between Today, This week and
-  Later with no request (L2-048).
+  is destroyed, which is when the teammate leaves the four screens.
+- **`TeamPins`** — type in `api`: `teamId`, `teamName`, `inviteToken`, `viewerTeammateId`,
+  `pins` and `viewerSettings`. It mirrors `TeamPinsDto`.
+- **Moments across midnight** — the screens group moments (`weekMoments`, `groupMoments` in
+  `moments/`) in computed signals that read the clock's minute tick, with today taken in the
+  teammate's city. When the clock passes a teammate's midnight, their moments move between
+  Today, This week and Later with no request (L2-048).
 
-The globe keeps its position through a refresh because `GlobeView` receives a new `pins` value
-and an unchanged `selectedId`; `PinLayer` adds, moves and removes pins by teammate id and does
-not rebuild the scene.
+The globe keeps its position through a refresh because `GlobeView` receives new placements
+and an unchanged `facing`; `PinLayer` draws the pins over it and the scene is not rebuilt.
 
 Backend:
 
@@ -95,15 +103,16 @@ Backend:
   `TeamPinsDto`. A `PinDto` carries a null `Weather` when the teammate does not share it or the
   source fails, and its `WeatherState` (`Available`, `Unavailable` or `NotShared`) says which;
   the pin is still returned with its time zone.
-- **`TeamPinsDto`** — `TeamId`, `TeamName`, `InviteToken`, `ViewerTeammateId` and the `PinDto`
-  list. It carries no postal code and no local time.
+- **`TeamPinsDto`** — `TeamId`, `TeamName`, `InviteToken`, `ViewerTeammateId`, the `PinDto`
+  list and `ViewerSettings`, the asker's own `SettingsDto` (ADR 0025). It carries no postal code,
+  no local time, and no other teammate's settings.
 - **`CachedWeatherSource`** — decorator over `OpenMeteoWeatherSource` with a 5 second timeout
   (L2-049) and a circuit breaker. Weather is fresh for 15 minutes (L2-018), the interval of a
   refresh, so a refresh usually finds the weather in the cache; a miss sends Open-Meteo a
   position and nothing else.
 
-The interval is one constant, `TeamStore.RefreshIntervalMinutes`. Unit tests advance a fake
-clock bound to `CLOCK`; none sleeps. How the web app learns its team id when a teammate returns
+The interval is one constant, `refreshIntervalMinutes`. Unit tests move a fake clock bound to
+`CLOCK`, and the e2e specs move the page's clock; none sleeps. How the web app learns its team id when a teammate returns
 on another device is designed in `joining/sign-in` (L2-052), outside this feature.
 
 ## Requirements
@@ -155,7 +164,7 @@ In the web app, `BrowserClock` ticks `TeamStore`, which calls `HttpTeamApi`. In 
 
 A minute tick finds 15 minutes passed, and the store reads the pins again. The handler returns
 every teammate's pin with weather or null. The store merges them, keeps the selection, and
-reports the new teammate's id, whose pin the globe adds and pulses once. A failed refresh keeps
+reports the new teammate's id, whose pin is drawn and pulses once. A failed refresh keeps
 the pins held and shows the banner, with "Try again", until a refresh succeeds.
 
 ![Sequence diagram for a quiet refresh that brings in a new teammate](diagrams/sequence-quiet-refresh.png)

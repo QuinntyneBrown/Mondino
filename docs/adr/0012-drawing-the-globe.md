@@ -89,7 +89,8 @@ The constraints are the requirements' and the instructions':
   `domain`) moves the sun once a minute and rests while the tab is hidden. Each screen that reads
   the time binds `CLOCK` to its own `BrowserClock` in its component's providers, so its timer
   and listener go with the screen and its code stays out of the initial chunk; Join and Create
-  Team bind it the same way.
+  Team bind it the same way. (Since ADR 0025, `TeamShell` binds one for Globe, Team, Moments and
+  Profile & Settings, which the team's refresh also reads.)
 - **Released on destroy.** `GlobeScene.dispose` cancels the pending frame, removes the canvas's
   context-loss listener, disposes of every geometry, material and texture, closes the decoded
   images, and calls `renderer.dispose()` and `renderer.forceContextLoss()`. `GlobeView` aborts

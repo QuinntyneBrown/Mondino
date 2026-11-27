@@ -11,41 +11,53 @@ skinparam class {
 }
 title Class structure — Keep the team fresh
 
-class TeamStore <<domain pins/>> {
-  +{static} RefreshIntervalMinutes: number = 15
-  +pins: Signal<Pin[]>
-  +teamName: Signal<string | null>
-  +inviteToken: Signal<string | null>
-  +viewerTeammateId: Signal<string | null>
-  +selectedTeammateId: Signal<string | null>
-  +counts: Signal<TeamCounts>
-  +arrivedTeammateIds: Signal<string[]>
-  +loadState: Signal<LoadState>
-  +refreshFailed: Signal<boolean>
-  +refreshing: Signal<boolean>
-  +refreshedAt: Signal<Date | null>
-  -pending: AbortController | null
-  +load(teamId: string): Promise<void>
-  +refresh(): Promise<void>
-  +acknowledgeArrived(): void
-  -refreshIfDue(now: Date): void
-  -merge(next: TeamPins): void
+class TeamShell <<mondino team/>> {
+  provides CLOCK, TeamStore, SETTINGS_STORE
+  #bannerText: Signal<string | null>
 }
 
-enum LoadState {
+class Banner <<components, mo-banner>> {
+  +text: string
+  +time: string
+  +busy: boolean
+  +retry: Output<void>
+}
+
+class TeamStore <<mondino team/>> {
+  +team: Signal<TeamPins | null>
+  +state: Signal<TeamState>
+  +moments: Signal<Moment[]>
+  +selectedId: Signal<string | null>
+  +heldIds: Signal<string[]>
+  +arrivedIds: Signal<string[]>
+  +refreshFailed: Signal<boolean>
+  +refreshing: Signal<boolean>
+  +refreshedAt: Signal<number | null>
+  -releasing: AbortController
+  +load(): Promise<void>
+  +refresh(): Promise<void>
+  -refreshIfDue(minute: number): void
+}
+
+enum TeamState {
   Loading
   Ready
   Failed
+  Forgotten
+}
+
+interface SettingsStore <<api, SETTINGS_STORE>> {
+  +replace(settings: Settings): void
 }
 
 interface Clock <<api, CLOCK>> {
-  +now(): Date
-  +minute: Signal<Date>
+  +now(): number
+  +minute: Signal<number>
 }
 
 class BrowserClock <<domain time/>> {
-  +now(): Date
-  +minute: Signal<Date>
+  +now(): number
+  +minute: Signal<number>
 }
 
 interface TeamApi <<api, TEAM_API>> {
@@ -61,6 +73,7 @@ class TeamPins <<api>> {
   +inviteToken: string
   +viewerTeammateId: string
   +pins: Pin[]
+  +viewerSettings?: Settings
 }
 
 class TeamsController <<Mondino.Api>> {
@@ -81,6 +94,7 @@ class TeamPinsDto <<Mondino.Application>> {
   +string InviteToken
   +Guid ViewerTeammateId
   +IReadOnlyList<PinDto> Pins
+  +SettingsDto ViewerSettings
 }
 
 interface ICurrentTeammate <<Mondino.Application>>
@@ -92,7 +106,10 @@ Clock <|.. BrowserClock
 TeamApi <|.. HttpTeamApi
 TeamStore ..> Clock : injects CLOCK
 TeamStore ..> TeamApi : injects TEAM_API
-TeamStore --> LoadState
+TeamStore --> TeamState
+TeamStore ..> SettingsStore : replace(viewerSettings)
+TeamShell *-- TeamStore
+TeamShell ..> Banner : while refreshFailed
 TeamStore ..> TeamPins : merges
 HttpTeamApi ..> TeamsController : GET /api/teams/{teamId}/pins
 TeamsController ..> GetPinsQuery : sends

@@ -5,7 +5,9 @@
 A screen left open stays true. Every 15 minutes while visible, and at once when a tab hidden for longer is
 shown again, the team's pins, weather and moments are read again without losing the selection or the globe's
 position. A teammate who joined meanwhile appears and pulses. When a refresh fails the screen keeps its last
-data, the clocks keep ticking, and a banner says "Couldn't refresh just now." with "Try now".
+data, the clocks keep ticking, and a banner under the header says "Couldn’t refresh. Clocks are live; weather
+and moments are from 14:50." (on Team, "weather is from 14:50") with "Try again", which reads "Trying…" while
+it asks (the mock `notifications/refresh-banner/warning.html`).
 
 Journey 25 of `docs/journeys.md`. Requirements: L2-048 (`docs/specs/L2.md`).
 
@@ -88,7 +90,7 @@ Builds on: journeys 10, 15 and 19.
      none while hidden, at once on return after more than 15 minutes; unit tests on a fake clock.
   2. Merging a refresh: selection and globe position kept, arrived pins pulse once, counts update.
   3. Moments moving between Today, This week and Later at their place's midnight.
-  4. `refreshFailed`: the banner in `TeamShell` with "Try now", gone silently when a refresh works; pending
+  4. `refreshFailed`: the banner in `TeamShell` with "Try again", gone silently when a refresh works; pending
      requests cancelled on leaving.
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
