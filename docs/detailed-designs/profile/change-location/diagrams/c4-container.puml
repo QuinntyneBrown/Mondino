@@ -7,7 +7,7 @@ Person(teammate, "Teammate", "Changes their own location")
 System_Boundary(mondino, "Mondino") {
   Container(spa, "Mondino web app", "Angular", "Profile and Settings: own pin, country and postal code")
   Container(api, "Mondino API", "ASP.NET Core", "Own profile, postal code lookup, moving the pin")
-  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teammates with their postal code and city")
+  ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Teammates with their postal code and city")
 }
 System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
 System_Ext(meteo, "Open-Meteo", "Weather")

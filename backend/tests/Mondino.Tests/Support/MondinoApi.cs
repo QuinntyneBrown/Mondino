@@ -95,6 +95,9 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
 
+    /// <summary>Settings a test gives the API before the first request, over the ones set here.</summary>
+    public Dictionary<string, string> Settings { get; } = [];
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -126,6 +129,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         if (CapturesLogs)
         {
             builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs).AddFilter<CapturedLogs>(null, LogLevel.Trace));
+        }
+
+        foreach (var (name, value) in Settings)
+        {
+            builder.UseSetting(name, value);
         }
 
         builder.ConfigureTestServices(services =>

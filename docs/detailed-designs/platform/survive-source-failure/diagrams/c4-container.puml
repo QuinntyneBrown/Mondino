@@ -8,7 +8,7 @@ Person(teammate, "Teammate", "Reads the team")
 System_Boundary(mondino, "Mondino") {
   Container(spa, "Mondino web app", "Angular", "Shows local time and status from the time zone; says where weather is unavailable; keeps its last data")
   Container(api, "Mondino API", "ASP.NET Core", "The only caller of outside sources: timeout, cache, circuit breaker")
-  ContainerDb(db, "Mondino database", "EF Core, engine TO SUPPLY", "Each pin's city, position and time zone")
+  ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Each pin's city, position and time zone")
 }
 
 System_Ext(weather, "Open-Meteo", "Weather")

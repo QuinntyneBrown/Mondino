@@ -34,6 +34,9 @@ public sealed class FailingAppDbContext : IAppDbContext
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken) =>
         throw Down();
 
+    public Task<bool> CanConnectAsync(CancellationToken cancellationToken) =>
+        throw Down();
+
     private static InvalidOperationException Down() => new("The database is down.");
 }
 

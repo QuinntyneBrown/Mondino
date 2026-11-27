@@ -17,7 +17,8 @@ The terms used below:
 - **correlation id** — identifier of one request's trace, present in its logs and in the error returned to the browser
 - **outside source** — service outside Mondino that the backend calls for postal codes, weather or calendars
 
-The product that receives the telemetry and the hosting platform are `<TO SUPPLY>`.
+The product that receives the telemetry is `<TO SUPPLY>`. The API is hosted on Azure App
+Service ([ADR 0004](../../../adr/0004-azure-hosting.md)).
 
 ## Description
 
@@ -77,11 +78,17 @@ from an allow-list, so an attribute that is not named is dropped, not kept.
 **Health endpoints.**
 
 - `GET /health/live` reports that the process is running. It checks nothing else.
-- `GET /health/ready` runs `DatabaseReadyCheck`, which confirms through `AppDbContext` that
-  the `Mondino database` is reachable. An outside source's failure does not make the backend
-  unready, since a pin still shows its local time without it.
-- Each answers with a status only: no configuration, no versions of dependencies and no
-  teammate data. Both are marked as open explicitly and need no session (`protect-team-data`).
+- `GET /health/ready` runs `DatabaseReadyCheck`, which confirms through `IAppDbContext`
+  (`CanConnectAsync`) that the `Mondino database` is reachable: 200 `Healthy`, or 503
+  `Unhealthy`. An outside source's failure does not make the backend unready, since a pin
+  still shows its local time without it.
+- Each answers with a status only, one word of plain text that is never cached: no
+  configuration, no versions of dependencies and no teammate data. A failed check reports no
+  description and no error. Both are marked as open explicitly and need no session
+  (`protect-team-data`).
+- The health endpoints are built (`HealthEndpoints` and `DatabaseReadyCheck`, in
+  `Mondino.Api`'s `Health`), with the database they check, by
+  [`keep-team-data`](../keep-team-data/). The rest of this design is not built yet.
 
 **Settings a deployed system needs.** The exporter reads the standard
 `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS`; the service is named

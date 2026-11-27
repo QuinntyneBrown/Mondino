@@ -15,6 +15,7 @@ using Mondino.Infrastructure.SignIn;
 using Mondino.Infrastructure.Teammates;
 using Mondino.Infrastructure.Teams;
 using Mondino.Infrastructure.WeatherSource;
+using Npgsql;
 
 namespace Mondino.Infrastructure;
 
@@ -23,8 +24,9 @@ public static class DependencyInjection
     /// <summary>
     /// The database, the seed, who is asking and their session (docs/adr/0008), the cities, the postal code source, the invite tokens, the email fingerprint (<c>EmailProtection:Key</c>), the sign-in links and the Email source (<c>SignInEmail:*</c>, docs/adr/0011)
     /// (<c>PostalCodeSource:*</c>, docs/adr/0006). <c>Database:Provider</c> names the engine
-    /// (docs/adr/0004): <c>PostgreSQL</c>, with the connection string <c>ConnectionStrings:Mondino</c>,
-    /// or <c>InMemory</c>, which keeps nothing between runs.
+    /// (docs/adr/0004): <c>PostgreSQL</c>, with the connection string <c>ConnectionStrings:Mondino</c>
+    /// and, deployed, <c>Database:Authentication</c> for a connection without a password
+    /// (docs/adr/0017), or <c>InMemory</c>, which keeps nothing between runs.
     /// </summary>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -33,14 +35,13 @@ public static class DependencyInjection
         var provider = configuration["Database:Provider"] ?? "InMemory";
         if (string.Equals(provider, "PostgreSQL", StringComparison.OrdinalIgnoreCase))
         {
-            var connectionString = configuration.GetConnectionString("Mondino");
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new InvalidOperationException(
-                    "Database:Provider 'PostgreSQL' needs the connection string ConnectionStrings:Mondino.");
-            }
-
-            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+            // Checked now, so a wrong setting stops the process at startup; connected to only when used.
+            // A transient failure is retried by the provider's own strategy (docs/adr/0017).
+            var connection = DatabaseConnection.Read(configuration);
+            services.AddSingleton(_ => connection.CreateDataSource());
+            services.AddDbContext<AppDbContext>((provider, options) => options.UseNpgsql(
+                provider.GetRequiredService<NpgsqlDataSource>(),
+                npgsql => npgsql.EnableRetryOnFailure()));
         }
         else if (string.Equals(provider, "InMemory", StringComparison.OrdinalIgnoreCase))
         {

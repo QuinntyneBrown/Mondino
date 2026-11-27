@@ -50,7 +50,8 @@ class LogMessages <<static, source-generated>> {
   +UnhandledError(logger, errorType: string, correlationId: string): void
 }
 
-class HealthEndpoints {
+class HealthEndpoints <<static>> {
+  +{static} AddMondinoHealth(services): IServiceCollection
   +{static} MapMondinoHealth(app): void
   GET /health/live
   GET /health/ready

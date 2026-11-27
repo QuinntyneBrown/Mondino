@@ -1,0 +1,46 @@
+@startuml
+title UML sequence behaviour — Report readiness
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Deployment or operator" as actor
+box "Backend — Mondino API" #D1FADF
+  participant "HealthEndpoints" as health
+  participant "DatabaseReadyCheck" as check
+end box
+box "Backend — Mondino Infrastructure" #FFF4E5
+  participant "AppDbContext" as context
+  participant "EntraDatabaseTokens" as tokens
+end box
+database "Mondino database" as db
+actor -> health : GET /health/ready, with no session
+health -> check : CheckHealthAsync
+check -> context : CanConnectAsync, through IAppDbContext
+context -> tokens : Token, when a new connection is opened
+context -> db : Connect over TLS, the certificate and name verified
+alt reached
+  db --> context : connected
+  context --> check : true
+  check --> health : Healthy
+  health --> actor : 200 "Healthy", no-store
+else not reached, or the check throws
+  context --> check : false, or an error
+  check --> health : Unhealthy, with no description and no error
+  health --> actor : 503 "Unhealthy", no-store
+end
+note over health
+  A status and nothing else: no configuration,
+  no version, no teammate data (L2-051).
+end note
+@enduml

@@ -16,7 +16,7 @@ Container_Boundary(api, "Mondino API") {
   Component(weather, "CachedWeatherSource", "IWeatherSource", "Weather cached for 15 minutes, with a 5 s timeout and a circuit breaker")
   Component(finder, "MomentFinder", "Application service", "The moments that belong to a city")
 }
-ContainerDb(db, "Mondino database", "Relational, EF Core; engine TO SUPPLY", "Teams and teammates")
+ContainerDb(db, "Mondino database", "Relational, EF Core, PostgreSQL", "Teams and teammates")
 System_Ext(meteo, "Open-Meteo", "Weather at a city")
 
 Rel(clock, store, "Minute tick")
