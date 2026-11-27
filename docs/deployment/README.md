@@ -63,7 +63,9 @@ the version that was running goes on serving.
    ```
 
    The server has no password: every connection signs in with a Microsoft Entra token. The
-   administrator is a person, and is used only here and in an emergency.
+   administrator is a person, and is used only here and in an emergency. The template takes
+   about three quarters of an hour: the server about ten minutes, then about a minute for each
+   firewall rule, one at a time.
 
 5. Create the two database roles, as the administrator, from a machine whose address the
    firewall allows for the length of this step:
@@ -94,6 +96,10 @@ the version that was running goes on serving.
      -c 'REVOKE ALL ON TABLE "__EFMigrationsHistory" FROM mondino_app'
    az postgres flexible-server firewall-rule delete -g mondino-rg -n <server-name> --rule-name setup --yes
    ```
+
+   On an empty database the migration logs one `fail:` line, a read of `__EFMigrationsHistory`
+   before that table exists; EF Core then creates it. The command ends with "The database is at
+   the latest migration." and exit code 0.
 
    **Never run `Mondino.Cli seed` against the deployed database.** The sample team's invite
    token is written in this repository, so anyone who reads it could join that team.
