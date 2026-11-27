@@ -122,6 +122,11 @@ Builds on: journeys 6 and 14.
   `WeekPanel` (as `pages/globe/default` draws them, each selecting its teammate's pin) and to prove L2-024
   criteria 1, 2 and 7 in Playwright, with criterion 5's six rows (its "leads to the Moments screen" waits for
   journey 21). Raise journey 15's % by the criteria proven here.
+- Journey 17 built the Team rows with a dash, "Nothing coming up", under "Coming up" for every teammate,
+  and waits for this journey to fill it with each row's next moment (`TeamRow.nextMoment` and its when,
+  "Today", "In 5 days", "9 Nov") as `pages/team/default` draws it, and to prove in Playwright L2-026
+  criterion 9 and the next moment on a phone's row (criterion 10). Raise journey 17's % by the criteria
+  proven here.
 - Set journey 19 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

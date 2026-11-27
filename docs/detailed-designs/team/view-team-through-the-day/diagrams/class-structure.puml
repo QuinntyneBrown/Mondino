@@ -13,7 +13,6 @@ title Class structure — View the team through the day
 
 class TeamPage <<mondino>> {
   {static} +LargeTeamThreshold: number = 40
-  +filter: InputSignal<string | undefined>
   +statusFilter: Signal<StatusFilter>
   +query: WritableSignal<string>
   +toggled: WritableSignal<Map<string, boolean>>
@@ -21,7 +20,7 @@ class TeamPage <<mondino>> {
   +rows: Signal<TeamRow[]>
   +visibleRows: Signal<TeamRow[]>
   +sections: Signal<CitySectionContent[]>
-  +markers: Signal<RibbonMarker[]>
+  +ribbon: Signal<RibbonView>
   +density: Signal<RibbonDensity | null>
   +options: Signal<Option[]>
   +onFilter(filter: StatusFilter): void
@@ -32,31 +31,34 @@ class TeamPage <<mondino>> {
   +onTeammateChosen(teammateId: string): void
 }
 
-class TeamStore <<domain pins/>> {
-  +pins: Signal<Pin[]>
-  +viewerPin: Signal<Pin | null>
-  +counts: Signal<TeamCounts>
+class TeamStore <<mondino>> {
+  +team: Signal<TeamPins | null>
+  +state: Signal<TeamState>
+  +load(): Promise<void>
 }
 
 class "pins/ functions" as fn <<function, domain pins/>> {
-  +orderWestToEast(pins: Pin[], now: Date): Pin[]
-  +teamRows(pins: Pin[], viewer: Pin, now: Date, settings: Settings): TeamRow[]
+  +orderWestToEast(pins: Pin[], now: number): Pin[]
+  +teamRows(pins: Pin[], now: number, format: ClockFormat, unit: TemperatureUnit): TeamRow[]
+  +teamCounts(pins: Pin[], now: number): TeamCounts
+  +teamLine(counts: TeamCounts): string
   {static} +CityRowLimit: number = 50
   +filterByStatus(rows: TeamRow[], filter: StatusFilter): TeamRow[]
   +searchRows(rows: TeamRow[], query: string): TeamRow[]
   +citySections(rows: TeamRow[], toggled: Map<string, boolean>, now: Date, settings: Settings): CitySectionContent[]
-  +ribbonMarkers(pins: Pin[], now: Date, settings: Settings): RibbonMarker[]
+  +ribbonMarkers(pins: Pin[], now: number, format: ClockFormat): RibbonView
+  +ribbonScale(format: ClockFormat): string[]
   +ribbonDensity(pins: Pin[], now: Date, settings: Settings): RibbonDensity
 }
 
 class "zoneOffsetMinutes" as off <<function, domain time/>> {
-  +zoneOffsetMinutes(now: Date, timeZoneId: string): number
+  +zoneOffsetMinutes(now: number, timeZoneId: string): number
 }
 
 enum StatusFilter {
-  All
-  Working
-  Asleep
+  all
+  working
+  asleep
 }
 
 class TeamRow <<domain pins/>> {
@@ -65,25 +67,29 @@ class TeamRow <<domain pins/>> {
   +initials: string
   +colour: string
   +isViewer: boolean
-  +city: string
+  +cityName: string
   +country: string
   +localTime: string
   +offset: string | null
   +status: Status | null
-  +weather: Weather | null
+  +weather: RowWeather | null
   +weatherState: WeatherState
-  +nextMoment: Moment | null
-  +nextMomentWhen: string | null
 }
 
-class RibbonMarker <<domain pins/>> {
+class RibbonMarker <<api>> {
   +teammateId: string
   +name: string
   +initials: string
   +colour: string
+  +cityName: string
   +localTime: string
-  +dayFraction: number
+  +at: number
   +lane: number
+}
+
+class RibbonView <<api>> {
+  +markers: RibbonMarker[]
+  +rows: number
 }
 
 class CitySectionContent <<domain pins/>> {
@@ -103,7 +109,7 @@ class RibbonDensity <<domain pins/>> {
   +maxBinTime: string
 }
 
-class Option <<components>> {
+class SegmentedOption <<components>> {
   +value: string
   +label: string
   +count: number | null
@@ -111,21 +117,26 @@ class Option <<components>> {
 
 class DayRibbon <<components, mo-day-ribbon>> {
   +markers: InputSignal<RibbonMarker[]>
+  +rows: InputSignal<number>
+  +scale: InputSignal<string[]>
+  +address: InputSignal<(teammateId: string) => string>
   +density: InputSignal<RibbonDensity | null>
   +summary: InputSignal<string | null>
   +teammateChosen: OutputEmitterRef<string>
 }
 
 class Segmented <<components, mo-segmented>> {
-  +options: InputSignal<Option[]>
+  +options: InputSignal<SegmentedOption[]>
   +value: InputSignal<string>
-  +mode: InputSignal<'tabs' | 'radio'>
+  +label: InputSignal<string>
+  +controls: InputSignal<string>
   +valueChange: OutputEmitterRef<string>
 }
 
 class TeamTable <<components, mo-team-table>> {
   +rows: InputSignal<TeamRow[]>
   +caption: InputSignal<string>
+  +address: InputSignal<(teammateId: string) => string>
   +teammateChosen: OutputEmitterRef<string>
 }
 
@@ -150,7 +161,12 @@ class ListNote <<components, mo-list-note>> {
 
 class InvitePrompt <<components, mo-invite-prompt>> {
   +teamName: InputSignal<string>
-  +invite: OutputEmitterRef<void>
+  +invite: OutputEmitterRef<HTMLElement>
+}
+
+class EmptyState <<components, mo-empty-state>> {
+  +title: InputSignal<string>
+  +text: InputSignal<string>
 }
 
 TeamPage --> TeamStore : reads
@@ -163,6 +179,7 @@ TeamPage --> SearchField : renders for a large team
 TeamPage --> CitySection : renders one for each city
 TeamPage --> ListNote : renders when no row is left
 TeamPage --> InvitePrompt : renders for a team of one
+TeamPage --> EmptyState : renders when the first read fails
 CitySection --> TeamTable : renders its rows
 CitySection ..> CitySectionContent : presents
 CitySectionContent "1" o-- "0..50" TeamRow
@@ -171,8 +188,9 @@ fn ..> RibbonDensity : builds
 DayRibbon ..> RibbonDensity : presents as 48 bars
 fn ..> off : orders by
 fn ..> TeamRow : builds
-fn ..> RibbonMarker : builds
+fn ..> RibbonView : builds
+RibbonView "1" o-- "0..40" RibbonMarker
 DayRibbon ..> RibbonMarker : presents
-Segmented ..> Option : presents
+Segmented ..> SegmentedOption : presents
 TeamTable ..> TeamRow : presents
 @enduml

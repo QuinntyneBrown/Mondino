@@ -1,0 +1,100 @@
+<table class="team-table">
+  <caption class="visually-hidden">
+    {{
+      caption()
+    }}
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Person</th>
+      <th scope="col">Location</th>
+      <th scope="col">Local time</th>
+      <th scope="col">Compared to you</th>
+      <th scope="col">Weather</th>
+      <th scope="col">Coming up</th>
+      <td></td>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.teammateId) {
+      <tr class="team-table__row">
+        <th scope="row" class="team-table__person">
+          <mo-avatar [initials]="row.initials" [colour]="row.colour" />
+          <span class="team-table__who">
+            <a
+              class="team-table__link"
+              [attr.href]="address()(row.teammateId)"
+              [attr.title]="row.name.length > 32 ? row.name : null"
+              (click)="choose($event, row.teammateId)"
+              >{{ row.name }}
+              @if (row.isViewer) {
+                <span class="team-table__you">(you)</span>
+              }
+            </a>
+            <span class="team-table__phone tnum">{{
+              row.offset === null ? row.cityName : row.cityName + ' · ' + row.offset
+            }}</span>
+            @if (row.status; as status) {
+              <span class="team-table__sub">{{ words[status] }}</span>
+            }
+          </span>
+        </th>
+        <td class="team-table__location">
+          {{ row.cityName }}<span class="team-table__sub">{{ row.country }}</span>
+        </td>
+        <td class="team-table__time">
+          <span class="team-table__clock tnum">
+            @if (row.status; as status) {
+              <span class="dot" [class]="dots[status]" aria-hidden="true"></span>
+            }
+            {{ row.localTime }}
+          </span>
+        </td>
+        <td class="team-table__offset tnum">
+          @if (row.offset === null) {
+            <span aria-label="You">—</span>
+          } @else {
+            {{ row.offset }}
+          }
+        </td>
+        <td class="team-table__weather tnum">
+          @if (row.weather; as weather) {
+            <span class="team-table__weather-in">
+              <svg
+                mo-weather-icon
+                size="sm"
+                [condition]="weather.condition"
+                [night]="weather.night"
+              ></svg
+              >{{ weather.degrees }}
+            </span>
+          } @else if (row.weatherState === 'Unavailable') {
+            <span class="team-table__weather-in text-muted">
+              <svg
+                class="icon icon--sm"
+                role="img"
+                aria-label="Weather unavailable"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057" />
+                <path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78" />
+                <path d="m2 2 20 20" />
+              </svg>
+            </span>
+          } @else {
+            <span class="team-table__none" aria-label="Weather not shared">—</span>
+          }
+        </td>
+        <td class="team-table__moment">
+          <span class="team-table__none" aria-label="Nothing coming up">—</span>
+        </td>
+        <td class="team-table__go" aria-hidden="true">
+          <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

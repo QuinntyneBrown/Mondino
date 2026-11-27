@@ -125,6 +125,12 @@ team of 40 or fewer.
   lesson it applied worked.
 - Set journey 18 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
+- Journey 17 built the Team screen for a team of 40 or fewer and, until this journey, lists a team past 40
+  by its first 40 rows west to east with a ribbon of bands and no marker. It waits for this journey to prove
+  in Playwright L2-026 criterion 7 (a team of 500 keeps a bounded number of rows in the page as it is
+  scrolled), L2-027 criterion 11 (the bar chart scrolls sideways inside itself, by keyboard, and is named
+  so) and the bar's part of L2-027 criterion 12 (a teammate who hides their status is counted in their half
+  hour's bar and not in the line about working hours). Raise journey 17's % by the criteria proven here.
 
 ## Deferred (not in this journey)
 - Moments for a team of 500 is not drawn (`docs/mocks/README.md`, open question 7); journey 21 bounds its

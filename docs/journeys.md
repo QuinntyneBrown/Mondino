@@ -55,7 +55,10 @@ criterion 2 (the panel gives the city and country, no postal code); the Team row
 them, so it stays at 34. Journey 16 proved the invite dialog's part of L2-044 criterion 10 (a team named
 as markup in the dialog's title, as text) and of L2-043 criterion 12 (any teammate, not only the team's
 maker, reads its invite link; another team's teammate and no session are refused); the leave dialog,
-Left Team and the link's reset complete them, so it stays at 34.
+Left Team and the link's reset complete them, so it stays at 34. Journey 17 proved the Team rows' part of
+L2-044 criterion 1 (a name of markup, a long name and a one-word name in Team's rows and on its ribbon,
+as text) and of L2-007 criterion 2 (a Team row gives the city and country, no postal code); the search and
+the moments complete them, so it stays at 34.
 Journey 7 stands at 100: every criterion of L2-052 is proven by an acceptance test, the backend's
 through the API and the screen's in Playwright, by keyboard and by touch at 320 px. The Globe it opens
 is the arrival journey 4 left; an expired or used link, and the wait while one opens, show Sign In's
@@ -81,7 +84,7 @@ its prompt hands on: the weather on a pin and in its label (L2-011 criterion 1, 
 with journey 13, a teammate's sharing switches (L2-011 criteria 4 and 7) with journey 23, and the panel a
 selected pin or group pin opens, through which a group's teammates are chosen (L2-012 criterion 5, L2-013
 criteria 3 and 7), with journey 14 (ADR 0014).
-Journey 11 stands at 90 (10 of its 11 criteria; the last comes with journeys 15 and 17): the rest of
+Journey 11 stands at 100 (all 11 of its criteria): the rest of
 L2-014 and L2-015 is proven by an acceptance test, the
 backend's through the API (a pin's IANA time zone, no local time, and whether its status is shared) and
 the Globe's in Playwright under the page's fake clock (each pin's local time and status in words as
@@ -94,8 +97,9 @@ belongs to the screens of later journeys: the counts and filters that leave out 
 does not share their status (L2-015 criterion 4) with journeys 15 and 17; the switch that turns sharing
 off, and the clock chosen in Profile & Settings, with journey 23. Journey 15 proved the Globe's half of L2-015
 criterion 4 (such a teammate counted as neither working nor asleep, and not under "In working hours now");
-the Team screen's half waits for journey 17, so it stays at 90.
-Journey 12 stands at 60 (9 of its 14 criteria): the offset, the
+journey 17 proved the Team screen's half (such a teammate listed under All only, in neither count, with no
+status in their row), which brought it to 100.
+Journey 12 stands at 100 (all 14 of its criteria): the offset, the
 overlap and the overlap bar are built and proven by direct unit tests against the cast at the mocks' "now"
 (every offset `pages/team/default` gives, "7h behind you", "4h 30m ahead", "Same time", a daylight-saving
 change on one side, Tomás's 16:00 to 18:00 and "4 pm–6 pm", Noah's "None today" with 23:00 to 08:00, the bar's
@@ -108,8 +112,10 @@ specs raise this number. Journey 14's Playwright specs proved every criterion of
 to 18:00, "9 am–12 pm" on a 12-hour viewer's clock, the sentence with start, end and length, and none on the
 viewer's own panel or Ahmed's) and L2-016 criterion 5 (Tomás's offset going from "8h behind you" to "7h
 behind you" as Milan leaves summer time, with no reload). L2-016 criteria 1 to 4 name the Team row as well as
-the panel, whose part is proven, and wait for journey 17.
-Journey 13 stands at 70 (6 of its 9 criteria): the weather comes from Open-Meteo by way of the backend
+the panel, whose part is proven; journey 17 proved the Team row's ("7h behind", "4h 30m ahead", "10h ahead",
+"Same time", the viewer's dash named "You") and criterion 6 (the column "Compared to you", and "Mexico City ·
+7h behind" under 768 px), which brought it to 100.
+Journey 13 stands at 90 (8 of its 9 criteria): the weather comes from Open-Meteo by way of the backend
 alone (ADR 0015), and is proven through the API (one call per city, fresh for 15 minutes, a code outside
 the table shown as cloudy, a wind of 39 km/h or more as windy, the position rounded to two decimals and
 nothing else sent, 5 seconds and no weather, no weather kept after a failure, and a teammate who does not
@@ -124,7 +130,10 @@ journeys (journey 14 proved the panel's "13°C" and "Foggy in Milan" with the fo
 "0°C" for −0.4 °C, L2-019 criterion 2, and the panel's "55°F", whose Team row "55°" completes L2-019
 criterion 1 with journey 17): the weather icon a screen reader reads as its word on a Team row
 (L2-018 criterion 5; on the Globe the icon is hidden and its word is in the pin's name) and the Team row's
-"55°" with journey 17, and the unit changed in Profile & Settings (L2-019 criterion 3) with journey 23.
+"55°" with journey 17, and the unit changed in Profile & Settings (L2-019 criterion 3) with journey 23. Journey 17 proved the Team
+row's icon read as its word and drawn as `pages/team/default` draws it, and its "55°" for a viewer in °F
+(L2-018 criterion 5, L2-019 criterion 1), which brought it to 90; the unit chosen in Profile & Settings is
+what is left.
 Journey 14 stands at 80 (9 of the 11 criteria of L2-023): a selected pin opens its teammate's panel beside
 the globe, or under it on a phone, as `pages/globe/selected`, `selected-self`, `selected-asleep`,
 `sharing-off` and `weather-unavailable` draw it (no "Message" button), proven in Playwright part by part
@@ -136,7 +145,7 @@ to see their pin", "3 cities · …", the cities largest first with their local 
 teammate). Journey 15 proved that closing a teammate's panel by its button, or a group's by Escape, returns
 the panel to the week's view (criteria 4 and 10), which brought it from 60 to 80. Not yet proven: the
 moments in Tomás's and Ahmed's panels (criteria 1 and 11) come with journey 19's moments.
-Journey 15 stands at 70 (14 of the 21 criteria of L2-024 and L2-025): the Globe screen sits under
+Journey 15 stands at 70 (15 of the 21 criteria of L2-024 and L2-025): the Globe screen sits under
 `TeamShell` and its header, as the mocks draw it, and with no pin selected heads the globe with "13
 teammates" and "12 time zones · 8 working · 2 asleep", changing as an hour changes a status, and the panel
 shows the week as `pages/globe/no-moments` and "In working hours now" as `pages/globe/default` draw them,
@@ -153,8 +162,11 @@ criterion 7; journey 16), and a teammate who joins while the Globe is open appea
 (criterion 10's second half; journey 25). The note shown with every kind of moment off comes with journey
 23. Journey 16 proved criterion 7 on the Globe: "Invite teammate" opens the invite dialog and nothing is
 copied until "Copy link" is used. The criterion names the headers of Team, Moments and Profile & Settings
-too, which come with journeys 17, 21 and 22, so it is not yet counted and journey 15 stays at 70.
-Journey 16 stands at 50 (7 of the 15 criteria of L2-054 and L2-055): "Invite teammate" in `TeamShell`'s
+too, which come with journeys 17, 21 and 22, so it is not yet counted and journey 15 stays at 70. Journey 17
+proved "2 more on the Team page" opening Team with "Working now" chosen (L2-024 criterion 3), and "Invite
+teammate" on Team's header (L2-025 criterion 7's Team part; Moments and Profile & Settings complete it),
+which brought it to 15 of 21, still 70.
+Journey 16 stands at 50 (8 of the 15 criteria of L2-054 and L2-055): "Invite teammate" in `TeamShell`'s
 header opens the invite dialog, a CDK Dialog loaded on first open, as `dialogs/invite/default` draws it
 but for "Reset link", which is left out until it is designed. Proven in Playwright: focus starts on "Copy
 link", stays inside and returns to the button on Escape or Close (L2-054 criterion 2); "Copy link" puts
@@ -167,7 +179,26 @@ own teammates read its invite link, with the dialog showing it, and a team named
 (criterion 9). Not yet proven: the header on Team, Moments and Profile & Settings and "Reset link" in
 the dialog (criterion 1; journeys 17, 21 and 22, and the reset's design), "Invite teammates" on Team for
 a team of one (criterion 6; journey 17), and every criterion of L2-055, which waits for the design of
-what "Reset link" asks before it acts (`mocks/README.md`, open question 3).
+what "Reset link" asks before it acts (`mocks/README.md`, open question 3). Journey 17 proved "Invite
+teammates" on Team for a team of one (criterion 6) and the header's "Invite teammate" on Team (criterion 1's
+Team part), which brought it to 8 of 15, still 50.
+Journey 17 stands at 80 (24 of the 29 criteria of L2-026, L2-027 criteria 1 to 7, 11 and 12, and L2-028):
+Team sits under `TeamShell` at `/team`, a lazy route, and is what `pages/team/default`, `working`, `asleep`,
+`no-results`, `quiet`, `loading`, `empty`, `error`, `weather-unavailable`, `sharing-off` and `edge` draw,
+proven in Playwright against the mocks' markup: every row west to east with its city and country, local
+time and status, offset, weather icon and degrees, and "Coming up" a dash named "Nothing coming up"; a row
+or a marker, by pointer or by keyboard, opening the Globe with that teammate selected; the phone's row;
+the day ribbon's bands in words and every marker where the mock places it, in its row, named by name and
+local time, scrolling inside itself under 576 px and its 12-hour marks; the filters as one tab list with
+the team's counts, the arrow keys, Home and End, `?filter=working` from the Globe, the two notes with "Show
+everyone", the list and counts following the hour with no reload and a teammate who hides their status
+under All only and still on the ribbon; the loading placeholder, the error with "Try again", the team of
+one's card opening the invite dialog, the weather warning, and names as text; `teamRows`,
+`filterByStatus`, `teamLine`, `ribbonMarkers` and `ribbonScale` by direct unit tests. A team past 40 holds
+the first 40 rows of its filter and a ribbon without faces until journey 18. Not yet proven, for later
+journeys: a team of 500 scrolled city by city (L2-026 criterion 7), the bar chart's scrolling and its line
+about working hours (L2-027 criteria 11 and 12's bar part) with journey 18, and "Coming up" with the next
+moment, on a row and on a phone's row (L2-026 criteria 9 and 10), with journey 19.
 
 Journey 30 stands at 20 before its own run: one of the six criteria of L2-051 is proven by acceptance tests
 through the API, criterion 4, liveness and readiness reported to anyone as one word with no configuration,
@@ -187,13 +218,13 @@ ADR 0017). The telemetry, its redaction and the correlation id are journey 30's 
 | 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 100 |
 | 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 100 |
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 100 |
-| 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 90 |
-| 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 60 |
-| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 70 |
+| 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 100 |
+| 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 100 |
+| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 90 |
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 80 |
 | 15 | [View the week around the world](prompts/15-view-the-week-around-the-world-prompt.md) | See this week's moments, who is working, and team counts. | L2-024, L2-025 | 4 | 70 |
 | 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 50 |
-| 17 | [View the team through the day](prompts/17-view-the-team-through-the-day-prompt.md) | See everyone west to east on a day ribbon. | L2-026, L2-027, L2-028 | 6 | 0 |
+| 17 | [View the team through the day](prompts/17-view-the-team-through-the-day-prompt.md) | See everyone west to east on a day ribbon. | L2-026, L2-027, L2-028 | 6 | 80 |
 | 18 | [Find a teammate in a large team](prompts/18-find-a-teammate-in-a-large-team-prompt.md) | Search a team past 40, listed in a section per city. | L2-027, L2-056 | 3 | 0 |
 | 19 | [Find moments](prompts/19-find-moments-prompt.md) | Holidays, races, events and sport found where teammates live. | L2-020 | 8 | 0 |
 | 20 | [Mark pins with moments](prompts/20-mark-pins-with-moments-prompt.md) | See a moment marker beside pins with moments this week. | L2-021, L2-022 | 4 | 0 |
@@ -207,4 +238,4 @@ ADR 0017). The telemetry, its redaction and the correlation id are journey 30's 
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 20 |
-| | **Total** | | | **147** | **53** |
+| | **Total** | | | **147** | **58** |

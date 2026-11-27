@@ -87,8 +87,8 @@ Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then
 - Invoke the `implementing-incrementally` skill, and `angular-developer` for Angular code.
 - Plan thin vertical slices, for example:
   1. The west-to-east order in `domain` (current UTC offset, then longitude), with direct tests.
-  2. `TeamPage` (lazy) with the heading and `TeamTable`: the columns Person, Location, Local time, vs you,
-     Weather and Coming up; the viewer's row; a row is a link to the Globe with that pin selected.
+  2. `TeamPage` (lazy) with the heading and `TeamTable`: the columns Person, Location, Local time, Compared
+     to you, Weather and Coming up; the viewer's row; a row is a link to the Globe with that pin selected.
   3. The phone layout under 768 px.
   4. `DayRibbon`: markers at their hour, working hours and night labelled in words, two teammates at one hour
      both reachable, markers as links, 12-hour ticks hour-only.
@@ -96,7 +96,10 @@ Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then
      a teammate who hides their status is under All only.
   6. Loading, error, the team of one and the edge cases (a very long name, a one-word name, a name typed as
      markup).
-  7. A bounded number of rows in the page for a team of 500 (windowing).
+  7. A bounded number of rows in the page: at most 40. Until journey 18 builds the bar chart, the search and
+     the city sections (whose open sections bound the rows of a team of 500, L2-026 criterion 7), a team past
+     40 lists the first 40 of the filter west to east and its ribbon draws its bands and scale with no
+     marker. (The design bounds a large team by its city sections, not by windowing one table.)
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page
@@ -125,8 +128,9 @@ Builds on: journeys 11, 12 and 13. "Coming up" fills with journey 19; until then
 - Journey 11 waits for this screen to prove that a teammate who does not share their status is listed under
   All only, not under Working now nor Asleep nor in their counts (L2-015 criterion 4; the Globe's half is
   proven by journey 15); raise journey 11's % when it is.
-- Set journey 17 to 100 in the **% complete** column of `docs/journeys.md` (and in
-  `docs/detailed-journeys.md` if it exists), and update the total.
+- Set journey 17's **% complete** in `docs/journeys.md` (and in `docs/detailed-journeys.md` if it exists) by
+  count: the share of its criteria proven by a passing acceptance test. L2-026 criteria 7, 9 and 10's next
+  moment, and L2-027 criteria 11 and 12's bar, wait for journeys 18 and 19. Update the total.
 
 ## Deferred (not in this journey)
 - Past 40 teammates the day ribbon is a bar chart of the teammates at each half hour (L2-027 AC8 to AC10), and

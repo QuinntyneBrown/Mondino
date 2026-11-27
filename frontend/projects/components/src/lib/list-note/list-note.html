@@ -1,0 +1,8 @@
+<div class="list-note" role="status">
+  <strong class="list-note__title">{{ title() }}</strong>{{ text() }}
+  @if (action(); as action) {
+    <br /><button mo-button size="sm" type="button" (click)="actionChosen.emit()">
+      {{ action }}
+    </button>
+  }
+</div>
