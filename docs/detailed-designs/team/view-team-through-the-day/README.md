@@ -196,11 +196,11 @@ loading and refreshing are designed in `keep-team-fresh`.
   asleep, west to east". It holds at most 40 rows.
 - **`CitySection`** (`mo-city-section`) — presentation component, the mocks' `city-section`
   block, one for each `CitySectionContent` of a large team. It takes `content` and `address`, and
-  emits `toggle` with the city's key and `teammateChosen`. Its heading holds a button
+  emits `toggled` with the city's key and `teammateChosen`. Its heading holds a button
   (`city-section__toggle`) with the city's name, its count ("4", followed by "teammates" for
   assistive technology) and its local time in tabular figures ("Honolulu", "4", "04:05"). The
   button carries `aria-expanded` and, while open, `aria-controls` naming the table under it;
-  it emits `toggle`. An open section renders a `TeamTable` of its rows, with the caption
+  it emits `toggled`. An open section renders a `TeamTable` of its rows, with the caption
   "Teammates in Honolulu". When `more` is above zero a line under the table (`city-section__more`) says how many
   more teammates the city has and to search for them: "**14 more teammates in London.** Search to
   find them." (`team/hundreds-crowded-city`), "1 more teammate" for one. A closed section renders no table. From

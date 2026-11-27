@@ -8,7 +8,6 @@ import {
   northwindPins,
   northwindPinsOf,
   northwindPinsWhere,
-  teamOf500,
 } from '../fixtures/pins';
 import { rememberTeam } from '../support/membership';
 
@@ -175,29 +174,5 @@ test.describe('Team: its states', () => {
 
     // And the long name, which may be cut short, is given whole as its tooltip
     await expect(teamPage.cells(teamPage.row(longName)).link).toHaveAttribute('title', longName);
-  });
-
-  test('a team past 40 holds at most 40 rows, and its ribbon draws no marker', async ({
-    api,
-    teamPage,
-  }) => {
-    // Given a team of 500
-    api.answer('GET', NORTHWIND_PINS, teamOf500());
-    await teamPage.open();
-
-    // Then the counts are the team's
-    await expect(teamPage.lead).toHaveText('500 teammates · 38 time zones · live');
-    await expect(teamPage.tabs).toHaveText(['All 500', 'Working now 324', 'Asleep 42']);
-
-    // And the page holds the first 40 rows of the filter, west to east, and no more (L2-026)
-    await expect(teamPage.rows).toHaveCount(40);
-    await teamPage.tab('Working now').click();
-    await expect(teamPage.tab('Working now')).toHaveAttribute('aria-selected', 'true');
-    await expect(teamPage.rows).toHaveCount(40);
-
-    // And the ribbon keeps its bands and its scale, with no marker in them
-    await expect(teamPage.ribbonBands).toHaveCount(5);
-    await expect(teamPage.scale).toHaveCount(9);
-    await expect(teamPage.markers).toHaveCount(0);
   });
 });

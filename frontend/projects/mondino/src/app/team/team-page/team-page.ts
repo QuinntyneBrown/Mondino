@@ -13,17 +13,20 @@ import { CLOCK, type StatusFilter } from '@mondino/api';
 import {
   Alert,
   Button,
+  CitySection,
   DayRibbon,
   EmptyState,
   InvitePrompt,
   Skeleton,
   ListNote,
+  SearchField,
   Segmented,
   type SegmentedOption,
   TeamTable,
 } from '@mondino/components';
 import {
   BrowserClock,
+  citySections,
   defaultClockFormat,
   defaultTemperatureUnit,
   filterByStatus,
@@ -31,6 +34,7 @@ import {
   ribbonDensity,
   ribbonMarkers,
   ribbonScale,
+  searchRows,
   teamCounts,
   teamLine,
   teamRows,
@@ -69,11 +73,13 @@ const notes: Record<StatusFilter, { title: string; text: string } | null> = {
   imports: [
     Alert,
     Button,
+    CitySection,
     DayRibbon,
     EmptyState,
     InvitePrompt,
     ListNote,
     RouterLink,
+    SearchField,
     Segmented,
     Skeleton,
     TeamTable,
@@ -121,11 +127,25 @@ export class TeamPage {
   });
 
   /**
-   * The rows the filter keeps, west to east, at most 40 of them: until journey 18 lists a large
-   * team city by city, the rows in the page stay bounded this way (L2-026, L2-047).
+   * What is typed in a large team's search (L2-056): the screen's own, never in the address, since
+   * it can be a teammate's name, and gone when the teammate leaves the screen.
    */
+  protected readonly query = signal('');
+
+  /** The cities the teammate has opened (true) or closed (false), by key. */
+  private readonly toggled = signal<ReadonlyMap<string, boolean>>(new Map());
+
+  /** The rows the filter and the search keep, west to east (L2-026, L2-028, L2-056). */
   protected readonly rows = computed(() =>
-    filterByStatus(this.allRows(), this.filter()).slice(0, LargeTeamThreshold),
+    searchRows(filterByStatus(this.allRows(), this.filter()), this.query()),
+  );
+
+  /**
+   * A large team's list, city by city: a closed city holds no rows and an open one at most 50, so
+   * the rows in the page stay bounded (L2-047, L2-056).
+   */
+  protected readonly sections = computed(() =>
+    this.large() ? citySections(this.rows(), this.toggled()) : [],
   );
 
   /** "All 13", "Working now 8", "Asleep 2": the team's counts. */
@@ -151,7 +171,13 @@ export class TeamPage {
   protected readonly loadingRows = [1, 2, 3, 4, 5, 6];
 
   protected readonly caption = computed(() => captions[this.filter()]);
-  protected readonly note = computed(() => notes[this.filter()]);
+  /** What the list says when nothing is left: the search's note, or the filter's. */
+  protected readonly note = computed(() => {
+    const query = this.query().trim();
+    return query
+      ? { title: `No one matches “${query}”`, text: 'Try another filter.' }
+      : notes[this.filter()];
+  });
 
   /** Past 40 teammates faces no longer fit and rows no longer fit on a screen (L2-056). */
   protected readonly large = computed(
@@ -209,6 +235,18 @@ export class TeamPage {
       queryParams: { filter: filter === 'all' ? null : filter },
       replaceUrl: true,
     });
+  }
+
+  /** "Show everyone": the search cleared and the filter back to All. */
+  protected showEveryone(): void {
+    this.query.set('');
+    this.chooseFilter('all');
+  }
+
+  /** A city's button opens it when closed and closes it when open. */
+  protected toggle(key: string): void {
+    const open = this.sections().find((section) => section.key === key)?.open ?? false;
+    this.toggled.update((toggled) => new Map(toggled).set(key, !open));
   }
 
   protected tryAgain(): void {

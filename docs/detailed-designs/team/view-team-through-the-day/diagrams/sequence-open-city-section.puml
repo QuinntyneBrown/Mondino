@@ -24,7 +24,7 @@ box "Frontend — Mondino web app" #E0F2FE
 end box
 note over page : First shown: the first two cities are open,\nthe rest are closed and hold no rows (L2-056)
 actor -> city : Use the button of a closed city ("San Francisco", 27, "07:05")
-city -> page : toggle(city key)
+city -> page : toggled(city key)
 page -> page : toggled.update: this city is open
 page -> sections : citySections(visibleRows, toggled)
 sections -> sections : The opened city gets its first 50 rows;\nmore = count less 50, when above zero
@@ -37,7 +37,7 @@ opt the city has more than 50 teammates
   city --> actor : "14 more teammates in London. Search to find them."
 end
 actor -> city : Use the button again
-city -> page : toggle(city key)
+city -> page : toggled(city key)
 page -> page : toggled.update: this city is closed
 page -> city : content, open = false
 city --> actor : The heading alone; its rows leave the page (L2-047)

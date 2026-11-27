@@ -7,7 +7,7 @@ import { expect, test } from '../fixtures/test';
 import { NOW } from '../fixtures/now';
 import { NORTHWIND_PINS, northwindPins, teamOf500 } from '../fixtures/pins';
 import { fitsItsWidth } from '../support/layout';
-import { mockBars, mockScale } from '../support/mocks';
+import { mockBars, mockCitySections, mockScale, mockTeamRows, mockText } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
 
 /** Leaves the screen open until `minutes` after the mocks' now, then lets a second pass. */
@@ -118,5 +118,100 @@ test.describe('Team: a team of hundreds', () => {
     await expect(teamPage.bars).toHaveCount(0);
     await expect(teamPage.ribbonSummary).toHaveCount(0);
     await expect(teamPage.densityScroll).toHaveCount(0);
+  });
+
+  test('the list is a section per city, west to east, the first two open, as the hundreds mock draws it', async ({
+    api,
+    teamPage,
+  }) => {
+    // Given a team of 500 in 38 time zones, 324 in working hours and 42 probably asleep
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+
+    // When the Team screen is opened
+    await teamPage.open();
+
+    // Then the heading and the filters count the team, and a search stands beside them
+    await expect(teamPage.lead).toHaveText(mockText('pages/team/hundreds.html', 'page__lead')!);
+    await expect(teamPage.tabs).toHaveText(['All 500', 'Working now 324', 'Asleep 42']);
+    await expect(teamPage.search).toHaveAttribute('placeholder', 'Find a person or city');
+    await expect(teamPage.search).toHaveAttribute('maxlength', '60');
+    await expect(teamPage.search).toHaveAttribute('aria-controls', 'team-list');
+
+    // And each city is a section, west to east, with its count and local time, the first two open
+    expect(await teamPage.sectionHeads()).toEqual(mockCitySections('pages/team/hundreds.html'));
+    for (const city of ['Honolulu', 'Vancouver']) {
+      const toggle = teamPage.sectionToggle(city);
+      await expect(toggle).toHaveAccessibleName(new RegExp(`^${city} 4 teammates \\d\\d:05$`));
+      await expect(await teamPage.controlledBy(toggle)).toHaveCount(1);
+    }
+    await expect(teamPage.sectionToggle('San Francisco')).not.toHaveAttribute('aria-controls');
+
+    // And the open cities' rows are the mock's, with the same columns, and no closed city has one
+    await expect(teamPage.teamHead).toHaveAttribute('aria-hidden', 'true');
+    await expect(teamPage.teamHead).toBeVisible();
+    const expected = mockTeamRows('pages/team/hundreds.html');
+    await expect(teamPage.rows).toHaveCount(expected.length);
+    for (const [index, mock] of expected.entries()) {
+      const row = teamPage.rows.nth(index);
+      await expect(teamPage.cells(row).link).toHaveText(mock.name);
+      await expect(teamPage.cells(row).status).toHaveText(mock.status ?? '');
+      await expect(teamPage.cells(row).location).toHaveText(mock.city + mock.country);
+      await expect(teamPage.cells(row).time).toHaveText(mock.time);
+      await expect(teamPage.cells(row).offset).toHaveText(mock.offset);
+      await expect(teamPage.cells(row).weather).toHaveText(mock.degrees);
+      await expect(teamPage.cells(row).weatherIcon).toHaveAccessibleName(mock.weatherName!);
+    }
+  });
+
+  test('a city’s button opens and closes it, and a row in it opens the Globe', async ({
+    api,
+    teamPage,
+    globePage,
+    page,
+  }) => {
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+    await teamPage.open();
+    await expect(teamPage.rows).toHaveCount(8);
+
+    // When San Francisco's button is used, its 27 open
+    const sanFrancisco = teamPage.sectionToggle('San Francisco');
+    await sanFrancisco.click();
+    await expect(sanFrancisco).toHaveAttribute('aria-expanded', 'true');
+    await expect(teamPage.sectionRows('San Francisco')).toHaveCount(27);
+
+    // And when Honolulu's is used by keyboard, its rows leave the page
+    const honolulu = teamPage.sectionToggle('Honolulu');
+    await honolulu.focus();
+    await page.keyboard.press('Enter');
+    await expect(honolulu).toHaveAttribute('aria-expanded', 'false');
+    await expect(teamPage.sectionRows('Honolulu')).toHaveCount(0);
+    await expect(teamPage.rows).toHaveCount(31);
+
+    // And a row of an open city opens the Globe with that teammate selected
+    await teamPage.link(teamPage.row('Lea Nguyen')).click();
+    await expect(page).toHaveURL(/\/globe\?teammate=/);
+    await expect(globePage.personName).toHaveText('Lea Nguyen');
+  });
+
+  test('a filter leaves each city only its teammates in that status, and a city with none out', async ({
+    api,
+    teamPage,
+  }) => {
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+    await teamPage.open('asleep');
+    await expect(teamPage.sectionToggles).toHaveCount(6);
+
+    // Then only the cities where it is night are listed, Honolulu and Seoul to Auckland
+    expect((await teamPage.sectionHeads()).map(({ name, count }) => `${name} ${count}`)).toEqual([
+      'Honolulu 4',
+      'Seoul 4',
+      'Tokyo 10',
+      'Melbourne 10',
+      'Sydney 9',
+      'Auckland 5',
+    ]);
+    // And the first two of them are open, each with its own teammates only
+    await expect(teamPage.rows).toHaveCount(8);
+    await expect(teamPage.cells(teamPage.rows.first()).status).toHaveText('Probably asleep');
   });
 });

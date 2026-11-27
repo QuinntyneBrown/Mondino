@@ -1,0 +1,80 @@
+// One city of a large team (docs/design-system/components/city-section).
+:host {
+  display: block;
+}
+.city-section {
+  border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+}
+.city-section__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--target-comfortable);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--color-fg-default);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.city-section__toggle:hover {
+  background: var(--color-bg-surface);
+}
+.city-section__toggle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+.icon {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--color-fg-muted);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: rotate var(--duration-fast) var(--ease-standard);
+}
+.city-section__toggle[aria-expanded='false'] .icon {
+  rotate: -90deg;
+}
+.city-section__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--text-h3);
+  font-size: var(--font-size-md);
+}
+.city-section__count {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.city-section__time {
+  min-width: var(--space-12);
+  text-align: right;
+  font: var(--text-figure);
+  font-size: var(--font-size-md);
+}
+.city-section__more {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.city-section__more strong {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-semibold);
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .city-section__toggle,
+  .icon {
+    transition: none;
+  }
+}

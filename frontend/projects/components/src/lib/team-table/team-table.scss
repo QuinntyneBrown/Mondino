@@ -135,6 +135,18 @@
   .team-table thead td {
     display: none;
   }
+  // In a city section the one row of headings over every city stands in for these.
+  .team-table--sectioned {
+    margin-top: 0;
+  }
+  .team-table--sectioned thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
   .team-table thead tr {
     padding: 0 var(--space-3) var(--space-2);
     border-bottom: var(--border-width-hairline) solid var(--color-border-default);

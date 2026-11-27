@@ -1,4 +1,4 @@
-<table class="team-table">
+<table class="team-table" [class.team-table--sectioned]="sectioned()" [attr.id]="tableId()">
   <caption class="visually-hidden">
     {{
       caption()

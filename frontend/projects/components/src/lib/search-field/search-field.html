@@ -1,0 +1,19 @@
+<div class="input-wrap">
+  <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.3-4.3" />
+  </svg>
+  <input
+    class="input input--search"
+    id="team-search"
+    name="q"
+    type="search"
+    autocomplete="off"
+    maxlength="60"
+    [attr.aria-label]="label()"
+    [attr.placeholder]="label()"
+    [attr.aria-controls]="controls()"
+    [value]="value()"
+    (input)="changed($event)"
+  />
+</div>

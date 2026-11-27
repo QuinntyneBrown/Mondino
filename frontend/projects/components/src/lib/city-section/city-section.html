@@ -1,0 +1,42 @@
+<section class="city-section">
+  <h3>
+    <!-- The spaces between the parts are for the button's accessible name; flex ignores them. -->
+    <button
+      class="city-section__toggle"
+      type="button"
+      [attr.aria-expanded]="content().open"
+      [attr.aria-controls]="content().open ? tableId() : null"
+      (click)="toggled.emit(content().key)"
+    >
+      <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+      <span class="city-section__name">{{ content().name }}</span>
+      {{ ' ' }}
+      <span class="city-section__count tnum"
+        >{{ content().count
+        }}<span class="visually-hidden">{{
+          content().count === 1 ? ' teammate' : ' teammates'
+        }}</span></span
+      >
+      {{ ' ' }}
+      <span class="city-section__time tnum">{{ content().localTime }}</span>
+    </button>
+  </h3>
+  @if (content().open) {
+    <mo-team-table
+      sectioned
+      [tableId]="tableId()"
+      [caption]="'Teammates in ' + content().name"
+      [rows]="content().rows"
+      [address]="address()"
+      (teammateChosen)="teammateChosen.emit($event)"
+    />
+    @if (content().more > 0) {
+      <p class="city-section__more">
+        <strong>{{ moreLine() }}</strong>
+        Search to find them.
+      </p>
+    }
+  }
+</section>

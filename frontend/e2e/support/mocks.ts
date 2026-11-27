@@ -187,3 +187,19 @@ export function mockBars(path: string): {
     count: { bar: counted, text: bars[counted]?.[2] ?? '' },
   };
 }
+
+/** The city sections of a mock's large team, in order: each button's city, count, time and state. */
+export function mockCitySections(
+  path: string,
+): { name: string; count: string; time: string; expanded: string }[] {
+  return [
+    ...mockMarkup(path).matchAll(
+      /<button class="city-section__toggle" type="button" aria-expanded="(\w+)"[^>]*>[\s\S]*?<span class="city-section__name">([^<]*)<\/span><span class="city-section__count tnum">(\d+)<span class="visually-hidden"> teammates<\/span><\/span><span class="city-section__time tnum">([^<]*)<\/span>/g,
+    ),
+  ].map(([, expanded, name, count, time]) => ({ name, count, time, expanded }));
+}
+
+/** The text of the first element of a class in a mock, tags taken out. */
+export function mockText(path: string, className: string): string | null {
+  return textOf(mockMarkup(path), className);
+}
