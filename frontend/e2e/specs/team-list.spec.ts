@@ -6,6 +6,7 @@ import { expect, test } from '../fixtures/test';
 import { idOf, NORTHWIND_PINS, northwindPins, northwindPinsWhere } from '../fixtures/pins';
 import { mockMarkup, mockTeamRows } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
+import { fitsItsWidth } from '../support/layout';
 
 test.describe('Team: everyone, west to east', () => {
   test.use({ webgl: false });
@@ -65,6 +66,33 @@ test.describe('Team: everyone, west to east', () => {
 
     // And no postal code is anywhere on the screen (L2-007)
     await expect(teamPage.main).not.toContainText('20121');
+  });
+
+  test('under 768 px a row gives the name, status, local time and city with the offset', async ({
+    api,
+    teamPage,
+    page,
+  }) => {
+    // Given a phone 390 px wide
+    await page.setViewportSize({ width: 390, height: 844 });
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
+    await teamPage.open();
+
+    // Then Tomás's row reads "Tomás Herrera", "Early morning", "08:05" and "Mexico City · 7h behind" (L2-016)
+    const tomas = teamPage.cells(teamPage.row('Tomás Herrera'));
+    await expect(tomas.link).toBeVisible();
+    await expect(tomas.status).toHaveText('Early morning');
+    await expect(tomas.time).toHaveText('08:05');
+    await expect(tomas.phone).toHaveText('Mexico City · 7h behind');
+    await expect(teamPage.cells(teamPage.row('Sofia Bianchi')).phone).toHaveText('Milan');
+
+    // And the table's other columns, and a "Coming up" with nothing in it, are not shown
+    for (const hidden of [tomas.location, tomas.offset, tomas.weather, tomas.moment])
+      await expect(hidden).toBeHidden();
+    await expect(teamPage.columns.first()).toBeHidden();
+
+    // And the page does not scroll sideways
+    expect(await fitsItsWidth(page)).toBe(true);
   });
 
   test('a row chosen by pointer or keyboard opens the Globe with that teammate selected', async ({

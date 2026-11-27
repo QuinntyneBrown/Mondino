@@ -105,7 +105,7 @@
   grid-column: 1 / -1;
   min-width: 0;
 }
-.team-table__moment:has(.team-table__none) {
+.team-table__row .team-table__moment:has(.team-table__none) {
   display: none;
 }
 .team-table__weather-in {
@@ -162,7 +162,7 @@
   .team-table__moment {
     grid-column: auto;
   }
-  .team-table__moment:has(.team-table__none) {
+  .team-table__row .team-table__moment:has(.team-table__none) {
     display: block;
   }
 }
