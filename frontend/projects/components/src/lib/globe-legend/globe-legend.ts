@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
- * The Globe screen's legend over the stage, from 640 px: the night side, a moment this week,
+ * The Globe screen's legend over the stage, from 640 px: the night side, a moment this week unless
+ * every kind is turned off,
  * teammates close together and how to turn the globe (L2-010). Over the still picture its last
  * entry says why the globe is still, and under 640 px, where the legend is not shown, a line
  * under the globe says it instead (L2-008). It lays itself out in the stage it is placed in.
@@ -15,4 +16,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 export class GlobeLegend {
   /** Whether the globe is the still picture. */
   readonly still = input(false);
+  /** Whether moments mark pins: with every kind turned off there is no marker to explain (L2-022). */
+  readonly moments = input(true);
 }

@@ -75,6 +75,12 @@ export class GlobePage {
   readonly week: Locator;
   readonly weekLead: Locator;
   readonly weekEmpty: Locator;
+  /** The note in the week's place with every kind of moment switched off, and its link. */
+  readonly weekNote: Locator;
+  readonly chooseMoments: Locator;
+  readonly weekNoteTitle: Locator;
+  /** Every moment marker over the globe. */
+  readonly allMarkers: Locator;
   readonly allMoments: Locator;
   /** The week's moment rows. */
   readonly weekRows: Locator;
@@ -179,6 +185,10 @@ export class GlobePage {
     this.week = this.panel.locator('section:has(> h2:text-is("This week around the world"))');
     this.weekLead = this.week.locator('.panel__lead');
     this.weekEmpty = this.week.locator('.panel__empty');
+    this.weekNote = this.week.locator('.panel__note');
+    this.weekNoteTitle = this.weekNote.locator('strong');
+    this.allMarkers = this.pinList.locator('.moment-marker');
+    this.chooseMoments = this.weekNote.getByRole('link', { name: 'Choose moments' });
     this.allMoments = this.week.locator('a.panel__more');
     this.weekRows = this.week.locator('.row-list a.row');
     this.working = this.panel.locator('section:has(h2:text-is("In working hours now"))');

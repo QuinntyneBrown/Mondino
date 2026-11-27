@@ -9,9 +9,9 @@ import {
   signal,
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { CLIPBOARD, HttpTeamApi, TEAM_API } from '@mondino/api';
+import { CLIPBOARD, HttpTeamApi, SETTINGS_STORE, TEAM_API } from '@mondino/api';
 import { AppHeader, Avatar, Toast } from '@mondino/components';
-import { initialsOf, NavigatorClipboard } from '@mondino/domain';
+import { initialsOf, NavigatorClipboard, SettingsCache } from '@mondino/domain';
 import { InviteDialogOpener } from './invite-dialog-opener';
 import { InviteLinkCopier } from './invite-link-copier';
 import { TeamStore } from './team-store';
@@ -29,6 +29,8 @@ import { Toaster } from './toaster';
   providers: [
     { provide: TEAM_API, useClass: HttpTeamApi },
     { provide: CLIPBOARD, useClass: NavigatorClipboard },
+    // The viewer's chosen kinds of moment, read where the teammate screens are (ADR 0020).
+    { provide: SETTINGS_STORE, useClass: SettingsCache },
     TeamStore,
     Toaster,
     InviteLinkCopier,

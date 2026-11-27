@@ -13,3 +13,17 @@ export async function rememberTeam(page: Page, membership = NORTHWIND_MEMBERSHIP
     localStorage.setItem('mondino.membership', kept);
   }, JSON.stringify(membership));
 }
+
+/**
+ * Makes the browser hold a teammate's chosen kinds of moment, as a save on Profile & Settings
+ * leaves them (ADR 0020): Sofia's unless another teammate id is given.
+ */
+export async function chooseKinds(
+  page: Page,
+  momentKinds: string[],
+  teammateId = NORTHWIND_MEMBERSHIP.teammateId,
+): Promise<void> {
+  await page.addInitScript((kept) => {
+    localStorage.setItem('mondino.settings', kept);
+  }, JSON.stringify({ teammateId, momentKinds }));
+}
