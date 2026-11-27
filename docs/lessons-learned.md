@@ -534,3 +534,58 @@ apply the lessons that fit.
 - *Leave a screen in a spec the way a person would* (journey 8, lesson 4): the turning specs come to
   the Globe by joining, the one way the Globe draws a pin before journey 10.
 
+
+## Journey 10: Show pins
+
+**What slowed it**
+
+- The initial chunk went from 259.64 kB to 260.40 kB, past its warning, with nothing new in it. Bisecting
+  the templates found two instructions the Angular compiler shares through the initial chunk once any
+  template uses them: `@let` (0.35 kB) and a text with two interpolations, `{{ a }} · {{ b }}`
+  (`ɵɵtextInterpolate2`, 0.41 kB). One computed string and no `@let` brought it back to 259.64 kB.
+- `PinLayer`'s stylesheet passed the 4 kB component style budget with the labels in it; the labels became
+  `PinLabel`, a component of their own, as the design system draws them.
+- `GlobeGestures` captured the pointer on `pointerdown`, so a click on a pin was delivered to the globe and
+  never reached the button. Capture now waits until the pointer has moved far enough to be a drag.
+- Every spec that reached the Globe broke at once (36 of them): its pins request was unanswered, which the
+  guard fails, and the turning specs read the just-joined pin, which is now selected and holds the globe.
+  The turning specs open the Globe from a remembered team with Sofia alone, and the rest answer the pins.
+- Selecting a pin turns the globe, so the pins facing the viewer, and the order Tab takes, change under the
+  spec: the Tab spec waits for the turn to finish before it presses Tab again, and names the pin it expects.
+- A pin layer drawn from the frame loop is rendered by the zoneless scheduler after the frame: the hidden
+  tab spec read Sofia's pin one render before the frame it measured, one run in five. It lets 32 ms pass
+  before reading.
+- `locator.filter({ has })` with a locator rooted at another locator matched nothing; `has` takes a
+  locator rooted at the page, resolved inside each candidate.
+
+**Lessons**
+
+1. **Measure the initial chunk after each template change, and bisect a rise by template feature.** A
+   control flow or interpolation shape used for the first time can bring the compiler's instruction for it
+   into the shared chunk, whichever lazy chunk the template is in.
+2. **Capture the pointer only once a gesture has started.** A container that captures on `pointerdown`
+   takes every click from the controls inside it.
+3. **When a screen starts a request, list every spec that reaches the screen.** They all need the answer,
+   and a new default state (a selected pin) changes what they see.
+4. **When an action moves what the keyboard reaches, wait for the move before the next key.** Assert the
+   settled state (the pin that has gone from view) before pressing on.
+5. **Read what a frame drew after the render that follows it.** A signal set in the frame loop is drawn by
+   the next render, not by the frame itself.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0014, the show-pins design and its diagrams,
+  L2-013's 500 px and the design system's pin pages were one commit before any code; they were touched
+  again for the names the code chose (`selectPin`, `PinLabel`, `widthChange`).
+- *Measure the initial bundle* (journey 2, lesson 1; journey 8, lesson 1): it caught the 0.76 kB rise
+  above; 259.64 kB before and after the journey, and no budget moved.
+- *Run the spec before the page exists* (journey 1, lesson 5): every new spec ran red first, by its
+  missing code or by breaking the line under test (lifting, selecting, the blank tap, the grouping radius,
+  the compact rule, the label placer) and restoring it.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it caught a
+  selector in a spec and the Tab order flake before commit.
+- *Pause the clock before a spec measures motion* (journey 9, lesson 1) and *let a spec jump the time*
+  (lesson 6): the turn to a selected pin is proven within a second and held for ten in under a second of
+  the spec's own time.
+- *List the specs that look at the screen still* (journey 9, lesson 5): the pin specs run under reduced
+  motion, and those that measure the turn opt back in.

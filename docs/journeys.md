@@ -43,7 +43,9 @@ left are names shown as text on the pins,
 the panel, the Team rows and search and the moments (L2-007 criterion 2, L2-044 criteria 1 and 12; journeys
 10, 14, 17, 18 and 21), the team's name in the invite and leave dialogs and on Left Team with the link's
 reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profile & Settings' 429
-(L2-045 criterion 6; journey 22).
+(L2-045 criterion 6; journey 22). Journey 10 proved the pins' part of L2-044 criterion 1, a name of
+markup on a pin shown as text, and the Globe's answer to a session that has ended, which forgets the team
+and shows "You need an invite link"; neither completes a criterion, so it stays at 34.
 Journey 7 stands at 100: every criterion of L2-052 is proven by an acceptance test, the backend's
 through the API and the screen's in Playwright, by keyboard and by touch at 320 px. The Globe it opens
 is the arrival journey 4 left; an expired or used link, and the wait while one opens, show Sign In's
@@ -59,7 +61,16 @@ Journey 9 stands at 100: every criterion of L2-009 is proven by an acceptance te
 a paused clock, read from where the new pin is drawn, and every rule of turning by direct unit tests
 of `GlobeMotion`, but for what its prompt hands on: the turn to a selected pin (criterion 3) is built
 as `GlobeView`'s `facing` input and proven on Join, whose globe turns to the city found and holds;
-selecting a pin and clearing the selection come with journeys 10 and 14 (ADR 0013).
+selecting a pin and clearing the selection come with journeys 10 and 14 (ADR 0013). Journey 10 proved
+criterion 3 on the Globe screen too: a pin or group pin selected by click, key or tap turns the globe to
+it within a second and holds there until a click off the pins clears it.
+Journey 10 stands at 100: the cast is drawn as `pages/globe/default` draws it, every criterion of L2-011
+to L2-013 is proven by an acceptance test in Playwright, and the colour rule (L2-011 criterion 2) through
+the API, with grouping, label placement, initials and accessible names by direct unit tests, but for what
+its prompt hands on: the weather on a pin and in its label (L2-011 criterion 1, L2-012 criterion 1) comes
+with journey 13, a teammate's sharing switches (L2-011 criteria 4 and 7) with journey 23, and the panel a
+selected pin or group pin opens, through which a group's teammates are chosen (L2-012 criterion 5, L2-013
+criteria 3 and 7), with journey 14 (ADR 0014).
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -72,7 +83,7 @@ selecting a pin and clearing the selection come with journeys 10 and 14 (ADR 001
 | 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 100 |
 | 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 100 |
 | 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 100 |
-| 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 0 |
+| 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 100 |
 | 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 0 |
 | 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 0 |
 | 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 0 |
@@ -93,4 +104,4 @@ selecting a pin and clearing the selection come with journeys 10 and 14 (ADR 001
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **36** |
+| | **Total** | | | **147** | **41** |
