@@ -1,4 +1,5 @@
 import type { Position } from '../globe/position';
+import type { Weather } from '../weather/weather';
 
 /** A city: where a pin is placed, at the city's own position, never a postal code's. */
 export interface City {
@@ -11,10 +12,10 @@ export interface City {
   readonly timeZoneId: string;
 }
 
-/** What a postal code lookup found: the city, and the weather there (journey 13), or null. */
+/** What a postal code lookup found: the city, and the weather there, or null when there is none. */
 export interface PostalCodeResult {
   readonly city: City;
-  readonly weather: null;
+  readonly weather: Weather | null;
 }
 
 /** A city to choose in "Your city". */

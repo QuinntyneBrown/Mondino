@@ -26,8 +26,11 @@
           <circle cx="12" cy="10" r="3" />
         </svg>
         <span
-          ><strong>{{ cityAndRegion() }}</strong> — pinned at city level.</span
-        >
+          ><strong>{{ cityAndRegion() }}</strong> — pinned at city level.
+          @if (weather(); as weather) {
+            <span class="tnum">{{ weather.degrees }}</span> {{ weather.rest }}
+          }
+        </span>
       </p>
     }
     @case ('NotFound') {

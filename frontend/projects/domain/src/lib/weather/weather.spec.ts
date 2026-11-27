@@ -75,12 +75,15 @@ describe('isNightSky', () => {
 describe('foundWeather', () => {
   const fog: Weather = { temperatureC: 13, condition: 'fog', observedAt: '2025-10-27T14:00:00Z' };
   it('says "13° and foggy right now." in °C', () =>
-    expect(foundWeather(fog, 'celsius')).toBe('13° and foggy right now.'));
+    expect(foundWeather(fog, 'celsius')).toEqual({ degrees: '13°', rest: 'and foggy right now.' }));
   it('says "55° and foggy right now." in °F', () =>
-    expect(foundWeather(fog, 'fahrenheit')).toBe('55° and foggy right now.'));
+    expect(foundWeather(fog, 'fahrenheit')).toEqual({
+      degrees: '55°',
+      rest: 'and foggy right now.',
+    }));
   it('says "and partly cloudy" in lower case', () =>
-    expect(foundWeather({ ...fog, condition: 'partly-cloudy' }, 'celsius')).toBe(
-      '13° and partly cloudy right now.',
+    expect(foundWeather({ ...fog, condition: 'partly-cloudy' }, 'celsius')?.rest).toBe(
+      'and partly cloudy right now.',
     ));
-  it('says nothing without weather', () => expect(foundWeather(null, 'celsius')).toBe(''));
+  it('says nothing without weather', () => expect(foundWeather(null, 'celsius')).toBeNull());
 });

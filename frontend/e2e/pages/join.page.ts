@@ -54,6 +54,8 @@ export class JoinPage {
   readonly postalCodeError: Locator;
   /** The line under the country and postal code: privacy, finding, found or not found. */
   readonly lookup: Locator;
+  /** The temperature in the found line, in tabular figures. */
+  readonly lookupDegrees: Locator;
   readonly submit: Locator;
   readonly city: Locator;
   readonly cityHelp: Locator;
@@ -110,6 +112,7 @@ export class JoinPage {
     this.nameError = this.main.locator('#name-error');
     this.postalCodeError = this.main.locator('#postal-error');
     this.lookup = this.main.locator('#lookup');
+    this.lookupDegrees = this.lookup.locator('.tnum');
     this.submit = this.form.locator('button[type="submit"]');
     this.city = this.main.getByRole('combobox', { name: 'Your city' });
     this.cityHelp = this.main.locator('#city-help');

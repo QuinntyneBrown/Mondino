@@ -111,6 +111,7 @@
               messageId="lookup"
               [state]="store.lookup()"
               [country]="store.country()"
+              [weather]="foundWeather()"
               [quiet]="!!errors().postal"
             />
           }
