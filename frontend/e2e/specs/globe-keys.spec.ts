@@ -7,8 +7,6 @@ import { rememberTeam } from '../support/membership';
 import { joinFromMilan, pauseTheClock } from '../support/turning';
 
 test.describe('Globe: turned with the arrow keys', () => {
-  test.use({ viewport: { width: 800, height: 600 } });
-
   test('each arrow key turns the focused globe by a step that way', async ({
     page,
     api,

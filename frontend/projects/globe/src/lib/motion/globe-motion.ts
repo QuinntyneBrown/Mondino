@@ -97,7 +97,12 @@ export class GlobeMotion {
       }
     } else if (this.mode === 'Waiting') {
       this.waitedMs += elapsedMs;
-      if (this.waitedMs >= IdleDelayMs) this.mode = this.leftAlone();
+      if (this.waitedMs >= IdleDelayMs) {
+        // The time past the rest is spent turning, so the globe is where the clock says.
+        const overMs = this.waitedMs - IdleDelayMs;
+        this.mode = this.leftAlone();
+        return this.advance(overMs);
+      }
     }
     return this.current;
   }

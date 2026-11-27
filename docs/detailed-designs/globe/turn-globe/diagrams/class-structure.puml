@@ -75,7 +75,6 @@ class GlobeView {
 }
 
 class GlobeScene {
-  {static} +MaxFrameMs: number = 100
   +setOrientation(orientation: GlobeOrientation): void
   +onFrame(listener: (elapsedMs: number) => void): void
   +start(): void

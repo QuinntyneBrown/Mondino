@@ -11,7 +11,7 @@ import {
   northwindInvite,
 } from '../fixtures/invites';
 import type { JoinPage } from '../pages/join.page';
-import { pauseTheClock } from '../support/turning';
+import { letTimePass, pauseTheClock } from '../support/turning';
 
 /** Runs the paused clock in short steps until the person's own pin is on the globe. */
 async function untilThePinIsPlaced(page: Page, joinPage: JoinPage): Promise<void> {
@@ -27,8 +27,6 @@ async function untilThePinIsPlaced(page: Page, joinPage: JoinPage): Promise<void
 const offCentre = ({ x, y }: { x: number; y: number }) => Math.hypot(x - 50, y - 50);
 
 test.describe('Globe: turns to a pin and holds', () => {
-  test.use({ viewport: { width: 800, height: 600 } });
-
   test.beforeEach(async ({ api }) => {
     api.answer('GET', NORTHWIND_INVITE, northwindInvite());
     api.answer('POST', NORTHWIND_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
@@ -49,13 +47,17 @@ test.describe('Globe: turns to a pin and holds', () => {
     const placed = await joinPage.youPinPlace();
     expect(offCentre(placed)).toBeGreaterThan(5);
 
-    // Then within a second the globe has turned so her pin faces the viewer
-    await page.clock.runFor(1_000);
+    // Then the globe turns towards her pin, and within a second her pin faces the viewer
+    await letTimePass(page, 400);
+    const turning = offCentre(await joinPage.youPinPlace());
+    expect(turning).toBeLessThan(offCentre(placed));
+    expect(turning).toBeGreaterThan(0.5);
+    await letTimePass(page, 568);
     const facing = await joinPage.youPinPlace();
     expect(offCentre(facing)).toBeLessThan(0.5);
 
     // And it stays there
-    await page.clock.runFor(10_000);
+    await letTimePass(page, 10_000);
     expect(await joinPage.youPinPlace()).toEqual(facing);
   });
 

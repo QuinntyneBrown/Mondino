@@ -83,3 +83,14 @@ export async function changeReducedMotion(page: Page, reduce: boolean): Promise<
   await page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' });
   await page.screenshot({ clip: { x: 0, y: 0, width: 1, height: 1 } });
 }
+
+/**
+ * Lets `ms` pass on the paused clock in one step, then draws: the globe's next frame reports the
+ * whole time since the one before (ADR 0013), so seconds of turning cost one frame, not one a
+ * 16 ms. The globe's frame loop must already be running, as it is a frame after it was last
+ * asked to move.
+ */
+export async function letTimePass(page: Page, ms: number): Promise<void> {
+  await page.clock.fastForward(ms);
+  await page.clock.runFor(32);
+}

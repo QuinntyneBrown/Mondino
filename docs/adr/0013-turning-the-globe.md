@@ -20,7 +20,7 @@ stopped.
 ## Decision
 
 - **The numbers**, named constants in the `globe` library (`motion/globe-motion.ts`, with
-  `TapThresholdPx` in `motion/globe-gestures.ts` and `MaxFrameMs` in `scene/globe-scene.ts`):
+  `TapThresholdPx` in `motion/globe-gestures.ts`):
   - `TurnRateDegreesPerSecond = 6`: a whole turn a minute, slow enough to read a label as it
     passes, fast enough that 5 seconds visibly move the globe (30°, two time zones).
   - `StepDegrees = 15`: one press of an arrow key turns the globe by one time zone.
@@ -31,8 +31,10 @@ stopped.
     eased out (`1 − (1 − t)³`), the shape of `--ease-standard`.
   - `TapThresholdPx = 6`: a pointer that moves less is a tap, kept for selecting a pin
     (journey 10).
-  - A frame's elapsed time is capped at `MaxFrameMs = 100`, so a frame after a pause or a rest
-    never jumps the globe.
+  - Motion is measured in time, not in frames: a frame reports the time since the one before
+    it, uncapped, so the globe turns at the same speed however often frames come. The first
+    frame after a rest, or after a frame that was not asked for by the loop, reports 0, so the
+    globe continues from where it rested and never jumps.
 - **Directions.** The orientation is the longitude and latitude at the centre of the view.
   Turning eastward is the Earth's own way: the surface moves from west to east, so the longitude
   at the centre falls and the pins move right. A drag turns the globe's front with the pointer,
@@ -72,4 +74,8 @@ stopped.
   chunks (a few kB); the initial chunk does not change.
 - The e2e specs that read the 3D globe's pixels at a known orientation emulate reduced motion,
   so the globe holds still while they look.
+- A frame of the 3D globe costs about 25 ms in SwiftShader locally and about 150 ms on CI, so a
+  spec cannot run seconds of turning a frame at a time. Because a frame reports the time since
+  the one before, uncapped, a spec pauses the clock and moves it on with `fastForward`: one frame
+  then shows the whole time's turn.
 - Journey 10 resolves a selected pin into `facing`; nothing in this decision changes then.
