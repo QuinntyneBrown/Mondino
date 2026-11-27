@@ -109,10 +109,10 @@ detailed design are brought in line with it in that order, before any code.
   in the wordmark itself; in a sentence the product is "Mondino".
 - **Mark:** a little world: a globe with one meridian and one parallel, and a single pin
   resting on its rim. Clear space on every side equals the pin's diameter.
-- **Colour:** paper and ink carry the interface: a cool paper canvas, white surfaces and
-  hairlines, and deep navy ink for text and navigation. Pin (orange-red) marks people and sun
-  (yellow) marks moments; leaf (green) marks working hours and sea is the brand's navy. The
-  globe has colours of its own. Nothing else competes. The prototype and the mocks are drawn
+- **Colour:** paper and ink carry the interface: a lavender paper canvas, white surfaces and
+  hairlines, and deep indigo ink for text and navigation. Pin (violet) marks people and sun
+  (yellow) marks moments; leaf (teal) marks working hours and sea is the brand's deep indigo.
+  The globe has colours of its own. Nothing else competes. The prototype and the mocks are drawn
   in light and in dark.
 - **Type:** Gabarito for the wordmark, names and clocks, and Inter for everything that is read.
   Times and temperatures use tabular figures.

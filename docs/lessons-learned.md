@@ -1095,3 +1095,45 @@ criterion 4.
   Tomás into working hours is set with the page's paused clock, with no wait.
 - *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit followed
   `node tools/verify/verify.mjs &&`.
+
+## Change: Apply the prototype's indigo and violet palette
+
+Not a journey of its own: the Mondino App and Mondino Brand prototypes moved from navy ink, an
+orange-red pin and a green leaf to deep indigo ink, a violet pin, a teal leaf and a lavender paper,
+in light and in dark. A colour change only: no criterion was added or removed, and no journey's
+% complete moved.
+
+**What slowed it**
+
+- Two colours were written outside the tokens. `assets/components.css` gave the centred dialog a
+  raw `rgb(0 0 0 / .3)` shadow in journey 16, which `check_design_system.py` reported as an error
+  from then on, and the app's invite dialog copied it. Both read the new token `--shadow-5` now.
+- A role pointed at a light-theme primitive in dark: `--color-danger-border` was the light pin in
+  both themes. The old orange passed 3:1 on the dark surface by chance; the new violet is 2.6:1. The
+  contrast check found it, and the role now points at the brighter dark pin.
+- The prototype draws its danger button in its pin-ink and darkens it on hover, the opposite of how
+  the two danger roles pointed. The roles were turned round; no token was renamed.
+- The mocks' backdrop (`.backdrop`, the night at 45% in both themes) and the app's
+  (`--color-bg-backdrop`, 55% in light, black at 65% in dark) already differ. Found and left: the
+  palette keeps every alpha, and the drift is recorded in the design system's README.
+
+**Lessons**
+
+1. **Change a palette in the primitives, then grep for what cannot read a token.** The logo files,
+   the favicon and the brand sheet's printed values hold colours of their own; everything else
+   followed `tokens.css`.
+2. **A palette change can break a contrast pair through a role that points at the wrong theme.**
+   Run `check_contrast.py` before looking at a single screen, and fix the role, not the component.
+3. **Rebuild every `rgb()` literal made from an old primitive.** A shadow, a backdrop or a band
+   written as numbers does not follow the primitive it was made from.
+4. **Keep `check_design_system.py` at 0 errors in every change that touches `components.css`.** The
+   raw shadow sat as an error for a journey because nothing that ran in CI read it.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the tokens, mocks, design system and
+  instructions were committed before the app's two changes.
+- *Look at an overlay once before calling its slice done* (journey 16, lesson 3): the invite dialog,
+  "Leave Northwind?" and the failure toast were looked at in light and dark, in the mocks and the app.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): the exit code was
+  read before committing.

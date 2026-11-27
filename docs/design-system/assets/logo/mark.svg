@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mondino">
   <title>Mondino</title>
-  <circle cx="30" cy="34" r="25" fill="#17223a"/>
-  <ellipse cx="30" cy="34" rx="10" ry="25" fill="none" stroke="#f1f5fb" stroke-opacity="0.9" stroke-width="3"/>
-  <path d="M6.5 40.5C14 45 46 45 53.5 40.5" fill="none" stroke="#f1f5fb" stroke-opacity="0.9" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="49" cy="15" r="9" fill="#e8532f" stroke="#f1f5fb" stroke-width="4"/>
+  <circle cx="30" cy="34" r="25" fill="#1a1466"/>
+  <ellipse cx="30" cy="34" rx="10" ry="25" fill="none" stroke="#f6f3fc" stroke-opacity="0.9" stroke-width="3"/>
+  <path d="M6.5 40.5C14 45 46 45 53.5 40.5" fill="none" stroke="#f6f3fc" stroke-opacity="0.9" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="49" cy="15" r="9" fill="#7032dc" stroke="#f6f3fc" stroke-width="4"/>
 </svg>

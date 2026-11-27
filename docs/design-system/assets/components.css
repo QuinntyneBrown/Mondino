@@ -1109,7 +1109,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 
 .backdrop { background: color-mix(in srgb, var(--palette-night) 45%, transparent); }
 
-@media (min-width: 36rem) { .dialog__panel { max-width: 27.5rem; box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-default), 0 24px 60px rgb(0 0 0 / .3); } }
+@media (min-width: 36rem) { .dialog__panel { max-width: 27.5rem; box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-default), var(--shadow-5); } }
 
 .dialog__body { margin-top: var(--space-3); }
 .dialog__body:has(.copy-field) { gap: var(--space-5); }

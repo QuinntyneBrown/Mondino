@@ -10,10 +10,13 @@ They are transcribed from the **Mondino App** prototype in Magic Patterns (the *
 Globe* OS; frames Join, Sign In, Create Team, Invite Needed, Globe, Team, Moments, Profile &
 Settings, Left Team and Not Found, and its shared `Globe`, `AppShell`, `AuthLayout`,
 `NoticePage`, `InviteDialog`, `OverlapBar`, feedback, pins, team and time code), as it stood on
-26 November 2026 after its second pass: the cool paper palette, the cartoon globe, the screens
-for signing in and making a team, the invite dialog, a team of 500, and its own dark theme. The
-brand sheet, `pages/brand`, is the *Mondino Brand* prototype's frame *Logo & Wordmark*, with the
-globe's colours added from the app's theme.
+26 November 2026 after its second pass: the cartoon globe, the screens for signing in and making
+a team, the invite dialog, a team of 500, and its own dark theme. On 27 November 2026 the
+prototype's `index.css` was read again for its new palette, in light and in dark: deep indigo ink
+and sea, a violet pin, a teal leaf, a yellow sun and a lavender paper, in place of the navy ink, the
+orange-red pin and the green leaf. Only the colours changed; the screens did not. The brand sheet,
+`pages/brand`, is the *Mondino Brand* prototype's frame *Logo & Wordmark*, with the globe's colours
+added from the app's theme.
 
 ## How to open them
 
@@ -119,6 +122,10 @@ kind's icon, darker pin text and control edges, all four kinds of moment on. Wha
 | Join colours each nameless pin in its teammate’s colour. | Every nameless pin on Join is in the pin colour. | The initials beside the team’s name carry their teammates’ colours, so a coloured pin would tie a set of initials to a city; the initials are not tied to any pin (L2-001). |
 | The globe fetches its land from a CDN and is drawn live with d3-geo. | A still SVG of the same cartoon globe, drawn into each mock. | Mocks open from disk with no network. |
 | Fonts from Google Fonts. | Gabarito and Inter bundled in the design system. | Fonts are self-hosted, never from a CDN. |
+| Leaf (`#0f7c8c`) is the only teal; the "Working hours" status is ink on leaf-soft. | The status is a darker teal, `--palette-leaf-strong` `#0c6e7c`, on leaf-soft. | The mocks name the status in the leaf's own colour, and leaf on leaf-soft is 4.06:1, under 4.5:1 for text (L2-041). |
+| No colour for a warning's text or icon. | `--palette-sun-strong` `#7a5200`, an amber, on sun-soft (6.1:1) and as a toast's icon on paper in dark. | A warning's text needs 4.5:1 and sun itself is far under it (L2-041). |
+| No raised surface in dark. | `--palette-night-raised` `#241a4f`, between the dark surface and its hairline. | Quiet fills and dialogs in dark need a step the prototype does not give; muted text keeps 6.1:1 on it. |
+| A dialog's shadow is black at 30%. | The shadow colour at 30%, `--shadow-5`: the ink in light, black in dark. | Every other shadow is drawn in the prototype's own shadow token, which is the ink in light. |
 | White initials on every teammate colour. | Seven of the thirteen teammate colours darkened. | 4.5:1 for text (L2-041). |
 | Tabs, filters and chips drawn about 30 px tall; the phone header 390 px wide at its narrowest. | The same look, each with a 44 px touch target, and a header that fits 320 px. | Every touch target is at least 44 × 44 px, and every screen works from the narrowest phone (L2-037, L2-039). |
 
@@ -160,14 +167,20 @@ still picture keeps its pins.
    does nothing when pressed is not built, so its foot keeps the count alone, "13 on the team ·
    link never expires". An unusable link already has one answer on Join, "This invite link no
    longer works" (L2-001).
-4. **The palette.** The Mondino App prototype uses the palette the *Palette Variants* canvas
-   calls "Current": navy ink and sea on a cool off-white with a warm orange pin. Fjord, Candy
-   Pop and Lagoon are on that canvas as options and none has been applied to the app. The mocks
-   use Current. Choosing another changes the primitives at the top of
-   `docs/design-system/tokens/tokens.css` and nothing else.
-5. **Dark theme.** Decided: the prototype now has one, and the mocks use its values. The design
-   system adds the steps the prototype's sixteen values do not give (a raised surface, the
-   danger and warning surfaces).
+4. **The palette.** Decided, on 27 November 2026: the prototype's indigo and violet palette is
+   applied, in light and in dark: deep indigo ink and sea, a violet pin, a teal leaf, a yellow sun
+   and a lavender paper. "Current" (navy ink and sea with an orange-red pin), Fjord, Candy Pop and
+   Lagoon stay on the *Palette Variants* canvas as history. The change was made in the primitives
+   at the top of `docs/design-system/tokens/tokens.css`, with the steps the prototype does not
+   give worked out again (see the departures above), and in the files that cannot read a token:
+   the logo files, the favicon and the brand sheet's printed values. The globe's colours and the
+   thirteen teammate colours did not change. Two teammate colours, 4 and 12, are violet like the
+   pin; a pin carries its teammate's initials and a nameless pin on Join has none, so the two are
+   told apart by more than colour.
+5. **Dark theme.** Decided: the prototype now has one, and the mocks use its values, read again
+   with the indigo and violet palette. The design system adds the steps the prototype's sixteen
+   values do not give (a raised surface, the danger and warning surfaces), and in dark draws an
+   error's edge in the brighter pin, as the prototype's re-pointed pin does.
 6. **"Invite teammate".** Decided, and changed: the header button opens the invite dialog
    (`dialogs/invite`), on a phone as an icon. It no longer copies the link straight to the
    clipboard. "Message" stays out: Mondino has no chat.

@@ -2,8 +2,9 @@
    Mondino design tokens — the only place colours, sizes and durations live.
 
    The single source of truth, extracted from docs/mocks. The values come from
-   the Mondino App prototype in Magic Patterns (its @theme block): a cool paper canvas, deep navy ink, an orange-red pin, a yellow sun,
-   a green leaf, and the cartoon globe's own colours.
+   the Mondino App prototype in Magic Patterns (its @theme block, read again on
+   27 November 2026): a lavender paper canvas, deep indigo ink, a violet pin, a
+   yellow sun, a teal leaf, and the cartoon globe's own colours.
 
    Three tiers:
      1. Primitives  (--palette-*, --font-*)  raw values, never used directly
@@ -54,35 +55,35 @@
 :root, [data-theme="light"] {
   /* ---------- Primitives: brand colour (from the prototype) -------------- */
   --palette-white: #ffffff;
-  --palette-paper: #f1f5fb;       /* canvas */
-  --palette-land: #e3eaf4;        /* quiet fills, hover on ink-on-paper */
-  --palette-line: #dce4ef;        /* hairlines */
-  --palette-line-strong: #808ca1; /* control edges, 3:1 on paper and white */
-  --palette-muted: #5b6678;       /* secondary text */
-  --palette-ink-soft: #2b3a5a;
-  --palette-ink: #17223a;         /* text, navigation, primary actions */
-  --palette-sea: #1d2d4d;         /* brand navy */
-  --palette-night: #0b1324;
+  --palette-paper: #f6f3fc;       /* canvas: lavender paper */
+  --palette-land: #ebe4f7;        /* quiet fills, hover on ink-on-paper */
+  --palette-line: #e4ddf3;        /* hairlines */
+  --palette-line-strong: #807a9c; /* control edges, 3:1 on paper and white: the prototype's edge */
+  --palette-muted: #5f5a7d;       /* secondary text */
+  --palette-ink-soft: #2e2680;
+  --palette-ink: #1a1466;         /* deep indigo: text, navigation, primary actions */
+  --palette-sea: #2b1470;         /* the brand's deep indigo */
+  --palette-night: #150a3d;
 
-  --palette-pin: #e8532f;         /* people */
-  --palette-pin-soft: #fbe2d8;
-  --palette-pin-strong: #b34024;  /* pin as text, 4.5:1 on paper, white and pin-soft */
-  --palette-pin-solid: #cc4929;   /* pin behind white text */
-  --palette-pin-light: #ff9475;   /* pin as text on night: the prototype's dark pin-ink */
-  --palette-pin-deep: #3b211b;     /* the prototype's dark pin-soft */
-  --palette-pin-dark: #ff6a45;     /* the pin itself, in dark */
+  --palette-pin: #7032dc;         /* people: violet */
+  --palette-pin-soft: #ece3fc;
+  --palette-pin-strong: #5a22c2;  /* pin as text, 4.5:1 on paper, white and pin-soft: the prototype's pin-ink; also the danger button */
+  --palette-pin-solid: #4519a0;   /* pin behind white text, pointed at: the prototype's hover on “Leave Northwind” */
+  --palette-pin-light: #bb9cff;   /* pin as text on night: the prototype's dark pin-ink */
+  --palette-pin-deep: #2c1a5c;     /* the prototype's dark pin-soft */
+  --palette-pin-dark: #9a6bff;     /* the pin itself, in dark */
 
-  --palette-sun: #f2b43c;         /* moments */
-  --palette-sun-soft: #fcefd2;
-  --palette-sun-strong: #7a5200;  /* sun as text on sun-soft */
+  --palette-sun: #f5b335;         /* moments */
+  --palette-sun-soft: #fdf0d3;
+  --palette-sun-strong: #7a5200;  /* sun as text on sun-soft; the mocks' own */
   --palette-sun-deep: #3a3118;     /* the prototype's dark sun-soft */
   --palette-sun-dark: #f5c04f;     /* sun, in dark */
 
-  --palette-leaf: #2f7d57;        /* working hours */
-  --palette-leaf-soft: #dcefe3;
-  --palette-leaf-strong: #2c7451; /* leaf as text on leaf-soft */
-  --palette-leaf-light: #5cc48c;   /* leaf, in dark */
-  --palette-leaf-deep: #16352a;    /* the prototype's dark leaf-soft */
+  --palette-leaf: #0f7c8c;        /* working hours: teal */
+  --palette-leaf-soft: #d7eef1;
+  --palette-leaf-strong: #0c6e7c; /* leaf as text on leaf-soft; the mocks' own */
+  --palette-leaf-light: #3fb8c8;   /* leaf, in dark */
+  --palette-leaf-deep: #0f3036;    /* the prototype's dark leaf-soft */
 
   /* The cartoon globe, in light. */
   --palette-ocean: #38a8f2;
@@ -121,13 +122,13 @@
   --palette-teammate-13: #5a7d3a;
 
   /* Dark theme surfaces, from the prototype's dark theme. */
-  --palette-night-canvas: #0d1422;      /* paper, in dark */
-  --palette-night-surface: #151e31;     /* surface, in dark */
-  --palette-night-raised: #1c2740;      /* one step up from the surface; the mocks' own */
-  --palette-night-line: #26324a;        /* hairlines */
-  --palette-night-line-strong: #6f7d96; /* control edges, 3:1 on the canvas and the surface */
-  --palette-night-muted: #9ba7bb;       /* secondary text */
-  --palette-night-fg: #eef2f8;          /* ink, in dark */
+  --palette-night-canvas: #100a2b;      /* paper, in dark */
+  --palette-night-surface: #1a1240;     /* surface, in dark */
+  --palette-night-raised: #241a4f;      /* one step up from the surface; the mocks' own */
+  --palette-night-line: #2e2459;        /* hairlines */
+  --palette-night-line-strong: #7a7099; /* control edges, 3:1 on the canvas and the surface */
+  --palette-night-muted: #a59cc4;       /* secondary text */
+  --palette-night-fg: #f2effb;          /* ink, in dark */
 
   /* ---------- Primitives: typography ------------------------------------ */
   --font-family-display: "Gabarito", ui-sans-serif, system-ui, sans-serif; /* wordmark, names, clocks */
@@ -171,7 +172,7 @@
   --color-bg-subtle: var(--palette-land);
   --color-bg-subtle-hover: var(--palette-line);
   --color-bg-inverse: var(--palette-ink);
-  --color-bg-backdrop: rgb(11 19 36 / 0.55);
+  --color-bg-backdrop: rgb(21 10 61 / 0.55);
 
   --color-fg-default: var(--palette-ink);
   --color-fg-muted: var(--palette-muted);
@@ -209,7 +210,7 @@
   --color-working: var(--palette-leaf);
   --color-working-subtle: var(--palette-leaf-soft);
   --color-fg-working: var(--palette-leaf-strong);
-  --color-night-band: rgb(23 34 58 / 0.07);
+  --color-night-band: rgb(26 20 102 / 0.07);
   --color-asleep-bg: var(--palette-ink);
   --color-fg-on-asleep: var(--palette-paper);
   --color-brand-sea: var(--palette-sea);
@@ -237,8 +238,8 @@
   --color-danger-fg: var(--palette-pin-strong);
   --color-danger-border: var(--palette-pin);
   --color-danger-icon: var(--palette-pin-strong);
-  --color-danger-solid: var(--palette-pin-solid);
-  --color-danger-solid-hover: var(--palette-pin-strong);
+  --color-danger-solid: var(--palette-pin-strong);
+  --color-danger-solid-hover: var(--palette-pin-solid);
   --color-fg-on-danger: var(--palette-white);
 
   /* The globe. */
@@ -251,7 +252,7 @@
   --color-globe-cloud: var(--palette-cloud);
   --color-globe-night: var(--palette-dusk);
   --color-globe-outline: var(--palette-ink);
-  --color-globe-shadow: rgb(23 34 58 / 0.14);
+  --color-globe-shadow: rgb(26 20 102 / 0.14);
   --color-globe-shine: rgb(255 255 255 / 0.4);
   --color-globe-graticule: rgb(255 255 255 / 0.16);
   --color-globe-coast: rgb(255 255 255 / 0.35);
@@ -343,11 +344,12 @@
   --border-width-pin: 3px;
 
   /* ---------- Semantic: elevation --------------------------------------- */
-  --shadow-color: 23 34 58;
+  --shadow-color: 26 20 102;
   --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.18);
   --shadow-2: 0 2px 6px rgb(var(--shadow-color) / 0.14), 0 1px 2px rgb(var(--shadow-color) / 0.08);
   --shadow-3: 0 8px 30px rgb(var(--shadow-color) / 0.12), 0 2px 6px rgb(var(--shadow-color) / 0.08);
   --shadow-4: 0 10px 30px rgb(var(--shadow-color) / 0.25), 0 4px 12px rgb(var(--shadow-color) / 0.10);
+  --shadow-5: 0 24px 60px rgb(var(--shadow-color) / 0.3); /* a dialog, centred from 576 px */
   --shadow-lift: 0 6px 14px rgb(var(--shadow-color) / 0.35);
   --shadow-focus: 0 0 0 2px var(--color-focus-ring-offset), 0 0 0 4px var(--color-focus-ring);
 
@@ -502,7 +504,7 @@
 
   --color-danger-bg: var(--palette-pin-deep);
   --color-danger-fg: var(--palette-pin-light);
-  --color-danger-border: var(--palette-pin);
+  --color-danger-border: var(--palette-pin-dark);
   --color-danger-icon: var(--palette-pin-light);
   --color-danger-solid: var(--palette-pin-light);
   --color-danger-solid-hover: var(--palette-pin-soft);
@@ -526,6 +528,7 @@
   --shadow-2: 0 2px 6px rgb(var(--shadow-color) / 0.45), 0 1px 2px rgb(var(--shadow-color) / 0.3);
   --shadow-3: 0 8px 30px rgb(var(--shadow-color) / 0.5), 0 2px 6px rgb(var(--shadow-color) / 0.35);
   --shadow-4: 0 10px 30px rgb(var(--shadow-color) / 0.6), 0 4px 12px rgb(var(--shadow-color) / 0.4);
+  --shadow-5: 0 24px 60px rgb(var(--shadow-color) / 0.3);
   --shadow-lift: 0 6px 14px rgb(var(--shadow-color) / 0.6);
 
   color-scheme: dark;
@@ -589,7 +592,7 @@
     --color-warning-solid: var(--palette-sun);
     --color-danger-bg: var(--palette-pin-deep);
     --color-danger-fg: var(--palette-pin-light);
-    --color-danger-border: var(--palette-pin);
+    --color-danger-border: var(--palette-pin-dark);
     --color-danger-icon: var(--palette-pin-light);
     --color-danger-solid: var(--palette-pin-light);
     --color-danger-solid-hover: var(--palette-pin-soft);
@@ -611,6 +614,7 @@
     --shadow-2: 0 2px 6px rgb(var(--shadow-color) / 0.45), 0 1px 2px rgb(var(--shadow-color) / 0.3);
     --shadow-3: 0 8px 30px rgb(var(--shadow-color) / 0.5), 0 2px 6px rgb(var(--shadow-color) / 0.35);
     --shadow-4: 0 10px 30px rgb(var(--shadow-color) / 0.6), 0 4px 12px rgb(var(--shadow-color) / 0.4);
+    --shadow-5: 0 24px 60px rgb(var(--shadow-color) / 0.3);
     --shadow-lift: 0 6px 14px rgb(var(--shadow-color) / 0.6);
     color-scheme: dark;
   }
