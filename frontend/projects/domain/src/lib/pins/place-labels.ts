@@ -8,10 +8,14 @@ export interface LabelledPoint {
   readonly labelled: boolean;
   /** Half the width of its mark: a pin's or a group pin's. */
   readonly markRadius: number;
+  /** Its label's width at rest; the time alone's when not given. */
+  readonly widthPx?: number;
 }
 
 /** A resting label, as the mocks draw "15:05": about 48 × 24 CSS px. */
 export const LabelWidthPx = 48;
+/** A resting label with weather, as the mocks draw "11:05 ☂ 26°": about 92 CSS px (L2-018). */
+export const WeatherLabelWidthPx = 92;
 export const LabelHeightPx = 24;
 /** The gap from a pin's centre to its label: half a 26 px pin and 8 px. */
 const GapPx = 21;
@@ -33,8 +37,9 @@ export function placeLabels(
   return points.map((point) => {
     if (compact || !point.labelled) return null;
     for (const side of sides) {
-      const [left, top] = boxOf(point, side);
-      const [right, bottom] = [left + LabelWidthPx, top + LabelHeightPx];
+      const width = point.widthPx ?? LabelWidthPx;
+      const [left, top] = boxOf(point, side, width);
+      const [right, bottom] = [left + width, top + LabelHeightPx];
       if (
         ![
           [left, top],
@@ -56,15 +61,15 @@ export function placeLabels(
   });
 }
 
-function boxOf(point: LabelledPoint, side: LabelSide): [number, number] {
+function boxOf(point: LabelledPoint, side: LabelSide, width: number): [number, number] {
   switch (side) {
     case 'right':
       return [point.x + GapPx, point.y - LabelHeightPx / 2];
     case 'left':
-      return [point.x - GapPx - LabelWidthPx, point.y - LabelHeightPx / 2];
+      return [point.x - GapPx - width, point.y - LabelHeightPx / 2];
     case 'below':
-      return [point.x - LabelWidthPx / 2, point.y + GapPx];
+      return [point.x - width / 2, point.y + GapPx];
     case 'above':
-      return [point.x - LabelWidthPx / 2, point.y - GapPx - LabelHeightPx];
+      return [point.x - width / 2, point.y - GapPx - LabelHeightPx];
   }
 }

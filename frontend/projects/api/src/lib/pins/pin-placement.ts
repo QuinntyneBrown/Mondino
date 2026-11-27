@@ -1,4 +1,5 @@
 import type { Status } from '../time/status';
+import type { PinWeather } from '../weather/weather';
 
 /** Which side of its pin a label sits on. */
 export type LabelSide = 'right' | 'left' | 'below' | 'above';
@@ -17,7 +18,9 @@ export interface PinView {
   readonly localTime: string;
   /** The status at the local time, or null when the teammate does not share it. */
   readonly status: Status | null;
-  /** The pin's accessible name: "Tomás Herrera, Mexico City, 08:05, Early morning". */
+  /** The weather in the viewer's unit, or null when there is none to show. */
+  readonly weather: PinWeather | null;
+  /** The pin's accessible name: "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°". */
   readonly description: string;
   readonly isViewer: boolean;
   /** Placed just now: it pulses once. */

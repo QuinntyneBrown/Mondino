@@ -7,6 +7,28 @@ export const NORTHWIND_PINS = `/api/teams/${NORTHWIND_MEMBERSHIP.teamId}/pins`;
 
 type City = keyof typeof NORTHWIND_POSITIONS;
 
+/** The cast's weather at each city, in °C, at the mocks' "now" (docs/mocks/README.md). */
+const weatherAt: Record<City, [number, string]> = {
+  'Mexico City': [22, 'partly-cloudy'],
+  Austin: [24, 'partly-cloudy'],
+  'São Paulo': [26, 'showers'],
+  Dublin: [9, 'rain'],
+  Accra: [30, 'clear'],
+  Milan: [13, 'fog'],
+  Berlin: [8, 'cloudy'],
+  Stockholm: [6, 'cloudy'],
+  Dubai: [32, 'clear'],
+  Bengaluru: [27, 'storm'],
+  Tokyo: [14, 'clear'],
+  Melbourne: [18, 'wind'],
+};
+
+/** The weather at a city as the backend answers it, observed at the top of the hour. */
+function weatherOf(city: City): WeatherJson {
+  const [temperatureC, condition] = weatherAt[city];
+  return { temperatureC, condition, observedAt: '2025-10-27T14:00:00Z' };
+}
+
 const cities: Record<City, { country: string; timeZoneId: string }> = {
   'Mexico City': { country: 'Mexico', timeZoneId: 'America/Mexico_City' },
   Austin: { country: 'United States', timeZoneId: 'America/Chicago' },
@@ -46,6 +68,12 @@ export function idOf(name: string): string {
   return `00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`;
 }
 
+export interface WeatherJson {
+  temperatureC: number;
+  condition: string;
+  observedAt: string;
+}
+
 export interface PinJson {
   teammateId: string;
   name: string;
@@ -57,6 +85,9 @@ export interface PinJson {
   /** Whether the teammate shares if they are working or asleep; always true on the viewer's own. */
   sharesStatus: boolean;
   isViewer: boolean;
+  /** The weather at the city, or null when it is unavailable or not shared. */
+  weather: WeatherJson | null;
+  weatherState: 'Available' | 'Unavailable' | 'NotShared';
 }
 
 function pinOf(name: string, colour: string, city: City): PinJson {
@@ -70,6 +101,8 @@ function pinOf(name: string, colour: string, city: City): PinJson {
     timeZoneId: cities[city].timeZoneId,
     sharesStatus: true,
     isViewer: name === 'Sofia Bianchi',
+    weather: weatherOf(city),
+    weatherState: 'Available',
   };
 }
 
@@ -162,6 +195,8 @@ export function teamOf500(): Answer {
       timeZoneId: place.timeZoneId,
       sharesStatus: true,
       isViewer: false,
+      weather: place.name in weatherAt ? weatherOf(place.name as City) : null,
+      weatherState: place.name in weatherAt ? 'Available' : 'Unavailable',
     });
   }
   return northwindPins(pins);

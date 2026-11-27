@@ -28,6 +28,8 @@ export class GlobePage {
   /** The pins placed just now, which pulse once. */
   readonly newPins: Locator;
   readonly restingLabels: Locator;
+  /** The local time in each resting label. */
+  readonly restingTimes: Locator;
   readonly liftedLabels: Locator;
   /** The new teammate's own pin, lifted, and its label. */
   readonly youPin: Locator;
@@ -61,6 +63,7 @@ export class GlobePage {
     this.liftedPins = this.pinList.locator('li.globe__pin--lifted');
     this.newPins = this.pinList.locator('.pin--new');
     this.restingLabels = this.pinList.locator('.pin-label:not(.pin-label--lifted)');
+    this.restingTimes = this.restingLabels.locator('strong');
     this.liftedLabels = this.pinList.locator('.pin-label--lifted');
     this.youPin = this.stage.locator('.globe__pin--lifted .pin--you');
     this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');
@@ -84,6 +87,40 @@ export class GlobePage {
   /** A pin's label, beside its button. */
   labelOf(name: string): Locator {
     return this.pinItem(name).locator('.pin-label');
+  }
+
+  /** The local time in a pin's label. */
+  labelTimeOf(name: string): Locator {
+    return this.labelOf(name).locator('strong');
+  }
+
+  /** The degrees in a pin's label, and the condition's word in a lifted one. */
+  labelDegreesOf(name: string): Locator {
+    return this.labelOf(name).locator('svg.icon + span');
+  }
+
+  labelWordOf(name: string): Locator {
+    return this.labelOf(name).locator('svg.icon + span + span');
+  }
+
+  /** The weather icon in a pin's label. */
+  labelIconOf(name: string): Locator {
+    return this.labelOf(name).locator('svg.icon');
+  }
+
+  /** The shapes of the icon in a pin's label, each as its tag and its attributes in order of name. */
+  async labelIconShapes(name: string): Promise<string[]> {
+    return this.labelIconOf(name).evaluate((svg) =>
+      [...svg.children].map((shape) =>
+        [
+          shape.tagName,
+          ...[...shape.attributes]
+            .filter((attribute) => !attribute.name.startsWith('_ng'))
+            .map((attribute) => `${attribute.name}=${attribute.value}`)
+            .sort(),
+        ].join(' '),
+      ),
+    );
   }
 
   /** The accessible names of the pins in the list, in its order. */
