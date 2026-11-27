@@ -239,4 +239,91 @@ test.describe('Team: a team of hundreds', () => {
     await expect(teamPage.more).toHaveText(mockText(path, 'city-section__more')!);
     await expect(teamPage.density).toHaveAccessibleName(mockBars(path).name);
   });
+
+  test('the search keeps the teammates whose name or city it matches, under their cities, within the filter', async ({
+    api,
+    teamPage,
+  }) => {
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+    await teamPage.open();
+    await expect(teamPage.rows).toHaveCount(8);
+
+    // When a name is typed, only that teammate is left, under their city
+    await teamPage.search.fill('tara');
+    await expect(teamPage.sectionToggles).toHaveCount(1);
+    expect(await teamPage.sectionHeads()).toEqual([
+      { name: 'Honolulu', count: '1', time: '04:05', expanded: 'true' },
+    ]);
+    expect(await teamPage.names()).toEqual(['Tara Okafor']);
+
+    // And a city is found without its accents, opened as the first section
+    await teamPage.search.fill('sao paulo');
+    await expect(teamPage.sectionToggles).toHaveCount(1);
+    await expect(teamPage.sectionToggle('São Paulo')).toHaveAttribute('aria-expanded', 'true');
+    await expect(teamPage.rows).toHaveCount(18);
+
+    // And within Working now, Berlin's 36 are all at work
+    await teamPage.search.fill('Berlin');
+    await teamPage.tab('Working now').click();
+    await expect(teamPage.tab('Working now')).toHaveAttribute('aria-selected', 'true');
+    await expect(teamPage.sectionRows('Berlin')).toHaveCount(36);
+    // And the filters still count the whole team
+    await expect(teamPage.tabs).toHaveText(['All 500', 'Working now 324', 'Asleep 42']);
+    // And what was typed is not in the address
+    expect(teamPage.address()).toBe('/team?filter=working');
+  });
+
+  test('a search that matches no one says so, and "Show everyone" clears it and returns to All', async ({
+    api,
+    teamPage,
+  }) => {
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+    await teamPage.open('asleep');
+    await expect(teamPage.rows).toHaveCount(8);
+
+    // When a city where no teammate lives is searched for
+    await teamPage.search.fill('Reykjavik');
+
+    // Then the list says so in the mock's words, and no city is left
+    const path = 'pages/team/hundreds-no-match.html';
+    await expect(teamPage.noteTitle).toHaveText(mockText(path, 'list-note__title')!);
+    await expect(teamPage.note).toHaveText(
+      new RegExp(`Try another filter\\.\\s*Show everyone\\s*$`),
+    );
+    await expect(teamPage.note).toHaveAttribute('role', 'status');
+    await expect(teamPage.sectionToggles).toHaveCount(0);
+
+    // When "Show everyone" is used, the search is empty, All is chosen, and every city is back
+    await teamPage.showEveryone.click();
+    await expect(teamPage.search).toHaveValue('');
+    await expect(teamPage.tab('All')).toHaveAttribute('aria-selected', 'true');
+    await expect(teamPage.sectionToggles).toHaveCount(40);
+    expect(teamPage.address()).toBe('/team');
+  });
+
+  test('what is typed in the search is held to 60 characters and shown as text', async ({
+    api,
+    teamPage,
+    page,
+    problems,
+  }) => {
+    page.on('dialog', (dialog) => {
+      problems.push(`A dialog opened: ${dialog.message()}`);
+      void dialog.dismiss();
+    });
+    api.answer('GET', NORTHWIND_PINS, teamOf500());
+    await teamPage.open();
+    await expect(teamPage.rows).toHaveCount(8);
+
+    // When markup longer than 60 characters is typed
+    const markup = '<img src=x onerror=alert(1)>';
+    const typed = `${markup}${'x'.repeat(60)}`;
+    await teamPage.search.pressSequentially(typed);
+
+    // Then the field keeps 60 characters, and the note quotes them as text
+    await expect(teamPage.search).toHaveValue(typed.slice(0, 60));
+    await expect(teamPage.noteTitle).toHaveText(`No one matches “${typed.slice(0, 60)}”`);
+    await expect(teamPage.images).toHaveCount(0);
+    expect(page.url()).not.toContain('img');
+  });
 });
