@@ -4,7 +4,7 @@
 
 A teammate sees only the team they are in and changes only their own pin; anyone else is refused by the
 backend, whatever the browser shows. A postal code reaches only the teammate it belongs to. What a person
-types is validated and rendered as text. Someone with no team who opens a screen sees "Invite link needed" in
+types is validated and rendered as text. Someone with no team who opens a screen sees "You need an invite link" in
 place.
 
 Journey 6 of `docs/journeys.md`. Requirements: L2-007, L2-043, L2-044, L2-045 (`docs/specs/L2.md`).
