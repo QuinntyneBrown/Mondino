@@ -1,3 +1,4 @@
+import type { Moment } from '../moments/moment';
 import { InjectionToken } from '@angular/core';
 import type { Position } from '../globe/position';
 import type { Weather, WeatherState } from '../weather/weather';
@@ -39,6 +40,8 @@ export interface TeamPins {
 /** Reads a team's pins. Refused with 401 when the session has ended, and 404 for another team. */
 export interface TeamApi {
   getPins(teamId: string, signal: AbortSignal): Promise<TeamPins>;
+  /** The team's moments, from today in each place to 90 days ahead, in date order (find-moments). */
+  getMoments(teamId: string, signal: AbortSignal): Promise<readonly Moment[]>;
 }
 
 export const TEAM_API = new InjectionToken<TeamApi>('TeamApi');

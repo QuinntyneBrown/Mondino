@@ -1,3 +1,4 @@
+import type { MomentView } from '../moments/moment';
 import type { DaySpan, Overlap, OverlapText } from '../time/overlap';
 import type { Status } from '../time/status';
 import type { WeatherCondition, WeatherState } from '../weather/weather';
@@ -55,6 +56,8 @@ export interface TeammatePanelContent {
   readonly privateNote: string | null;
   /** Null on the viewer's own panel and for a teammate who does not share their status. */
   readonly overlap: OverlapView | null;
+  /** The teammate's upcoming moments in date order (L2-020); none, and the panel has no section. */
+  readonly moments: readonly MomentView[];
 }
 
 /** One teammate of a group pin, as its panel lists them. */

@@ -1,0 +1,17 @@
+// A moment's emblem (docs/design-system/components): a round badge in the moment colour.
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--emblem-size);
+  height: var(--emblem-size);
+  border-radius: var(--radius-full);
+  background: var(--color-moment-subtle);
+  color: var(--color-fg-default);
+}
+:host(.emblem--solid),
+:host(.emblem--strong) {
+  background: var(--color-moment);
+  color: var(--color-fg-on-moment);
+}

@@ -21,6 +21,8 @@ export * from './lib/pin-layer/pin-layer';
 export * from './lib/pin-label/pin-label';
 export * from './lib/overlap-bar/overlap-bar';
 export * from './lib/weather-icon/weather-icon';
+export * from './lib/moment-icon/moment-icon';
+export * from './lib/emblem/emblem';
 export * from './lib/status/status';
 export * from './lib/teammate-panel/teammate-panel';
 export * from './lib/group-panel/group-panel';

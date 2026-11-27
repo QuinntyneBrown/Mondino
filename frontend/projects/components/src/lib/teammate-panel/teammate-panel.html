@@ -76,6 +76,20 @@
       <p>{{ note }}</p>
     </div>
   }
+  @if (content().moments.length > 0) {
+    <div class="person__moments">
+      @for (moment of content().moments; track $index) {
+        <div class="moment-card">
+          <mo-emblem solid iconSize="card" [kind]="moment.kind" />
+          <div>
+            <p class="moment-card__kind">{{ moment.kindName + ' · ' + moment.when }}</p>
+            <h3 class="moment-card__title">{{ moment.title }}</h3>
+            <p class="moment-card__detail">{{ moment.detail }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
   @if (content().overlap; as overlap) {
     <mo-overlap-bar
       [overlap]="overlap.overlap"

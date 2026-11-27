@@ -324,6 +324,26 @@ export class GlobePage {
     );
   }
 
+  /** The moment cards of a teammate's panel, each read as a mock's: kind and when, title, detail and icon. */
+  momentCards(): Promise<{ kind: string; title: string; detail: string; icon: string[] }[]> {
+    return this.personMoments.locator('.moment-card').evaluateAll((cards) =>
+      cards.map((card) => ({
+        kind: card.querySelector('.moment-card__kind')?.textContent?.trim() ?? '',
+        title: card.querySelector('.moment-card__title')?.textContent?.trim() ?? '',
+        detail: card.querySelector('.moment-card__detail')?.textContent?.trim() ?? '',
+        icon: [...(card.querySelector('svg')?.children ?? [])].map((shape) =>
+          [
+            shape.tagName,
+            ...[...shape.attributes]
+              .filter((attribute) => !attribute.name.startsWith('_ng'))
+              .map((attribute) => `${attribute.name}=${attribute.value}`)
+              .sort(),
+          ].join(' '),
+        ),
+      })),
+    );
+  }
+
   /** The overlap bar's parts, each as its class and its --from and --span, as a mock writes them. */
   async overlapBarParts(): Promise<string[]> {
     return this.overlapParts.evaluateAll((parts: HTMLElement[]) =>

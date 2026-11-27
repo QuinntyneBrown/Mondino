@@ -167,6 +167,7 @@ export class GlobePage {
       untracked(() => this.clock.now()),
       this.clockFormat(),
       this.unit(),
+      this.store.moments(),
     );
   });
 

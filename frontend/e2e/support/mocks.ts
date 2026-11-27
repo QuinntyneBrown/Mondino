@@ -74,6 +74,16 @@ export interface MockPanel {
   /** The overlap bar's parts: each part's class and its --from and --span. */
   barParts: string[];
   announcement: string | null;
+  /** Each moment card: its kind and when, title and detail, and its emblem's icon's shapes. */
+  moments: MockMomentCard[];
+}
+
+/** A moment card in a mock's teammate panel. */
+export interface MockMomentCard {
+  kind: string;
+  title: string;
+  detail: string;
+  icon: string[];
 }
 
 export function mockPanel(path: string): MockPanel {
@@ -98,7 +108,68 @@ export function mockPanel(path: string): MockPanel {
       ([, part, style]) => `${part} ${style}`,
     ),
     announcement: /<p class="visually-hidden" role="status"[^>]*>([^<]*)</.exec(panel)?.[1] ?? null,
+    moments: [...panel.matchAll(/<div class="moment-card">([\s\S]*?)<\/div><\/div>/g)].map(
+      ([, card]) => ({
+        kind: textOf(card, 'moment-card__kind') ?? '',
+        title: textOf(card, 'moment-card__title') ?? '',
+        detail: textOf(card, 'moment-card__detail') ?? '',
+        icon: shapesOf(card),
+      }),
+    ),
   };
+}
+
+/** A moment row of a mock's week around the world: its emblem, title, kind and teammate, and when. */
+export interface MockWeekMoment {
+  solid: boolean;
+  icon: string[];
+  title: string;
+  /** The row's meta as a screen reader reads it: "Holiday, Liam · Dublin". */
+  meta: string;
+  when: string;
+}
+
+/** The moment rows of a mock's "This week around the world", in order. */
+export function mockWeekMoments(path: string): MockWeekMoment[] {
+  const markup = mockMarkup(path);
+  const week = markup.slice(
+    markup.indexOf('id="week-title"'),
+    markup.indexOf('id="working-title"'),
+  );
+  return [...week.matchAll(/<a class="row"[^>]*>([\s\S]*?)<\/a>/g)].map(([, row]) => ({
+    solid: /class="emblem emblem--solid"/.test(row),
+    icon: shapesOf(row),
+    title: textOf(row, 'row__title') ?? '',
+    meta: textOf(row, 'row__meta') ?? '',
+    when: textOf(row, 'row__trail') ?? '',
+  }));
+}
+
+/** "Coming up" in a mock's Team row: the pill's icon's name and shapes, title and when; or null for a dash. */
+export interface MockComingUp {
+  iconName: string | null;
+  icon: string[];
+  title: string;
+  when: string;
+}
+
+/** "Coming up" of each row of a mock's Team table, by the row's link text. */
+export function mockComingUp(path: string): Map<string, MockComingUp | null> {
+  const markup = mockMarkup(path);
+  return new Map(
+    [...markup.matchAll(/<tr class="team-table__row">([\s\S]*?)<\/tr>/g)].map(([, row]) => {
+      const cell = /<td class="team-table__moment">([\s\S]*?)<\/td>/.exec(row)?.[1] ?? '';
+      const pill = /<span class="moment-pill">/.test(cell)
+        ? {
+            iconName: /aria-label="([^"]*)"/.exec(cell)?.[1] ?? null,
+            icon: shapesOf(cell),
+            title: textOf(cell, 'moment-pill__title') ?? '',
+            when: textOf(cell, 'moment-pill__when') ?? '',
+          }
+        : null;
+      return [textOf(row, 'team-table__link') ?? '', pill];
+    }),
+  );
 }
 
 /** A row of a mock's Team table, part by part, as a spec compares it with the screen's. */

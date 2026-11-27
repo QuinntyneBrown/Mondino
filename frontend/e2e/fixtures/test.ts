@@ -1,5 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import { ApiFixture } from './api';
+import { NO_MOMENTS, NORTHWIND_MOMENTS } from './moments';
 import { NOW } from './now';
 import { CreateTeamPage } from '../pages/create-team.page';
 import { GlobePage } from '../pages/globe.page';
@@ -48,6 +49,8 @@ export const test = base.extend<Options & Fixtures>({
   api: async ({ page, problems }, use) => {
     const api = new ApiFixture(problems);
     await api.install(page);
+    // Northwind has no moment unless a spec says so, as `pages/globe/no-moments` draws its week.
+    api.answer('GET', NORTHWIND_MOMENTS, NO_MOMENTS);
     await use(api);
   },
 

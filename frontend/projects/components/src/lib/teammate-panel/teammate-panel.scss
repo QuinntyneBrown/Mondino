@@ -98,3 +98,27 @@
 .panel__note .icon {
   margin-top: var(--space-0-5);
 }
+.person__moments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.moment-card {
+  display: flex;
+  gap: var(--space-3);
+  padding: 0.875rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-moment-subtle);
+}
+.moment-card__kind {
+  font: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+}
+.moment-card__title {
+  font: var(--text-h4);
+  overflow-wrap: anywhere;
+}
+.moment-card__detail {
+  margin-top: var(--space-0-5);
+  font: var(--text-body-sm);
+}
