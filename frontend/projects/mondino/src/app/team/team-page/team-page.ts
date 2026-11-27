@@ -8,11 +8,13 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { CLOCK } from '@mondino/api';
-import { TeamTable } from '@mondino/components';
+import { DayRibbon, TeamTable } from '@mondino/components';
 import {
   BrowserClock,
   defaultClockFormat,
   defaultTemperatureUnit,
+  ribbonMarkers,
+  ribbonScale,
   teamCounts,
   teamLine,
   teamRows,
@@ -28,7 +30,7 @@ import { TeamStore } from '../team-store';
  */
 @Component({
   selector: 'mo-team-page',
-  imports: [TeamTable],
+  imports: [DayRibbon, TeamTable],
   // One clock for the screen, released with it; the team is the shell's.
   providers: [{ provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './team-page.html',
@@ -60,6 +62,14 @@ export class TeamPage {
     const pins = this.store.team()?.pins;
     return pins ? teamRows(pins, this.now(), this.clockFormat(), this.unit()) : [];
   });
+
+  /** Each teammate on the day ribbon, at the hour they are living through (L2-027). */
+  protected readonly ribbon = computed(() => {
+    const pins = this.store.team()?.pins;
+    return pins ? ribbonMarkers(pins, this.now(), this.clockFormat()) : null;
+  });
+
+  protected readonly scale = computed(() => ribbonScale(this.clockFormat()));
 
   /** The address that selects a teammate on the Globe. */
   protected readonly addressOf = (teammateId: string): string =>

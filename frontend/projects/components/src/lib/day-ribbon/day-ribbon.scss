@@ -1,0 +1,91 @@
+// The day, hour by hour (docs/design-system/components/day-ribbon).
+:host {
+  display: block;
+}
+.day-ribbon {
+  margin-top: var(--space-8);
+}
+// At its least the ribbon is 45rem wide; narrower, it scrolls inside its region.
+.day-ribbon__scroll {
+  overflow-x: auto;
+}
+.day-ribbon__scroll > * {
+  min-width: 45rem;
+}
+.day-ribbon__track {
+  position: relative;
+  height: calc(var(--ribbon-top) + var(--rows) * var(--ribbon-row-height));
+  overflow: hidden;
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+}
+// The bands: night 23:00 to 07:00 (across midnight), morning, working hours and evening.
+.day-ribbon__band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding: var(--space-2) 0 0 var(--space-2);
+  font: var(--text-caption);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+}
+.day-ribbon__band--night {
+  background: var(--color-night-band);
+}
+.day-ribbon__band--edge {
+  background: var(--color-moment-subtle);
+}
+.day-ribbon__band--working {
+  left: 37.5%;
+  width: 37.5%;
+  background: var(--color-working-subtle);
+}
+.day-ribbon__band--first {
+  left: 0;
+  width: 29.1667%;
+}
+.day-ribbon__band--morning {
+  left: 29.1667%;
+  width: 8.3333%;
+}
+.day-ribbon__band--evening {
+  left: 75%;
+  width: 20.8333%;
+}
+.day-ribbon__band--last {
+  left: 95.8333%;
+  width: 4.1667%;
+}
+.day-ribbon__marker {
+  position: absolute;
+  left: clamp(var(--space-5), var(--at), calc(100% - var(--space-5)));
+  top: calc(var(--ribbon-top) + var(--row) * var(--ribbon-row-height));
+  translate: -50% 0;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+.day-ribbon__marker:hover {
+  scale: 1.1;
+}
+.day-ribbon__marker .avatar {
+  width: var(--space-8);
+  height: var(--space-8);
+  font-size: var(--font-size-xs);
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-bg-surface);
+}
+.day-ribbon__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  font: var(--text-caption);
+  font-size: var(--font-size-2xs);
+  color: var(--color-fg-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-ribbon__marker {
+    transition: none;
+  }
+}

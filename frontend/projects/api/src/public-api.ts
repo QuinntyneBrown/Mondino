@@ -23,3 +23,4 @@ export * from './lib/teams/http-team-api';
 export * from './lib/teams/team-pins';
 export * from './lib/weather/weather';
 export * from './lib/pins/team-row';
+export * from './lib/pins/ribbon';

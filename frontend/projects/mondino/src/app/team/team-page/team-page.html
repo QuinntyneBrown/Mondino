@@ -3,6 +3,15 @@
   @if (lead(); as lead) {
     <p class="page__lead tnum">{{ lead }}</p>
   }
+  @if (ribbon(); as ribbon) {
+    <mo-day-ribbon
+      [markers]="ribbon.markers"
+      [rows]="ribbon.rows"
+      [scale]="scale()"
+      [address]="addressOf"
+      (teammateChosen)="choose($event)"
+    />
+  }
   <div class="section-head">
     <h2>Everyone, west to east</h2>
   </div>

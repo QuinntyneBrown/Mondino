@@ -100,6 +100,27 @@ export class TeamPage {
     return this.rows.filter({ has: this.page.locator('.team-table__link', { hasText: name }) });
   }
 
+  /** The ribbon's marker named as a screen reader reads it: "Liam O’Connor, 14:05". */
+  marker(name: string): Locator {
+    return this.ribbon.getByRole('link', { name, exact: true });
+  }
+
+  /** Where each marker sits, as a mock writes it: its --at without the %, its --row and its tooltip. */
+  async markerPlaces(): Promise<{ at: string; row: string; title: string }[]> {
+    return this.markers.evaluateAll((markers: HTMLElement[]) =>
+      markers.map((marker) => ({
+        at: marker.style.getPropertyValue('--at').replace('%', '').trim(),
+        row: marker.style.getPropertyValue('--row').trim(),
+        title: marker.title,
+      })),
+    );
+  }
+
+  /** Whether the ribbon is wider than its region, which scrolls sideways inside itself. */
+  async ribbonScrolls(): Promise<boolean> {
+    return this.ribbonScroll.evaluate((region) => region.scrollWidth > region.clientWidth);
+  }
+
   /** A row's parts, as the mocks class them. */
   link(row: Locator): Locator {
     return row.locator('.team-table__link');
