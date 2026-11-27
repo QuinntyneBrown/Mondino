@@ -66,6 +66,17 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Check the required app settings are set
+        # By name only: no value is read or printed (docs/deployment/README.md).
+        run: |
+          names=$(az webapp config appsettings list -g "$(az webapp list --query "[?name=='${{ vars.AZURE_WEBAPP_NAME }}'].resourceGroup | [0]" -o tsv)" \
+            -n "${{ vars.AZURE_WEBAPP_NAME }}" --query "[].name" -o tsv)
+          missing=0
+          for setting in EmailProtection__Key PostalCodeSource__Username; do
+            grep -qx "$setting" <<< "$names" || { echo "::error::App setting $setting is not set (docs/deployment/README.md)"; missing=1; }
+          done
+          exit $missing
+
       - id: deploy
         uses: azure/webapps-deploy@v3
         with:
