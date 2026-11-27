@@ -3,21 +3,32 @@ import type { Answer } from './api';
 /** Northwind's invite link, as the mocks' cast gives it. */
 export const NORTHWIND_INVITE = '/api/invites/northwind-7Kq2';
 
+/** The supported countries, with the form of their postal codes, as the backend answers them. */
 const countries = [
-  ['AU', 'Australia'],
-  ['BR', 'Brazil'],
-  ['CA', 'Canada'],
-  ['DE', 'Germany'],
-  ['GH', 'Ghana'],
-  ['IN', 'India'],
-  ['IE', 'Ireland'],
-  ['IT', 'Italy'],
-  ['JP', 'Japan'],
-  ['MX', 'Mexico'],
-  ['SE', 'Sweden'],
-  ['AE', 'United Arab Emirates'],
-  ['US', 'United States'],
-].map(([code, name]) => ({ code, name }));
+  ['AU', 'Australia', 'Australia', 'Australian postal codes have four digits, like 2000.'],
+  ['BR', 'Brazil', 'Brazil', 'Brazilian postal codes have eight digits, like 01310-100.'],
+  ['CA', 'Canada', 'Canada', 'Canadian postal codes look like A1A 1A1.'],
+  ['DE', 'Germany', 'Germany', 'German postal codes have five digits, like 10115.'],
+  [
+    'GH',
+    'Ghana',
+    'Ghana',
+    'Ghanaian postal codes are two letters and three or four digits, like GA543.',
+  ],
+  ['IN', 'India', 'India', 'Indian PIN codes have six digits, like 560001.'],
+  ['IE', 'Ireland', 'Ireland', 'Irish Eircodes look like D02 X285.'],
+  ['IT', 'Italy', 'Italy', 'Italian postal codes have five digits, like 20121.'],
+  ['JP', 'Japan', 'Japan', 'Japanese postal codes have seven digits, like 100-0001.'],
+  ['MX', 'Mexico', 'Mexico', 'Mexican postal codes have five digits, like 06000.'],
+  ['SE', 'Sweden', 'Sweden', 'Swedish postal codes have five digits, like 111 22.'],
+  [
+    'AE',
+    'United Arab Emirates',
+    'the United Arab Emirates',
+    'UAE addresses use a P.O. Box number of up to six digits, like 12345.',
+  ],
+  ['US', 'United States', 'the United States', 'US ZIP codes have five digits, like 78701.'],
+].map(([code, name, nameInText, postalCodeForm]) => ({ code, name, nameInText, postalCodeForm }));
 
 /** The twelve teammates' cities: one bare position for each, as the backend answers them. */
 export const NORTHWIND_POSITIONS = {
@@ -55,5 +66,63 @@ export function northwindInvite(overrides: Record<string, unknown> = {}): Answer
       countries,
       ...overrides,
     },
+  };
+}
+
+/** Where Join looks a postal code up, and searches the cities, through Northwind's invite link. */
+export const NORTHWIND_LOOKUPS = '/api/invites/northwind-7Kq2/postal-code-lookups';
+export const NORTHWIND_CITY_SEARCHES = '/api/invites/northwind-7Kq2/city-searches';
+
+/** Cities as the backend answers them: each at its own position, never a postal code's. */
+export const CITIES = {
+  Milan: {
+    name: 'Milan',
+    region: 'Lombardy',
+    countryCode: 'IT',
+    position: { latitude: 45.46427, longitude: 9.18951 },
+    timeZoneId: 'Europe/Rome',
+  },
+  Milazzo: {
+    name: 'Milazzo',
+    region: 'Sicily',
+    countryCode: 'IT',
+    position: { latitude: 38.22008, longitude: 15.24023 },
+    timeZoneId: 'Europe/Rome',
+  },
+  Mississauga: {
+    name: 'Mississauga',
+    region: 'Ontario',
+    countryCode: 'CA',
+    position: { latitude: 43.5789, longitude: -79.6583 },
+    timeZoneId: 'America/Toronto',
+  },
+  Toronto: {
+    name: 'Toronto',
+    region: 'Ontario',
+    countryCode: 'CA',
+    position: { latitude: 43.65333, longitude: -79.38389 },
+    timeZoneId: 'America/Toronto',
+  },
+};
+
+/** The postal codes the lookup knows, by country and as the backend normalises them. */
+const KNOWN: Record<string, (typeof CITIES)[keyof typeof CITIES]> = {
+  'IT 20121': CITIES.Milan,
+  'CA L5B3C1': CITIES.Mississauga,
+  'CA M5V2T6': CITIES.Toronto,
+};
+
+/**
+ * Answers a postal code lookup as the backend would: the city of a postal code it knows, and
+ * `postal_code_not_found` for any other.
+ */
+export function lookupAnswer(body: { countryCode: string; postalCode: string }): Answer {
+  const key = `${body.countryCode} ${body.postalCode.replace(/[\s-]/g, '').toUpperCase()}`;
+  const city = KNOWN[key];
+  if (city) return { json: { city, weather: null } };
+  return {
+    status: 422,
+    headers: { 'content-type': 'application/problem+json' },
+    json: { status: 422, code: 'postal_code_not_found' },
   };
 }

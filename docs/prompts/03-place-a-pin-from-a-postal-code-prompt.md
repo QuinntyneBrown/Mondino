@@ -6,7 +6,7 @@ On the Join screen a person gives a name, a country and a postal code and nothin
 code field looks it up ("Finding 20121…"); when the city is found the screen names it with its weather, places
 a pin labelled "You" at the city, and the button changes from "Place my pin" to "Join Northwind". A postal
 code that does not fit the country's form or is not known says so with the form that country's postal codes
-take; a source that does not answer says the postal code could not be checked.
+take; when the source does not answer, the person picks their city from "Your city" instead.
 
 Journey 3 of `docs/journeys.md`. Requirements: L2-002, L2-003, L2-004, L2-006 (`docs/specs/L2.md`).
 
@@ -71,7 +71,7 @@ Builds on: journeys 1 and 2.
   and "Contracts the features share" in `docs/detailed-designs/README.md`.
 - The mocks (the source of truth), under `docs/mocks/`: `pages/join/default.html`, `pages/join/locating.html`,
   `pages/join/found.html`, `pages/join/not-found.html`, `pages/join/lookup-unavailable.html`,
-  `pages/join/invalid.html`, `pages/join/rate-limited.html`. Read `docs/mocks/README.md` for the cast and its
+  `pages/join/invalid.html`, `pages/join/rate-limited.html`, `pages/join/choosing-city.html`. Read `docs/mocks/README.md` for the cast and its
   "now" (Monday 27 October 2025, 14:05 UTC); the e2e fixtures use that cast and that time.
 - The design system, under `docs/design-system/components/`: `text-field.html`, `select.html`, `form-
   field.html`, `lookup-message.html`, `alert.html`, `button.html`, `spinner.html`, and the tokens in
@@ -84,7 +84,7 @@ Builds on: journeys 1 and 2.
   mocks`, then `extracting-design-systems` if it adds a component.
 
 ## Phase 2: Decide what is open (an ADR in `docs/adr/`, or the detailed design where it says so)
-- The provider of the postal code source (`<TO SUPPLY>`): choose one that resolves the thirteen supported
+- The provider of the postal code source (decided: ADR 0006): choose one that resolves the thirteen supported
   countries to a city, a region, a position and an IANA time zone, and record it with its terms in an ADR.
   Document any setting a deployed system needs.
 
@@ -104,8 +104,8 @@ Builds on: journeys 1 and 2.
      alert that takes focus, the privacy line and the sources line.
   5. Frontend: locating and found (`PostalCodeField`, `LookupMessage`, button copy, the "You" pin handed to
      the globe stage); changing the postal code or country clears it.
-  6. Frontend: not found, lookup unavailable with try again, and rate limited; each announced (an error as an
-     alert).
+  6. Frontend: not found, lookup unavailable with "Your city" (`pages/join/choosing-city`), and rate limited;
+     each announced (an error as an alert).
 - For each slice:
   - Write the Given-When-Then criteria, from the acceptance criteria in `docs/specs/L2.md`.
   - Write the acceptance test: backend through the API (`backend/`), frontend in Playwright with page

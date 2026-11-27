@@ -27,6 +27,8 @@ export class JoinPage {
   readonly status: Locator;
   readonly skeletons: Locator;
   readonly form: Locator;
+  /** Every control a person fills in the form. */
+  readonly formControls: Locator;
   readonly name: Locator;
   readonly country: Locator;
   readonly postalCode: Locator;
@@ -43,6 +45,21 @@ export class JoinPage {
   readonly globe: Locator;
   readonly pins: Locator;
   readonly pinLayer: Locator;
+  /** The error summary above the fields, after a submit with something missing. */
+  readonly summary: Locator;
+  readonly summaryTitle: Locator;
+  readonly nameError: Locator;
+  readonly postalCodeError: Locator;
+  /** The line under the country and postal code: privacy, finding, found or not found. */
+  readonly lookup: Locator;
+  readonly submit: Locator;
+  readonly city: Locator;
+  readonly cityHelp: Locator;
+  readonly cityOptions: Locator;
+  readonly rateLimit: Locator;
+  readonly rateLimitCountdown: Locator;
+  readonly youPin: Locator;
+  readonly youLabel: Locator;
 
   constructor(readonly page: Page) {
     this.main = page.locator('main.join');
@@ -56,6 +73,7 @@ export class JoinPage {
     this.status = this.main.getByRole('status');
     this.skeletons = this.main.locator('.skeleton');
     this.form = this.main.locator('form.join__fields');
+    this.formControls = this.form.locator('input, select, textarea');
     this.name = this.main.getByLabel('Your name');
     this.country = this.main.getByLabel('Country');
     this.postalCode = this.main.getByLabel('Postal code');
@@ -72,6 +90,50 @@ export class JoinPage {
     this.globe = this.stage.locator('.globe');
     this.pins = this.stage.locator('.globe__pin .pin-dot');
     this.pinLayer = this.stage.locator('.globe__pins');
+    this.summary = this.form.locator('.alert--danger');
+    this.summaryTitle = this.summary.locator('.alert__title');
+    this.nameError = this.main.locator('#name-error');
+    this.postalCodeError = this.main.locator('#postal-error');
+    this.lookup = this.main.locator('#lookup');
+    this.submit = this.form.locator('button[type="submit"]');
+    this.city = this.main.getByRole('combobox', { name: 'Your city' });
+    this.cityHelp = this.main.locator('#city-help');
+    this.cityOptions = this.main.getByRole('listbox').getByRole('option');
+    this.rateLimit = this.form.locator('.alert--warning');
+    this.rateLimitCountdown = this.rateLimit.locator('.tnum[aria-hidden="true"]');
+    this.youPin = this.stage.locator('.globe__pin--lifted .pin-dot--you');
+    this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');
+  }
+
+  /** A link in the error summary, by its words. */
+  summaryLink(name: string): Locator {
+    return this.summary.getByRole('link', { name });
+  }
+
+  /** Fills the form as a person would, leaving the postal code field last. */
+  async fill(details: { name?: string; country?: string; postalCode?: string }): Promise<void> {
+    if (details.name !== undefined) await this.name.fill(details.name);
+    if (details.country !== undefined) await this.country.selectOption({ label: details.country });
+    if (details.postalCode !== undefined) await this.postalCode.fill(details.postalCode);
+  }
+
+  /** What the browser keeps for this screen: its address, its storage and its cookies, as text. */
+  async everythingKept(): Promise<string> {
+    const kept = await this.page.evaluate(() => {
+      const all = (storage: Storage) =>
+        Array.from({ length: storage.length }, (_, i) => {
+          const key = storage.key(i) ?? '';
+          return `${key}=${storage.getItem(key)}`;
+        }).join(';');
+      return [location.href, all(localStorage), all(sessionStorage), document.cookie].join('|');
+    });
+    const cookies = await this.page.context().cookies();
+    return `${kept}|${JSON.stringify(cookies)}`;
+  }
+
+  /** Leaves the postal code field, which starts the lookup. */
+  async leavePostalCode(): Promise<void> {
+    await this.postalCode.blur();
   }
 
   async open(inviteToken: string): Promise<void> {

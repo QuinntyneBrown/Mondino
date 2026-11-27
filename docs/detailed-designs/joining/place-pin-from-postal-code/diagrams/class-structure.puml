@@ -33,15 +33,18 @@ package "mondino application" {
   }
 }
 package "@mondino/components" {
-  class PostalCodeField {
+  class TextField {
     +value: string
-    +country: Country
-    +lookupState: LookupState
+    +invalid: boolean
+    +error: string | null
     +disabled: boolean
-    +mode: Join | Move
     +valueChange: string
     +blurred: void
-    +retry: void
+  }
+  class LookupMessage {
+    +messageId: string
+    +state: LookupState
+    +country: Country
   }
   class CityField {
     +text: string
@@ -147,15 +150,16 @@ package "Mondino.Domain" {
 package "Mondino.Infrastructure" {
   class BundledCityDirectory
   class CachedPostalCodeLookup
-  class PostalCodeLookupClient
+  class GeoNamesPostalCodeLookup
+  class PostalCodeCityResolver
   class CachedWeatherSource
   class OpenMeteoWeatherSource
 }
 
 JoinStore --> LookupState
 JoinStore ..> InviteApi : INVITE_API
-PostalCodeField ..> LookupState : shows
-PostalCodeField ..> Country : form and example
+LookupMessage ..> LookupState : shows
+LookupMessage ..> Country : form
 InviteApi ..> PostalCodeResult : returns
 LookUpPostalCodeQueryValidator ..> LookUpPostalCodeQuery : validates
 LookUpPostalCodeQueryHandler ..> LookUpPostalCodeQuery : handles
@@ -170,8 +174,10 @@ PostalCodeLookupOutcome --> PostalCodeLookupStatus
 PostalCodeLookupOutcome --> City
 IWeatherSource ..> Weather : returns
 CachedPostalCodeLookup ..|> IPostalCodeLookup
-PostalCodeLookupClient ..|> IPostalCodeLookup
-CachedPostalCodeLookup --> PostalCodeLookupClient : decorates
+GeoNamesPostalCodeLookup ..|> IPostalCodeLookup
+CachedPostalCodeLookup --> GeoNamesPostalCodeLookup : decorates
+GeoNamesPostalCodeLookup --> PostalCodeCityResolver : resolves the place
+PostalCodeCityResolver ..> ICityDirectory : nearest matching city
 CachedWeatherSource ..|> IWeatherSource
 OpenMeteoWeatherSource ..|> IWeatherSource
 CachedWeatherSource --> OpenMeteoWeatherSource : decorates

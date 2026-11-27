@@ -1,13 +1,29 @@
 <div class="field">
   <label class="field__label" [for]="fieldId()">{{ label() }}</label>
   <input
+    #input
     class="input"
     [class.tnum]="tabular()"
     type="text"
     [id]="fieldId()"
+    [value]="value()"
+    [disabled]="disabled()"
     [attr.name]="name() || null"
     [attr.autocomplete]="autocomplete()"
     [attr.maxlength]="maxlength()"
-    [attr.aria-describedby]="describedBy()"
+    [attr.aria-describedby]="error() ? errorId() : describedBy()"
+    [attr.aria-invalid]="invalid() ? 'true' : null"
+    (input)="valueChange.emit(input.value)"
+    (blur)="blurred.emit()"
   />
+  @if (error(); as error) {
+    <p class="field__error" [id]="errorId()">
+      <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" x2="12" y1="8" y2="12" />
+        <line x1="12" x2="12.01" y1="16" y2="16" />
+      </svg>
+      {{ error }}
+    </p>
+  }
 </div>

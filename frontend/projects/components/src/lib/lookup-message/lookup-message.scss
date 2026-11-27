@@ -20,3 +20,28 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.lookup:empty {
+  display: none;
+}
+.lookup--found {
+  color: var(--color-fg-default);
+}
+.lookup--found .icon {
+  color: var(--color-fg-people);
+}
+.lookup--error {
+  color: var(--color-danger-fg);
+}
+.icon--spin {
+  animation: spin var(--duration-deliberate) linear infinite;
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .icon--spin {
+    animation: none;
+  }
+}

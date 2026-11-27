@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 export interface SelectOption {
   readonly value: string;
@@ -19,4 +19,9 @@ export class SelectField {
   readonly autocomplete = input('off');
   /** The options, in the order they are listed. Their labels are text. */
   readonly options = input<readonly SelectOption[]>([]);
+  /** The chosen option's value. */
+  readonly value = input('');
+  readonly disabled = input(false, { transform: booleanAttribute });
+
+  readonly valueChange = output<string>();
 }

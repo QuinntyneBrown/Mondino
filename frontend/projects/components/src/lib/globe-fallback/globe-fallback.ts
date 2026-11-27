@@ -19,4 +19,9 @@ export class GlobeFallback {
   readonly label = input('A still picture of the globe');
   /** Bare pins to draw, or none: `null` draws no pin layer at all. */
   readonly pins = input<readonly StillPlacement[] | null>(null);
+  /**
+   * The person's own new pin, lifted, labelled ("You · Milan") and pulsing once, drawn with the
+   * pins; or null. Its label is text.
+   */
+  readonly you = input<(StillPlacement & { readonly label: string }) | null>(null);
 }

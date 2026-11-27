@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Mondino.Application.Cities;
+using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
+using Mondino.Infrastructure.Cities;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.Persistence.Seeds;
+using Mondino.Infrastructure.PostalCodes;
 using Mondino.Infrastructure.Teammates;
 
 namespace Mondino.Infrastructure;
@@ -12,7 +16,8 @@ namespace Mondino.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// The database, the seed and who is asking. <c>Database:Provider</c> names the engine
+    /// The database, the seed, who is asking, the cities and the postal code source
+    /// (<c>PostalCodeSource:*</c>, docs/adr/0006). <c>Database:Provider</c> names the engine
     /// (docs/adr/0004): <c>PostgreSQL</c>, with the connection string <c>ConnectionStrings:Mondino</c>,
     /// or <c>InMemory</c>, which keeps nothing between runs.
     /// </summary>
@@ -46,6 +51,16 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
         services.AddScoped<IDatabaseMigrator, DatabaseMigrator>();
         services.AddScoped<ISeedStep, NorthwindSeed>();
+
+        // The cities Mondino holds, and the postal code source behind its timeout, cache and
+        // breaker (docs/adr/0006). The source's client logs nothing: its address carries the postal code.
+        services.AddSingleton<ICityDirectory, BundledCityDirectory>();
+        services.AddSingleton<PostalCodeCityResolver>();
+        services.Configure<PostalCodeSourceOptions>(configuration.GetSection(PostalCodeSourceOptions.Section));
+        services.AddHttpClient(GeoNamesPostalCodeLookup.ClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .RemoveAllLoggers();
+        services.AddSingleton<GeoNamesPostalCodeLookup>();
+        services.AddSingleton<IPostalCodeLookup, CachedPostalCodeLookup>();
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentTeammate, CurrentTeammate>();

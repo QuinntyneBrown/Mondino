@@ -7,9 +7,9 @@ Person(person, "Person with an invite link", "Fills in the Join form")
 System_Boundary(mondino, "Mondino") {
   Container(web, "Mondino web app", "Angular", "Join form, lookup status and the new pin on the globe")
   Container(api, "Mondino API", "ASP.NET Core", "Checks the format, finds the city and its weather")
-  ContainerDb(db, "Mondino database", "Engine TO SUPPLY", "Teams and invite tokens")
+  ContainerDb(db, "Mondino database", "PostgreSQL", "Teams and invite tokens")
 }
-System_Ext(postal, "Postal code source", "Provider TO SUPPLY")
+System_Ext(postal, "Postal code source", "GeoNames postal code search (ADR 0006)")
 System_Ext(meteo, "Open-Meteo", "Weather")
 
 Rel(person, web, "Types a name, a country and a postal code", "HTTPS")
