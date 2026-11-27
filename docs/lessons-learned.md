@@ -1292,3 +1292,61 @@ in light and in dark. A colour change only: no criterion was added or removed, a
 none, ADR 0019); L2-022 criterion 3 (the Moments screen, journey 21) and criterion 4's "Choose moments"
 arriving on Profile & Settings (journey 22), each added to that journey's prompt. Built here for journey
 23: the week's note and the legend with every kind off.
+
+## Journey 21: List moments
+
+**What slowed it**
+
+- The design had `MomentsPage` ask `TEAM_API` for the moments again, though `TeamStore` already reads
+  them for the teammate screens and swallows a failure. The store now says whether they answered
+  (`momentsState`) and reads them again on "Try again"; the page sends no request of its own.
+- The mock writes "Formula 1 · In 13 days" past a week, where `whenLabel` gives "9 Nov"; Moments has the
+  date beside it, so it took a label of its own, `daysAheadLabel`. The mock also labelled one kind icon
+  "Sport" beside the word "Sport"; it was made decorative as every other row's.
+- L2-007 criterion 2 asked a moment to give its city and country; the mock gives the city alone. The
+  requirement was brought to the mock.
+- The window for a team of 500 was first an `IntersectionObserver` on two edges of the rows. A jump of
+  the scroll bar to the bottom lands in the padding kept for the rows out of the window, where neither
+  edge is near, so the window never moved: the spec scrolled 200 times and found the first 60. It now
+  follows the scroll position once a frame (`followWindow`), and ADR 0021 says why.
+- The filter and states specs were green on arrival, because the list slice built the page whole; each
+  was broken (the filter ignored, the moments' failure ignored, the empty state hidden) and seen to fail.
+- A backend test of the postal code breaker (`After_five_failures_in_a_row…`) failed once and passed on
+  three reruns, with no backend change in this journey; it is left for the journey that owns it.
+
+**Lessons**
+
+1. **A window over a list must follow the scroll position, not only its edges.** A scroll bar jumps into
+   the space kept for what is out of the window; work out what the viewport shows from the position and
+   a measured row height.
+2. **Read what a store already loads before a page loads it again.** The shell's store held the moments;
+   giving it a state and a retry was smaller than a second request and a second place to cancel it.
+3. **A label that reads differently on two screens is two functions.** "In 13 days" beside a date and
+   "9 Nov" without one are each right where they are; one function with a flag hides which screen asks.
+4. **Read a list's text only after waiting for the state that changes it.** A filter's `aria-pressed`
+   read straight after the click was the old one; wait for the attribute, then compare.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the mock, the design and its diagrams, ADR 0021
+  and the mocks' open question were one commit before any code; the design and ADR were touched once more
+  when the window changed how it moves.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit code,
+  written to a log; the backend flake stopped one commit as it should.
+- *One value per text interpolation in a lazy component* (journey 18, lesson 2): the kicker, the kind
+  line and the detail are each one computed string. The initial chunk went from 273.05 kB to 273.16 kB,
+  the route's own entry, and stayed there through every slice.
+- *A design-system block gets its own component* (journey 19, lesson 4): `today-moment`, `moment-row`,
+  the groups and the chips are four components, each with its block's styles.
+- *Default an e2e fixture to the state earlier specs assumed* (journey 19, lesson 3): Northwind still has
+  no moment unless a spec says so; `momentsOf500` is new and only the large spec reads it.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5): three
+  slices, each broken and seen to fail.
+- *Look at an overlay once* (journey 16, lesson 3), in its spirit: one screenshot at 1280 and 375 px.
+
+**Progress:** 16 of 16 criteria proven (100%). Proven here for earlier journeys: L2-024 criterion 5's
+"All moments" reaching Moments (journey 15, 20 of 21: 95%, rounded to 100; L2-025 criterion 7 still
+waits for Profile & Settings, journey 22), L2-007 criterion 2's Moments part (journey 6, 35 of 40, still
+90), L2-022 criterion 3 (journey 20, 11 of 13, still 80), the Moments part of L2-054 criterion 1 and
+L2-025 criterion 7 (journey 16 stays at 50 until Profile & Settings proves the fourth screen), and
+Moments' part of L2-047 criterion 5, which with Team's completes it (journey 29, 1 of 14: 10).

@@ -116,7 +116,8 @@ Builds on: journeys 3, 6 and 8.
   Settings to `TeamShell`'s children, so the link reaches it and carries `aria-current="page"` there.
 - Journey 16 waits for this screen to prove, in Playwright, that "Invite teammate" in its header opens the
   invite dialog (L2-054 criterion 1, L2-025 criterion 7, with Team and Moments); raise journey 16's and
-  journey 15's % when all four screens are proven.
+  journey 15's % when all four screens are proven. Globe, Team and Moments are proven (Moments by journey 21,
+  `e2e/specs/moments-states.spec.ts`); Profile & Settings is the last.
 - Journey 20 links "Choose moments" (the Globe's week with every kind off) to `/profile` and waits for this
   screen to prove it leads to Profile & Settings (L2-022 criterion 4, `e2e/specs/globe-moment-kinds.spec.ts`);
   raise journey 20's % when it is proven.
