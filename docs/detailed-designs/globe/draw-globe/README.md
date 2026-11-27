@@ -92,7 +92,7 @@ any other origin.
   `label` (the globe's accessible name), `pins` (bare positions, drawn as plain markers until
   `show-pins`) and `you` (the teammate's own new pin and its label). Output: `stateChange`.
   (`turn-globe`, `show-pins`, `make-accessible` and `keep-team-fresh` add `interactive`,
-  `selectedId`, `select`, `selectGroup`, `descriptions`, `arrivedIds` and `arrivedShown`, and
+  `facing`, `selectedId`, `select`, `selectGroup`, `descriptions`, `arrivedIds` and `arrivedShown`, and
   `PinLayer` takes the markers' place.) It owns a `<canvas>` (`globe__art`) between the mocks'
   `globe__shadow` and `globe__outline` circles, and a `state` signal of type `GlobeState`
   (`Loading`, `Ready`, `Fallback`), emitted on each change. In `Loading` the canvas is hidden

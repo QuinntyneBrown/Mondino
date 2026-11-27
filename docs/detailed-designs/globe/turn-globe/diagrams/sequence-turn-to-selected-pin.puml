@@ -37,11 +37,11 @@ else a group pin
 end
 alt reduced motion requested (L2-009 AC5)
   motion -> motion : Set the orientation to face the pin, mode = Holding
-  view -> scene : setOrientation(orientation), draw()
+  view -> scene : setOrientation(orientation), requestFrame()
   scene --> actor : Pin faces the viewer, no animated turn
 else motion allowed
   motion -> motion : mode = TurningToPin along the shorter way round
-  loop each frame, for no more than 1 s (L2-009 AC3)
+  loop each frame, for 800 ms, inside 1 s (L2-009 AC3)
     scene -> view : Frame listener (elapsed ms)
     view -> motion : advance(elapsedMs)
     motion --> view : Eased orientation towards the pin
