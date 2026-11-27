@@ -4,12 +4,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Mondino.Application.Cities;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
+using Mondino.Application.SignIn;
 using Mondino.Application.Teammates;
 using Mondino.Application.Teams;
 using Mondino.Infrastructure.Cities;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.Persistence.Seeds;
 using Mondino.Infrastructure.PostalCodes;
+using Mondino.Infrastructure.SignIn;
 using Mondino.Infrastructure.Teammates;
 using Mondino.Infrastructure.Teams;
 
@@ -18,7 +20,7 @@ namespace Mondino.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// The database, the seed, who is asking and their session (docs/adr/0008), the cities, the postal code source, the invite tokens and the email fingerprint (<c>EmailProtection:Key</c>)
+    /// The database, the seed, who is asking and their session (docs/adr/0008), the cities, the postal code source, the invite tokens, the email fingerprint (<c>EmailProtection:Key</c>), the sign-in links and the Email source (<c>SignInEmail:*</c>, docs/adr/0011)
     /// (<c>PostalCodeSource:*</c>, docs/adr/0006). <c>Database:Provider</c> names the engine
     /// (docs/adr/0004): <c>PostgreSQL</c>, with the connection string <c>ConnectionStrings:Mondino</c>,
     /// or <c>InMemory</c>, which keeps nothing between runs.
@@ -68,6 +70,18 @@ public static class DependencyInjection
         // (<c>EmailProtection:Key</c>, docs/adr/0009).
         services.AddSingleton<IInviteTokens, InviteTokens>();
         services.AddSingleton<IEmailFingerprints, HmacEmailFingerprints>();
+
+        // Sign-in links: their tokens, and the outbox their mails leave through
+        // (<c>SignInEmail:*</c>, docs/adr/0011).
+        services.Configure<SignInLinkOptions>(configuration.GetSection(SignInLinkOptions.Section));
+        services.AddSingleton<ISignInTokens, SignInTokens>();
+        services.AddSingleton<SignInMailOutbox>();
+        services.AddSingleton<ISignInMailOutbox>(provider => provider.GetRequiredService<SignInMailOutbox>());
+        services.Configure<SignInEmailOptions>(configuration.GetSection(SignInEmailOptions.Section));
+        services.AddHttpClient(PostmarkSignInEmailSender.ClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .RemoveAllLoggers();
+        services.AddSingleton<ISignInEmailSender, PostmarkSignInEmailSender>();
+        services.AddHostedService<SignInMailDispatcher>();
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentTeammate, CurrentTeammate>();

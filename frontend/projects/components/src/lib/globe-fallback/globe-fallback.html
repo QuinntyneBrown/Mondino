@@ -55,6 +55,7 @@
     <circle class="globe__shine" cx="249.6" cy="133.7" r="8.8"/>
     <circle class="globe__outline" cx="300" cy="300" r="252" stroke-width="3.5"/>
     </svg>
+    <ng-content select="[pins]" />
     @if (pins(); as pins) {
       <div class="globe__pins" aria-hidden="true">
         @if (you(); as you) {

@@ -2,6 +2,7 @@
 // Traces to: L2-005, L2-045
 // Description: A failed join keeps what was typed and offers to try again; a full team says so in the form's place; too many joins wait
 
+import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import type { Request } from '@playwright/test';
 import { expect, test } from '../fixtures/test';
 import {
@@ -20,6 +21,7 @@ test.describe('Join: a join that is refused', () => {
   test.beforeEach(async ({ api, joinPage }) => {
     api.answer('GET', NORTHWIND_INVITE, northwindInvite());
     api.answer('POST', NORTHWIND_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
     await joinPage.open('northwind-7Kq2');
     await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
     await joinPage.leavePostalCode();

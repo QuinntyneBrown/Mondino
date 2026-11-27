@@ -2,7 +2,8 @@ namespace Mondino.Application.Joining;
 
 /// <summary>
 /// Lets one join at a time into one team, within one API instance, so a double-click cannot add
-/// two teammates and the 500th place cannot be taken twice. A fixed set of locks, chosen by the
+/// two teammates and the 500th place cannot be taken twice, and one sign-in link at a time, so it
+/// cannot start two sessions. A fixed set of locks, chosen by the
 /// team's id, so it holds no more memory however many teams there are. Across instances the unique
 /// index on (<c>TeamId</c>, <c>JoinRequestId</c>) holds.
 /// </summary>

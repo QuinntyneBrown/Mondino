@@ -40,12 +40,12 @@ package "@mondino/domain" {
 package "@mondino/api" {
   interface SignInApi {
     +requestLink(email: string, signal: AbortSignal): Promise<void>
-    +redeem(signInToken: string): Promise<SignInResult>
+    +redeem(signInToken: string, signal: AbortSignal): Promise<SignInResult>
   }
   class HttpSignInApi
   class SignInResult {
     +membership: Membership | null
-    +email: string
+    +email: string | null
   }
 }
 package "Mondino.Api" {
@@ -69,17 +69,23 @@ package "Mondino.Application" {
     +Handle(command: RedeemSignInLinkCommand): Task<SignInResultDto>
   }
   class SignInResultDto {
-    +Guid? TeamId
-    +Guid? TeammateId
-    +string? TeamName
-    +string Email
+    +MembershipDto? Membership
+    +string? Email
   }
   interface ISignInTokens {
-    +Create(): SignInToken
+    +Create(): string
     +Hash(token: string): string
+    +Seal(token: string, email: EmailAddress): byte[]
+    +Unseal(token: string, sealed: byte[]): EmailAddress?
+  }
+  interface ISignInMailOutbox {
+    +Enqueue(mail: SignInMail): void
   }
   interface ISignInEmailSender {
-    +SendAsync(email: EmailAddress, link: Uri, ct): Task<bool>
+    +SendAsync(mail: SignInMail, ct): Task<bool>
+  }
+  interface IEmailFingerprints {
+    +FingerprintOf(email: EmailAddress): string
   }
   interface IAppDbContext
 }
@@ -87,7 +93,9 @@ package "Mondino.Domain" {
   class SignInLink {
     +Guid Id
     +string TokenHash
-    +EmailAddress Email
+    +string EmailFingerprint
+    +byte[] SealedEmail
+    +DateTimeOffset CreatedAt
     +DateTimeOffset ExpiresAt
     +DateTimeOffset? UsedAt
     +{static} TimeSpan Lifetime = 15 minutes
@@ -100,12 +108,15 @@ package "Mondino.Domain" {
   class Teammate {
     +Guid Id
     +Guid TeamId
-    +EmailAddress? Email
+    +string? EmailFingerprint
+    +DateTimeOffset JoinedAt
   }
 }
 package "Mondino.Infrastructure" {
   class SignInTokens
-  class SignInEmailSender
+  class SignInMailOutbox
+  class SignInMailDispatcher
+  class PostmarkSignInEmailSender
   class TeammateSessionHandler
 }
 
@@ -121,17 +132,20 @@ SignInController ..> TeammateSessionHandler : signs in through
 RequestSignInLinkCommandValidator ..> RequestSignInLinkCommand : validates
 RequestSignInLinkCommandHandler ..> RequestSignInLinkCommand : handles
 RequestSignInLinkCommandHandler ..> ISignInTokens
-RequestSignInLinkCommandHandler ..> ISignInEmailSender
+RequestSignInLinkCommandHandler ..> ISignInMailOutbox
+RequestSignInLinkCommandHandler ..> IEmailFingerprints
+RedeemSignInLinkCommandHandler ..> IEmailFingerprints
 RequestSignInLinkCommandHandler ..> IAppDbContext
 RequestSignInLinkCommandHandler ..> SignInLink : creates
 RedeemSignInLinkCommandHandler ..> RedeemSignInLinkCommand : handles
 RedeemSignInLinkCommandHandler ..> ISignInTokens
 RedeemSignInLinkCommandHandler ..> IAppDbContext
 RedeemSignInLinkCommandHandler ..> SignInLink : uses once
-RedeemSignInLinkCommandHandler ..> Teammate : finds by email
+RedeemSignInLinkCommandHandler ..> Teammate : finds by the email's fingerprint, joined last
 RedeemSignInLinkCommandHandler ..> SignInResultDto : returns
 SignInTokens ..|> ISignInTokens
-SignInEmailSender ..|> ISignInEmailSender
-SignInLink --> EmailAddress
-Teammate --> EmailAddress
+SignInMailOutbox ..|> ISignInMailOutbox
+SignInMailDispatcher ..> SignInMailOutbox : drains
+SignInMailDispatcher ..> ISignInEmailSender
+PostmarkSignInEmailSender ..|> ISignInEmailSender
 @enduml

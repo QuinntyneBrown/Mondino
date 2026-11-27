@@ -33,7 +33,11 @@
             "styles": [
               "../docs/design-system/tokens/tokens.css",
               "projects/mondino/src/styles.scss"
-            ]
+            ],
+            "loader": {
+              ".glb": "file",
+              ".png": "file"
+            }
           },
           "configurations": {
             "production": {
@@ -116,6 +120,21 @@
       "projectType": "library",
       "root": "projects/components",
       "sourceRoot": "projects/components",
+      "prefix": "mo",
+      "architect": {
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "buildTarget": "mondino:build:development"
+          }
+        }
+      }
+    },
+    "globe": {
+      "projectType": "library",
+      "root": "projects/globe",
+      "sourceRoot": "projects/globe",
       "prefix": "mo",
       "architect": {
         "test": {

@@ -1,8 +1,49 @@
 <main id="main" class="globe-screen" tabindex="-1">
   <section class="globe-screen__stage" aria-label="The team on the globe">
-    <div class="globe-screen__globe">
-      <mo-globe-fallback [label]="globeLabel" [pins]="you() ? [] : null" [you]="you()" />
-    </div>
+    @if (globeState() === 'Fallback') {
+      <div class="globe-screen__globe">
+        <mo-globe-fallback
+          data-measured
+          [label]="globeLabel()"
+          (widthChange)="stillWidth.set($event)"
+        >
+          @if (stillPinPlacements(); as placements) {
+            <mo-pin-layer
+              pins
+              [placements]="placements"
+              [selectedId]="store.selectedId()"
+              [selectedGroupKey]="store.selectedGroupKey()"
+              (selectPin)="store.select($event)"
+              (selectGroup)="selectGroup($event)"
+            />
+          }
+        </mo-globe-fallback>
+      </div>
+    } @else {
+      <div class="globe-screen__globe">
+        <mo-globe
+          interactive
+          [label]="globeLabel()"
+          [facing]="facing()"
+          (stateChange)="globeState.set($event)"
+          (viewChange)="showView($event)"
+          (blankTap)="store.clear()"
+        >
+          <mo-globe-placeholder loading variant="disc" />
+          @if (placements(); as placements) {
+            <mo-pin-layer
+              pins
+              [placements]="placements"
+              [selectedId]="store.selectedId()"
+              [selectedGroupKey]="store.selectedGroupKey()"
+              (selectPin)="store.select($event)"
+              (selectGroup)="selectGroup($event)"
+            />
+          }
+        </mo-globe>
+      </div>
+    }
+    <mo-globe-legend [still]="globeState() === 'Fallback'" />
   </section>
 </main>
 <div class="toast-region" role="status" aria-live="polite">

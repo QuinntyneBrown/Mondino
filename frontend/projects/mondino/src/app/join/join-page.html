@@ -246,8 +246,18 @@
   <section class="join__stage" aria-label="The team on the globe">
     @if (store.inviteState() === 'Loading') {
       <mo-globe-placeholder />
-    } @else {
+    } @else if (globeState() === 'Fallback') {
       <mo-globe-fallback [label]="globeLabel()" [pins]="pins()" [you]="you()" />
+    } @else {
+      <mo-globe
+        [label]="globeLabel()"
+        [pins]="positions()"
+        [you]="newPin()"
+        [facing]="newPin()?.position ?? null"
+        (stateChange)="globeState.set($event)"
+      >
+        <mo-globe-placeholder loading variant="disc" />
+      </mo-globe>
     }
   </section>
 </main>

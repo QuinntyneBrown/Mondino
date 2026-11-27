@@ -2,6 +2,7 @@
 // Traces to: L2-053, L2-007, L2-042, L2-044
 // Description: Once the team is made, Create Team gives its invite link to copy and the way on to the globe, and keeps no postal code or email
 
+import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { expect, test } from '../fixtures/test';
 import { lookupAnswer } from '../fixtures/invites';
 import { CREATE_LOOKUPS, NEW_INVITE_TOKEN, NORTHWIND_CREATED, TEAMS } from '../fixtures/teams';
@@ -10,6 +11,7 @@ test.describe('Create Team: the team is made', () => {
   test.beforeEach(({ api }) => {
     api.answer('POST', CREATE_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
     api.answer('POST', TEAMS, NORTHWIND_CREATED);
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
   });
 
   async function make(createTeamPage: import('../pages/create-team.page').CreateTeamPage) {

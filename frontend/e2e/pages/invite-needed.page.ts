@@ -6,10 +6,14 @@ export class InviteNeededPage {
   readonly main: Locator;
   readonly title: Locator;
   readonly text: Locator;
+  /** The email a sign-in link was sent to, when the text names one. */
+  readonly email: Locator;
   readonly wordmark: Locator;
   readonly globe: Locator;
   readonly startATeam: Locator;
   readonly useADifferentEmail: Locator;
+  /** Images on the screen: there are none when an email is shown as text. */
+  readonly images: Locator;
   /** The app header, which a notice page does not have. */
   readonly appHeader: Locator;
 
@@ -17,10 +21,12 @@ export class InviteNeededPage {
     this.main = page.locator('main.notice-page');
     this.title = this.main.locator('.notice-page__title');
     this.text = this.main.locator('.notice-page__text');
+    this.email = this.text.locator('strong');
     this.wordmark = this.main.locator('.brand .wordmark');
     this.globe = this.main.getByRole('img', { name: 'A small globe' });
     this.startATeam = this.main.getByRole('link', { name: 'Start a team' });
     this.useADifferentEmail = this.main.getByRole('link', { name: 'Use a different email' });
+    this.images = this.main.locator('img');
     this.appHeader = page.locator('.app-header');
   }
 

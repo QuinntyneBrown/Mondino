@@ -1,0 +1,45 @@
+<div class="globe-stage">
+  <div
+    class="globe"
+    [class.globe--loading]="state() !== 'Ready'"
+    [class.globe--interactive]="interactive()"
+    [attr.role]="interactive() ? 'group' : 'img'"
+    [attr.tabindex]="interactive() ? 0 : null"
+    [attr.aria-label]="name()"
+  >
+    <svg class="globe__frame" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
+      <circle class="globe__shadow" cx="313.2" cy="318.5" r="264" />
+    </svg>
+    <canvas class="globe__art" aria-hidden="true"></canvas>
+    <svg class="globe__frame" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
+      <circle class="globe__outline" cx="300" cy="300" r="264" stroke-width="3.7" />
+    </svg>
+    @if (state() === 'Ready') {
+      <ng-content select="[pins]" />
+    }
+    @if (state() === 'Loading') {
+      <div class="globe__loading"><ng-content select="[loading]" /></div>
+    }
+    @if (markers(); as markers) {
+      <div class="globe__pins" aria-hidden="true">
+        @if (markers.you; as you) {
+          <span class="globe__pin globe__pin--lifted" [style.--x.%]="you.x" [style.--y.%]="you.y"
+            ><span class="pin-dot pin-dot--you pin-dot--new"></span
+            ><span class="pin-label pin-label--lifted pin-label--right"
+              ><span class="pin-label__name">{{ you.label }}</span></span
+            ></span
+          >
+        }
+        @for (pin of markers.pins; track $index) {
+          <span
+            class="globe__pin"
+            [style.--x.%]="pin.x"
+            [style.--y.%]="pin.y"
+            [style.--depth]="pin.depth < 1 ? pin.depth : null"
+            ><span class="pin-dot"></span
+          ></span>
+        }
+      </div>
+    }
+  </div>
+</div>

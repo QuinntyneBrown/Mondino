@@ -67,9 +67,9 @@ internal sealed class JoinTeamCommandHandler(
 
         using var _ = await gate.EnterAsync(request.InviteToken, cancellationToken);
 
-        // 1. The team of the invite link, with its teammates.
+        // 1. The team of the invite link, with its teammates and their cities (for the colour).
         var team = await database.Teams
-            .Include(t => t.Teammates)
+            .Include(t => t.Teammates).ThenInclude(t => t.City)
             .SingleOrDefaultAsync(t => t.InviteToken == request.InviteToken, cancellationToken)
             ?? throw RefusedException.NotFound(ErrorCodes.InviteNotFound);
 
@@ -89,7 +89,7 @@ internal sealed class JoinTeamCommandHandler(
         try
         {
             teammate = team.AddTeammate(
-                name, postalCode, city, PinColourPicker.Pick(team), joinRequestId, time.GetUtcNow());
+                name, postalCode, city, PinColourPicker.Pick(team, city), joinRequestId, time.GetUtcNow());
         }
         catch (TeamFullException)
         {

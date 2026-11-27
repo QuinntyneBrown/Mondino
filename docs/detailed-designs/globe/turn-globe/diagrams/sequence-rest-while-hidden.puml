@@ -29,7 +29,7 @@ note over view, scene : No frame listener runs, so GlobeMotion does not advance:
 actor -> doc : Return to the tab
 doc -> view : visibilitychange, visible
 view -> scene : start()
-scene -> view : Frame listener (elapsed ms, capped so the globe does not jump)
+scene -> view : Frame listener (elapsed ms, 0 after the rest so the globe does not jump)
 view -> motion : advance(elapsedMs)
 motion --> view : Orientation continuing from where it rested
 view -> scene : setOrientation(orientation)

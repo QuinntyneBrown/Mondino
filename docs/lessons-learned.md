@@ -336,3 +336,350 @@ apply the lessons that fit.
   helper sends the session's cookies by hand for the same reason.
 - *Check the shape of navigation state and storage* (journey 4, lesson 3): `teammateGuard` reads
   only `TeamMembership.current()`, which already checks the stored shape.
+
+## Journey 7: Sign in with an emailed link
+
+**What slowed it**
+
+- The design had the handler send the mail before answering and refuse with 503 when the Email
+  source did not take it. Mail goes only to a teammate's email, so that refusal, and the seconds a
+  call takes, would have told anyone which emails Mondino knows. Mail now leaves from an outbox
+  after the answer (ADR 0011), and the design, the shared contracts and `survive-source-failure`
+  were brought in line before any code.
+- The design kept the email with the link in plain, against ADR 0009. The link keeps the email's
+  fingerprint and the email sealed under a key only the token gives, which is also how "You need an
+  invite link" can name it for a teammate who left after asking.
+- The log test passed against a build whose analyzers had refused the sabotage meant to prove it,
+  and then failed for real once every category logged at Trace: MVC writes an action's arguments to
+  its Trace log, and a record's `ToString` printed the email, the token, and Create Team's name and
+  postal code. Every API request record now prints only its type.
+- `JsonContent.Create` writes camelCase by default; Postmark expects `From`, `To`, `TextBody`. The
+  test at the HTTP boundary caught it.
+- The globe-shape spec parsed the mock after the app was open, so the mock's own `style=` broke the
+  app's CSP and the guard failed the spec. The mock is read before the app is opened, as the
+  existing specs do.
+- ADR 0009 expected an `AuthLayout` component once a second screen used the `auth` block, but its
+  body's title, lead and fields would then be styled across a component boundary. The two pages
+  share one Sass partial instead (ADR 0011).
+
+**Lessons**
+
+1. **An answer that must not depend on a secret must not wait on it either.** When only some
+   inputs trigger a call to an outside source, put the call behind an outbox so neither the status
+   nor the time of the answer says which.
+2. **Prove a log test can fail, and check the sabotage built.** A failed build leaves the old
+   binary, and the test passes against it; read the build's own result first.
+3. **Capture logs with a provider-level filter.** `appsettings.json` keeps `Microsoft.AspNetCore` at
+   Warning, which hides MVC's Trace lines; `AddFilter<TProvider>(null, LogLevel.Trace)` sees
+   everything.
+4. **A record that carries what a person typed overrides `ToString`.** The framework logs action
+   arguments by their `ToString`.
+5. **Read a mock's markup before the app is open.** Parsing it under the app's CSP applies its
+   inline styles to nothing but still reports the violation.
+6. **A token meant for one browser goes in the fragment.** No server, proxy or log sees it; the
+   page sends it in a body and replaces the address before anything else.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0011, the sign-in design and its
+  diagrams, the shared contracts, two neighbouring designs, L2-052 and the deployment settings were
+  one commit before any code; the design was touched again only for what the code found (the
+  request records' `ToString`, "Use another email" as the mock's link).
+- *Read the prompt against the mock too* (journey 3, lesson 1): the mock draws "Use another email"
+  as a link to `/sign-in`; it was built as a button first and changed to the mock's link.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice ran red first, but for
+  four proofs that passed on first run because an earlier slice had built them (the token's storage,
+  "without a server token nothing is sent", the links to Sign In, and Sign In by touch and keyboard);
+  they were kept as the proof.
+- *Write a controller one action at a time* (journey 5, lesson 5): the redemption's rows in the open
+  endpoints test were held back from slice 1's commit and restored, red, in slice 3.
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6): 259.15 kB before,
+  259.24 kB after (the route's entry); Sign In is its own 7 kB chunk. No budget moved.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it caught
+  a selector in a spec before the commit.
+- *A cookie's lifetime is measured from the fake clock* (journey 4, lesson 1): the redemption tests
+  send the session's cookies by hand.
+- *Check the shape of navigation state and storage* (journey 4, lesson 3): `InviteNeededPage` reads
+  the email only when it is a short string, and takes it out of history once read
+  (journey 4, lesson 2).
+- *Test an outside source at its HTTP boundary* (journey 3, lesson 5): Postmark's message, its
+  timeout under `FakeTimeProvider`, its breaker and the missing token are proven against a fake
+  `HttpMessageHandler`.
+- *Remove `IHttpClientFactory`'s loggers* (journey 3, lesson 4): the Email source's client logs
+  nothing.
+
+## Journey 8: Draw the globe
+
+**What slowed it**
+
+- The prompt and the design put `GlobeView` behind `@defer`. Measured, the defer runtime added about
+  7 kB to the initial chunk and `NgTemplateOutlet` another 2.8 kB, past the 265 kB budget, to defer
+  8 kB of the globe library's own code. The renderer's dynamic import is the lazy boundary instead,
+  and a failed renderer chunk is one more reason for the still picture (ADR 0012). `BrowserClock`
+  moved from the root to each screen's providers for the last 0.8 kB.
+- The CSP of ADR 0010 has no `blob:`, so three.js's texture loading could not be used as it comes:
+  the masks are fetched and decoded with `createImageBitmap`.
+- three.js declares `pc_fragColor` itself only for GLSL 1 shaders; a GLSL 3 `ShaderMaterial` names
+  its own output. `GLTFLoader` also renames nodes with a dot in them, so `Globe.High` became
+  `GlobeHigh`.
+- Natural Earth's rings that cross the date line rasterised as stripes the width of the world until
+  they were unwrapped and drawn on a grid three worlds wide, folded back with XOR.
+- The release spec signed in through an emailed link and then went back: Sign In replaces its
+  history entry, so "back" left the app for `about:blank` and every count read zero. The spec now
+  comes from Not Found through its link, and goes back and forth three times.
+- The just-joined spec waited for the new pin before the toast; with the 3D globe the pin appears
+  only after the first frame, and the toast's four seconds were half gone. The toast is checked
+  first, then the pin.
+
+**Lessons**
+
+1. **Measure a lazy boundary before choosing it.** `@defer` and structural helpers cost bytes in
+   the initial chunk; a dynamic `import()` inside a lazy route's code costs nothing there. Defer the
+   heavy part, not the component around it.
+2. **Prove a 3D drawing by its pixels at projected places.** Replicate the camera in the spec,
+   sample a 5 × 5 patch at a place's projection, and compare one place at two times rather than a
+   colour against a constant; SwiftShader in headless Chromium draws WebGL 2 well enough.
+3. **Count what a screen holds through the browser, not the app.** An init script that wraps
+   `getContext`, the draw calls, `ResizeObserver` and `matchMedia`, with CDP's listener lists,
+   proves release without a hook in the product code.
+4. **Leave a screen in a spec the way a person would, inside the app.** A `goBack` after a replaced
+   history entry leaves the app and proves nothing.
+5. **Under a strict CSP, decode images from bytes.** `fetch` with the page's `AbortSignal` and
+   `createImageBitmap` need neither `blob:` nor a looser `img-src`, and abort with the screen.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0012, the 640 px breakpoint in three
+  requirements and the design system, and the draw-globe design were one commit before any code;
+  the design was touched again for what the build measured (no `@defer`, the clock per screen, the
+  meshes' names and sizes, `GlobeLegend`).
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6): 259.24 kB before, 259.64
+  kB after, inside the 260 kB warning; no budget moved. The renderer's chunk is 629 kB (130 kB
+  compressed) and loads only where WebGL 2 is had.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice ran red first, by
+  stashing the slice's app code or by removing the line under test (the sun's minute tick, the
+  release on destroy, the stop while hidden) and building again.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it caught
+  a triple-slash reference ESLint refuses and the just-joined spec's order.
+- *Read a mock's markup before the app is open* (journey 7, lesson 5): the Join spec that compares
+  pins with the mock still reads it first, and now runs on the still picture the mock draws.
+
+## Journey 9: Turn the globe
+
+**What slowed it**
+
+- A globe that turns on its own moves everything the journey-8 specs read: the pixel specs sample
+  places at the starting orientation, and the just-joined spec looked for the new pin after the
+  toast's 4 seconds, by which time, under load, the real time the clock also runs had turned Milan
+  to the far side. The pixel specs now emulate reduced motion, and the just-joined spec stops the
+  clock before it looks at the pin.
+- Playwright's clock fakes `requestAnimationFrame`, and Angular's zoneless scheduler races it with
+  `setTimeout`: with the clock paused, nothing renders until `runFor`. A spec that drives a turn
+  pauses the clock and polls with short `runFor` steps until what it waits for is drawn.
+- `pauseAt` refuses a moment already past, and the page's clock runs on between reading it and
+  pausing: `pauseAt(now + 1)` failed under load. The helper pauses 20 ms ahead and retries.
+- `emulateMedia` changes `matches` at once but fires the query's `change` event only at the
+  browser's next rendering, which a paused fake clock never brings; a one-pixel screenshot does.
+- The Globe screen is no taller than a phone until its panel is built, so a vertical drag left to
+  the page had nothing to scroll; the spec makes room, as the panel will.
+- Each faked frame of the 3D globe takes about 25 ms in SwiftShader locally whatever the window's
+  size, and about 150 ms on CI: the first push ran 5 seconds of turning a frame at a time, and
+  three specs timed out at 30 seconds. Playwright's clock yields a real task after every fake
+  timer, so frames cannot be merged. The frame's time is now uncapped (ADR 0013) and the specs
+  move the clock with `fastForward`, one frame for any length of time: the turning specs went
+  from 8 seconds to under 1.
+- Holding at once under reduced motion changed the orientation between frames, and the frame loop
+  compared the orientation before and after `advance`, so it never drew it. It compares with what
+  is drawn.
+
+**Lessons**
+
+1. **Pause the clock before a spec measures motion, and poll with `runFor`.** Real time ticking
+   under the fake clock moves an animation by however long the machine took; a paused clock and
+   steps of 16 ms make every frame the spec's own.
+2. **A changed media query needs a rendering to be reported.** After `emulateMedia`, bring about a
+   frame (a one-pixel screenshot) before expecting the page to have heard of it.
+3. **Read touch from touch events when a drag may be handed to the page.** The browser cancels a
+   touch pointer as soon as it pans; a non-passive `touchmove` decides on its first move, and CDP's
+   `Input.dispatchTouchEvent` drives it, scrolling and all.
+4. **Compare a frame's result with what is drawn, not with what came before it.** Something may
+   have moved the model between frames.
+5. **When a feature makes the screen move on its own, list the specs that look at it still.** Hold
+   them still on purpose (reduced motion, a paused clock), rather than relying on their speed.
+6. **Measure animation in time, and let a spec jump the time.** A frame that reports the real
+   time since the one before (0 after a rest) turns at the same speed on any device, and lets
+   `clock.fastForward` show seconds of motion in one frame; a spec that runs a 3D animation a
+   frame at a time costs its frames times the CI machine's slowness.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0013, the turn-globe design and its
+  diagrams, the draw-globe inputs and the design system's globe page were one commit before any
+  code; the design was touched again only for the names the code chose (`ArrowDirection`'s
+  values, `requestFrame`).
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6; journey 8, lesson 1):
+  259.64 kB before and after every slice; the motion, the gestures and the frame loop are in the
+  pages' lazy chunks. No budget moved.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice ran red first, by its
+  missing code, by stashing the app code and building again (the drag), or by removing the line
+  under test (the reduced motion listener). Two proofs passed on first run because they hold
+  something already true (the globe still under reduced motion before it turned at all, the still
+  picture taking no focus) and were kept as the proof.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it
+  caught a CDP type in the page object, and the just-joined spec the turning globe broke, which
+  one commit had been made over before the code was read and was fixed in the next.
+- *Count what a screen holds through the browser* (journey 8, lesson 3): the release spec still
+  counts the media query listeners, now with the reduced motion one, and every pointer, touch and
+  key listener is registered with the screen's `AbortSignal`.
+- *Leave a screen in a spec the way a person would* (journey 8, lesson 4): the turning specs come to
+  the Globe by joining, the one way the Globe draws a pin before journey 10.
+
+
+## Journey 10: Show pins
+
+**What slowed it**
+
+- The initial chunk went from 259.64 kB to 260.40 kB, past its warning, with nothing new in it. Bisecting
+  the templates found two instructions the Angular compiler shares through the initial chunk once any
+  template uses them: `@let` (0.35 kB) and a text with two interpolations, `{{ a }} · {{ b }}`
+  (`ɵɵtextInterpolate2`, 0.41 kB). One computed string and no `@let` brought it back to 259.64 kB.
+- `PinLayer`'s stylesheet passed the 4 kB component style budget with the labels in it; the labels became
+  `PinLabel`, a component of their own, as the design system draws them.
+- `GlobeGestures` captured the pointer on `pointerdown`, so a click on a pin was delivered to the globe and
+  never reached the button. Capture now waits until the pointer has moved far enough to be a drag.
+- Every spec that reached the Globe broke at once (36 of them): its pins request was unanswered, which the
+  guard fails, and the turning specs read the just-joined pin, which is now selected and holds the globe.
+  The turning specs open the Globe from a remembered team with Sofia alone, and the rest answer the pins.
+- Selecting a pin turns the globe, so the pins facing the viewer, and the order Tab takes, change under the
+  spec: the Tab spec waits for the turn to finish before it presses Tab again, and names the pin it expects.
+- A pin layer drawn from the frame loop is rendered by the zoneless scheduler after the frame: the hidden
+  tab spec read Sofia's pin one render before the frame it measured, one run in five. It lets 32 ms pass
+  before reading.
+- `locator.filter({ has })` with a locator rooted at another locator matched nothing; `has` takes a
+  locator rooted at the page, resolved inside each candidate.
+
+**Lessons**
+
+1. **Measure the initial chunk after each template change, and bisect a rise by template feature.** A
+   control flow or interpolation shape used for the first time can bring the compiler's instruction for it
+   into the shared chunk, whichever lazy chunk the template is in.
+2. **Capture the pointer only once a gesture has started.** A container that captures on `pointerdown`
+   takes every click from the controls inside it.
+3. **When a screen starts a request, list every spec that reaches the screen.** They all need the answer,
+   and a new default state (a selected pin) changes what they see.
+4. **When an action moves what the keyboard reaches, wait for the move before the next key.** Assert the
+   settled state (the pin that has gone from view) before pressing on.
+5. **Read what a frame drew after the render that follows it.** A signal set in the frame loop is drawn by
+   the next render, not by the frame itself.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0014, the show-pins design and its diagrams,
+  L2-013's 500 px and the design system's pin pages were one commit before any code; they were touched
+  again for the names the code chose (`selectPin`, `PinLabel`, `widthChange`).
+- *Measure the initial bundle* (journey 2, lesson 1; journey 8, lesson 1): it caught the 0.76 kB rise
+  above; 259.64 kB before and after the journey, and no budget moved.
+- *Run the spec before the page exists* (journey 1, lesson 5): every new spec ran red first, by its
+  missing code or by breaking the line under test (lifting, selecting, the blank tap, the grouping radius,
+  the compact rule, the label placer) and restoring it.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it caught a
+  selector in a spec and the Tab order flake before commit.
+- *Pause the clock before a spec measures motion* (journey 9, lesson 1) and *let a spec jump the time*
+  (lesson 6): the turn to a selected pin is proven within a second and held for ten in under a second of
+  the spec's own time.
+- *List the specs that look at the screen still* (journey 9, lesson 5): the pin specs run under reduced
+  motion, and those that measure the turn opt back in.
+
+## Journey 11: Show local time and status
+
+**What slowed it**
+
+- Much of the journey was already built: journey 8 made the one clock that ticks on the minute and rests
+  while the tab is hidden, and journey 10 a 24-hour local time on every pin. The design still described a
+  `Date`-based clock bound once in `app.config.ts`; it was brought in line with the clock built (numbers,
+  bound per screen) before any code, and the minute-tick spec passed on its first run and was kept as the
+  proof.
+- The Globe's first screen holds Mexico City and Austin on the far side, so L2-014's own example ("08:05"
+  in Mexico City) cannot be read off the screen without turning it. The specs read the teammates the
+  still picture shows, and find a boundary that one of them crosses: Ahmed's 08:59 to 09:00 in Dubai,
+  fifteen hours on, in one jump of the page's clock. Mexico City is proven by a direct unit test.
+- `page.clock.pauseAt` moved the clock to the next minute and fired the clock's timer, but nothing was drawn:
+  with the page's clock paused, Angular's zoneless scheduler renders nothing until the clock runs. A second
+  of `runFor` after the pause draws it, and also proves the tick lands within a second of the minute.
+- The verify script failed once on the just-joined spec under load: its toast's 4 seconds were counted after
+  steps that spend the paused clock in 16 ms frames. The toast is now proven as soon as it is seen. A commit
+  had been made with `;` after a failing verify; it was followed by the fix before any push.
+- The prototype has no status visible on the Globe outside the panel; the status there is given in words in
+  each pin's accessible name. The `status` badge waits for the panel (journey 14), the first screen that
+  draws it.
+
+**Lessons**
+
+1. **After `pauseAt`, let the clock run before reading the page.** A paused fake clock fires the timers that
+   are due but renders nothing; `runFor(1_000)` renders and bounds how late the change may be.
+2. **Pick a teammate the screen shows for a time boundary, and jump to it.** Any visible zone reaches every
+   hour within a day; `pauseAt` hours ahead costs one frame, not the hours.
+3. **Prove a timed message as soon as it is seen.** A spec that spends a paused clock in frames before it
+   measures a lifetime counts its own frames against it.
+4. **Never chain a commit after the verify script with `;`.** Read `rc` and commit only on 0.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): the design's clock, `localTime`, `defaultClockFormat`,
+  the backend's `SharesStatus` and where the status badge is built were one commit before any code; the
+  show-pins design's `describePin` was aligned in the same commit.
+- *Measure the initial chunk after each template change* (journey 10, lesson 1): no template changed; the
+  initial total stayed 259.64 kB after each slice, and the Globe page's chunk took the time functions.
+- *Run the spec before the page exists* (journey 1, lesson 5): the status specs ran red on the missing status,
+  the 12-hour spec by building the Globe with the 24-hour clock in place of the viewer's default, and the
+  backend's by the missing `SharesStatus`; the minute tick passed first, as journey 8 had built it.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read each slice; it caught the just-joined
+  flake, though only after a commit chained with `;` (lesson 4 above).
+- *Pause the clock before a spec measures motion* (journey 9, lesson 1) and *let a spec jump the time*
+  (lesson 6): every time spec runs on the still picture under the page's clock, four specs in under a second.
+- *When a screen starts a request, list every spec that reaches the screen* (journey 10, lesson 3): the pins'
+  new `sharesStatus` went into the shared fixture, and the three specs that read a pin's name were brought in
+  line with the mock's names.
+
+## Journey 12: Show offset and overlap
+
+**What slowed it**
+
+- No screen built so far shows an offset or an overlap: the panel is journey 14's and the Team table
+  journey 17's. Every criterion of L2-016 and L2-017 is read off one of them, so the journey built the rules,
+  the bar and the one function pages call, proved them by direct tests against the cast, and stands at 0
+  until those screens' Playwright specs prove them. Prompts 14 and 17 now say which criteria they raise.
+- The prompt wrote the offset as "7 h behind" and "4 h 30 min ahead"; the mocks, L2-016 and the design say
+  "7h behind" and "4h 30m ahead". The mock won and the prompt was corrected.
+- The design put `Offset`, `DaySpan`, `Overlap` and `OverlapText` in `domain`, but `OverlapBar` in
+  `components` takes them and `components` may read only `api`'s types. They, and `WorkingDay`, were moved
+  to `api`, so the status, the overlap and the bar read one working day rather than three copies.
+- The design still gave the clock as `Date`s; it was brought in line with the numbers journey 11 built.
+- `formatTime`'s 12-hour form keeps ":00" ("4:00 pm") for a local time, while the overlap drops it ("4 pm").
+  The overlap has its own `formatMinuteOfDay` rather than a flag on `formatTime`.
+
+**Lessons**
+
+1. **Before planning a journey, find the screen each criterion is read off.** When none exists yet, build
+   and unit-test the rules, record in the later journeys' prompts which criteria they will prove, and
+   count none as proven.
+2. **Put a type where its lowest reader can import it.** A presentation component that draws a domain
+   value needs that value's type, and any constant it draws by, in `api`.
+3. **Prove a drawing by the mock's own numbers.** The bar's parts are compared with the `--from` and
+   `--span` the mock writes (66.67%, 4.17%, 62.85%), rounded as it rounds them.
+4. **Give the one rule of who gets what a function of its own.** `compareWithViewer` decides the
+   viewer's own pin and a teammate who does not share their status once, for the panel and the Team row.
+
+**Earlier lessons applied**
+
+- *Read the prompt against the mock too* (journey 3, lesson 1): caught "7 h behind"; one line of the prompt
+  changed, before any code.
+- *Bring the docs in line first* (journey 1, lesson 6): the design's clock, the types' library and the
+  overlap's 12-hour form were one commit before any code; the design was touched again for `WorkingDay`'s
+  move and `compareWithViewer`, as the code chose them.
+- *Run the spec before the page exists* (journey 1, lesson 5): each slice's tests ran red first on the
+  missing module, then green.
+- *Measure the initial chunk after each template change* (journey 10, lesson 1): `OverlapBar` is used by
+  no route yet; the initial total stayed 259.64 kB.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit was chained
+  with `&&` on the verify script's `rc`.

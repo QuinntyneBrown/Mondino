@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test';
 
 /**
  * What a visit leaves behind and sends out: every request the page made, and everything the
- * browser keeps (the address bar, local and session storage, every IndexedDB store and the
- * cookies), so a spec can look for what must never be there.
+ * browser keeps (the address bar, the history entry's state, local and session storage, every
+ * IndexedDB store and the cookies), so a spec can look for what must never be there.
  */
 export class BrowserRecord {
   readonly requests: string[] = [];
@@ -46,6 +46,7 @@ export class BrowserRecord {
       return [
         location.href,
         history.length,
+        JSON.stringify(history.state),
         all(localStorage),
         all(sessionStorage),
         stores.join(';'),

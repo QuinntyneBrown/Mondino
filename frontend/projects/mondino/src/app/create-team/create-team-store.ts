@@ -7,14 +7,11 @@ import {
   type LookupState,
   TEAM_CREATION_API,
 } from '@mondino/api';
-import { supportedCountries } from '@mondino/domain';
+import { isEmailAddress, supportedCountries } from '@mondino/domain';
 import type { CreateTeamState } from './create-team-state';
 
 /** The most characters a team's name and a name may have (L2-053, docs/adr/0009). */
 export const nameLimit = 60;
-
-/** The most characters an email may have. */
-export const emailLimit = 254;
 
 /** How long "Your city" waits after typing stops before it searches. */
 export const citySearchDelay = 300;
@@ -24,16 +21,6 @@ export type CreateTeamField = 'team' | 'name' | 'email' | 'postal';
 
 /** What is wrong with one field. */
 export type FieldProblem = 'Missing' | 'TooLong' | 'NotAnEmail';
-
-/** An email in the form `local@domain.tld`, with no space, as the backend reads one. */
-export function looksLikeEmail(text: string): boolean {
-  const value = text.trim();
-  const at = value.indexOf('@');
-  if (value.length > emailLimit || at <= 0 || at !== value.lastIndexOf('@') || /\s/.test(value))
-    return false;
-  const domain = value.slice(at + 1);
-  return domain.indexOf('.') > 0 && !domain.endsWith('.');
-}
 
 /**
  * Create Team's state, provided at its route so it goes when the person leaves. It holds the form,
@@ -98,7 +85,7 @@ export class CreateTeamStore {
     if (name) problems.name = name;
     const email = this.email().trim();
     if (email.length === 0) problems.email = 'Missing';
-    else if (!looksLikeEmail(email)) problems.email = 'NotAnEmail';
+    else if (!isEmailAddress(email)) problems.email = 'NotAnEmail';
     if (!this.lookupDown && this.postalCode().trim().length === 0) problems.postal = 'Missing';
     return problems;
   });

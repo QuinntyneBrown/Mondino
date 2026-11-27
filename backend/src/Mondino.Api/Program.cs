@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.StaticFiles;
 using Mondino.Api.Errors;
 using Mondino.Api.RateLimiting;
 using Mondino.Api.Security;
@@ -46,7 +47,10 @@ app.Use((context, next) =>
 
     return next(context);
 });
-app.UseStaticFiles();
+// The globe's model is glTF binary, which ASP.NET Core does not know by its extension (ADR 0012).
+var contentTypes = new FileExtensionContentTypeProvider();
+contentTypes.Mappings[".glb"] = "model/gltf-binary";
+app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
 
 app.UseRouting();
 app.UseRateLimiter();

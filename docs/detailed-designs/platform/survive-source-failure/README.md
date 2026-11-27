@@ -93,9 +93,10 @@ on the hosting platform and is `<TO SUPPLY>`.
   teammate already has a pin, a lookup that is down keeps the alert "We couldn’t check M5V
   2T6 right now. Your postal code may be fine — nothing is wrong with what you typed. Your
   pin stays in Milan." with "Try again" (`change-location`).
-- When the email source does not accept a sign-in link, `POST /api/sign-in-links` answers 503
-  with `sign_in_email_unavailable` and Sign In reads "We couldn’t send the link. Mondino
-  didn’t answer — try again in a moment." Nothing else depends on the email source.
+- The email source is called from an outbox, after `POST /api/sign-in-links` has answered
+  (ADR 0011): a mail it does not accept is dropped and the teammate asks again. The answer
+  never depends on it, since a refusal only for a known email would say which emails Mondino
+  knows. Nothing else depends on the email source.
 
 **What a handler does with a missing answer (L2-049).**
 

@@ -1,0 +1,144 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.globe-stage {
+  position: relative;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.globe {
+  position: relative;
+  // The pins inside measure the globe's own box (ADR 0014).
+  container: globe / inline-size;
+  width: min(100cqw, 100cqh);
+  aspect-ratio: 1;
+  flex: none;
+  user-select: none;
+}
+.globe__frame,
+.globe__art,
+.globe__loading {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+// The Globe screen's globe is dragged to spin; a vertical touch drag stays the page's to scroll
+// until the globe takes it (ADR 0013).
+.globe--interactive {
+  touch-action: pan-y;
+  cursor: grab;
+}
+.globe--interactive:active {
+  cursor: grabbing;
+}
+// Until the first frame is drawn the placeholder holds the place; the box itself never moves.
+.globe--loading .globe__frame,
+.globe--loading .globe__art {
+  visibility: hidden;
+}
+.globe__shadow {
+  fill: var(--color-globe-shadow);
+}
+.globe__outline {
+  fill: none;
+  stroke: var(--color-globe-outline);
+}
+.globe__pins {
+  position: absolute;
+  inset: 0;
+}
+.globe__pin {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: var(--z-raised);
+  opacity: var(--depth, 1);
+}
+// A pin with no name, in the pin colour, until pins are built (show-pins).
+.pin-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  box-sizing: content-box;
+  width: var(--pin-dot-size);
+  height: var(--pin-dot-size);
+  border: var(--border-width-thick) solid var(--color-pin-ring);
+  border-radius: var(--radius-full);
+  background: var(--color-people);
+}
+.globe__pin--lifted {
+  z-index: var(--z-pin-lifted);
+  opacity: 1;
+}
+.pin-dot--you {
+  width: var(--space-4);
+  height: var(--space-4);
+  border-width: var(--border-width-pin);
+}
+.pin-dot--new::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--space-3));
+  border-radius: var(--radius-full);
+  background: var(--color-people);
+  opacity: 0;
+  z-index: -1;
+  animation: pulse var(--duration-deliberate) var(--ease-standard) 1;
+}
+@keyframes pulse {
+  from {
+    scale: 0.6;
+    opacity: 0.6;
+  }
+  to {
+    scale: 1.6;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pin-dot--new::after {
+    animation: none;
+  }
+}
+.pin-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pin-label--lifted {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-fg-default);
+  color: var(--color-bg-canvas);
+  box-shadow: var(--shadow-lift);
+  font: var(--text-caption);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-none);
+}
+.pin-label--lifted.pin-label--right {
+  translate: calc(var(--pin-size-lifted) / 2 + var(--space-3)) calc(-50% - var(--space-1));
+}
+.pin-label__name {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+@container (max-width: 31.249rem) {
+  .pin-label--lifted.pin-label--right {
+    translate: -50% calc(var(--pin-size-lifted) / 2 + var(--space-2));
+  }
+}

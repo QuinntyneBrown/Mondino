@@ -35,6 +35,9 @@ public static class ErrorCodes
     /// <summary>A request that changes something, sent from another site (docs/adr/0008).</summary>
     public const string CrossSiteRequest = "cross_site_request";
 
+    /// <summary>A sign-in link that was never issued, was used, or has expired: the three answer alike.</summary>
+    public const string SignInLinkUnusable = "sign_in_link_unusable";
+
     /// <summary>The code for a status that no handler gave a code of its own.</summary>
     public static string? ForStatus(int status) => status switch
     {

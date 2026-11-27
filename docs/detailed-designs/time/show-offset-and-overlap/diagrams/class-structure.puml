@@ -14,49 +14,64 @@ title Class structure — Show offset and overlap
 
 
 class "time/ functions" as TimeFns <<domain, time/>> {
-  +zoneOffsetMinutes(now: Date, timeZoneId: string): number
-  +offsetBetween(now: Date, timeZoneId: string, viewerTimeZoneId: string): Offset
+  +zoneOffsetMinutes(now: number, timeZoneId: string): number
+  +offsetBetween(now: number, timeZoneId: string, viewerTimeZoneId: string): Offset
   +formatOffset(offset: Offset, form: 'row' | 'panel'): string
-  +workingDayOnViewerClock(now: Date, timeZoneId: string, viewerTimeZoneId: string): DaySpan
-  +overlapBetween(now: Date, timeZoneId: string, viewerTimeZoneId: string): Overlap | null
+  +workingDayOnViewerClock(now: number, timeZoneId: string, viewerTimeZoneId: string): DaySpan
+  +overlapBetween(now: number, timeZoneId: string, viewerTimeZoneId: string): Overlap | null
+  +compareWithViewer(pin: Pin, viewerPin: Pin | undefined, now: number, format: ClockFormat): Comparison | null
+  +formatMinuteOfDay(minute: number, format: ClockFormat): string
   +formatOverlap(overlap: Overlap | null, theirDay: DaySpan, firstName: string, format: ClockFormat): OverlapText
 }
 
-class DaySpan <<domain, time/>> {
+class DaySpan <<api, time/>> {
   +startMinute: number
   +endMinute: number
 }
 
-class OverlapText <<domain, time/>> {
+class OverlapText <<api, time/>> {
   +figure: string
   +sentence: string
 }
 
-class Offset <<domain, time/>> {
+class Offset <<api, time/>> {
   +minutes: number
   +direction: OffsetDirection
 }
 
-enum OffsetDirection <<domain, time/>> {
+enum OffsetDirection <<api, time/>> {
   ahead
   behind
   same
 }
 
-class Overlap <<domain, time/>> {
+class Overlap <<api, time/>> {
   +startMinute: number
   +endMinute: number
   +lengthMinutes: number
 }
 
-class WorkingDay <<domain, time/>> {
+class Comparison <<domain, time/>> {
+  +offset: Offset
+  +overlap: OverlapView | null
+}
+
+class OverlapView <<domain, time/>> {
+  +overlap: Overlap | null
+  +theirDay: DaySpan
+  +nowMinute: number
+  +firstName: string
+  +text: OverlapText
+}
+
+class WorkingDay <<api, time/>> {
   +{static} startMinute: number = 540
   +{static} endMinute: number = 1080
 }
 
 interface Clock <<api>> {
-  +minute: Signal<Date>
-  +now(): Date
+  +minute: Signal<number>
+  +now(): number
 }
 
 class TeamStore <<domain, pins/>> {
@@ -76,6 +91,7 @@ class OverlapBar <<components>> {
   +nowMinute: number
   +firstName: string
   +text: OverlapText
+  +clockFormat: ClockFormat
 }
 
 class TeammatePanel <<components>> {
@@ -85,6 +101,9 @@ class TeammatePanel <<components>> {
   +overlapText: OverlapText | null
 }
 
+TimeFns ..> Comparison : returns
+Comparison --> Offset : has
+Comparison --> OverlapView : has
 TimeFns ..> Offset : returns
 TimeFns ..> Overlap : returns
 TimeFns ..> DaySpan : returns

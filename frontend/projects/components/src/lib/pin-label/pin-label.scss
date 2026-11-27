@@ -1,0 +1,87 @@
+// The label beside a pin (docs/design-system/components/pin-label.html): at rest its local time,
+// lifted the teammate read clearly. On a compact globe only a lifted label shows, under its pin.
+:host {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  height: var(--pin-label-height);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  box-shadow: var(--shadow-1);
+  font: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-none);
+  white-space: nowrap;
+  pointer-events: none;
+}
+strong {
+  font-weight: var(--font-weight-semibold);
+}
+:host(.pin-label--right) {
+  translate: calc(var(--pin-size) / 2 + var(--space-2)) -50%;
+}
+:host(.pin-label--left) {
+  translate: calc(-100% - var(--pin-size) / 2 - var(--space-2)) -50%;
+}
+:host(.pin-label--below) {
+  translate: -50% calc(var(--pin-size) / 2 + var(--space-2));
+}
+:host(.pin-label--above) {
+  translate: -50% calc(-100% - var(--pin-size) / 2 - var(--space-2));
+}
+:host(.pin-label--lifted) {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-fg-default);
+  color: var(--color-bg-canvas);
+  box-shadow: var(--shadow-lift);
+  font-size: var(--font-size-xs);
+}
+:host(.pin-label--lifted.pin-label--right) {
+  translate: calc(var(--pin-size-lifted) / 2 + var(--space-3)) calc(-50% - var(--space-1));
+}
+:host(.pin-label--lifted.pin-label--left) {
+  translate: calc(-100% - var(--pin-size-lifted) / 2 - var(--space-3)) calc(-50% - var(--space-1));
+}
+:host(.pin-label--lifted.pin-label--below) {
+  translate: -50% calc(var(--pin-size-lifted) / 2 + var(--space-2));
+}
+:host(.pin-label--lifted.pin-label--above) {
+  translate: -50% calc(-100% - var(--pin-size-lifted) / 2 - var(--space-3));
+}
+.pin-label__name {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+.pin-label__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+@container globe (max-width: 31.249rem) {
+  :host(:not(.pin-label--lifted)) {
+    display: none;
+  }
+  // The lifted label sits under its pin and wraps, so it stays inside the globe.
+  :host(.pin-label--lifted) {
+    width: max-content;
+    max-width: 62cqw;
+    white-space: normal;
+    translate: -50% calc(var(--pin-size-lifted) / 2 + var(--space-2));
+  }
+  .pin-label__line {
+    flex-wrap: wrap;
+  }
+}

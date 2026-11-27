@@ -64,6 +64,9 @@ export class JoinPage {
   readonly rateLimitCountdown: Locator;
   readonly youPin: Locator;
   readonly youLabel: Locator;
+  /** The 3D globe's canvas, and the still picture where it cannot be drawn. */
+  readonly canvas: Locator;
+  readonly stillPicture: Locator;
 
   /** Every image element on the page: a name rendered as markup would make one. */
   readonly images: Locator;
@@ -116,6 +119,8 @@ export class JoinPage {
     this.rateLimitCountdown = this.rateLimit.locator('.tnum[aria-hidden="true"]');
     this.youPin = this.stage.locator('.globe__pin--lifted .pin-dot--you');
     this.youLabel = this.stage.locator('.globe__pin--lifted .pin-label__name');
+    this.canvas = this.stage.locator('.globe:not(.globe--loading) canvas.globe__art');
+    this.stillPicture = this.stage.locator('svg.globe__art');
   }
 
   /** A link in the error summary, by its words. */
@@ -167,6 +172,13 @@ export class JoinPage {
   /** The names of the countries the Country field lists, in order. */
   countryNames(): Promise<string[]> {
     return this.country.locator('option').allTextContents();
+  }
+
+  /** Where the person's own pin is drawn, as a percentage of the globe's width and height. */
+  async youPinPlace(): Promise<{ x: number; y: number }> {
+    const [place] = await this.stage.locator('.globe__pin--lifted').evaluateAll(placesOf);
+    if (!place) throw new Error('The person’s own pin is not on the globe');
+    return place;
   }
 
   /** Where each pin is drawn, as a percentage of the globe's width and height, west to east. */

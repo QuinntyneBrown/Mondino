@@ -10,7 +10,8 @@
    in a still mock. Extend this file; never fork it per mock.
 
    Breakpoints (repeated literally, a media query cannot read a token):
-     36rem  576px  phone ends: wordmark, legend, heading over the globe
+     36rem  576px  phone ends: wordmark
+     40rem  640px  the Globe's stage: legend and heading over the globe, still line hidden
      48rem  768px  the Team table, "Invite teammate"
      62rem  992px  panel beside the globe, form beside the globe
      75rem  1200px text keeps its measure, the globe grows
@@ -359,7 +360,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 }
 /* The hit area is 44px whatever the pin's drawn size. */
 .pin::before { content: ""; position: absolute; left: 50%; top: 50%; width: var(--target-comfortable); height: var(--target-comfortable); translate: -50% -50%; border-radius: var(--radius-full); }
-.pin--you { border-color: var(--color-fg-default); }
+.pin--you { border: var(--border-width-pin) solid var(--color-fg-default); }
 .pin:hover, .pin:focus-visible, .pin[data-state="hover"], .pin[aria-pressed="true"] {
   width: var(--pin-size-lifted); height: var(--pin-size-lifted); translate: -50% calc(-50% - var(--space-1));
   box-shadow: var(--shadow-lift); font-size: var(--font-size-xs);
@@ -417,7 +418,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .pin-label__name { font-family: var(--font-family-display); font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); }
 .pin-label__line { display: flex; align-items: center; gap: var(--space-1-5); }
 .pin-label__moment { display: flex; align-items: center; gap: var(--space-1-5); color: var(--palette-sun); }
-/* On a globe under 400px pins are smaller and only the lifted pin is labelled. */
+/* On a globe under 500px pins are smaller and only the lifted pin is labelled. */
 @container globe (max-width: 31.249rem) {
   .pin { width: var(--pin-size-compact); height: var(--pin-size-compact); font-size: 0; }
   .pin--group { font-size: var(--font-size-3xs); width: var(--pin-size); height: var(--pin-size); }

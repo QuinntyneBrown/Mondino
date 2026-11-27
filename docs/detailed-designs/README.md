@@ -105,13 +105,15 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - A session is issued in three places only: on joining (`join-team`), on making a team
   (`make-team`) and on opening a sign-in link that is still good (`sign-in`). Each ends in
   `TeamMembership.remember`.
-- An email is the teammate's own, as a postal code is. `Teammate.Email` is optional and is set
-  for the teammate who made a team; it travels only in a request body, is in no DTO another
-  teammate receives, and is in no log, metric or span. No answer says whether Mondino knows
-  an email: `POST /api/sign-in-links` answers 202 whatever the email.
+- An email is the teammate's own, as a postal code is. It is kept only as
+  `Teammate.EmailFingerprint`, a keyed fingerprint set for the teammate who made a team
+  (ADR 0009); it travels only in a request body, is in no DTO another teammate receives, and
+  is in no log, metric or span. No answer says whether Mondino knows an email:
+  `POST /api/sign-in-links` answers 202 with no body whatever the email.
 - `ISignInEmailSender`, in `Mondino.Application`, is the outside source that delivers sign-in
-  links. It receives the address and the link and nothing else. A sign-in token is stored as
-  a hash, works once, and expires after 15 minutes by `TimeProvider`.
+  links: Postmark (ADR 0011). It receives the address and the link and nothing else, from an
+  outbox, so no answer waits for it. A sign-in token is stored as a hash, works once, and
+  expires after 15 minutes by `TimeProvider`.
 - `IInviteTokens` makes a team's invite token when the team is made and when its link is
   reset (`POST /api/teams/{teamId}/invite-link-resets`, which any teammate of the team may
   call). An invite link never expires; a reset token matches no team, and is refused with
@@ -122,21 +124,20 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
   15 minutes.
-- The `globe` library depends on `api` only. `GlobePage` hands `GlobeView` what `domain` works
-  out: the pin and label templates, the moment markers, the pin descriptions and, through
-  `PIN_GROUPER` (`PinGrouper`, `groupPins(points, options)`), the grouping of pins that would
-  cover each other into group pins with a count. `PinLayer` injects the token and `GlobePage`
-  binds it. `GlobeView` takes `selectedGroupIds`, and selecting a group pin turns the globe to
-  it.
+- The `globe` library depends on `api` only (ADR 0014). `GlobeView` reports where things are on
+  the globe as a `GlobeViewport` (`viewChange`) and a tap on no pin (`blankTap`); `GlobePage`
+  places the pins itself with `placePins` (`domain`'s `pins/`), which groups pins that would
+  cover each other into group pins with a count (`groupPins`) and sides their labels
+  (`placeLabels`), and hands the placements to `PinLayer` (`components`) in `GlobeView`'s
+  `[pins]` slot. Selecting a pin or a group pin turns the globe to it (`facing`).
 - The pins on the globe are the accessible list. `PinLayer` renders them as the mocks'
-  `ul.globe__pins > li.globe__pin > button.pin`; each button is named by `describePin` and
-  carries `aria-pressed`, and the visible label is `aria-hidden`. There is no separate hidden
-  list. `GlobeFallback` (the still picture) and `GlobePlaceholder` are in `components`, so
-  they show when the `globe` library's chunk fails to load. The still picture keeps its pins,
-  in place and working: `GlobeFallback` takes `placements` (from `stillPlacements(pins, size,
-  options)` in `domain`'s `pins/`), `descriptions`, `markers` and `selectedId`, and emits
-  `select` and `selectGroup`. Its pins lift and open their panels; it does not turn and is
-  not dragged.
+  `ul.globe__pins > li.globe__pin > button.pin`; each button is named by `describePin` or
+  `describeGroup` and carries `aria-pressed`, and the visible label is `aria-hidden`. There
+  is no separate hidden list. `GlobeFallback` (the still picture) and `GlobePlaceholder` are
+  in `components`, so they show when the `globe` library's chunk fails to load. The still
+  picture keeps its pins, in place and working: it takes the same `PinLayer` in its own
+  `[pins]` slot, placed by `placePins` from `stillViewport(width)`. Its pins lift and are
+  selected; it does not turn and is not dragged.
 - `TeamShell`, in the app, is the component of the route that holds Globe, Team, Moments and
   Profile & Settings. It provides `TeamStore` and renders `AppHeader` (`mo-app-header`, block
   `app-header`), the refresh banner and the toast. The header avatar's initials and colour come
@@ -176,23 +177,24 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - `workingNow(pins, now, limit)` returns a `WorkingNow` (`count`, `teammates`, `more`), and
   the Globe's panel lists at most six moments and six teammates. A `MomentMarker` holds its
   `moments`, an `emblem`, a `count` and `today`.
-- `GlobeScene.setPalette` takes a `GlobePalette` read from the `--color-globe-*` tokens, and
+- `GlobeScene.setPalette` takes a `GlobePalette` read from the `--color-globe-*` tokens; the
+  globe is drawn by three.js from `globe.glb` and two mask textures built in Blender
+  (ADR 0012), and its outline and shadow are SVG circles around the canvas. `CLOCK`'s
+  `minute` signal ticks once a minute (`BrowserClock`, bound by each screen that reads the time), and
   `TeamStore.refreshing` is true while a refresh is pending.
 
 ## Not decided yet
 
 The designs mark these as `<TO SUPPLY>`:
 
-- The globe's renderer and the format its Blender-built assets are exported to; an ADR decides
-  both before the Globe is built.
 - The hosting platform, and with it how the API learns a client's own address behind the
   platform's proxy (forwarded headers), which the rate limits count by.
-- The providers of the postal code source, of the holiday, race and event calendars and of
-  the email source, and the data set behind the city search.
+- The providers of the holiday, race and event calendars. (The postal code source and the city
+  search's data set are ADR 0006's; the email source is ADR 0011's.)
 - Signing in (`joining/sign-in`): how a teammate who joined by invite link signs in again,
   since Join asks for no email and only Create Team collects one; what is shown when an
-  emailed link has expired or was already used, and while one is being opened; which team is
-  shown when one email is on more than one team; and the words of the email.
+  emailed link has expired or was already used, and while one is being opened (until then
+  Sign In shows its form, ADR 0011); and how the email looks beyond its plain-text words.
 - Resetting the invite link (`joining/invite-teammates`): what "Reset link" asks before it
   acts, and what the dialog shows while the reset is pending, when it fails and once it is
   done. Resetting is not built before that design exists.
@@ -204,5 +206,5 @@ The designs mark these as `<TO SUPPLY>`:
 - Which emblems Mondino holds the right to use.
 - What becomes of a team when its last teammate leaves.
 - Numbers the requirements do not give: the circuit breaker's threshold,
-  the globe's turning rate and detail steps, the rate limit on a teammate's own postal code
+  the globe's turning rate, the rate limit on a teammate's own postal code
   lookup.

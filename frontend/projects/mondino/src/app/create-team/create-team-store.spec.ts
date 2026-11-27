@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   ApiError,
@@ -7,7 +8,7 @@ import {
   TEAM_CREATION_API,
   type TeamCreationApi,
 } from '@mondino/api';
-import { CreateTeamStore, looksLikeEmail } from './create-team-store';
+import { CreateTeamStore } from './create-team-store';
 
 const milan: PostalCodeResult = {
   city: {
@@ -38,7 +39,7 @@ function storeAnswering(rest: Partial<TeamCreationApi> = {}): CreateTeamStore {
     providers: [
       CreateTeamStore,
       { provide: TEAM_CREATION_API, useValue: api },
-      { provide: CLOCK, useValue: { now: () => Date.now() } },
+      { provide: CLOCK, useValue: { now: () => Date.now(), minute: signal(0) } },
     ],
   });
   return TestBed.inject(CreateTeamStore);
@@ -51,26 +52,6 @@ function fill(store: CreateTeamStore): void {
   store.setCountry('IT');
   store.setPostalCode('20121');
 }
-
-describe('looksLikeEmail', () => {
-  const cases: [string, boolean][] = [
-    ['sofia@northwind.co', true],
-    ['  sofia@northwind.co ', true],
-    ['sofia', false],
-    ['sofia@northwind', false],
-    ['@northwind.co', false],
-    ['sofia@@northwind.co', false],
-    ['sofia bianchi@northwind.co', false],
-    ['sofia@northwind.', false],
-    ['sofia@.co', false],
-    [`${'a'.repeat(245)}@northwind.co`, false],
-  ];
-  for (const [text, expected] of cases) {
-    it(`reads "${text.slice(0, 30)}" as ${expected ? 'an email' : 'not an email'}`, () => {
-      expect(looksLikeEmail(text)).toBe(expected);
-    });
-  }
-});
 
 describe('CreateTeamStore', () => {
   it('answers the first field that is wrong, in the order of the form, and sends nothing', async () => {

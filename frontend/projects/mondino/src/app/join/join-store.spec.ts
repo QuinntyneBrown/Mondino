@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   ApiError,
@@ -48,7 +49,7 @@ function storeAnswering(
     providers: [
       JoinStore,
       { provide: INVITE_API, useValue: api },
-      { provide: CLOCK, useValue: { now: () => Date.now() } },
+      { provide: CLOCK, useValue: { now: () => Date.now(), minute: signal(0) } },
     ],
   });
   return { store: TestBed.inject(JoinStore) };

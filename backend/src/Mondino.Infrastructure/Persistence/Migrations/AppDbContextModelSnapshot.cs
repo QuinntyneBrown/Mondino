@@ -22,6 +22,46 @@ namespace Mondino.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Mondino.Domain.SignIn.SignInLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EmailFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("SealedEmail")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmailFingerprint");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("SignInLinks");
+                });
+
             modelBuilder.Entity("Mondino.Domain.Teams.City", b =>
                 {
                     b.Property<Guid>("Id")
@@ -122,6 +162,9 @@ namespace Mondino.Infrastructure.Persistence.Migrations
                     b.Property<string>("PostalCode")
                         .HasMaxLength(12)
                         .HasColumnType("character varying(12)");
+
+                    b.Property<bool>("SharesStatus")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");

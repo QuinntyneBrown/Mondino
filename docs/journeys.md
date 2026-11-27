@@ -33,16 +33,65 @@ to the maker's city (criterion 9) comes with journeys 8 and 9, and the Globe of 
 (criterion 11) opens as journey 4 left it until journey 15 draws "Just you, for now". The links to
 Create Team from "You need an invite link" and "You’ve left" come with the screens of journeys 7
 and 24.
-Journey 6 stands at 70: 28 of the 40 criteria of L2-007 and L2-043 to L2-045 are proven by acceptance
+Journey 6 stands at 90: 34 of the 40 criteria of L2-007 and L2-043 to L2-045 are proven by acceptance
 tests, the backend's through the API and the screens' in Playwright, among them every endpoint refused
 without a session unless marked open, another team answered as no team, a left teammate's session refused,
 the antiforgery token, the security headers and the app served under a nonce-based CSP. The rest name
-screens and endpoints of later journeys, which prove them there: Sign In's link and its limits (L2-043
-criteria 9 and 10, L2-044 criterion 9, L2-045 criteria 7 to 9; journey 7), names shown as text on the pins,
+screens and endpoints of later journeys, which prove them there. Journey 7 proved Sign In's six (L2-043
+criteria 9 and 10, L2-044 criterion 9, L2-045 criteria 7 to 9), which brought it from 28 to 34. The six
+left are names shown as text on the pins,
 the panel, the Team rows and search and the moments (L2-007 criterion 2, L2-044 criteria 1 and 12; journeys
 10, 14, 17, 18 and 21), the team's name in the invite and leave dialogs and on Left Team with the link's
 reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profile & Settings' 429
-(L2-045 criterion 6; journey 22).
+(L2-045 criterion 6; journey 22). Journey 10 proved the pins' part of L2-044 criterion 1, a name of
+markup on a pin shown as text, and the Globe's answer to a session that has ended, which forgets the team
+and shows "You need an invite link"; neither completes a criterion, so it stays at 34.
+Journey 7 stands at 100: every criterion of L2-052 is proven by an acceptance test, the backend's
+through the API and the screen's in Playwright, by keyboard and by touch at 320 px. The Globe it opens
+is the arrival journey 4 left; an expired or used link, and the wait while one opens, show Sign In's
+form until their screens are designed (ADR 0011).
+Journey 8 stands at 100: every criterion of L2-008 and L2-010 is proven by an acceptance test in
+Playwright, read from the drawn globe's pixels, and the sun's position by direct unit tests (L2-010
+criterion 1), but for what its prompt hands on: stepping down to the lower level of detail (L2-008
+criterion 4) is journey 29's, which the scene's two detail steps are ready for; pins that lift and
+open their panels on the still picture (criterion 3), a pin in the shaded half and readable there
+(L2-010 criteria 2 and 4) come with journeys 9, 10 and 14; and the legend leaving out "Moment this
+week" with every kind turned off (criterion 5) with journey 22. Join's stage draws the same globe.
+Journey 9 stands at 100: every criterion of L2-009 is proven by an acceptance test in Playwright under
+a paused clock, read from where the new pin is drawn, and every rule of turning by direct unit tests
+of `GlobeMotion`, but for what its prompt hands on: the turn to a selected pin (criterion 3) is built
+as `GlobeView`'s `facing` input and proven on Join, whose globe turns to the city found and holds;
+selecting a pin and clearing the selection come with journeys 10 and 14 (ADR 0013). Journey 10 proved
+criterion 3 on the Globe screen too: a pin or group pin selected by click, key or tap turns the globe to
+it within a second and holds there until a click off the pins clears it.
+Journey 10 stands at 100: the cast is drawn as `pages/globe/default` draws it, every criterion of L2-011
+to L2-013 is proven by an acceptance test in Playwright, and the colour rule (L2-011 criterion 2) through
+the API, with grouping, label placement, initials and accessible names by direct unit tests, but for what
+its prompt hands on: the weather on a pin and in its label (L2-011 criterion 1, L2-012 criterion 1) comes
+with journey 13, a teammate's sharing switches (L2-011 criteria 4 and 7) with journey 23, and the panel a
+selected pin or group pin opens, through which a group's teammates are chosen (L2-012 criterion 5, L2-013
+criteria 3 and 7), with journey 14 (ADR 0014).
+Journey 11 stands at 80 (9 of its 11 criteria; the other two come with journeys 14, 15 and 17): the rest of
+L2-014 and L2-015 is proven by an acceptance test, the
+backend's through the API (a pin's IANA time zone, no local time, and whether its status is shared) and
+the Globe's in Playwright under the page's fake clock (each pin's local time and status in words as
+`pages/globe/default` names them, on the 24-hour clock and on the 12-hour clock of a teammate who joined
+from the United States, every time ticking together on the minute, a status changing at its hour, and no
+status for a teammate who does not share it), with the status table, its boundaries and Saturday, the
+12-hour form and a daylight-saving change by direct unit tests. What is not yet proven belongs to the
+screens of later journeys: the panel's "Tuesday 28 Oct" (L2-014 criterion 5; `formatDay` is built and unit-tested)
+and the `status` badge come with journey 14, and the counts and filters that leave out a teammate who
+does not share their status (L2-015 criterion 4) with journeys 15 and 17; the switch that turns sharing
+off, and the clock chosen in Profile & Settings, with journey 23.
+Journey 12 stands at 0 (none of its 14 criteria is yet proven by an acceptance test): the offset, the
+overlap and the overlap bar are built and proven by direct unit tests against the cast at the mocks' "now"
+(every offset `pages/team/default` gives, "7h behind you", "4h 30m ahead", "Same time", a daylight-saving
+change on one side, Tomás's 16:00 to 18:00 and "4 pm–6 pm", Noah's "None today" with 23:00 to 08:00, the bar's
+parts placed as `pages/globe/selected` places them, its text read aloud with start, end and length, nothing
+for the viewer's own pin and no overlap for a teammate who does not share their status), but every criterion
+of L2-016 and L2-017 is read off a teammate's panel or a Team row, which come with journey 14 (L2-016
+criteria 1 to 5, L2-017 criteria 1 to 8) and journey 17 (L2-016 criteria 1 to 4 and 6); their Playwright
+specs raise this number.
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -51,12 +100,12 @@ reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profil
 | 3 | [Place a pin from a postal code](prompts/03-place-a-pin-from-a-postal-code-prompt.md) | Give name, country and postal code; the city is found. | L2-002, L2-003, L2-004, L2-006 | 5 | 100 |
 | 4 | [Join the team](prompts/04-join-the-team-prompt.md) | Join and land on the Globe with your new pin. | L2-005 | 4 | 100 |
 | 5 | [Create a team](prompts/05-create-a-team-prompt.md) | Name a team, place your own pin and get its invite link. | L2-053 | 5 | 100 |
-| 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 70 |
-| 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 0 |
-| 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 0 |
-| 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 0 |
-| 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 0 |
-| 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 0 |
+| 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 90 |
+| 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 100 |
+| 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 100 |
+| 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 100 |
+| 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 100 |
+| 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 80 |
 | 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 0 |
 | 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 0 |
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 0 |
@@ -76,4 +125,4 @@ reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profil
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **17** |
+| | **Total** | | | **147** | **43** |

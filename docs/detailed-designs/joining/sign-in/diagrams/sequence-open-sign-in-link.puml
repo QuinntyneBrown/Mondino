@@ -45,11 +45,11 @@ alt no link, expired, or already used
   controller --> client : 410 ProblemDetails, code sign_in_link_unusable
   client --> store : ApiError
   store --> page : state LinkUnusable
-  page --> actor : What is shown is TO SUPPLY
+  page --> actor : The Sign In form, signed in to nothing (ADR 0011)
 else usable
   handler -> link : TryUse(now from TimeProvider)
   link --> handler : Used once (L2-052)
-  handler -> db : Find the teammate with this email; save
+  handler -> db : Save the use (UsedAt is a concurrency token); find the teammate\nwith this email's fingerprint who joined last
   alt the email is on a team
     db --> handler : Teammate and Team
     handler --> controller : SignInResultDto with team id, teammate id and team name
@@ -62,11 +62,12 @@ else usable
     page --> actor : Navigate to /globe (L2-052)
   else the email is on no team
     db --> handler : None
+    handler -> handler : Unseal the email with the token
     handler --> controller : SignInResultDto with the email only
     controller --> client : 200 SignInResultDto, no cookie
     client --> store : SignInResult with no membership
     store --> page : The email
-    page --> actor : Navigate to /globe with the email in the navigation state:\n"You need an invite link" (L2-052)
+    page --> actor : Navigate to /globe with the email in the navigation state:\n"You need an invite link" naming it, read once (L2-052)
   end
 end
 @enduml
