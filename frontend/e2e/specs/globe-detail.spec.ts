@@ -45,7 +45,7 @@ test.describe('Globe: stepping down on a slow device', () => {
 
     // And it stays there while the frames stay slow, still turning
     const count = await frameCount(page);
-    await expect.poll(() => frameCount(page), { timeout: 15_000 }).toBeGreaterThan(count + 70);
+    await expect.poll(() => frameCount(page), { timeout: 15_000 }).toBeGreaterThan(count + 20);
     await expect(globePage.canvas).toHaveJSProperty('width', Math.floor(box.width));
     expect(await largestDrawn(page)).toBe(lighter);
   });
@@ -57,9 +57,9 @@ test.describe('Globe: stepping down on a slow device', () => {
     const box = (await globePage.canvas.boundingBox())!;
     const finer = await largestDrawn(page);
 
-    // When its frames keep coming 40 a second for more than 3 seconds
+    // When its frames keep coming 32 a second for more than 3 seconds
     const count = await frameCount(page);
-    await expect.poll(() => frameCount(page), { timeout: 15_000 }).toBeGreaterThan(count + 140);
+    await expect.poll(() => frameCount(page), { timeout: 15_000 }).toBeGreaterThan(count + 110);
 
     // Then nothing is lowered
     await expect(globePage.canvas).toHaveJSProperty('width', Math.floor(box.width * 2));

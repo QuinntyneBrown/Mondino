@@ -48,9 +48,11 @@ test.describe('Steady memory: one clock, and nothing left waiting', () => {
   }) => {
     await rememberTeam(page);
     const cancelled: string[] = [];
+    // The backend's requests cancelled; the globe's own fetches are cancelled with it too.
     page.on('requestfailed', (request) => {
-      if (request.failure()?.errorText.includes('ABORTED'))
-        cancelled.push(new URL(request.url()).pathname);
+      const { pathname } = new URL(request.url());
+      if (pathname.startsWith('/api/') && request.failure()?.errorText.includes('ABORTED'))
+        cancelled.push(pathname);
     });
 
     // Given Profile & Settings waiting for the teammate's own pin

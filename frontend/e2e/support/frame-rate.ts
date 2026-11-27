@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Gives every animation frame a time of the spec's choosing: 40 frames a second until
+ * Gives every animation frame a time of the spec's choosing: 32 frames a second, just over 30, until
  * `slowDown` is called, then 20, one frame after another, whatever the machine running the spec
  * can draw. It also records how many indices each draw call drew, so a spec can tell the models
  * apart.
@@ -19,7 +19,7 @@ export async function watchFrames(page: Page): Promise<void> {
         const batch = { frame: 0, callbacks: [] as FrameRequestCallback[] };
         batch.frame = requestAnimationFrame((now) => {
           pending = undefined;
-          time = time === undefined ? now : time + (frames.slow ? 50 : 25);
+          time = time === undefined ? now : time + (frames.slow ? 50 : 1000 / 32);
           frames.count++;
           for (const each of batch.callbacks) each(time);
         });
