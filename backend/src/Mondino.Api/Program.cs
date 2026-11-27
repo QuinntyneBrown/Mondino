@@ -24,6 +24,13 @@ app.UseStatusCodePages();
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
 app.MapControllers();
 
+// In a deployment the Angular build is published into wwwroot and served from the same origin,
+// so the browser calls only this backend. An unknown /api route stays a 404, never the app shell.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.Map("/api/{**rest}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound));
+app.MapFallbackToFile("index.html");
+
 await app.RunAsync();
 
 /// <summary>The API's entry point, public so the acceptance tests can host it.</summary>
