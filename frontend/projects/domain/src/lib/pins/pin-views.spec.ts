@@ -10,17 +10,37 @@ const pin = (name: string, cityName: string, timeZoneId: string, isViewer = fals
   country: '',
   position: { latitude: 0, longitude: 0 },
   timeZoneId,
+  sharesStatus: true,
   isViewer,
 });
 
 describe('pinViews', () => {
-  it('names a pin by its name, city and local time', () => {
+  it('names a pin by its name, city, local time and status', () => {
     const view = pinViews([pin('Tomás Herrera', 'Mexico City', 'America/Mexico_City')], now).get(
       'Tomás Herrera',
     );
     expect(view?.initials).toBe('TH');
     expect(view?.localTime).toBe('08:05');
-    expect(view?.description).toBe('Tomás Herrera, Mexico City, 08:05');
+    expect(view?.status).toBe('early-morning');
+    expect(view?.description).toBe('Tomás Herrera, Mexico City, 08:05, Early morning');
+  });
+
+  it('gives the local time on the viewer’s 12-hour clock', () => {
+    const view = pinViews(
+      [pin('Tomás Herrera', 'Mexico City', 'America/Mexico_City')],
+      now,
+      null,
+      '12-hour',
+    ).get('Tomás Herrera');
+    expect(view?.localTime).toBe('8:05 am');
+    expect(view?.description).toBe('Tomás Herrera, Mexico City, 8:05 am, Early morning');
+  });
+
+  it('gives no status for a teammate who does not share it', () => {
+    const ahmed = { ...pin('Ahmed Al-Sayed', 'Dubai', 'Asia/Dubai'), sharesStatus: false };
+    const view = pinViews([ahmed], now).get('Ahmed Al-Sayed');
+    expect(view?.status).toBeNull();
+    expect(view?.description).toBe('Ahmed Al-Sayed, Dubai, 18:05');
   });
 
   it('marks the viewer’s own pin "(you)"', () => {
@@ -28,7 +48,7 @@ describe('pinViews', () => {
       'Sofia Bianchi',
     );
     expect(view?.name).toBe('Sofia Bianchi (you)');
-    expect(view?.description).toBe('Sofia Bianchi (you), Milan, 15:05');
+    expect(view?.description).toBe('Sofia Bianchi (you), Milan, 15:05, Working hours');
     expect(view?.initials).toBe('SB');
   });
 

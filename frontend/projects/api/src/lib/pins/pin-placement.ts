@@ -1,3 +1,5 @@
+import type { Status } from '../time/status';
+
 /** Which side of its pin a label sits on. */
 export type LabelSide = 'right' | 'left' | 'below' | 'above';
 
@@ -11,9 +13,11 @@ export interface PinView {
   /** The name as it is shown, with "(you)" after the viewer's own. */
   readonly name: string;
   readonly cityName: string;
-  /** The local time: "15:05". */
+  /** The local time on the viewer's clock: "15:05", or "3:05 pm". */
   readonly localTime: string;
-  /** The pin's accessible name: "Tomás Herrera, Mexico City, 08:05". */
+  /** The status at the local time, or null when the teammate does not share it. */
+  readonly status: Status | null;
+  /** The pin's accessible name: "Tomás Herrera, Mexico City, 08:05, Early morning". */
   readonly description: string;
   readonly isViewer: boolean;
   /** Placed just now: it pulses once. */

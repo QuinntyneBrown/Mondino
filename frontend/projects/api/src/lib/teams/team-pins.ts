@@ -4,7 +4,7 @@ import type { Position } from '../globe/position';
 /**
  * A teammate's pin as their teammates see it: at their city, never at their postal code, which is
  * in no part of it (L2-007). The local time is not sent: the browser works it out from the time
- * zone. Weather, status sharing and moments join with journeys 13, 23 and 20.
+ * zone (L2-014). Weather and moments join with journeys 13 and 20.
  */
 export interface Pin {
   readonly teammateId: string;
@@ -16,6 +16,8 @@ export interface Pin {
   readonly position: Position;
   /** An IANA time zone: "Europe/Rome". */
   readonly timeZoneId: string;
+  /** Whether the teammate shares if they are working or asleep: when not, no status is shown (L2-015). */
+  readonly sharesStatus: boolean;
   /** The viewer's own pin. */
   readonly isViewer: boolean;
 }

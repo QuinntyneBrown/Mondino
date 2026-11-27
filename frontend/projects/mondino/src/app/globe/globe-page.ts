@@ -21,7 +21,13 @@ import {
 } from '@mondino/api';
 import { GlobeFallback, GlobeLegend, GlobePlaceholder, PinLayer, Toast } from '@mondino/components';
 import { GlobeView, type GlobeState } from '@mondino/globe';
-import { BrowserClock, pinViews, placePins, stillViewport } from '@mondino/domain';
+import {
+  BrowserClock,
+  defaultClockFormat,
+  pinViews,
+  placePins,
+  stillViewport,
+} from '@mondino/domain';
 import type { JustJoined } from './just-joined';
 import { TeamStore } from './team-store';
 
@@ -65,17 +71,22 @@ export class GlobePage {
   private readonly viewport = signal<GlobeViewport | null>(null);
   protected readonly stillWidth = signal(0);
 
-  /** What each pin shows, worked out once a minute. */
+  /**
+   * What each pin shows, its local time and status among it, worked out in one pass each time the
+   * one clock's minute changes (L2-014, L2-015). Times are on the viewer's clock: until Profile &
+   * Settings stores a choice (journey 23), the default for the country of their pin.
+   */
   private readonly views = computed(() => {
     this.clock.minute();
     const team = this.store.team();
-    return team
-      ? pinViews(
-          team.pins,
-          untracked(() => this.clock.now()),
-          this.justJoined?.teammateId ?? null,
-        )
-      : null;
+    if (!team) return null;
+    const viewer = team.pins.find((pin) => pin.isViewer);
+    return pinViews(
+      team.pins,
+      untracked(() => this.clock.now()),
+      this.justJoined?.teammateId ?? null,
+      defaultClockFormat(viewer?.country ?? ''),
+    );
   });
 
   private placementsIn(viewport: GlobeViewport | null): readonly PinPlacement[] | null {
