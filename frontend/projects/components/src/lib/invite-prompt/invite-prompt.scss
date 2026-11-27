@@ -1,0 +1,35 @@
+// A team of one’s card (docs/design-system/components/card, patterns/empty-and-error-states).
+:host {
+  display: block;
+}
+.card {
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  background: var(--color-bg-surface);
+}
+.invite-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-12);
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+}
+.invite-prompt__title {
+  font: var(--text-name);
+}
+.invite-prompt__text {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

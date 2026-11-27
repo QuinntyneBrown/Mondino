@@ -8,10 +8,15 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CLOCK, type StatusFilter } from '@mondino/api';
 import {
+  Alert,
+  Button,
   DayRibbon,
+  EmptyState,
+  InvitePrompt,
+  Skeleton,
   ListNote,
   Segmented,
   type SegmentedOption,
@@ -28,6 +33,7 @@ import {
   teamLine,
   teamRows,
 } from '@mondino/domain';
+import { InviteDialogOpener } from '../invite-dialog-opener';
 import { TeamStore } from '../team-store';
 
 const filterOf = (value: string | null): StatusFilter =>
@@ -58,7 +64,18 @@ const notes: Record<StatusFilter, { title: string; text: string } | null> = {
  */
 @Component({
   selector: 'mo-team-page',
-  imports: [DayRibbon, ListNote, Segmented, TeamTable],
+  imports: [
+    Alert,
+    Button,
+    DayRibbon,
+    EmptyState,
+    InvitePrompt,
+    ListNote,
+    RouterLink,
+    Segmented,
+    Skeleton,
+    TeamTable,
+  ],
   // One clock for the screen, released with it; the team is the shell's.
   providers: [{ provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './team-page.html',
@@ -70,6 +87,7 @@ export class TeamPage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly store = inject(TeamStore);
+  private readonly inviteDialog = inject(InviteDialogOpener);
 
   /** The filter the address names, `?filter=working` or `asleep`; anything else is All. */
   protected readonly filter = signal<StatusFilter>('all');
@@ -113,6 +131,18 @@ export class TeamPage {
     ];
   });
 
+  /** A team of one has no list to filter: a card invites the team in its place (L2-054). */
+  protected readonly alone = computed(() => this.store.team()?.pins.length === 1);
+  protected readonly teamName = computed(() => this.store.team()?.teamName ?? '');
+
+  /** While any pin's weather is unavailable, a warning says the local times are still right. */
+  protected readonly weatherUnavailable = computed(
+    () => this.store.team()?.pins.some((pin) => pin.weatherState === 'Unavailable') ?? false,
+  );
+
+  /** The loading placeholder's six rows, as pages/team/loading draws them. */
+  protected readonly loadingRows = [1, 2, 3, 4, 5, 6];
+
   protected readonly caption = computed(() => captions[this.filter()]);
   protected readonly note = computed(() => notes[this.filter()]);
 
@@ -153,6 +183,14 @@ export class TeamPage {
       queryParams: { filter: filter === 'all' ? null : filter },
       replaceUrl: true,
     });
+  }
+
+  protected tryAgain(): void {
+    void this.store.load();
+  }
+
+  protected invite(trigger: HTMLElement): void {
+    void this.inviteDialog.open(trigger);
   }
 
   protected choose(teammateId: string): void {

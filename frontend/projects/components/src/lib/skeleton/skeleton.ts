@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-export type SkeletonShape = 'text' | 'short' | 'mid' | 'title' | 'pill' | 'control';
+/** `sized`: no size of its own; the screen that places it sizes it, as Team's placeholder does. */
+export type SkeletonShape =
+  'text' | 'short' | 'mid' | 'title' | 'pill' | 'control' | 'avatar' | 'sized';
 
 /**
  * A placeholder in the shape of what is loading. It is decorative: the screen announces the wait
