@@ -199,6 +199,27 @@ public sealed class TeamMomentsTests
         Assert.Equal(13, asked.Count(what => what.StartsWith("holidays", StringComparison.Ordinal)));
     }
 
+    [Fact]
+    public async Task A_title_and_a_detail_from_a_calendar_are_plain_text_cut_to_80_and_160_characters()
+    {
+        // Given an event whose title is markup 100 characters long and whose detail is 200 characters
+        await using var api = new MondinoApi();
+        await api.SeedAsync();
+        var title = "<img src=x onerror=alert(1)>" + new string('t', 72);
+        var detail = "<b>" + new string('d', 197);
+        api.Calendars.HasEvent(MomentKind.LocalEvent, title, new DateOnly(2025, 10, 30), "IT", 45.4642, 9.19, detail);
+        using var client = api.CreateSecureClient();
+        var sofia = await api.JoinNorthwindAsync(client);
+
+        // When the moments are read
+        var moment = (await MomentsAsync(client, sofia)).First();
+
+        // Then the title is its first 79 characters and an ellipsis, as the literal characters, and
+        // the detail its first 159 and an ellipsis
+        Assert.Equal(title[..79] + "…", moment.GetProperty("title").GetString());
+        Assert.Equal(detail[..159] + "…", moment.GetProperty("detail").GetString());
+    }
+
     private static async Task<List<JsonElement>> MomentsAsync(HttpClient client, Session session)
     {
         using var response = await client.SendAsync(session.Request(HttpMethod.Get, $"/api/teams/{session.TeamId}/moments"));
