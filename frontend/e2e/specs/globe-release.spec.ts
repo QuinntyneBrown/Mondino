@@ -1,11 +1,15 @@
 // Acceptance Test
 // Traces to: L2-008, L2-047
-// Description: Leaving the Globe screen leaves no WebGL context, drawing, observer or listener of the globe's behind; a hidden tab draws nothing
+// Description: Leaving the Globe screen leaves no WebGL context, drawing, observer or listener of the globe's behind; a hidden tab draws nothing and is right at once when shown
 
 import { expect, test } from '../fixtures/test';
 import { watchWhatIsHeld, whatIsHeld } from '../support/globe-resources';
 import { rememberTeam } from '../support/membership';
-import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
+import { NORTHWIND_PINS, northwindPins, northwindPinsOf } from '../fixtures/pins';
+import { brightness, coloursAt, placeOnGlobe } from '../support/globe-pixels';
+
+/** Northwind's counts at 15:05 UTC, an hour after the cast's "now". */
+const HOUR_LATER_COUNTS = '12 time zones · 9 working · 2 asleep';
 
 test.describe('Globe: leaving it releases the globe', () => {
   test('entering and leaving the Globe leaves no context, drawing, observer or listener behind', async ({
@@ -49,7 +53,7 @@ test.describe('Globe: leaving it releases the globe', () => {
     expect((await whatIsHeld(page)).draws).toBe(left.draws);
   });
 
-  test('a hidden tab draws nothing, and draws again when it is shown', async ({
+  test('a tab hidden for an hour draws nothing, and shown again has its local times, statuses and night side right at once', async ({
     api,
     page,
     globePage,
@@ -66,9 +70,18 @@ test.describe('Globe: leaving it releases the globe', () => {
       });
     });
     await rememberTeam(page);
-    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
+    api.answer('GET', NORTHWIND_PINS, northwindPins());
+    // The globe holds still, so the night side's pixels are where the spec looks (ADR 0013).
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    // Off the Horn of Africa the sun sets between 14:05 and 15:05 UTC on 27 October
+    const hornOfAfrica = placeOnGlobe(0, 50)!;
+
+    // Given the Globe at 14:05 UTC
     await globePage.open();
     await expect(globePage.canvas).toBeVisible();
+    await expect(globePage.counts).toHaveText('12 time zones · 8 working · 2 asleep');
+    const times = await globePage.workingRowTexts();
+    const [day] = await coloursAt(globePage.canvas, [hornOfAfrica]);
 
     // When the tab is hidden for an hour
     await page.evaluate(() =>
@@ -81,10 +94,15 @@ test.describe('Globe: leaving it releases the globe', () => {
     // Then nothing was drawn
     expect((await whatIsHeld(page)).draws).toBe(hidden.draws);
 
-    // And shown again, the globe is drawn at once, with the sun where it is now
+    // And shown again, before the next minute begins, the statuses, the local times and the
+    // night side are those of 15:05
     await page.evaluate(() =>
       (window as unknown as { __setHidden(v: boolean): void }).__setHidden(false),
     );
-    await expect.poll(async () => (await whatIsHeld(page)).draws).toBeGreaterThan(hidden.draws);
+    await expect(globePage.counts).toHaveText(HOUR_LATER_COUNTS);
+    expect(await globePage.workingRowTexts()).not.toEqual(times);
+    await expect
+      .poll(async () => brightness((await coloursAt(globePage.canvas, [hornOfAfrica]))[0]))
+      .toBeLessThan(brightness(day) * 0.75);
   });
 });

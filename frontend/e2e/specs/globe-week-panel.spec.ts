@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-024, L2-023, L2-015, L2-020, L2-044
+// Traces to: L2-024, L2-023, L2-015, L2-020, L2-044, L2-047
 // Description: With no pin selected the panel shows the week around the world, this week's moments six at most, soonest first and the same day west to east, and who is in working hours now, six at most, by local hour then west to east; a row selects its teammate's pin, and closing a teammate's or a group's panel returns to the week
 
 import type { Page } from '@playwright/test';
