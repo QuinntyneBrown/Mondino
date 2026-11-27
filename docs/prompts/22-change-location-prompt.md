@@ -114,6 +114,9 @@ Builds on: journeys 3, 6 and 8.
   lesson it applied worked.
 - Journey 15 draws the header's link to Profile & Settings (the viewer's avatar, `/profile`); add Profile &
   Settings to `TeamShell`'s children, so the link reaches it and carries `aria-current="page"` there.
+- Journey 16 waits for this screen to prove, in Playwright, that "Invite teammate" in its header opens the
+  invite dialog (L2-054 criterion 1, L2-025 criterion 7, with Team and Moments); raise journey 16's and
+  journey 15's % when all four screens are proven.
 - Set journey 22 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

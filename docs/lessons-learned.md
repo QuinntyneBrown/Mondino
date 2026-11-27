@@ -994,3 +994,59 @@ criterion 4.
   from a reason to avoid a feature into a table of what each costs, so the budget is set from measurement.
 - *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): the commit followed
   `node tools/verify/verify.mjs &&`.
+
+## Journey 16: Invite teammates
+
+**What slowed it**
+
+- The design was again behind the code: it named the CDK `Clipboard`, a `CopyResult`, `CopyField.select()`
+  and a `TeamStore` in `domain`, none of which journey 15 built. It was brought in line, with its three
+  changed diagrams, before any code.
+- The mock's note and L2-037 put the sheet under 576 px; the design system's CSS, which the mocks render
+  through, made it one under 640 px. The note won and the CSS was brought to 36rem. `CopyField` had also
+  drifted from both mocks to a copy icon; it takes their link icon again.
+- CDK 22 draws an overlay in the browser's top layer (`popover`) by default, and an open CDK Dialog marks
+  every sibling of its container `aria-hidden` except live regions and popovers. The shell's toast regions,
+  inside `mo-root`, were hidden from assistive technology and painted under the dialog's scrim. The spec
+  that read the toast by its class passed; a screenshot showed it. The regions now move to the body, and the
+  dialog is drawn in the page's layers (`usePopover: false`), so `--z-toast` is over it as `copy-failed`
+  draws it.
+- `import('@angular/cdk/overlay')` for that one token cost the initial chunk 12.9 kB more (273.56 to
+  286.50 kB): a dynamic import keeps every export of the entry, and with them the core and `rxjs` they use.
+  Importing `Dialog` and `OVERLAY_DEFAULT_CONFIG` by name from a two-line local module brought it to
+  272.73 kB, the CDK Dialog line of ADR 0018 (259.81 kB before the journey, +12.92 kB).
+- Four of the slices passed on their first run, because the CDK's focus trap, restored focus and the sheet's
+  CSS came with the first. Each was proven able to fail by breaking the one setting it reads.
+- Team, Moments and Profile & Settings do not exist yet, so L2-054 criteria 1 and 6 and L2-025 criterion 7
+  cannot be counted, and L2-055 waits for the reset's design: 7 of 15 criteria, 50.
+
+**Lessons**
+
+1. **Read a toast by its role when a dialog is open.** `getByRole('alert')` leaves out what is hidden from
+   assistive technology; a class locator does not, and passes over a silenced alert.
+2. **Take what a lazy feature needs from a package by name, through a small module of re-exports.** A
+   dynamic import of a package entry keeps all its exports in the build.
+3. **Look at an overlay once, with reduced motion, before calling its slice done.** Stacking and the top
+   layer are invisible to a spec that reads text; a screenshot found the toast under the scrim.
+4. **A CDK 22 overlay is in the top layer unless told otherwise.** Anything that must sit over a dialog
+   (a toast) needs the dialog out of the top layer (`OVERLAY_DEFAULT_CONFIG`) or to be in it itself, and
+   must be a live region beside the overlay container to be announced.
+5. **When a slice is green before its code, break the setting it reads.** Turning off `restoreFocus`,
+   the select request or the breakpoint made each spec fail where expected.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): the design, three diagrams, the breakpoint and the mocks' note were one commit
+  before any code.
+- *Run the spec before the page exists* (journey 1, lesson 5): the first spec failed on the missing dialog,
+  the hold on a toast that went, the alert on its role.
+- *Prove a log test can fail, and check the sabotage built* (journey 7, lesson 2), in its spirit: each
+  green-on-arrival slice and the backend's invite link test were broken once and seen to fail.
+- *Measure the initial chunk after importing anything new from a package already in it* (journey 15,
+  lesson 1) and *diff two metafiles by input* (bundle pass, lesson 2): the jump was read from the chunk
+  table at once, and the metafile diff named `@angular/core` and `rxjs`'s schedulers.
+- *Prove a timed message as soon as it is seen* (journey 11, lesson 3): the toast's hold is counted from a
+  clock paused once it shows.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit followed
+  `node tools/verify/verify.mjs &&`.
