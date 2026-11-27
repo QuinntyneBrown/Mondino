@@ -12,6 +12,7 @@ public sealed record GetInviteQuery(string InviteToken) : IRequest<InviteDto>;
 /// <summary>
 /// The team's name, its count, a bare position for each teammate and the initials and colour of
 /// the five who joined most recently. No teammate id, name, city, time zone, weather or postal code.
+/// A full team answers its name and nothing else about it (L2-005).
 /// </summary>
 public sealed record InviteDto(
     string TeamName,
@@ -19,6 +20,7 @@ public sealed record InviteDto(
     IReadOnlyList<PositionDto> Positions,
     IReadOnlyList<InviteAvatarDto> Avatars,
     bool AlreadyJoined,
+    bool Full,
     IReadOnlyList<CountryDto> Countries);
 
 /// <summary>A bare position: where a pin is, and nothing of whose it is.</summary>
@@ -59,7 +61,12 @@ internal sealed class GetInviteQueryHandler(IAppDbContext database, ICurrentTeam
 
         if (currentTeammate.IsAuthenticated && currentTeammate.TeamId == team.Id)
         {
-            return new InviteDto(team.Name, count, [], [], AlreadyJoined: true, CountryDto.All);
+            return new InviteDto(team.Name, count, [], [], AlreadyJoined: true, Full: false, CountryDto.All);
+        }
+
+        if (count >= Domain.Teams.Team.MaxTeammates)
+        {
+            return new InviteDto(team.Name, 0, [], [], AlreadyJoined: false, Full: true, CountryDto.All);
         }
 
         var positions = await teammates
@@ -79,6 +86,7 @@ internal sealed class GetInviteQueryHandler(IAppDbContext database, ICurrentTeam
             positions,
             recent.Select(t => new InviteAvatarDto(Domain.Teams.TeammateInitials.Of(t.Name), t.Colour)).ToList(),
             AlreadyJoined: false,
+            Full: false,
             CountryDto.All);
     }
 }

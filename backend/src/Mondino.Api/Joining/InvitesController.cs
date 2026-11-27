@@ -50,6 +50,7 @@ public sealed class InvitesController(ISender sender) : ControllerBase
     /// </summary>
     [HttpPost("{inviteToken}/teammates")]
     [SameSiteOnly]
+    [EnableRateLimiting(RateLimitPolicies.Join)]
     public async Task<ActionResult<JoinResultDto>> Join(
         string inviteToken, [FromBody] JoinRequest request, CancellationToken cancellationToken)
     {

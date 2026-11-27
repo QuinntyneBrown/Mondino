@@ -125,6 +125,21 @@ public class MondinoApi : WebApplicationFactory<Program>
         return await database.Teammates.CountAsync(t => t.TeamId == team.Id);
     }
 
+    /// <summary>Adds made-up teammates at the team's first city until it has <paramref name="count"/>.</summary>
+    public async Task FillTeamAsync(string inviteToken, int count)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var team = await database.Teams.Include(t => t.Teammates).ThenInclude(t => t.City).SingleAsync(t => t.InviteToken == inviteToken);
+        var city = team.Teammates[0].City;
+        for (var i = team.Teammates.Count; i < count; i++)
+        {
+            team.Add(Guid.NewGuid(), $"Teammate {i}", "teammate-1", city, Now.AddMinutes(-i));
+        }
+
+        await database.SaveChangesAsync(CancellationToken.None);
+    }
+
     /// <summary>A teammate as stored, with their city.</summary>
     public async Task<Teammate> TeammateAsync(Guid teammateId)
     {
