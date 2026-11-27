@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   ApiError,
@@ -38,7 +39,7 @@ function storeAnswering(rest: Partial<TeamCreationApi> = {}): CreateTeamStore {
     providers: [
       CreateTeamStore,
       { provide: TEAM_CREATION_API, useValue: api },
-      { provide: CLOCK, useValue: { now: () => Date.now() } },
+      { provide: CLOCK, useValue: { now: () => Date.now(), minute: signal(0) } },
     ],
   });
   return TestBed.inject(CreateTeamStore);
