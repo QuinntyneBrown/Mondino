@@ -14,7 +14,8 @@
     "e2e:typecheck": "tsc -p e2e/tsconfig.json --noEmit",
     "e2e:visual": "ng build && playwright test -c playwright.sweeps.config.ts --project=visual",
     "e2e:responsive": "ng build && playwright test -c playwright.sweeps.config.ts --project=responsive",
-    "e2e:accessibility": "ng build && playwright test -c playwright.sweeps.config.ts --project=accessibility"
+    "e2e:accessibility": "ng build && playwright test -c playwright.sweeps.config.ts --project=accessibility",
+    "e2e:performance": "ng build && playwright test -c playwright.sweeps.config.ts --project=performance"
   },
   "private": true,
   "packageManager": "npm@10.9.9",
