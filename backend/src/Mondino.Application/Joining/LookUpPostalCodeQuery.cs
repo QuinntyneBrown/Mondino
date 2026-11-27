@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Mondino.Application.Cities;
 using Mondino.Application.Errors;
 using Mondino.Application.Persistence;
+using Mondino.Application.Teams;
 
 namespace Mondino.Application.Joining;
 
@@ -14,8 +15,8 @@ public sealed record LookUpPostalCodeQuery(string? InviteToken, string? CountryC
     : IRequest<PostalCodeResultDto>;
 
 /// <summary>The city a postal code lies in, and the weather there. It does not echo the postal code.</summary>
-/// <param name="Weather">The weather at the city, or null; journey 13 fills it.</param>
-public sealed record PostalCodeResultDto(CityDto City, object? Weather);
+/// <param name="Weather">The weather at the city, or null when the weather source has none (L2-003).</param>
+public sealed record PostalCodeResultDto(CityDto City, WeatherDto? Weather);
 
 /// <summary>A city: its name, region and country, its own position and its IANA time zone.</summary>
 public sealed record CityDto(string Name, string Region, string CountryCode, PositionDto Position, string TimeZoneId)
@@ -40,7 +41,7 @@ internal static class LookUpPostalCodeQueryValidator
     }
 }
 
-internal sealed class LookUpPostalCodeQueryHandler(IAppDbContext database, IPostalCodeLookup lookup)
+internal sealed class LookUpPostalCodeQueryHandler(IAppDbContext database, IPostalCodeLookup lookup, IWeatherSource weatherSource)
     : IRequestHandler<LookUpPostalCodeQuery, PostalCodeResultDto>
 {
     public async Task<PostalCodeResultDto> Handle(LookUpPostalCodeQuery request, CancellationToken cancellationToken)
@@ -62,11 +63,16 @@ internal sealed class LookUpPostalCodeQueryHandler(IAppDbContext database, IPost
 
         // 3. The source finds the city, at the city's own position.
         var outcome = await lookup.FindCityAsync(postalCode, cancellationToken);
-        return outcome.Status switch
+        if (outcome.Status != PostalCodeLookupStatus.Found)
         {
-            PostalCodeLookupStatus.Found => new PostalCodeResultDto(CityDto.From(outcome.City!), Weather: null),
-            PostalCodeLookupStatus.NotFound => throw new RefusedException(422, ErrorCodes.PostalCodeNotFound),
-            _ => throw new RefusedException(503, ErrorCodes.PostalCodeUnavailable),
-        };
+            throw outcome.Status == PostalCodeLookupStatus.NotFound
+                ? new RefusedException(422, ErrorCodes.PostalCodeNotFound)
+                : new RefusedException(503, ErrorCodes.PostalCodeUnavailable);
+        }
+
+        // 4. And the weather there, which the source is asked for by the city's position alone.
+        var city = outcome.City!;
+        var weather = await weatherSource.GetCurrentAsync(WeatherPlaces.Of(city.Latitude, city.Longitude), cancellationToken);
+        return new PostalCodeResultDto(CityDto.From(city), WeatherDto.From(weather));
     }
 }
