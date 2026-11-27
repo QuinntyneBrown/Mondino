@@ -1,0 +1,25 @@
+// A moment kind's icon (docs/design-system/foundations/iconography.html): a line icon on a 24-unit
+// grid that takes the colour of the text beside it.
+:host {
+  display: block;
+  flex: none;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+:host(.icon--xs) {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+}
+:host(.icon--card) {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+:host(.icon--sm) {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}

@@ -42,6 +42,7 @@ import {
   stillViewport,
   teammatePanelView,
   teamCounts,
+  weekMoments,
   workingNow,
 } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
@@ -167,6 +168,7 @@ export class GlobePage {
       untracked(() => this.clock.now()),
       this.clockFormat(),
       this.unit(),
+      this.store.moments(),
     );
   });
 
@@ -249,6 +251,21 @@ export class GlobePage {
       untracked(() => this.clock.now()),
       this.clockFormat(),
       6,
+    );
+  });
+
+  /**
+   * This week's moments for the week's view (L2-024): six at most, from today to 7 days ahead in
+   * each place, worked out again as the minute changes; none while a panel is open.
+   */
+  protected readonly momentsThisWeek = computed(() => {
+    this.clock.minute();
+    const team = this.store.team();
+    if (!team || this.week() === null) return [];
+    return weekMoments(
+      this.store.moments(),
+      team.pins,
+      untracked(() => this.clock.now()),
     );
   });
 

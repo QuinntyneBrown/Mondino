@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using Mondino.Application.Cities;
+using Mondino.Domain.Teams;
 
 namespace Mondino.Infrastructure.Cities;
 
@@ -18,7 +19,7 @@ internal sealed class BundledCityDirectory : ICityDirectory
 
     public IReadOnlyList<KnownCity> Search(string countryCode, string text, int max)
     {
-        var folded = CityNames.Fold(text);
+        var folded = PlaceNames.Fold(text);
         if (folded.Length == 0 || !index.Value.ByCountry.TryGetValue(countryCode, out var cities))
         {
             return [];
@@ -69,7 +70,7 @@ internal sealed class BundledCityDirectory : ICityDirectory
                 group => group
                     .OrderByDescending(city => city.Population)
                     .ThenBy(city => city.Name, StringComparer.Ordinal)
-                    .Select(city => new Entry(city, CityNames.Fold(city.Name)))
+                    .Select(city => new Entry(city, PlaceNames.Fold(city.Name)))
                     .ToArray());
         return new Index(byCountry, all.ToDictionary(city => city.CityId));
     }

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Mondino.Application.Joining;
+using Mondino.Application.Moments;
 using Mondino.Application.Teammates;
 
 namespace Mondino.Application;
@@ -17,6 +18,8 @@ public static class DependencyInjection
         });
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<TeamJoinGate>();
+        services.AddSingleton<EmblemCatalogue>();
+        services.AddScoped<MomentFinder>();
         return services;
     }
 }

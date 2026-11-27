@@ -1,7 +1,31 @@
 <section aria-labelledby="mo-week-panel-week">
   <h2 id="mo-week-panel-week">This week around the world</h2>
   <p class="panel__lead">Holidays, races and local moments where your teammates live.</p>
-  <p class="panel__empty">No moments this week.</p>
+  @if (moments().length > 0) {
+    <ul class="row-list">
+      @for (moment of moments(); track $index) {
+        <li>
+          <a
+            class="row"
+            [attr.href]="address()(moment.teammateId)"
+            (click)="choose($event, moment.teammateId)"
+          >
+            <mo-emblem strong [solid]="moment.today" [kind]="moment.kind" />
+            <span class="row__body">
+              <span class="row__title">{{ moment.title }}</span>
+              <span class="row__meta"
+                ><span class="visually-hidden">{{ moment.kindName + ', ' }}</span
+                >{{ moment.who }}</span
+              >
+            </span>
+            <span class="row__trail">{{ moment.when }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="panel__empty">No moments this week.</p>
+  }
   <a class="panel__more" [attr.href]="allMomentsAddress()" (click)="toMoments($event)">
     All moments
     <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">

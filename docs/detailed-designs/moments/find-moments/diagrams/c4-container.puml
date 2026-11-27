@@ -6,17 +6,13 @@ title Containers — Find moments
 Person(teammate, "Teammate", "A person on a team")
 System_Boundary(mondino, "Mondino") {
   Container(web, "Mondino web app", "Angular", "Shows moments on the globe and on the Moments screen")
-  Container(api, "Mondino API", "ASP.NET Core", "Finds the moments that belong to each teammate's city")
+  Container(api, "Mondino API", "ASP.NET Core", "Finds the moments that belong to each teammate's city, from its own calendar and the public one")
   ContainerDb(db, "Mondino database", "EF Core, PostgreSQL", "Teams, teammates and their cities")
 }
-System_Ext(holidays, "Holiday calendar source", "Provider TO SUPPLY")
-System_Ext(races, "Race calendar source", "Provider TO SUPPLY")
-System_Ext(events, "Event source", "Provider TO SUPPLY")
+System_Ext(holidays, "OpenHolidays API", "Public holidays (ADR 0019)")
 
 Rel(teammate, web, "Uses", "HTTPS")
 Rel(web, api, "Calls", "JSON/HTTPS")
 Rel(api, db, "Reads teammates and cities", "EF Core")
-Rel(api, holidays, "Asks with a country", "HTTPS")
-Rel(api, races, "Asks with a country", "HTTPS")
-Rel(api, events, "Asks with a city position", "HTTPS")
+Rel(api, holidays, "Asks with a country and a year", "HTTPS")
 @enduml

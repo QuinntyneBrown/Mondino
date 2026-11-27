@@ -32,20 +32,20 @@ internal sealed class NorthwindSeed : ISeedStep
         ("Mara Lindqvist", "teammate-2", "Stockholm"),
     ];
 
-    private static readonly (string Name, string CountryCode, double Latitude, double Longitude, string TimeZoneId)[] Cities =
+    private static readonly (string Name, string CountryCode, string Region, double Latitude, double Longitude, string TimeZoneId)[] Cities =
     [
-        ("Mexico City", "MX", 19.4326, -99.1332, "America/Mexico_City"),
-        ("Austin", "US", 30.2672, -97.7431, "America/Chicago"),
-        ("São Paulo", "BR", -23.5505, -46.6333, "America/Sao_Paulo"),
-        ("Dublin", "IE", 53.3498, -6.2603, "Europe/Dublin"),
-        ("Accra", "GH", 5.6037, -0.1870, "Africa/Accra"),
-        ("Milan", "IT", 45.4642, 9.19, "Europe/Rome"),
-        ("Berlin", "DE", 52.52, 13.405, "Europe/Berlin"),
-        ("Stockholm", "SE", 59.3293, 18.0686, "Europe/Stockholm"),
-        ("Dubai", "AE", 25.2048, 55.2708, "Asia/Dubai"),
-        ("Bengaluru", "IN", 12.9716, 77.5946, "Asia/Kolkata"),
-        ("Tokyo", "JP", 35.6762, 139.6503, "Asia/Tokyo"),
-        ("Melbourne", "AU", -37.8136, 144.9631, "Australia/Melbourne"),
+        ("Mexico City", "MX", "Mexico City", 19.4326, -99.1332, "America/Mexico_City"),
+        ("Austin", "US", "Texas", 30.2672, -97.7431, "America/Chicago"),
+        ("São Paulo", "BR", "São Paulo", -23.5505, -46.6333, "America/Sao_Paulo"),
+        ("Dublin", "IE", "Leinster", 53.3498, -6.2603, "Europe/Dublin"),
+        ("Accra", "GH", "Greater Accra", 5.6037, -0.1870, "Africa/Accra"),
+        ("Milan", "IT", "Lombardy", 45.4642, 9.19, "Europe/Rome"),
+        ("Berlin", "DE", "State of Berlin", 52.52, 13.405, "Europe/Berlin"),
+        ("Stockholm", "SE", "Stockholm", 59.3293, 18.0686, "Europe/Stockholm"),
+        ("Dubai", "AE", "Dubai", 25.2048, 55.2708, "Asia/Dubai"),
+        ("Bengaluru", "IN", "Karnataka", 12.9716, 77.5946, "Asia/Kolkata"),
+        ("Tokyo", "JP", "Tokyo", 35.6762, 139.6503, "Asia/Tokyo"),
+        ("Melbourne", "AU", "Victoria", -37.8136, 144.9631, "Australia/Melbourne"),
     ];
 
     public async Task SeedAsync(IAppDbContext database, CancellationToken cancellationToken)
@@ -58,12 +58,12 @@ internal sealed class NorthwindSeed : ISeedStep
 
         var known = await database.Cities.ToListAsync(cancellationToken);
         var cities = new Dictionary<string, City>();
-        foreach (var (name, countryCode, latitude, longitude, timeZoneId) in Cities)
+        foreach (var (name, countryCode, region, latitude, longitude, timeZoneId) in Cities)
         {
             var city = known.FirstOrDefault(c => c.Name == name && c.CountryCode == countryCode);
             if (city is null)
             {
-                city = new City(Guid.NewGuid(), name, countryCode, new Position(latitude, longitude), timeZoneId);
+                city = new City(Guid.NewGuid(), name, countryCode, new Position(latitude, longitude), timeZoneId, region: region);
                 database.Cities.Add(city);
             }
 

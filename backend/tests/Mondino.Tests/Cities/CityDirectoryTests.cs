@@ -1,6 +1,7 @@
 // Traces to: L2-004, L2-006
 // Description: The cities Mondino holds: searched by the start of a name, largest first, and a postal code's place resolved to its city
 
+using Mondino.Domain.Teams;
 using Mondino.Infrastructure.Cities;
 using Mondino.Infrastructure.PostalCodes;
 
@@ -80,5 +81,5 @@ public sealed class CityDirectoryTests
     [InlineData("  Saint-Laurent ", "saint laurent")]
     [InlineData("MILAN", "milan")]
     public void Names_are_compared_without_accents_case_or_punctuation(string name, string folded) =>
-        Assert.Equal(folded, CityNames.Fold(name));
+        Assert.Equal(folded, PlaceNames.Fold(name));
 }

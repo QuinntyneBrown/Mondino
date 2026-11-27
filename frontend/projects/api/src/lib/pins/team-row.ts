@@ -1,3 +1,4 @@
+import type { MomentView } from '../moments/moment';
 import type { Status } from '../time/status';
 import type { WeatherCondition, WeatherState } from '../weather/weather';
 
@@ -35,6 +36,8 @@ export interface TeamRow {
   /** Null unless `weatherState` is `Available`. */
   readonly weather: RowWeather | null;
   readonly weatherState: WeatherState;
+  /** The teammate's next moment, "Coming up" (L2-026); null for a dash. */
+  readonly nextMoment: MomentView | null;
 }
 
 /**

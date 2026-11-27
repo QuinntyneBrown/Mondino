@@ -1,13 +1,14 @@
 using System.Text;
 
-namespace Mondino.Infrastructure.Cities;
+namespace Mondino.Domain.Teams;
 
 /// <summary>
 /// How two names of a place are compared: accents, case and punctuation set aside. The API runs in
 /// invariant globalization mode, where Unicode normalisation does not separate accents, so the
-/// Latin letters with accents the thirteen countries use are folded from a table.
+/// Latin letters with accents the thirteen countries use are folded from a table. Cities and
+/// regions are compared this way.
 /// </summary>
-internal static class CityNames
+public static class PlaceNames
 {
     private static readonly Dictionary<char, string> Folds = BuildFolds();
 

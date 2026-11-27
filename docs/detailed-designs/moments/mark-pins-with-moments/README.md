@@ -37,9 +37,10 @@ rule and the drawing of the marker.
 The rule lives in `domain`'s `moments/`. The `globe` library draws the result and holds no rule.
 
 - **`EmblemCatalogue`** — backend application service. It sets `Moment.EmblemKey` where Mondino
-  holds the right to use the emblem of the moment's subject, and leaves it empty otherwise. The
-  emblems Mondino holds the right to use are `<TO SUPPLY>`.
-- **`Pin`** — `api` type. Each pin carries its `timeZoneId` and its teammate's `moments`.
+  holds the right to use the emblem of the moment's subject, and leaves it empty otherwise. Mondino
+  holds the right to no emblem (ADR 0019), so it sets none.
+- **`Pin`** — `api` type. Each pin carries its `timeZoneId`; its teammate's moments are
+  `TeamStore.moments` with its `teammateId` (`find-moments`), so a pin carries none itself.
 - **`Settings.momentKinds`** — the viewer's chosen kinds. `ProfileApi` reads and saves them, and
   `SettingsCache` holds them in the browser for the next visit.
 - **`markerFor(pin, kinds, now)`** — pure function. It drops the moments whose kind is not in
@@ -50,8 +51,8 @@ The rule lives in `domain`'s `moments/`. The `globe` library draws the result an
   zone to the date.
 - **`emblemFor(moment)`** — pure function returning an `Emblem`. It returns the held emblem when
   the moment's `emblemKey` is in `HELD_EMBLEMS`, and the icon of the moment's kind otherwise.
-- **`HELD_EMBLEMS`** — set of emblem keys whose pictures are bundled with the app. Its contents
-  are `<TO SUPPLY>`. A key the backend sends that is not in the set falls back to the kind's
+- **`HELD_EMBLEMS`** — set of emblem keys whose pictures are bundled with the app. It is empty
+  (ADR 0019). A key the backend sends that is not in the set falls back to the kind's
   icon. Emblem pictures are served with the app and never loaded from a third party.
 - **`Emblem`** — `api` type: whether the picture is a held emblem or a kind's icon, its key and
   the kind.

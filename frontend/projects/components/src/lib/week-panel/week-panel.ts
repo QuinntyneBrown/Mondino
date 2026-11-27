@@ -1,24 +1,27 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import type { WorkingNow } from '@mondino/api';
+import type { WeekMoment, WorkingNow } from '@mondino/api';
 import { Avatar } from '../avatar/avatar';
+import { Emblem } from '../emblem/emblem';
 
 /**
  * The panel beside the globe with no pin selected (L2-024): "This week around the world", the
  * week's moments with "All moments" under them, and "In working hours now", who is working with
  * their count, six at most and a link to the rest. Each row and link is a real link; a plain click
  * is handed to the page as an output, and one that opens a new tab follows the link. Names and
- * cities are data. The moment rows come with the moments (journey 19); until then, and in a week
+ * cities, and a moment's title, are data. Each moment row links to its teammate's pin; in a week
  * with none, the list says so.
  */
 @Component({
   selector: 'mo-week-panel',
-  imports: [Avatar],
+  imports: [Avatar, Emblem],
   templateUrl: './week-panel.html',
   styleUrl: './week-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeekPanel {
   readonly working = input.required<WorkingNow>();
+  /** This week's moments, six at most, soonest first (L2-024). */
+  readonly moments = input<readonly WeekMoment[]>([]);
   /** The address that selects a teammate: "/globe?teammate=…". */
   readonly address = input.required<(teammateId: string) => string>();
   /** The Moments screen, and the Team screen with "Working now" chosen. */

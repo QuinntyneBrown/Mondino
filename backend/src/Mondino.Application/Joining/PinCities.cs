@@ -60,8 +60,13 @@ internal static class PinCities
                 known.CountryCode,
                 new Position(known.Latitude, known.Longitude),
                 known.TimeZoneId,
-                known.CityId);
+                known.CityId,
+                known.Region);
             database.Cities.Add(city);
+        }
+        else
+        {
+            city.KnowRegion(known.Region);
         }
 
         return city;

@@ -1,5 +1,6 @@
 import type {
   ClockFormat,
+  Moment,
   Pin,
   StatusFilter,
   TeamCounts,
@@ -10,6 +11,7 @@ import { formatTime, localTime } from '../time/local-time';
 import { formatOffset, offsetBetween } from '../time/offset';
 import { statusFor } from '../time/status';
 import { formatDegrees, isNightSky } from '../weather/weather';
+import { nextMoment } from '../moments/moment-days';
 import { initialsOf } from './initials';
 import { orderWestToEast } from './west-to-east';
 
@@ -17,13 +19,15 @@ import { orderWestToEast } from './west-to-east';
  * The Team screen's rows at `now` (L2-026): every pin west to east, each with its local time and
  * status (L2-014, L2-015), its offset from the viewer in the row's words (L2-016) and its weather
  * in the viewer's unit (L2-018, L2-019). The viewer is the pin marked `isViewer`; their own row has
- * no offset. A teammate who does not share their status has none, at any hour.
+ * no offset. A teammate who does not share their status has none, at any hour. "Coming up" is
+ * their next moment (L2-020).
  */
 export function teamRows(
   pins: readonly Pin[],
   now: number,
   format: ClockFormat,
   unit: TemperatureUnit,
+  moments: readonly Moment[] = [],
 ): TeamRow[] {
   const viewer = pins.find((pin) => pin.isViewer);
   return orderWestToEast(pins, now).map((pin) => {
@@ -51,6 +55,7 @@ export function teamRows(
             }
           : null,
       weatherState: pin.weatherState,
+      nextMoment: nextMoment(moments, pin.teammateId, now),
     };
   });
 }

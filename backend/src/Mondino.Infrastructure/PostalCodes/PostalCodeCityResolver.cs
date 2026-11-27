@@ -1,4 +1,5 @@
 using Mondino.Application.Cities;
+using Mondino.Domain.Teams;
 using Mondino.Infrastructure.Cities;
 
 namespace Mondino.Infrastructure.PostalCodes;
@@ -22,7 +23,7 @@ internal sealed class PostalCodeCityResolver(ICityDirectory directory)
         }
 
         var names = NamesOf(place.Name);
-        var named = cities.Where(city => names.Contains(CityNames.Fold(city.Name))).ToList();
+        var named = cities.Where(city => names.Contains(PlaceNames.Fold(city.Name))).ToList();
         var candidates = named.Count > 0 ? named : cities;
         return candidates.MinBy(city => DistanceSquared(city, place));
     }
@@ -32,10 +33,10 @@ internal sealed class PostalCodeCityResolver(ICityDirectory directory)
     {
         var names = new HashSet<string>(StringComparer.Ordinal);
         var bare = placeName.Split('(')[0];
-        names.Add(CityNames.Fold(bare));
+        names.Add(PlaceNames.Fold(bare));
         foreach (var suffix in new[] { " city centre", " centre", " downtown", " central" })
         {
-            var folded = CityNames.Fold(bare);
+            var folded = PlaceNames.Fold(bare);
             if (folded.EndsWith(suffix, StringComparison.Ordinal))
             {
                 names.Add(folded[..^suffix.Length]);

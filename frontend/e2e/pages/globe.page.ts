@@ -74,6 +74,8 @@ export class GlobePage {
   readonly weekLead: Locator;
   readonly weekEmpty: Locator;
   readonly allMoments: Locator;
+  /** The week's moment rows. */
+  readonly weekRows: Locator;
   readonly working: Locator;
   readonly workingCount: Locator;
   /** The words that name the count to assistive technology alone. */
@@ -175,6 +177,7 @@ export class GlobePage {
     this.weekLead = this.week.locator('.panel__lead');
     this.weekEmpty = this.week.locator('.panel__empty');
     this.allMoments = this.week.locator('a.panel__more');
+    this.weekRows = this.week.locator('.row-list a.row');
     this.working = this.panel.locator('section:has(h2:text-is("In working hours now"))');
     this.workingCount = this.working.locator('.panel__count');
     this.workingCountName = this.workingCount.locator('.visually-hidden');
@@ -244,6 +247,34 @@ export class GlobePage {
   /** The text the page has selected. */
   selectedText(): Promise<string> {
     return this.page.evaluate(() => window.getSelection()?.toString() ?? '');
+  }
+
+  /** A moment row of the week, by its title. */
+  weekRow(title: string): Locator {
+    return this.weekRows.filter({ has: this.page.locator('.row__title', { hasText: title }) });
+  }
+
+  /** The week's moment rows, each read as a mock's: its emblem, title, meta and when. */
+  weekRowParts(): Promise<
+    { solid: boolean; icon: string[]; title: string; meta: string; when: string }[]
+  > {
+    return this.weekRows.evaluateAll((rows) =>
+      rows.map((row) => ({
+        solid: row.querySelector('.emblem')?.classList.contains('emblem--solid') ?? false,
+        icon: [...(row.querySelector('svg')?.children ?? [])].map((shape) =>
+          [
+            shape.tagName,
+            ...[...shape.attributes]
+              .filter((attribute) => !attribute.name.startsWith('_ng'))
+              .map((attribute) => `${attribute.name}=${attribute.value}`)
+              .sort(),
+          ].join(' '),
+        ),
+        title: row.querySelector('.row__title')?.textContent?.trim() ?? '',
+        meta: (row.querySelector('.row__meta')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+        when: row.querySelector('.row__trail')?.textContent?.trim() ?? '',
+      })),
+    );
   }
 
   /** A row under "In working hours now", by the teammate's name. */
@@ -321,6 +352,26 @@ export class GlobePage {
             .sort(),
         ].join(' '),
       ),
+    );
+  }
+
+  /** The moment cards of a teammate's panel, each read as a mock's: kind and when, title, detail and icon. */
+  momentCards(): Promise<{ kind: string; title: string; detail: string; icon: string[] }[]> {
+    return this.personMoments.locator('.moment-card').evaluateAll((cards) =>
+      cards.map((card) => ({
+        kind: card.querySelector('.moment-card__kind')?.textContent?.trim() ?? '',
+        title: card.querySelector('.moment-card__title')?.textContent?.trim() ?? '',
+        detail: card.querySelector('.moment-card__detail')?.textContent?.trim() ?? '',
+        icon: [...(card.querySelector('svg')?.children ?? [])].map((shape) =>
+          [
+            shape.tagName,
+            ...[...shape.attributes]
+              .filter((attribute) => !attribute.name.startsWith('_ng'))
+              .map((attribute) => `${attribute.name}=${attribute.value}`)
+              .sort(),
+          ].join(' '),
+        ),
+      })),
     );
   }
 

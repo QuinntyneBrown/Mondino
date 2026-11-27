@@ -228,6 +228,10 @@ export class TeamPage {
       weatherDash: row.locator('.team-table__weather .team-table__none'),
       moment: row.locator('.team-table__moment'),
       nothingComingUp: row.locator('.team-table__moment .team-table__none'),
+      /** The next moment's pill: its kind's icon, its title and when. */
+      momentIcon: row.locator('.moment-pill svg'),
+      momentTitle: row.locator('.moment-pill__title'),
+      momentWhen: row.locator('.moment-pill__when'),
     };
   }
 
@@ -235,6 +239,21 @@ export class TeamPage {
   async names(): Promise<string[]> {
     return (await this.rows.locator('.team-table__link').allInnerTexts()).map((name) =>
       name.replace(/\s*\(you\)$/, '').trim(),
+    );
+  }
+
+  /** The shapes of a row's moment icon, each as its tag and its attributes in order of name. */
+  async momentIconShapes(row: Locator): Promise<string[]> {
+    return row.locator('.moment-pill svg').evaluate((svg) =>
+      [...svg.children].map((shape) =>
+        [
+          shape.tagName,
+          ...[...shape.attributes]
+            .filter((attribute) => !attribute.name.startsWith('_ng'))
+            .map((attribute) => `${attribute.name}=${attribute.value}`)
+            .sort(),
+        ].join(' '),
+      ),
     );
   }
 

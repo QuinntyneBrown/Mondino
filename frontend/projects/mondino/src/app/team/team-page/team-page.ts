@@ -123,7 +123,9 @@ export class TeamPage {
 
   private readonly allRows = computed(() => {
     const pins = this.store.team()?.pins;
-    return pins ? teamRows(pins, this.now(), this.clockFormat(), this.unit()) : [];
+    return pins
+      ? teamRows(pins, this.now(), this.clockFormat(), this.unit(), this.store.moments())
+      : [];
   });
 
   /**

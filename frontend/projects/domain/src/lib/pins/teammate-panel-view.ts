@@ -1,4 +1,5 @@
-import type { ClockFormat, Pin, TeammatePanelContent, TemperatureUnit } from '@mondino/api';
+import type { ClockFormat, Moment, Pin, TeammatePanelContent, TemperatureUnit } from '@mondino/api';
+import { upcomingMoments } from '../moments/moment-days';
 import { compareWithViewer } from '../time/compare-with-viewer';
 import { formatDay, formatTime, localTime } from '../time/local-time';
 import { formatOffset } from '../time/offset';
@@ -12,7 +13,7 @@ import { initialsOf } from './initials';
  * offset in the panel's words (L2-016), the status (L2-015), the weather in the viewer's unit
  * (L2-018, L2-019) and the overlap (L2-017). The viewer's own panel has no offset or overlap; a
  * teammate who shares neither their weather nor their status gets the private note in place of
- * the three. The moments join with journey 19.
+ * the three. Their moments are the upcoming ones, soonest first (L2-020).
  */
 export function teammatePanelView(
   pin: Pin,
@@ -20,6 +21,7 @@ export function teammatePanelView(
   now: number,
   format: ClockFormat,
   unit: TemperatureUnit,
+  moments: readonly Moment[] = [],
 ): TeammatePanelContent {
   const time = localTime(now, pin.timeZoneId);
   const comparison = compareWithViewer(pin, viewer, now, format);
@@ -56,5 +58,6 @@ export function teammatePanelView(
       ? `${name} keeps their weather and working hours private. You’ll still see their local time and city.`
       : null,
     overlap: comparison?.overlap ?? null,
+    moments: upcomingMoments(moments, pin.teammateId, now),
   };
 }

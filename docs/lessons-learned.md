@@ -1187,3 +1187,52 @@ in light and in dark. A colour change only: no criterion was added or removed, a
 - *Make a shared fixture count as the mock does* (journey 15, lesson 3): extended to its cities and names.
 - *Look at an overlay once before calling its slice done* (journey 16, lesson 3), in its spirit: one
   screenshot at 1280 and 375 px of the bar chart and the sections.
+
+## Journey 19: Find moments
+
+**What slowed it**
+
+- No public calendar Mondino may use covers Formula 1, local events or sport, nor the holidays of six of
+  its thirteen countries: Nager.Date asks commercial users for sponsorship, Jolpica-F1 is non-commercial
+  and event APIs need contracts. Reading each source's terms before choosing settled it: OpenHolidays
+  (ODbL) for the holidays it has, and Mondino's own calendar, embedded and changed by pull request, for
+  the rest (ADR 0019).
+- Two sources name one region differently ("State of Berlin" and "Berlin"), and GeoNames' first-level
+  names differ again. A region is matched by its name with case, accents and "State of" folded away,
+  tested a case per row.
+- The mocks gave Sofia "Monza tickets on sale" but Luca, in the same Milan, nothing: against L2-020's
+  rule that a moment belongs to everyone where it happens. The mocks were brought to the rule first.
+- The analyzers refused `from`/`to` as parameter names (CA1716) and a test's Arrange through a fake whose
+  session had no cookie got 401, not 404; the "another team" case moved to the theory that uses real
+  sessions.
+- The calendar adapters were written before their tests in one slice; each test was then proven able to
+  fail by breaking the dedupe, the cache, the breaker and the region match.
+- Adding the "Coming up" pill to `TeamTable`'s stylesheet passed its 4 kB warning budget. The pill was a
+  design-system block of its own, and as `MomentPill` it took its styles with it.
+- The e2e server serves `dist/`: a spec run without `npm run build` tests the last build.
+
+**Lessons**
+
+1. **Read a source's terms before its documentation.** A licence that forbids commercial use ends the
+   choice; check it first and record it in the ADR with the date it was read.
+2. **When a mock gives one teammate a moment and not another in the same place, the mock is wrong.**
+   Check a cast's moments against the rule of each kind before building on them.
+3. **Default an e2e fixture to the state earlier specs assumed.** Answering the new endpoint with nothing
+   in the shared fixture kept every earlier spec as it was; only the specs about moments answer the cast.
+4. **A design-system block gets its own component as soon as a second stylesheet would hold it.** It
+   keeps each component's budget and the rule that no component styles another's block.
+5. **Build before a Playwright run.** The specs run against `dist/`, so a red that does not move after a
+   change is the old build.
+
+**Earlier lessons applied**
+
+- *Never pipe the verify script* (journey 18, lesson 1): every commit was guarded by verify's own exit
+  code, writing to a log file; one lint failure stopped a commit as it should.
+- *One value per text interpolation in a lazy component* (journey 18, lesson 2): every moment line is one
+  string ("Holiday · In 5 days", "· 9 Nov"); the initial chunk stayed at 273.05 kB through all four
+  frontend slices.
+- *When a slice is green before its code, break the setting it reads* (journey 16, lesson 5): the backend
+  calendar tests, and the week's markup and refused-moments specs, were each broken and seen to fail.
+- *Make a shared fixture count as the mock does* (journey 15, lesson 3): `CAST_MOMENTS` is the backend
+  test's cast, moment for moment, and the specs compare the screens with the mocks' markup.
+- *Fix the mock, not the rule* (journey 18, lesson 4): Luca's Monza moment.

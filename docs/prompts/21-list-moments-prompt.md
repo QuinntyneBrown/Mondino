@@ -111,6 +111,14 @@ Builds on: journeys 14 and 19.
 - Journey 16 waits for this screen to prove, in Playwright, that "Invite teammate" in its header opens the
   invite dialog (L2-054 criterion 1, L2-025 criterion 7, with Team and Profile & Settings); raise journey 16's
   and journey 15's % when all four screens are proven.
+- Journey 6 waits for this screen to prove L2-007 criterion 2's last part in Playwright: a moment on the
+  Moments screen gives the city and country and no postal code (the panel and the Team row are proven).
+  Raise journey 6's % by the criterion proven here.
+- Journey 19 built `TeamStore.moments`, `daysUntil`, `whenLabel`, `upcomingMoments` and `KIND_NAMES`
+  (`domain`'s `moments/moment-days.ts`), `MomentIcon` and `Emblem` (`components`), and the e2e fixtures
+  `CAST_MOMENTS`, `momentOf()` and `northwindMoments()` (`e2e/fixtures/moments.ts`), which answer Northwind
+  with no moment by default; build `groupMoments` on them rather than again. The mocks' Moments list now has
+  Luca's "Monza tickets on sale" beside Sofia's (`docs/mocks/README.md`).
 - Set journey 21 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

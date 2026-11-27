@@ -1,9 +1,10 @@
 // Acceptance Test
-// Traces to: L2-007, L2-014, L2-015, L2-016, L2-017, L2-018, L2-019, L2-023, L2-044
-// Description: A selected teammate's panel gives their name, city and country, local time and own day, offset, status, weather and the overlap with the viewer, as the mocks draw it; the viewer's own has "(you)" and no offset or overlap; a teammate who shares neither weather nor status has the private note
+// Traces to: L2-007, L2-014, L2-015, L2-016, L2-017, L2-018, L2-019, L2-020, L2-023, L2-044
+// Description: A selected teammate's panel gives their name, city and country, local time and own day, offset, status, weather and the overlap with the viewer, and their upcoming moments, as the mocks draw it; the viewer's own has "(you)" and no offset or overlap; a teammate who shares neither weather nor status has the private note
 
 import { expect, test } from '../fixtures/test';
 import { idOf, NORTHWIND_PINS, northwindPins, northwindPinsWhere } from '../fixtures/pins';
+import { CAST_MOMENTS, NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
 import { mockPanel } from '../support/mocks';
 import { NORTHWIND_MEMBERSHIP, rememberTeam } from '../support/membership';
 import type { GlobePage } from '../pages/globe.page';
@@ -33,6 +34,8 @@ async function expectPanelAsIn(globePage: GlobePage, mock: string): Promise<void
     await expect(globePage.overlapText).toHaveText(drawn.overlapText!);
     expect(await globePage.overlapBarParts()).toEqual(drawn.barParts);
   } else await expect(globePage.overlap).toHaveCount(0);
+  if (drawn.moments.length > 0) expect(await globePage.momentCards()).toEqual(drawn.moments);
+  else await expect(globePage.personMoments).toHaveCount(0);
   // Mondino has no chat
   await expect(globePage.messageButton).toHaveCount(0);
 }
@@ -41,8 +44,10 @@ test.describe('Globe: a teammate’s panel', () => {
   // The still picture holds still; the panel does not depend on what draws the globe
   test.use({ webgl: false });
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, api }) => {
     await rememberTeam(page);
+    // The cast's moments, as the seeded Northwind's are found (find-moments)
+    api.answer('GET', NORTHWIND_MOMENTS, northwindMoments());
   });
 
   test('Tomás’s panel gives his city, time, "7h behind you", status, weather and overlap', async ({
@@ -101,8 +106,13 @@ test.describe('Globe: a teammate’s panel', () => {
     globePage,
   }) => {
     api.answer('GET', NORTHWIND_PINS, northwindPins());
+    // Luca, in Milan like Sofia, with no moment coming up
+    api.answer(
+      'GET',
+      NORTHWIND_MOMENTS,
+      northwindMoments(CAST_MOMENTS.filter((moment) => moment.teammateName !== 'Luca Ferri')),
+    );
 
-    // Luca, in Milan like Sofia, has no moment coming up
     await globePage.openAt(idOf('Luca Ferri'));
 
     await expect(globePage.personDay).toHaveText('Monday 27 Oct · same time as you');
@@ -128,8 +138,9 @@ test.describe('Globe: a teammate’s panel', () => {
 
     await globePage.openAt(idOf('Ahmed Al-Sayed'));
 
-    // Then it is pages/globe/sharing-off's: his city, "18:05", "3h ahead of you" and the note,
-    // with no status, no weather and no working-hours overlap
+    // Then it is pages/globe/sharing-off's: his city, "18:05", "3h ahead of you", the note and his
+    // moments ("Holiday · 2 Dec", "UAE National Day", and "Formula 1 · 7 Dec", "Abu Dhabi Grand
+    // Prix"), with no status, no weather and no working-hours overlap
     await expectPanelAsIn(globePage, 'pages/globe/sharing-off.html');
     await expect(globePage.personWeather).toHaveCount(0);
   });

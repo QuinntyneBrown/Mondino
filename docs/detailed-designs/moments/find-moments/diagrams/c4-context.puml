@@ -5,12 +5,8 @@ title System Context — Find moments
 
 Person(teammate, "Teammate", "A person on a team")
 System(mondino, "Mondino", "Shows a team on a 3D globe with local time, weather and moments")
-System_Ext(holidays, "Holiday calendar source", "Public holiday calendars; provider TO SUPPLY")
-System_Ext(races, "Race calendar source", "Formula 1 calendar; provider TO SUPPLY")
-System_Ext(events, "Event source", "Local events and sport fixtures; provider TO SUPPLY")
+System_Ext(holidays, "OpenHolidays API", "Public holidays of a country and its subdivisions, ODbL (ADR 0019)")
 
 Rel(teammate, mondino, "Reads the team's moments using")
-Rel(mondino, holidays, "Asks for holidays in a country", "HTTPS")
-Rel(mondino, races, "Asks for race weekends in a country", "HTTPS")
-Rel(mondino, events, "Asks for events and fixtures near a city", "HTTPS")
+Rel(mondino, holidays, "Asks for a country's holidays of a year", "HTTPS")
 @enduml

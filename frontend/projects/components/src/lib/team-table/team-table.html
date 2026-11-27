@@ -87,7 +87,11 @@
           }
         </td>
         <td class="team-table__moment">
-          <span class="team-table__none" aria-label="Nothing coming up">—</span>
+          @if (row.nextMoment; as moment) {
+            <mo-moment-pill [moment]="moment" />
+          } @else {
+            <span class="team-table__none" aria-label="Nothing coming up">—</span>
+          }
         </td>
         <td class="team-table__go" aria-hidden="true">
           <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
