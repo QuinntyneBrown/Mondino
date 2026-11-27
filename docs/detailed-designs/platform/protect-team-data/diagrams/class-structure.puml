@@ -39,7 +39,7 @@ class TeamScopeBehaviour<TRequest, TResponse> {
 }
 
 class AntiforgeryFilter {
-  +OnResourceExecutionAsync(context, next): Task
+  +OnAuthorizationAsync(context): Task
 }
 
 class AppShell {

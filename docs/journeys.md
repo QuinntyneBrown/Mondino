@@ -33,6 +33,16 @@ to the maker's city (criterion 9) comes with journeys 8 and 9, and the Globe of 
 (criterion 11) opens as journey 4 left it until journey 15 draws "Just you, for now". The links to
 Create Team from "You need an invite link" and "You’ve left" come with the screens of journeys 7
 and 24.
+Journey 6 stands at 70: 28 of the 40 criteria of L2-007 and L2-043 to L2-045 are proven by acceptance
+tests, the backend's through the API and the screens' in Playwright, among them every endpoint refused
+without a session unless marked open, another team answered as no team, a left teammate's session refused,
+the antiforgery token, the security headers and the app served under a nonce-based CSP. The rest name
+screens and endpoints of later journeys, which prove them there: Sign In's link and its limits (L2-043
+criteria 9 and 10, L2-044 criterion 9, L2-045 criteria 7 to 9; journey 7), names shown as text on the pins,
+the panel, the Team rows and search and the moments (L2-007 criterion 2, L2-044 criteria 1 and 12; journeys
+10, 14, 17, 18 and 21), the team's name in the invite and leave dialogs and on Left Team with the link's
+reset (L2-043 criterion 12, L2-044 criterion 10; journeys 16 and 24), and Profile & Settings' 429
+(L2-045 criterion 6; journey 22).
 
 | # | Journey | Description | Requirements | Effort (days) | % complete |
 |---|---|---|---|---|---|
@@ -41,14 +51,14 @@ and 24.
 | 3 | [Place a pin from a postal code](prompts/03-place-a-pin-from-a-postal-code-prompt.md) | Give name, country and postal code; the city is found. | L2-002, L2-003, L2-004, L2-006 | 5 | 100 |
 | 4 | [Join the team](prompts/04-join-the-team-prompt.md) | Join and land on the Globe with your new pin. | L2-005 | 4 | 100 |
 | 5 | [Create a team](prompts/05-create-a-team-prompt.md) | Name a team, place your own pin and get its invite link. | L2-053 | 5 | 100 |
-| 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 100 |
+| 6 | [Protect team data](prompts/06-protect-team-data-prompt.md) | Only teammates see their team; postal codes stay private. | L2-007, L2-043, L2-044, L2-045 | 5 | 70 |
 | 7 | [Sign in with an emailed link](prompts/07-sign-in-prompt.md) | Come back on a new device with a link that works once. | L2-052 | 6 | 0 |
 | 8 | [Draw the globe](prompts/08-draw-the-globe-prompt.md) | See a lit 3D globe with its night side shaded. | L2-008, L2-010 | 15 | 0 |
-| 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 100 |
+| 9 | [Turn the globe](prompts/09-turn-the-globe-prompt.md) | Drag, arrow-key and auto-turn the globe; hold on a pin. | L2-009 | 5 | 0 |
 | 10 | [Show pins](prompts/10-show-pins-prompt.md) | See every teammate's pin; lift one to read it. | L2-011, L2-012, L2-013 | 8 | 0 |
 | 11 | [Show local time and status](prompts/11-show-local-time-and-status-prompt.md) | See each teammate's local time and status, ticking together. | L2-014, L2-015 | 4 | 0 |
 | 12 | [Show offset and overlap](prompts/12-show-offset-and-overlap-prompt.md) | See how far ahead a teammate is and shared hours. | L2-016, L2-017 | 3 | 0 |
-| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 100 |
+| 13 | [Show weather](prompts/13-show-weather-prompt.md) | See temperature and weather at each teammate's city. | L2-018, L2-019 | 5 | 0 |
 | 14 | [View a teammate's panel](prompts/14-view-a-teammates-panel-prompt.md) | Select a pin and read that teammate's details. | L2-023 | 4 | 0 |
 | 15 | [View the week around the world](prompts/15-view-the-week-around-the-world-prompt.md) | See this week's moments, who is working, and team counts. | L2-024, L2-025 | 4 | 0 |
 | 16 | [Invite teammates](prompts/16-invite-teammates-prompt.md) | Open the invite dialog from any screen and copy the link. | L2-054, L2-055 | 3 | 0 |
@@ -58,7 +68,7 @@ and 24.
 | 20 | [Mark pins with moments](prompts/20-mark-pins-with-moments-prompt.md) | See a moment marker beside pins with moments this week. | L2-021, L2-022 | 4 | 0 |
 | 21 | [List moments](prompts/21-list-moments-prompt.md) | Browse upcoming moments by when and filter by kind. | L2-029, L2-030 | 4 | 0 |
 | 22 | [Change location](prompts/22-change-location-prompt.md) | See your own pin and move it to a new city. | L2-031, L2-032 | 4 | 0 |
-| 23 | [Choose display and sharing](prompts/23-choose-display-and-sharing-prompt.md) | Choose units, clock, moment kinds and what teammates see. | L2-033, L2-034, L2-035 | 5 | 100 |
+| 23 | [Choose display and sharing](prompts/23-choose-display-and-sharing-prompt.md) | Choose units, clock, moment kinds and what teammates see. | L2-033, L2-034, L2-035 | 5 | 0 |
 | 24 | [Leave the team](prompts/24-leave-the-team-prompt.md) | Remove your pin and everything held about you. | L2-036 | 3 | 0 |
 | 25 | [Keep the team fresh](prompts/25-keep-the-team-fresh-prompt.md) | An open screen refreshes pins, weather and moments quietly. | L2-048 | 3 | 0 |
 | 26 | [Survive a source failure](prompts/26-survive-a-source-failure-prompt.md) | Pins keep their local time when weather or calendars fail. | L2-049, L2-050 | 4 | 0 |
@@ -66,4 +76,4 @@ and 24.
 | 28 | [Make accessible](prompts/28-make-accessible-prompt.md) | Use everything by keyboard, touch, screen reader and reduced motion. | L2-039, L2-040, L2-041, L2-042 | 6 | 0 |
 | 29 | [Stay fast and light](prompts/29-stay-fast-and-light-prompt.md) | Open quickly, turn smoothly, hold steady memory all day. | L2-046, L2-047 | 6 | 0 |
 | 30 | [Observe without exposing](prompts/30-observe-without-exposing-prompt.md) | Operators see backend health; telemetry carries no teammate. | L2-051 | 3 | 0 |
-| | **Total** | | | **147** | **15** |
+| | **Total** | | | **147** | **17** |

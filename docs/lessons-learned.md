@@ -273,3 +273,66 @@ apply the lessons that fit.
 - *Check the shape of navigation state and storage* (journey 4, lesson 3): the membership is written
   through `TeamMembership`, and a spec reads everything the browser keeps for the postal code and
   the email.
+
+## Journey 6: Protect team data
+
+**What slowed it**
+
+- The API serves the Angular build from `wwwroot`, so a strict Content-Security-Policy on every
+  answer would have blocked the build's inlined critical CSS, its script and every component style
+  in the deployed app. Angular copies `ngCspNonce` from `mo-root` onto all of them at build time;
+  the API now serves `index.html` itself with the placeholder replaced by each answer's nonce
+  (ADR 0010).
+- The e2e server served the build with no headers, so nothing proved the app ran under the policy.
+  It now sends the API's headers; run without the nonce, every spec failed on the browser's CSP
+  errors, which the guard reads as console errors.
+- The fallback authorisation policy also covers what has no endpoint, so the app's files and the
+  SPA fallback would have needed a session. The static files run before routing and the fallback
+  is marked open, and a test calls every endpoint the API maps without a session.
+- No endpoint that changes something with a session exists yet, so the antiforgery check was
+  proven on a test-only endpoint beside the existing failing one.
+- The session's `Set-Cookie` was asserted with `Assert.Single`, which broke once the antiforgery
+  cookies joined it. The tests now pick the session cookie by name.
+- Many criteria name screens and endpoints of later journeys (Sign In, the panel, the Team table,
+  the invite dialog, Leave, Profile & Settings). They stay with those journeys, and journey 6 is
+  counted at the share it could prove.
+- Journey 5's progress commit set journeys 6, 9, 13 and 23 to 100 in the table while the total
+  counted only 1 to 5. The rows were put back.
+
+**Lessons**
+
+1. **Run the e2e suite under the production headers.** A security header the specs never see
+   cannot break them; served by the e2e server, the CSP broke every spec until the nonce was right.
+2. **Prove "closed by default" by calling every mapped endpoint.** Enumerate the endpoint data
+   source, call each without a session, and keep the open ones in a named list; a new endpoint
+   fails the test until it is either refused or added to the list on purpose.
+3. **A fallback authorisation policy reaches files too.** Put static files before routing and
+   mark the SPA fallback and the unknown-`/api` 404 open, or the app shell needs a session.
+4. **Bind the antiforgery token after setting `HttpContext.User`.** Sign-in does not change the
+   current request's user; set it to the new principal before issuing the token, or the token is
+   bound to no one and the first change is refused.
+5. **A count of `Set-Cookie` is fragile.** Assert the cookie you mean by its name.
+6. **Check the progress table against its total.** A row set to 100 that the total does not count
+   is a typo that later journeys would trust.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0010, the design, its diagrams, the
+  deployment setting and the prompt's title were one commit before any code; "Your city"'s limit
+  went into the mocks and the design system before the component.
+- *Read the prompt against the mock too* (journey 3, lesson 1): the prompt said "Invite link
+  needed"; the mock's "You need an invite link" won and the prompt was corrected.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice's tests were run red
+  first, but for four proofs that passed on first run because earlier journeys had built the
+  behaviour (text interpolation, no storage of a postal code, only joining and making a team
+  issuing a session, the limits); they were kept as the proof, as journey 4 kept its.
+- *Write a controller one action at a time* (journey 5, lesson 5): `/me` answered without a
+  postal code in slice 1 so slice 2's test of the owner's postal code could be seen to fail.
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6): 258.88 kB before,
+  259.15 kB after (the guard and the four routes), inside the budget; no budget moved.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it
+  caught selectors in a spec before the commit.
+- *A cookie's lifetime is measured from the fake clock* (journey 4, lesson 1): the new `Sessions`
+  helper sends the session's cookies by hand for the same reason.
+- *Check the shape of navigation state and storage* (journey 4, lesson 3): `teammateGuard` reads
+  only `TeamMembership.current()`, which already checks the stored shape.
