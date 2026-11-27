@@ -58,4 +58,15 @@ https://mondino-app-27660.azurewebsites.net
 | `Database__Provider` | `InMemory` | the only value accepted until journey 2 chooses an engine |
 | `DataProtection__KeysPath` | `/home/data-protection-keys` | the key ring that protects the session cookie, kept on the App Service's shared, persistent `/home` so a restart or a second instance keeps teammates signed in (ADR [0008](../adr/0008-session-and-cross-site-requests.md)) |
 | `EmailProtection__Key` | 32 random bytes, base64 (`openssl rand -base64 32`), as an App Service setting or a Key Vault reference | the secret key of the email fingerprint; Create Team fails until it is set, and it must never change once teams exist (ADR [0009](../adr/0009-making-a-team.md)) |
+| `PostalCodeSource__Username` | the GeoNames account name ([register](https://www.geonames.org/login), then enable *Free Web Services* on the account page) | the postal code source's account; without it every lookup answers `Unavailable` and Join and Create Team offer "Your city" instead (ADR [0006](../adr/0006-postal-code-source.md)) |
 | `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `true` | App Service's front end is a proxy: the rate limits count the client it saw (the last `X-Forwarded-For` entry), not the front end, and the request is known to be HTTPS (ADR [0010](../adr/0010-protecting-team-data.md)) |
+
+`EmailProtection__Key` and `PostalCodeSource__Username` are required: the deploy workflow checks
+that both are set on the App Service (by name; it never reads a value) and refuses to deploy
+until they are. Set them with:
+
+```sh
+az webapp config appsettings set -g mondino-rg -n <app-name> --settings \
+  EmailProtection__Key="$(openssl rand -base64 32)" \
+  PostalCodeSource__Username=<geonames-account>
+```
