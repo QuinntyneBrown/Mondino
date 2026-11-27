@@ -27,6 +27,10 @@ ADR [0004](../adr/0004-azure-hosting.md)). It can also be run by hand from the A
      "subject": "repo:<owner>/<repo>:environment:production",
      "audiences": ["api://AzureADTokenExchange"]
    }'
+   # This repository's OIDC tokens name it by ID as well, so add that subject too:
+   #   repo:QuinntyneBrown@1749159/Mondino@1472966755:environment:production
+   # (the exact subject is in the AADSTS700213 error of a failed login).
+   # In Git Bash, prefix the next command with MSYS_NO_PATHCONV=1 or the scope is rewritten.
    az role assignment create --assignee <appId> --role "Website Contributor" \
      --scope /subscriptions/<subscription-id>/resourceGroups/mondino-rg
    ```
@@ -40,6 +44,11 @@ ADR [0004](../adr/0004-azure-hosting.md)). It can also be run by hand from the A
    | `AZURE_TENANT_ID` | the directory (tenant) ID |
    | `AZURE_SUBSCRIPTION_ID` | the subscription ID |
    | `AZURE_WEBAPP_NAME` | `<app-name>` |
+
+## Live
+
+The app is `mondino-app-27660` in `mondino-rg` (canadacentral, Linux B1):
+https://mondino-app-27660.azurewebsites.net
 
 ## App settings
 
