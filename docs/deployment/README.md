@@ -130,6 +130,8 @@ Burstable `Standard_B1ms`, 32 GiB, backups kept 7 days).
 | `WeatherSource__BaseAddress` | `https://api.open-meteo.com/` (the default), or `https://customer-api.open-meteo.com/` with a commercial subscription | where the pins' weather is read from; Open-Meteo learns only a city's position, rounded (ADR [0015](../adr/0015-weather-source.md)) |
 | `WeatherSource__ApiKey` | the Open-Meteo subscription's key, as an App Service setting or a Key Vault reference; none for the free API | the free API is for non-commercial use; without the key a commercial deployment must not call it (ADR [0015](../adr/0015-weather-source.md)) |
 | `HolidaySource__BaseAddress` | `https://openholidaysapi.org/` (the default) | where public holidays are read from; OpenHolidays learns only a country and a year. Formula 1, local events and sport come from Mondino's own calendar, built in, with no setting (ADR [0019](../adr/0019-moment-calendars.md)) |
+| `OutsideSources__FailuresToOpen` | `5` (the default) | after this many failures in a row an outside source (postal codes, weather, holidays, email) is left alone; each source counts its own (ADR [0026](../adr/0026-one-breaker-for-every-outside-source.md)) |
+| `OutsideSources__BreakerOpenFor` | `00:00:30` (the default) | how long a source whose breaker opened is left alone before it is asked again; meanwhile pins keep their local time, weather up to 3 hours old is given and the last holidays read are kept (ADR [0026](../adr/0026-one-breaker-for-every-outside-source.md)) |
 
 `EmailProtection__Key` and `PostalCodeSource__Username` are required: the deploy workflow checks
 that both are set on the App Service (by name; it never reads a value) and refuses to deploy

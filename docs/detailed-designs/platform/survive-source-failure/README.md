@@ -16,67 +16,79 @@ teammate's name, their team or anything that identifies them.
 The terms used below:
 
 - **outside source** — service outside Mondino that the backend calls for postal codes, weather or calendars
-- **caching decorator** — class that implements an outside source's interface, wraps the real client, and adds a cache, a timeout and a circuit breaker
+- **caching decorator** — class that wraps an outside source's client and adds a cache, a timeout and a circuit breaker
 - **circuit breaker** — guard that stops calls to a source that keeps failing, for a short interval, before trying again
+- **source deadline** — one 6-second limit shared by the outside sources a request asks one after another
 - **place** — a country and postal code, or a position, or a country and year
 - **city directory** — data set of cities, with their positions and time zones, that the backend holds itself
 
-The providers of the postal code source, the holiday calendar source, the race calendar source
-the event source and the email source are `<TO SUPPLY>`.
+The postal code source is GeoNames (ADR 0006), the weather source Open-Meteo (ADR 0015), the
+holiday source OpenHolidays beside Mondino's own calendar, which also holds Formula 1, local
+events and sport (ADR 0019), and the email source Postmark (ADR 0011). The breakers, the older
+answers given while a source fails and the source deadline are ADR 0026's.
 
 ## Description
 
 **Interfaces and clients.** Each outside source sits behind an interface in
 `Mondino.Application`: `IPostalCodeLookup`, `IWeatherSource`, `IHolidayCalendar`,
-`IRaceCalendar` and `IEventCalendar`. `Mondino.Infrastructure` holds one typed HTTP client per
-source: `PostalCodeLookupClient`, `OpenMeteoWeatherSource`, `HolidayCalendarClient`,
-`RaceCalendarClient` and `EventCalendarClient`. The `Mondino API` is the only caller; the
-browser calls no outside source (L2-050). `ISignInEmailSender`, behind which the email source
-sits, follows the same rule: `SignInEmailSender` calls it through `SourceResilience`, with the
-timeout and the circuit breaker and with no cache, since nothing it sends is an answer to keep
-(`sign-in`).
+`IRaceCalendar` and `IEventCalendar`. `Mondino.Infrastructure` holds one HTTP client per
+outside source: `GeoNamesPostalCodeLookup`, `OpenMeteoWeatherSource` and
+`OpenHolidaysCalendar`; `MondinoCalendar`, which answers `IRaceCalendar`, `IEventCalendar` and
+part of `IHolidayCalendar`, is embedded and calls nothing. The `Mondino API` is the only caller;
+the browser calls no outside source (L2-050). `ISignInEmailSender`, behind which the email
+source sits, follows the same rule: `PostmarkSignInEmailSender` calls it with the timeout and a
+`SourceBreaker` and with no cache, since nothing it sends is an answer to keep (`sign-in`).
 
-**Caching decorators.** Dependency injection registers each interface as its decorator, which
-wraps the client. Handlers see the interface only.
+**Caching decorators.** Dependency injection registers each interface as its decorator, or the
+calendar that uses it, which wraps the client. Handlers see the interface only.
 
 - **`CachedWeatherSource`** — decorates `IWeatherSource`. It rounds the position to two
   decimal places and uses the rounded position as the cache key, so two teammates in one city
-  share one entry and one call. An entry younger than 15 minutes is fresh and is returned
-  without a call. Otherwise it calls
-  `OpenMeteoWeatherSource` through `SourceResilience`. When the call gives no value, it
-  returns the cached `Weather` if that is under 3 hours old (`MaxAge`), and `null` otherwise.
-  It never returns a zero temperature in place of a missing one.
-- **`CachedPostalCodeLookup`** — decorates `IPostalCodeLookup`. The key is the normalised
-  `PostalCode`. A postal code's city does not change from hour to hour, so entries are kept
-  for a long interval, which is `<TO SUPPLY>`. When the source fails and no entry exists, the
+  share one entry and one call; concurrent reads of the city share the call in flight. An entry
+  younger than 15 minutes is fresh and is returned without a call. Otherwise, unless its
+  `SourceBreaker` is open, it calls `OpenMeteoWeatherSource` with a 5 s timeout. When there is
+  no value (an error, the timeout, or the breaker open), it returns the city's last good
+  `Weather` if that was read under 3 hours ago (`ServedFor`), and `null` otherwise. It never
+  returns a zero temperature in place of a missing one. A caller whose token is cancelled stops
+  waiting; the call goes on for the others.
+- **`CachedPostalCodeLookup`** — decorates `IPostalCodeLookup`. The key is the country and the
+  normalised `PostalCode`. A postal code's city does not change from hour to hour, so `Found` is
+  kept 30 days and `NotFound` 1 day (ADR 0006). When the source fails and no entry exists, the
   handler answers `postal_code_unavailable`, which is distinct from `postal_code_not_found`.
-- **`CachedMomentCalendars`** — decorates `IHolidayCalendar`, `IRaceCalendar` and
-  `IEventCalendar`. Each kind is fetched and cached on its own, keyed by its place (a country
-  and year, a year, or a city). When one calendar fails, the decorator returns the last cached
-  moments of that kind, and moments of the other kinds are unaffected.
+- **`CachedOpenHolidays`** — wraps `OpenHolidaysCalendar` for `HolidayCalendar`, which answers
+  `IHolidayCalendar` with Mondino's own holidays and the public ones. A country's year is fresh
+  for 24 hours. When the source fails, times out or its breaker is open, it gives the last year
+  it read, whatever its age; the year goes only for room. Formula 1, local events and sport come
+  from `MondinoCalendar` and never fail, so `MomentFinder` still gives every other kind, and a
+  calendar that throws gives nothing without failing the read.
 
-**`SourceResilience`** — one resilience pipeline per source, built with
-`Microsoft.Extensions.Resilience`. `ExecuteAsync` runs a call inside it and returns a
-`SourceAnswer<T>` with a `SourceOutcome` (`Success`, `Failure`, `Timeout`, `CircuitOpen`) and
-the value, if any. It does not throw for a failed source.
+**`SourceBreaker`** — the circuit breaker, one instance per source, held by its decorator
+(ADR 0026). It does not throw for a failed source.
 
-- **Timeout.** Each call is cancelled after 5 s.
-- **Circuit breaker.** After `FailuresBeforeBreak` failures the circuit opens for
-  `BreakDuration`, and calls return `CircuitOpen` at once without reaching the source. Both
-  values are `<TO SUPPLY>`.
-- **No queue.** The pipeline does not retry and does not queue. Calls to one source run with a
-  bounded concurrency, which is `<TO SUPPLY>`.
+- **Timeout.** Each call is cancelled after 5 s, and counts as a failure.
+- **Circuit breaker.** After `FailuresToOpen` failures in a row the breaker opens for
+  `BreakerOpenFor`, and the decorator answers at once without reaching the source. The values
+  are the settings `OutsideSources:FailuresToOpen` (5) and `OutsideSources:BreakerOpenFor`
+  (30 s); one success closes the count.
+- **No queue.** No call is retried and none is queued. One call per place is in flight at a
+  time, shared by every read of that place, and none while the breaker is open, so calls in
+  flight are bounded by the distinct places being read, each ending within 5 s.
 
-Time is read from `TimeProvider`, so tests advance a `FakeTimeProvider` and never sleep. The
-cache is `IMemoryCache` with a size limit; a cache shared between instances of the API depends
-on the hosting platform and is `<TO SUPPLY>`.
+**`SourceDeadline`** — a request that asks two sources one after another (the postal code
+lookup, then the weather at the city found: on Join, Create Team, a teammate's own lookup and
+saving a new location) starts one 6 s deadline before the first and passes it to the second,
+which waits only what is left. When it runs out the answer has no weather.
+
+Time is read from `TimeProvider`, so tests advance a `FakeTimeProvider` and never sleep. Each
+cache is held in memory by its decorator, with a bound on its entries; each instance of the API
+holds its own.
 
 **Joining while the postal code lookup is down (L2-049).**
 
 - **`ICityDirectory`** — interface in `Mondino.Application` over the city directory.
   `BundledCityDirectory` in `Mondino.Infrastructure` reads a data set shipped with the API, so
   it is not an outside source and cannot be down while the API answers. The data set is
-  `<TO SUPPLY>`.
+  `cities.tsv.gz`, embedded in the API (ADR 0006).
 - When a lookup on Join or Create Team is refused with `postal_code_unavailable`, the screen
   switches the postal code field off and shows "Your city" with "Postal code lookup is down
   right now, so pick your city instead. Your pin goes to its centre."
@@ -106,9 +118,12 @@ on the hosting platform and is `<TO SUPPLY>`.
   `WeatherState` is `Unavailable`; `WeatherState` is `NotShared` where the teammate does not
   share their weather and `Available` otherwise, so the browser can tell the two apart. The
   response succeeds in every case.
-- **`GetMomentsQueryHandler`** returns the moments `CachedMomentCalendars` has for each kind.
-- **A response waits at most 6 s on outside sources.** The calls for one request run
-  concurrently under one deadline of 5 s, so the request completes with what the backend has.
+- **`GetMomentsQueryHandler`** returns the moments `MomentFinder` finds for each city, from
+  every calendar at once; a calendar that fails gives its last cached moments or none, and the
+  other kinds are still given.
+- **A response waits at most 6 s on outside sources.** The calls for one request to one source
+  run concurrently, each within 5 s, and two sources asked one after another share the 6 s
+  `SourceDeadline`, so the request completes with what the backend has.
 - **The web app shows what it has.** Local time, status, offset and overlap are worked out in
   the browser from the pin's time zone and the clock, so they need no outside source. Where a
   pin's `weatherState` is `Unavailable`, `PinLabel` leaves the weather out, and `TeammatePanel`
@@ -161,9 +176,8 @@ on the hosting platform and is `<TO SUPPLY>`.
 |--------|---------|
 | Postal code source | country and postal code |
 | Open-Meteo | the city's position, rounded to two decimal places |
-| Holiday calendar source | country and year |
-| Race calendar source | year |
-| Event source | the city's place; the exact parameters depend on the provider, `<TO SUPPLY>` |
+| Holiday source (OpenHolidays) | country and year |
+| Mondino's own calendar (races, events, sport) | nothing: it is embedded and calls no one |
 | Email source | the address a sign-in link is sent to, and the link; no name, no team and no city |
 
 Each client's method takes only those values, so a name, a team, a teammate id or a session is
@@ -203,25 +217,26 @@ source once stored.
 ### Components
 
 `GetPinsQueryHandler` and `GetMomentsQueryHandler` reach the sources through the caching
-decorators. Each decorator runs its calls through `SourceResilience`, which calls the typed
-clients within the timeout.
+decorators. Each decorator asks its `SourceBreaker` before a call and calls its client within the
+timeout.
 
 ![C4 component view for surviving source failure](diagrams/c4-component.png)
 
 ### Class structure
 
 `CachedWeatherSource` and `OpenMeteoWeatherSource` both implement `IWeatherSource`, and the
-decorator wraps the client; `CachedPostalCodeLookup` and `PostalCodeLookupClient` relate the
-same way. Each decorator depends on `SourceResilience`, which returns a `SourceAnswer<T>` with
-a `SourceOutcome`. `PinDto.Weather` is nullable, and `PinDto.WeatherState` says why.
+decorator wraps the client; `CachedPostalCodeLookup` wraps `GeoNamesPostalCodeLookup`, and
+`CachedOpenHolidays` wraps `OpenHolidaysCalendar` for `HolidayCalendar`. Each decorator, and
+`PostmarkSignInEmailSender`, holds a `SourceBreaker`. `PinDto.Weather` is nullable, and
+`PinDto.WeatherState` says why.
 
 ![Class diagram for surviving source failure](diagrams/class-structure.png)
 
 ### Behaviour — read pins while the weather source is failing
 
 `GetPinsQueryHandler` asks for weather once per distinct city (L2-050).
-`CachedWeatherSource` returns a fresh entry when it has one. Otherwise `SourceResilience`
-calls Open-Meteo with a 5 s timeout, or does not call it while the circuit is open. With no
+`CachedWeatherSource` returns a fresh entry when it has one. Otherwise it calls Open-Meteo
+with a 5 s timeout, or does not call it while its `SourceBreaker` is open. With no
 value, the decorator gives the cached weather when it is under 3 hours old, and `null`
 otherwise, which the handler marks `Unavailable`. The response succeeds, and each pin shows its local time and status; the panel
 and the Team row say the weather is unavailable in its place (L2-049).

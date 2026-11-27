@@ -43,8 +43,8 @@ holidays of Australia, Ghana, India, Japan, the United Arab Emirates and the Uni
 - **Timeout, cache and breaker** (`CachedOpenHolidays`): a call has 5 seconds (L2-049). A year of a
   country's holidays, with its subdivisions' names, is kept 24 hours, at most 1,000 entries; a
   failure is not kept. After 5 failures in a row the breaker opens for 30 seconds, and the source
-  gives nothing without a call. Serving an older answer while the source fails is journey 26's
-  (`survive-source-failure`).
+  gives nothing without a call. Since journey 26 it gives the last year it read instead, whatever
+  its age, while the source fails ([ADR 0026](0026-one-breaker-for-every-outside-source.md)).
 - **A failing calendar never fails a read.** `MomentFinder` takes nothing from a calendar that
   throws, times out or has its breaker open, and returns the other calendars' moments.
 - **A region is named in words**, the English name GeoNames gives a city's first-level division

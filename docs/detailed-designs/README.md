@@ -150,7 +150,9 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
   (ADR 0019); a failing calendar never fails the read.
 - `IWeatherSource.GetCurrentAsync(position)` answers a `Weather` or nothing; nothing is never
   shown as zero. Every call to an outside source times out after 5 s, and weather is fresh for
-  15 minutes. Open-Meteo is given a city's position rounded to two decimal places and nothing
+  15 minutes. Each source has its own breaker (5 failures in a row, then 30 s without a call,
+  `OutsideSources:*`); while the weather fails a city's answer up to 3 hours old is given, and
+  while the holiday source fails its last year read (ADR 0026). Open-Meteo is given a city's position rounded to two decimal places and nothing
   else (ADR 0015). `WeatherDto.Condition` travels as the web app's word (`partly-cloudy`), and
   the temperature in °C only. `PostalCodeResultDto.Weather` is the weather at the city found.
 - The `globe` library depends on `api` only (ADR 0014). `GlobeView` reports where things are on
@@ -236,6 +238,5 @@ The designs mark these as `<TO SUPPLY>`:
   the mock's countdown ("9:42").
 - Where the attributions of Open-Meteo (CC BY 4.0, ADR 0015) and OpenHolidays (ODbL, ADR 0019)
   are shown; no mock draws them.
-- Numbers the requirements do not give: the circuit breaker's threshold,
-  the globe's turning rate, the rate limit on a teammate's own postal code
-  lookup.
+- Numbers the requirements do not give: the globe's turning rate, the rate limit on a
+  teammate's own postal code lookup. (The breaker's threshold and pause are settings, ADR 0026.)

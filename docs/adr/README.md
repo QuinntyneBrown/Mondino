@@ -33,5 +33,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0023](0023-settings-kept-by-the-backend.md) | A teammate's settings are kept by the backend, and the browser keeps the display ones to draw the first screen | Accepted; extends 0020 |
 | [0024](0024-what-leaving-deletes.md) | Leaving deletes the teammate's row and their sign-in links, ends the session by its absence, and keeps an empty team | Accepted; changes one line of 0011 |
 | [0025](0025-the-refresh-rides-the-shells-clock.md) | The teammate screens share one clock, the refresh rides its minute, and the pins carry the viewer's own settings | Accepted; changes how 0012 binds the clock; takes up an alternative 0023 rejected |
+| [0026](0026-one-breaker-for-every-outside-source.md) | Every outside source has one kind of breaker, an older answer is given while it fails, and two sources in a row share one 6-second deadline | Accepted; completes 0015 and 0019 |
 
 Not decided yet: nothing a journey has reached.
