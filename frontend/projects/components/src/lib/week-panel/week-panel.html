@@ -1,0 +1,55 @@
+<section aria-labelledby="mo-week-panel-week">
+  <h2 id="mo-week-panel-week">This week around the world</h2>
+  <p class="panel__lead">Holidays, races and local moments where your teammates live.</p>
+  <p class="panel__empty">No moments this week.</p>
+  <a class="panel__more" [attr.href]="allMomentsAddress()" (click)="toMoments($event)">
+    All moments
+    <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
+    </svg>
+  </a>
+</section>
+<section aria-labelledby="mo-week-panel-working">
+  @if (working().count > 0) {
+    <div class="panel__head">
+      <h2 id="mo-week-panel-working">In working hours now</h2>
+      <span class="panel__count tnum">
+        <span class="visually-hidden">Teammates: </span>{{ working().count }}
+      </span>
+    </div>
+    <ul class="row-list">
+      @for (row of working().teammates; track row.teammateId) {
+        <li>
+          <a
+            class="row"
+            [attr.href]="address()(row.teammateId)"
+            (click)="choose($event, row.teammateId)"
+          >
+            <mo-avatar size="sm" [initials]="row.initials" [colour]="row.colour" />
+            <span class="row__name">
+              <strong>{{ row.name }}</strong>
+              @if (row.isViewer) {
+                (you)
+              }
+              <span class="text-muted"> · {{ row.cityName }}</span>
+            </span>
+            <span class="row__clock tnum">{{ row.localTime }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+    @if (working().more > 0) {
+      <a class="panel__more" [attr.href]="moreWorkingAddress()" (click)="toTeam($event)">
+        {{ working().more }} more on the Team page
+        <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+          <path d="M5 12h14" />
+          <path d="m12 5 7 7-7 7" />
+        </svg>
+      </a>
+    }
+  } @else {
+    <h2 id="mo-week-panel-working">In working hours now</h2>
+    <p class="panel__empty">Nobody — it’s quiet everywhere.</p>
+  }
+</section>

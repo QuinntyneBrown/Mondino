@@ -110,6 +110,9 @@ Builds on: journeys 11, 13, 20 and 22.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 15 built `WeekPanel` without the note shown when every kind of moment is switched off; build it with
+  the viewer's chosen kinds, as `pages/globe/quiet` draws it ("Every kind of moment is switched off" and
+  "Choose moments", in place of the lead, the rows and "All moments"), and prove it in Playwright.
 - Set journey 23 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 - Journey 13 waits for this screen to prove a changed unit reaching every temperature (L2-019 criterion

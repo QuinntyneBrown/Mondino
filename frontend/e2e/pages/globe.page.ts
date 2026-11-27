@@ -69,6 +69,41 @@ export class GlobePage {
   readonly groupRows: Locator;
   /** The one polite announcement of what was selected. */
   readonly announcement: Locator;
+  /** The week's view in the panel, with no pin selected: its two sections and their parts. */
+  readonly week: Locator;
+  readonly weekLead: Locator;
+  readonly weekEmpty: Locator;
+  readonly allMoments: Locator;
+  readonly working: Locator;
+  readonly workingCount: Locator;
+  /** The words that name the count to assistive technology alone. */
+  readonly workingCountName: Locator;
+  readonly workingRows: Locator;
+  readonly workingEmpty: Locator;
+  readonly moreWorking: Locator;
+  /** The header over the teammate screens: the mark, the navigation, Invite teammate and the viewer. */
+  readonly header: Locator;
+  readonly home: Locator;
+  readonly navigation: Locator;
+  readonly navigationLinks: Locator;
+  readonly currentScreen: Locator;
+  readonly inviteTeammate: Locator;
+  readonly profile: Locator;
+  readonly profileAvatar: Locator;
+  /** The heading over the globe: the number of teammates, and the counts under it. */
+  readonly title: Locator;
+  readonly counts: Locator;
+  /** The card of a team of one, in the panel's place: its title, text, link and "Copy". */
+  readonly inviteCard: Locator;
+  readonly inviteCardTitle: Locator;
+  readonly inviteCardText: Locator;
+  readonly inviteCardLink: Locator;
+  readonly copy: Locator;
+  /** The region of a toast that goes by itself, and of one that stays: an alert. */
+  readonly alertRegion: Locator;
+  /** A toast in the status region, and one in the alert region. */
+  readonly statusToast: Locator;
+  readonly alertToast: Locator;
   readonly toastRegion: Locator;
   readonly toast: Locator;
   readonly dismiss: Locator;
@@ -132,14 +167,73 @@ export class GlobePage {
     this.groupCityTimes = this.group.locator('.panel__city-time');
     this.groupRows = this.group.locator('.row-list a.row .row__name');
     this.announcement = this.main.locator('p.visually-hidden[role="status"]');
-    this.toastRegion = page.locator('.toast-region');
-    this.toast = this.toastRegion.locator('.toast');
+    this.week = this.panel.locator('section:has(> h2:text-is("This week around the world"))');
+    this.weekLead = this.week.locator('.panel__lead');
+    this.weekEmpty = this.week.locator('.panel__empty');
+    this.allMoments = this.week.locator('a.panel__more');
+    this.working = this.panel.locator('section:has(h2:text-is("In working hours now"))');
+    this.workingCount = this.working.locator('.panel__count');
+    this.workingCountName = this.workingCount.locator('.visually-hidden');
+    this.workingRows = this.working.locator('.row-list a.row');
+    this.workingEmpty = this.working.locator('.panel__empty');
+    this.moreWorking = this.working.locator('a.panel__more');
+    this.header = page.locator('header.app-header');
+    this.home = this.header.getByRole('link', { name: 'Mondino home' });
+    this.navigation = this.header.getByRole('navigation', { name: 'Primary' });
+    this.navigationLinks = this.navigation.getByRole('link');
+    this.currentScreen = this.navigation.locator('[aria-current="page"]');
+    this.inviteTeammate = this.header.getByRole('button', { name: 'Invite teammate' });
+    this.profile = this.header.getByRole('link', { name: 'Profile & Settings' });
+    this.profileAvatar = this.profile.locator('.avatar');
+    this.title = this.stage.locator('.globe-screen__heading h1');
+    this.counts = this.stage.locator('.globe-screen__counts');
+    this.inviteCard = this.stage.locator('.invite-card');
+    this.inviteCardTitle = this.inviteCard.locator('.invite-card__title');
+    this.inviteCardText = this.inviteCard.locator('.invite-card__text');
+    this.inviteCardLink = this.inviteCard.locator('.invite-card__url');
+    this.copy = this.inviteCard.getByRole('button', { name: 'Copy' });
+    this.toastRegion = page.locator('.toast-region[role="status"]');
+    this.alertRegion = page.locator('.toast-region[role="alert"]');
+    this.toast = page.locator('.toast-region .toast');
+    this.statusToast = this.toastRegion.locator('.toast');
+    this.alertToast = this.alertRegion.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
   }
 
   /** A teammate's row in a group's panel, by their name. */
   groupRow(name: string): Locator {
     return this.group.getByRole('link', { name: named(name) });
+  }
+
+  /** Makes the browser refuse to write to the clipboard, as it may. Call before the screen opens. */
+  async refuseCopy(): Promise<void> {
+    await this.page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: () => Promise.reject(new DOMException('Refused', 'NotAllowedError')) },
+      });
+    });
+  }
+
+  /** What is on the clipboard, as text. */
+  clipboardText(): Promise<string> {
+    return this.page.evaluate(() => navigator.clipboard.readText());
+  }
+
+  /** The text the page has selected. */
+  selectedText(): Promise<string> {
+    return this.page.evaluate(() => window.getSelection()?.toString() ?? '');
+  }
+
+  /** A row under "In working hours now", by the teammate's name. */
+  workingRow(name: string): Locator {
+    return this.working.getByRole('link', { name: named(name) });
+  }
+
+  /** The rows under "In working hours now" as the mocks write them: "Jordan Lee · Austin 09:05". */
+  async workingRowTexts(): Promise<string[]> {
+    return this.workingRows.evaluateAll((rows) =>
+      rows.map((row) => (row.textContent ?? '').replace(/\s+/g, ' ').trim()),
+    );
   }
 
   /** A pin's button, by the start of its accessible name: a teammate's name, or a group's count. */

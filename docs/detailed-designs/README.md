@@ -180,8 +180,12 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
   its search text out of it. Past `LargeTeamThreshold` (40) teammates the list is one
   `CitySection` per city, each open section holding at most `CityRowLimit` (50) rows;
   `TeamTable` uses no virtual scrolling.
-- `workingNow(pins, now, limit)` returns a `WorkingNow` (`count`, `teammates`, `more`), and
-  the Globe's panel lists at most six moments and six teammates. A `MomentMarker` holds its
+- `workingNow(pins, now, format, limit)` returns a `WorkingNow` (`count`, `teammates`, `more`),
+  and the Globe's panel lists at most six moments and six teammates. West to east is
+  `orderWestToEast(pins, now)` (`pins/`): the zone's current offset from UTC, then longitude.
+- `TeamShell` also provides `Toaster`, which holds the one toast shown (a success goes after 4
+  seconds, a danger stays until dismissed), and the `CLIPBOARD` (`NavigatorClipboard`, ADR 0009);
+  every toast on the four screens, the just-joined greeting among them, is shown through it. A `MomentMarker` holds its
   `moments`, an `emblem`, a `count` and `today`.
 - `GlobeScene.setPalette` takes a `GlobePalette` read from the `--color-globe-*` tokens; the
   globe is drawn by three.js from `globe.glb` and two mask textures built in Blender

@@ -8,7 +8,7 @@ export type TeamState = 'Loading' | 'Ready' | 'Failed' | 'Forgotten';
  * The team on the Globe screen (show-pins): its pins, read once for the remembered team, and the
  * selection, a teammate or a group pin. A session that has ended (401) or a team that is not the
  * session's (404) forgets the membership, so the screen says an invite link is needed.
- * Provided at the Globe route, so it goes when the teammate leaves the screen.
+ * Provided by `TeamShell`, so the teammate screens share it and it goes when the teammate leaves them.
  */
 @Injectable()
 export class TeamStore {

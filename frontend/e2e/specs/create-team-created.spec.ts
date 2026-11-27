@@ -2,7 +2,7 @@
 // Traces to: L2-053, L2-007, L2-042, L2-044
 // Description: Once the team is made, Create Team gives its invite link to copy and the way on to the globe, and keeps no postal code or email
 
-import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
+import { NORTHWIND_PINS, northwindPins, northwindPinsOf } from '../fixtures/pins';
 import { expect, test } from '../fixtures/test';
 import { lookupAnswer } from '../fixtures/invites';
 import { CREATE_LOOKUPS, NEW_INVITE_TOKEN, NORTHWIND_CREATED, TEAMS } from '../fixtures/teams';
@@ -111,12 +111,19 @@ test.describe('Create Team: the team is made', () => {
     await expect(createTeamPage.page).toHaveURL('/new');
   });
 
-  test('"Go to the globe" opens the Globe', async ({ createTeamPage, globePage }) => {
+  test('"Go to the globe" opens the Globe of a team of one', async ({
+    api,
+    createTeamPage,
+    globePage,
+  }) => {
+    api.answer('GET', NORTHWIND_PINS, northwindPinsOf('Sofia Bianchi'));
     await make(createTeamPage);
 
     await createTeamPage.goToTheGlobe.click();
 
     await expect(globePage.page).toHaveURL('/globe');
     await expect(globePage.globe).toBeVisible();
+    await expect(globePage.title).toHaveText('Just you, for now');
+    await expect(globePage.inviteCard).toBeVisible();
   });
 });

@@ -102,6 +102,9 @@ Builds on: journeys 10, 15 and 19.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 15 waits for this journey to prove the second half of L2-025 criterion 10: a teammate who joins
+  while the viewer's Globe is open appears at the next refresh with a pulse and no toast (the toast after
+  joining is proven). Raise journey 15's % when it is.
 - Set journey 25 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

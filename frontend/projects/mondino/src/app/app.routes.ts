@@ -17,11 +17,19 @@ export const routes: Routes = [
     path: 'sign-in',
     loadChildren: () => import('./sign-in/sign-in.routes').then((m) => m.signInRoutes),
   },
+  // The teammate screens, under one shell that holds the header and the team they share. An
+  // address the shell has no screen for yet falls through to the routes after it.
   {
-    path: 'globe',
-    title: 'Globe · Mondino',
+    path: '',
     canMatch: [teammateGuard],
-    loadComponent: () => import('./globe/globe-page').then((m) => m.GlobePage),
+    loadComponent: () => import('./team/team-shell').then((m) => m.TeamShell),
+    children: [
+      {
+        path: 'globe',
+        title: 'Globe · Mondino',
+        loadComponent: () => import('./globe/globe-page').then((m) => m.GlobePage),
+      },
+    ],
   },
   // Someone on no team who opens a team's screen is told, in place, that an invite link is needed.
   ...['globe', 'team', 'moments', 'profile'].map((path) => ({

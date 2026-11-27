@@ -112,6 +112,8 @@ Builds on: journeys 3, 6 and 8.
 ## Phase 4: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 15 draws the header's link to Profile & Settings (the viewer's avatar, `/profile`); add Profile &
+  Settings to `TeamShell`'s children, so the link reaches it and carries `aria-current="page"` there.
 - Set journey 22 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

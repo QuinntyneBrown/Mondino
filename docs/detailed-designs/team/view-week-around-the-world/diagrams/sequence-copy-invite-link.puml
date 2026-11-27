@@ -22,11 +22,13 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "InviteCard" as card
   participant "TeamShell" as shell
   participant "InviteLinkCopier" as copier
-  participant "Clipboard" as clip
+  participant "CLIPBOARD" as clip
+  participant "Toaster" as toaster
   participant "Toast" as toast
 end box
 actor -> page : Open the Globe screen
-page -> store : pins, viewerTeammateId, inviteToken
+shell -> store : load()
+page -> store : team: pins, viewerTeammateId, inviteToken
 store --> page : One pin, the viewer's own
 page -> page : teamOfOne is true (L2-025)
 page -> fn : inviteLinkFor(origin, inviteToken)
@@ -36,22 +38,26 @@ page --> actor : "Just you, for now", "Invite your team to fill the map", the in
 actor -> card : Use "Copy"
 card -> page : copy
 page -> copier : copy()
-copier -> clip : copy(inviteLink)
+copier -> store : inviteToken
+copier -> clip : write(inviteLink)
 alt the link is on the clipboard
-  clip --> copier : true
-  copier --> shell : result is Copied
+  clip --> copier : resolves
+  copier -> toaster : show(success)
+  toaster --> shell : the toast
   shell -> toast : "Invite link copied. Paste it wherever your team talks.",\nstatus region, 4 seconds
   toast --> actor : Confirmation announced to assistive technology (L2-025)
 else the browser refuses
-  clip --> copier : false
-  copier --> shell : result is Refused
-  shell -> toast : "Couldn’t copy the link.", alert, until dismissed
+  clip --> copier : rejects
+  copier -> toaster : show(danger)
+  toaster --> shell : the toast
+  shell -> toast : "Couldn’t copy the link.", alert region, until dismissed
+  copier --> page : false
   page -> card : selectLink()
   toast --> actor : The failure announced; the link in the card is selected (L2-025)
 end
 == A second teammate joins ==
 store -> store : Next load or refresh brings two pins (L2-048)
-store --> page : pins, counts
+store --> page : pins
 page -> page : teamOfOne is false
 page --> actor : "2 teammates"; WeekPanel in place of InviteCard
 @enduml

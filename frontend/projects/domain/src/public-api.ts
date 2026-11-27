@@ -20,3 +20,7 @@ export * from './lib/pins/teammate-panel-view';
 export * from './lib/pins/group-cities';
 export * from './lib/time/compare-with-viewer';
 export * from './lib/weather/weather';
+export * from './lib/pins/team-counts';
+export * from './lib/pins/west-to-east';
+export * from './lib/pins/working-now';
+export * from './lib/pins/invite-link';

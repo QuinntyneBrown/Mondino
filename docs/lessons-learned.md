@@ -832,6 +832,67 @@ no journey's % complete moved.
 - *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit was chained on
   `rc` with `&&`.
 
+## Journey 15: View the week around the world
+
+**What slowed it**
+
+- The prompt asked for the first 8 moments and "7 working"; the mocks, L2-024 and the design say six and
+  "8 working". The mock won and the prompt was corrected. No mock drew the week with no moment, which is
+  what the panel shows until journey 19 finds them, so `pages/globe/no-moments` and L2-024 criterion 11
+  were drawn and written first.
+- The design was again written before the code it names: `TeamStore` in `domain`, the CDK `Clipboard`
+  (ADR 0009 chose `navigator.clipboard`), `weekMoments` over moments that do not exist yet, and no
+  `TeamShell`, which journey 16's prompt expected this journey to build. The design was brought in line
+  with the code and the shell built here.
+- `RouterLinkActive` for the header's `aria-current` cost the initial chunk 9.8 kB (259.81 to 269.65 kB,
+  past the error budget): it lives in `@angular/router`'s one module, which is in the main chunk, so any
+  lazy use of it lands there. The shell marks the current screen from `NavigationEnd` itself; the nested
+  route's own config costs 0.10 kB (259.71 to 259.81 kB).
+- Drawn in the shell's outlet, the Globe is created after its navigation has ended, so
+  `Router.currentNavigation()` was null and the just-joined greeting was lost (six specs). It reads
+  `lastSuccessfulNavigation()` as well.
+- The team of 500 fixture did not count as `pages/globe/hundreds` does (36 time zones, 322 working, 72
+  asleep). It now places a stated number in each of 40 cities, chosen so the counts are the mock's.
+- A spec that paused the page's clock before the pins had answered found an empty screen; it waits for the
+  heading before jumping the time.
+- With the panel always beside the globe, the globe is narrower, and the heading over its top-left corner
+  covered the pixel a draw spec sampled as "nothing drawn"; it samples the bottom-right corner.
+
+**Lessons**
+
+1. **Measure the initial chunk after importing anything new from a package already in it.** A directive
+   used only by a lazy component still lands in the main chunk when its package's module is there; check
+   the chunk table before and after, and write the few lines yourself when it costs kilobytes.
+2. **A component drawn in a child outlet misses its navigation.** Read navigation state from
+   `lastSuccessfulNavigation()` as well as `currentNavigation()`.
+3. **Make a shared fixture count as the mock does before a spec reads its counts.** A large generated team
+   is easier to fix by stating each city's number than by tuning a formula.
+4. **Wait for the screen's data before pausing the page's clock.** A jump taken before the answer is drawn
+   leaves the screen without it.
+5. **When a requirement's state has no mock, draw it first, even an empty one.** The week with no moment is
+   what every teammate sees until journey 19.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6) and *read a design against the code built since*
+  (journey 14, lesson 1): the mock, L2-024 criterion 11, the design and its four diagrams and the prompt were
+  one commit before any code; the design was touched once more for `copyLink`, a name the lint chose.
+- *Read the prompt against the mock too* (journey 3, lesson 1): caught the eight moments and "7 working".
+- *Measure the initial chunk after each template change, and bisect a rise* (journey 10, lesson 1): caught
+  `RouterLinkActive` at once; 259.71 kB before the journey, 259.81 kB after, under the 260 kB warning.
+- *Run the spec before the page exists* (journey 1, lesson 5): each slice's spec ran red on the missing
+  heading, panel, header or card; the closing specs of journey 14 were proven by the week's view coming back.
+- *When a screen starts a request, list every spec that reaches the screen* (journey 10, lesson 3): the
+  shell moved the pins' request and the toast, and the just-joined, keys and draw specs were run and brought
+  in line with the mocks' words ("with your pin").
+- *After `pauseAt`, let the clock run* and *jump to a boundary* (journey 11, lessons 1 and 2): the counts
+  change at 15:00 UTC, when Tomás starts work, and the quiet team is read at 23:30 in Milan, each in one jump.
+- *Prove a timed message as soon as it is seen* (journey 11, lesson 3): the copy toast's 4 seconds are
+  counted from a clock paused once it is seen.
+- *Put a type where its lowest reader can import it* (journey 12, lesson 2): `TeamCounts`, `WorkingNow` and
+  `WorkingTeammate` are in `api`, so `WeekPanel` reads them.
+- *Never chain a commit after the verify script with `;`* (journey 11, lesson 4): every commit followed a
+  verify read as `rc=0`.
 ## Change: Keep team data in Azure PostgreSQL
 
 Not a journey of its own: the deployed Mondino ran on `InMemory` and lost every team at each

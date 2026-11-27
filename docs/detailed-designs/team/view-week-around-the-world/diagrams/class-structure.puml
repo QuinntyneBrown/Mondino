@@ -12,114 +12,100 @@ skinparam class {
 title Class structure — View the week around the world
 
 class GlobePage <<mondino>> {
-  +week: Signal<WeekMoment[]>
-  +working: Signal<WorkingNow>
-  +momentsOff: Signal<boolean>
+  +counts: Signal<TeamCounts | null>
+  +working: Signal<WorkingNow | null>
   +teamOfOne: Signal<boolean>
-  +inviteLink: Signal<string | null>
-  +onTeammateChosen(teammateId: string): void
-  +onAllMoments(): void
-  +onMoreWorking(): void
-  +onChooseMoments(): void
-  +onCopy(): void
+  +inviteLink: Signal<string>
+  #select(teammateId: string): void
+  #go(address: string): void
+  #copy(): Promise<void>
 }
 
-class TeamStore <<domain pins/>> {
-  +pins: Signal<Pin[]>
-  +viewerTeammateId: Signal<string | null>
-  +inviteToken: Signal<string | null>
-  +counts: Signal<TeamCounts>
-  +select(teammateId: string): boolean
+class TeamStore <<mondino>> {
+  +team: Signal<TeamPins | null>
+  +state: Signal<TeamState>
+  +selectedId: Signal<string | null>
+  +load(): Promise<void>
+  +select(teammateId: string): void
+  +clear(): void
 }
 
-class TeamCounts <<domain pins/>> {
+class TeamCounts <<api>> {
   +teammates: number
   +timeZones: number
   +working: number
   +asleep: number
 }
 
-class "moments/ and pins/ functions" as fn <<function, domain>> {
-  +weekMoments(pins: Pin[], now: Date, limit: number): WeekMoments
-  +workingNow(pins: Pin[], now: Date, limit: number): WorkingNow
-  +teamCounts(pins: Pin[], now: Date): TeamCounts
+class "pins/ functions" as fn <<function, domain>> {
+  +teamCounts(pins: Pin[], now: number): TeamCounts
+  +orderWestToEast(pins: Pin[], now: number): Pin[]
+  +workingNow(pins: Pin[], now: number, format: ClockFormat, limit: number): WorkingNow
   +inviteLinkFor(origin: string, inviteToken: string): string
 }
 
-class WeekMoments <<domain moments/>> {
-  +moments: WeekMoment[]
-  +more: boolean
-}
-
-class WeekMoment <<domain moments/>> {
-  +teammateId: string
-  +teammateFirstName: string
-  +city: string
-  +kind: MomentKind
-  +title: string
-  +when: string
-  +emblemKey: string | null
-}
-
-class WorkingNow <<domain pins/>> {
+class WorkingNow <<api>> {
   +count: number
   +teammates: WorkingTeammate[]
   +more: number
 }
 
-class WorkingTeammate <<domain pins/>> {
+class WorkingTeammate <<api>> {
   +teammateId: string
   +name: string
   +initials: string
   +colour: string
-  +city: string
+  +cityName: string
   +localTime: string
+  +isViewer: boolean
 }
 
 class WeekPanel <<components, mo-week-panel>> {
-  +moments: InputSignal<WeekMoment[]>
   +working: InputSignal<WorkingNow>
-  +momentsOff: InputSignal<boolean>
+  +address: InputSignal<(teammateId: string) => string>
+  +allMomentsAddress: InputSignal<string>
+  +moreWorkingAddress: InputSignal<string>
   +teammateChosen: OutputEmitterRef<string>
   +allMoments: OutputEmitterRef<void>
   +moreWorking: OutputEmitterRef<void>
-  +chooseMoments: OutputEmitterRef<void>
 }
 
 class InviteCard <<components, mo-invite-card>> {
   +inviteLink: InputSignal<string>
-  +copy: OutputEmitterRef<void>
+  +copyLink: OutputEmitterRef<void>
   +selectLink(): void
 }
 
-enum CopyResult {
-  Copied
-  Refused
-}
-
 class Toast <<components, mo-toast>> {
-  +title: InputSignal<string | null>
+  +strong: InputSignal<string | null>
   +text: InputSignal<string>
   +tone: InputSignal<'success' | 'danger'>
-  +dismissed: OutputEmitterRef<void>
+  +dismiss: OutputEmitterRef<void>
 }
 
 class AppHeader <<components, mo-app-header>> {
-  +invite: OutputEmitterRef<void>
+  +homeAddress: InputSignal<string>
+  +home: OutputEmitterRef<void>
+  +invite: OutputEmitterRef<HTMLElement>
 }
 
 class TeamShell <<mondino>> {
-  +onInvite(): void
+  #viewer: Signal<Pin | null>
+  #invite(trigger: HTMLElement): void
 }
 
-class InviteLinkCopier <<mondino>> {
-  +result: Signal<CopyResult | null>
-  +copy(): void
+class Toaster <<mondino>> {
+  +current: Signal<ToastMessage | null>
+  +show(toast: ToastMessage): void
   +dismiss(): void
 }
 
-class Clipboard <<Angular CDK>> {
-  +copy(text: string): boolean
+class InviteLinkCopier <<mondino>> {
+  +copy(): Promise<boolean>
+}
+
+interface Clipboard <<api, CLIPBOARD>> {
+  +write(text: string): Promise<void>
 }
 
 GlobePage --> TeamStore : reads / selects
@@ -127,18 +113,16 @@ GlobePage ..> fn : calls
 GlobePage --> WeekPanel : renders
 GlobePage --> InviteCard : renders for a team of one
 GlobePage ..> InviteLinkCopier : copies on Copy
+GlobePage ..> Toaster : greets a teammate who has just joined
+TeamShell --> TeamStore : provides, loads
 TeamShell --> AppHeader : renders
-TeamShell ..> InviteLinkCopier : reads the result
-TeamShell --> Toast : renders from the result
+TeamShell --> Toast : renders from Toaster
+TeamShell ..> Toaster : reads
 InviteLinkCopier ..> TeamStore : reads inviteToken
-InviteLinkCopier ..> Clipboard : injects
-InviteLinkCopier --> CopyResult
-TeamStore *-- TeamCounts
-fn ..> WeekMoments : builds
+InviteLinkCopier ..> Clipboard : writes with
+InviteLinkCopier ..> Toaster : shows the result with
+fn ..> TeamCounts : builds
 fn ..> WorkingNow : builds
 WorkingNow "1" *-- "0..6" WorkingTeammate
-fn ..> TeamCounts : builds
-WeekMoments "1" *-- "0..6" WeekMoment
-WeekPanel ..> WeekMoment : presents
 WeekPanel ..> WorkingNow : presents
 @enduml

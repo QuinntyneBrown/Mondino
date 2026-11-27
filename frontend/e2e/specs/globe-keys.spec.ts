@@ -21,7 +21,7 @@ test.describe('Globe: turned with the arrow keys', () => {
     await globePage.globe.focus();
     await expect(globePage.globe).toBeFocused();
     await expect(globePage.globe).toHaveAccessibleName(
-      'The globe, with 1 teammate’s pin. Drag to spin, or use the arrow keys.',
+      'The globe, with your pin. Drag to spin, or use the arrow keys.',
     );
     const before = await globePage.sofiaAt();
 
@@ -65,7 +65,7 @@ test.describe('Globe: turned with the arrow keys', () => {
       await expect(globePage.stillPicture).toBeVisible();
       await expect(globePage.stillGlobe).not.toHaveAttribute('tabindex');
       await expect(globePage.stillGlobe).toHaveAccessibleName(
-        'A still picture of the globe, with 1 teammate’s pin.',
+        'A still picture of the globe, with your pin.',
       );
     });
   });

@@ -105,6 +105,9 @@ Builds on: journeys 14 and 19.
 ## Phase 3: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 15 links "All moments" to `/moments` and waits for this screen to prove that it leads to the Moments
+  screen (L2-024 criterion 5, with journey 19's six rows); add Moments to `TeamShell`'s children, so the
+  header's "Moments" link reaches it. Raise journey 15's % by the criterion proven here.
 - Set journey 21 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

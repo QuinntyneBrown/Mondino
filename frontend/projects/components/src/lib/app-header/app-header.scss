@@ -1,0 +1,112 @@
+// The header (docs/design-system/components/app-header). The links in its slots are the screen's,
+// styled where they are written.
+:host {
+  display: block;
+}
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--layout-header-height);
+  padding: 0 var(--layout-margin);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+  background: var(--color-bg-canvas);
+}
+.app-header__home {
+  display: inline-flex;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+}
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+.app-header__invite {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+  border: var(--border-width-hairline) solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-fg-default);
+  font: var(--text-label);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.app-header__invite:hover {
+  background: var(--color-bg-surface);
+}
+// A 44 px touch target around the drawn 34 px.
+.app-header__invite::after {
+  content: '';
+  position: absolute;
+  inset: -0.3125rem;
+  border-radius: inherit;
+}
+.app-header__invite-label {
+  display: none;
+}
+.icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (min-width: 36rem) {
+  .app-header {
+    gap: var(--space-6);
+  }
+  .app-header__actions {
+    gap: var(--space-3);
+  }
+}
+@media (min-width: 48rem) {
+  .app-header__invite {
+    width: auto;
+    height: auto;
+    min-height: 2.25rem;
+    padding-inline: var(--space-3);
+  }
+  .app-header__invite::after {
+    inset: calc(-1 * var(--space-1)) 0;
+  }
+  .app-header__invite-label {
+    display: inline;
+  }
+}
+// A phone under 416 px: the header tightens so its tabs, the invite button and the avatar fit.
+@media (max-width: 25.99rem) {
+  .app-header {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+  }
+  .app-header__actions {
+    gap: 0;
+  }
+}
+@media (max-width: 22.49rem) {
+  .app-header {
+    gap: var(--space-1);
+    padding: 0 var(--space-2);
+  }
+}

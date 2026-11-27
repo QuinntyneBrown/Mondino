@@ -1,5 +1,11 @@
 <main id="main" class="globe-screen" tabindex="-1">
   <section class="globe-screen__stage" aria-label="The team on the globe">
+    @if (heading(); as heading) {
+      <div class="globe-screen__heading">
+        <h1>{{ heading.title }}</h1>
+        <p class="globe-screen__counts tnum">{{ heading.line }}</p>
+      </div>
+    }
     @if (globeState() === 'Fallback') {
       <div class="globe-screen__globe">
         <mo-globe-fallback
@@ -44,6 +50,14 @@
       </div>
     }
     <mo-globe-legend [still]="globeState() === 'Fallback'" />
+    @if (teamOfOne()) {
+      <mo-invite-card
+        #card
+        class="globe-screen__invite"
+        [inviteLink]="inviteLinkShown()"
+        (copyLink)="copy(card)"
+      />
+    }
   </section>
   @for (panel of panels(); track panel.teammateId) {
     <!-- One teammate at a time: another is drawn afresh, so it fades in. -->
@@ -65,10 +79,20 @@
       </div>
     </aside>
   }
+  @if (week(); as working) {
+    <aside class="globe-screen__panel" aria-label="This week around the world">
+      <div class="panel">
+        <mo-week-panel
+          [working]="working"
+          [address]="addressOf"
+          allMomentsAddress="/moments"
+          moreWorkingAddress="/team?filter=working"
+          (teammateChosen)="select($event)"
+          (allMoments)="go('/moments')"
+          (moreWorking)="go('/team?filter=working')"
+        />
+      </div>
+    </aside>
+  }
   <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
 </main>
-<div class="toast-region" role="status" aria-live="polite">
-  @if (toast(); as toast) {
-    <mo-toast [strong]="toast.strong" [text]="toast.text" (dismiss)="dismissToast()" />
-  }
-</div>

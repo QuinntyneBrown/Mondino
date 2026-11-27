@@ -126,6 +126,10 @@ Builds on: journeys 6 and 15. Journey 15 builds `TeamShell`, `AppHeader`, the in
 ## Phase 5: Lessons and progress
 - Add this journey's entry to `docs/lessons-learned.md`: what slowed it, new lessons, and how each earlier
   lesson it applied worked.
+- Journey 15 built "Invite teammate" in `AppHeader`, which `TeamShell.invite` leaves without an action, and
+  waits for this journey to prove that it opens the invite dialog on the Globe and that nothing is copied
+  until "Copy link" is used (L2-025 criterion 7) in Playwright; raise journey 15's % by the criterion proven
+  here. "Copy link" goes through journey 15's `InviteLinkCopier` and `Toaster`, whose toasts are proven.
 - Set journey 16 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

@@ -117,6 +117,11 @@ Builds on: journeys 6 and 14.
   Nacional") as `pages/globe/selected` draws them (L2-023 criterion 1) and Ahmed's beside the private note
   as `pages/globe/sharing-off` draws them (L2-023 criterion 11) in Playwright; Luca's panel with no
   moments section is proven already (criterion 3). Raise journey 14's % by the criteria proven here.
+- Journey 15 built the week's view with "No moments this week." in the moments' place and waits for this
+  journey to build `weekMoments` (`domain`'s `moments/`, using `orderWestToEast`) and the moment rows in
+  `WeekPanel` (as `pages/globe/default` draws them, each selecting its teammate's pin) and to prove L2-024
+  criteria 1, 2 and 7 in Playwright, with criterion 5's six rows (its "leads to the Moments screen" waits for
+  journey 21). Raise journey 15's % by the criteria proven here.
 - Set journey 19 to 100 in the **% complete** column of `docs/journeys.md` (and in
   `docs/detailed-journeys.md` if it exists), and update the total.
 

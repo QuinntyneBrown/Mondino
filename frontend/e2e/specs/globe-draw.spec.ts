@@ -80,8 +80,9 @@ test.describe('Globe: the 3D globe', () => {
     expect(desert[0]).toBeGreaterThan(desert[2] + 60);
     expect(forest[1]).toBeGreaterThan(forest[2]);
 
-    // And the globe is a ball in the box: nothing is drawn in its corners
-    const [corner] = await coloursAt(globePage.canvas, [{ x: 4, y: 4 }]);
+    // And the globe is a ball in the box: nothing is drawn in its corners (the bottom right, which
+    // the heading over the globe and the invite card do not reach)
+    const [corner] = await coloursAt(globePage.canvas, [{ x: 96, y: 96 }]);
     const [page] = await coloursAt(globePage.main, [{ x: 1, y: 1 }]);
     expect(corner).toEqual(page);
   });

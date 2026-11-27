@@ -134,70 +134,87 @@ export function northwindPinsOf(...names: string[]): Answer {
 }
 
 /**
- * A team of 500: the cast and 487 more, spread over the cast's twelve cities and 28 more, the most
- * in the first (as the prototype's `bigTeam.ts` spreads them over 40 cities).
+ * A team of 500 as `pages/globe/hundreds` counts it at the mocks' "now": the cast and 487 more in
+ * 40 cities and 38 time zones, 324 in working hours and 42 probably asleep, the most in London
+ * (as the prototype's `bigTeam.ts` spreads its team over 40 cities). Each city takes the number
+ * of the 487 beside it, so some are crowded and some are not.
  */
 export function teamOf500(): Answer {
-  const more: [string, number, number, string][] = [
-    ['Toronto', 43.65, -79.38, 'America/Toronto'],
-    ['New York', 40.71, -74.0, 'America/New_York'],
-    ['Chicago', 41.88, -87.63, 'America/Chicago'],
-    ['Los Angeles', 34.05, -118.24, 'America/Los_Angeles'],
-    ['Vancouver', 49.28, -123.12, 'America/Vancouver'],
-    ['Bogotá', 4.71, -74.07, 'America/Bogota'],
-    ['Lima', -12.05, -77.04, 'America/Lima'],
-    ['Buenos Aires', -34.6, -58.38, 'America/Argentina/Buenos_Aires'],
-    ['London', 51.51, -0.13, 'Europe/London'],
-    ['Paris', 48.86, 2.35, 'Europe/Paris'],
-    ['Madrid', 40.42, -3.7, 'Europe/Madrid'],
-    ['Lisbon', 38.72, -9.14, 'Europe/Lisbon'],
-    ['Amsterdam', 52.37, 4.9, 'Europe/Amsterdam'],
-    ['Rome', 41.9, 12.5, 'Europe/Rome'],
-    ['Turin', 45.07, 7.69, 'Europe/Rome'],
-    ['Warsaw', 52.23, 21.01, 'Europe/Warsaw'],
-    ['Athens', 37.98, 23.73, 'Europe/Athens'],
-    ['Istanbul', 41.01, 28.98, 'Europe/Istanbul'],
-    ['Cairo', 30.04, 31.24, 'Africa/Cairo'],
-    ['Lagos', 6.52, 3.38, 'Africa/Lagos'],
-    ['Nairobi', -1.29, 36.82, 'Africa/Nairobi'],
-    ['Cape Town', -33.92, 18.42, 'Africa/Johannesburg'],
-    ['Mumbai', 19.08, 72.88, 'Asia/Kolkata'],
-    ['Singapore', 1.35, 103.82, 'Asia/Singapore'],
-    ['Seoul', 37.57, 126.98, 'Asia/Seoul'],
-    ['Shanghai', 31.23, 121.47, 'Asia/Shanghai'],
-    ['Sydney', -33.87, 151.21, 'Australia/Sydney'],
-    ['Auckland', -36.85, 174.76, 'Pacific/Auckland'],
+  const castCities: Record<City, number> = {
+    'Mexico City': 12,
+    Austin: 10,
+    'São Paulo': 12,
+    Dublin: 12,
+    Accra: 10,
+    Milan: 18,
+    Berlin: 16,
+    Stockholm: 10,
+    Dubai: 10,
+    Bengaluru: 24,
+    Tokyo: 12,
+    Melbourne: 8,
+  };
+  const more: [string, number, number, string, number][] = [
+    ['Toronto', 43.65, -79.38, 'America/Toronto', 22],
+    ['New York', 40.71, -74.0, 'America/New_York', 28],
+    ['Denver', 39.74, -104.99, 'America/Denver', 7],
+    ['Los Angeles', 34.05, -118.24, 'America/Los_Angeles', 20],
+    ['Vancouver', 49.28, -123.12, 'America/Vancouver', 8],
+    ['Bogotá', 4.71, -74.07, 'America/Bogota', 8],
+    ['Lima', -12.05, -77.04, 'America/Lima', 6],
+    ['Buenos Aires', -34.6, -58.38, 'America/Argentina/Buenos_Aires', 8],
+    ['London', 51.51, -0.13, 'Europe/London', 34],
+    ['Paris', 48.86, 2.35, 'Europe/Paris', 20],
+    ['Madrid', 40.42, -3.7, 'Europe/Madrid', 14],
+    ['Lisbon', 38.72, -9.14, 'Europe/Lisbon', 10],
+    ['Amsterdam', 52.37, 4.9, 'Europe/Amsterdam', 14],
+    ['Rome', 41.9, 12.5, 'Europe/Rome', 10],
+    ['Zurich', 47.37, 8.54, 'Europe/Zurich', 8],
+    ['Warsaw', 52.23, 21.01, 'Europe/Warsaw', 8],
+    ['Athens', 37.98, 23.73, 'Europe/Athens', 6],
+    ['Istanbul', 41.01, 28.98, 'Europe/Istanbul', 6],
+    ['Cairo', 30.04, 31.24, 'Africa/Cairo', 6],
+    ['Lagos', 6.52, 3.38, 'Africa/Lagos', 8],
+    ['Nairobi', -1.29, 36.82, 'Africa/Nairobi', 6],
+    ['Cape Town', -33.92, 18.42, 'Africa/Johannesburg', 6],
+    ['Mumbai', 19.08, 72.88, 'Asia/Kolkata', 20],
+    ['Singapore', 1.35, 103.82, 'Asia/Singapore', 14],
+    ['Seoul', 37.57, 126.98, 'Asia/Seoul', 6],
+    ['Shanghai', 31.23, 121.47, 'Asia/Shanghai', 16],
+    ['Sydney', -33.87, 151.21, 'Australia/Sydney', 10],
+    ['Auckland', -36.85, 174.76, 'Pacific/Auckland', 4],
   ];
   const places = [
     ...Object.entries(NORTHWIND_POSITIONS).map(([name, position]) => ({
       name,
       position,
       ...cities[name as City],
+      count: castCities[name as City],
     })),
-    ...more.map(([name, latitude, longitude, timeZoneId]) => ({
+    ...more.map(([name, latitude, longitude, timeZoneId, count]) => ({
       name,
       position: { latitude, longitude },
       country: '',
       timeZoneId,
+      count,
     })),
   ];
   const pins: PinJson[] = cast.map(([n, c, city]) => pinOf(n, c, city));
-  for (let index = 0; index < 487; index++) {
-    // Each place takes one more of the rest than the next, so some are crowded and some are not.
-    const place = places[Math.floor(Math.sqrt(index * 3.9)) % places.length];
-    pins.push({
-      teammateId: `00000000-0000-4000-9000-${String(index).padStart(12, '0')}`,
-      name: `Teammate ${index + 1}`,
-      colour: `teammate-${(index % 13) + 1}`,
-      cityName: place.name,
-      country: place.country,
-      position: place.position,
-      timeZoneId: place.timeZoneId,
-      sharesStatus: true,
-      isViewer: false,
-      weather: place.name in weatherAt ? weatherOf(place.name as City) : null,
-      weatherState: place.name in weatherAt ? 'Available' : 'Unavailable',
-    });
-  }
+  let index = 0;
+  for (const place of places)
+    for (let each = 0; each < place.count; each++, index++)
+      pins.push({
+        teammateId: `00000000-0000-4000-9000-${String(index).padStart(12, '0')}`,
+        name: `Teammate ${index + 1}`,
+        colour: `teammate-${(index % 13) + 1}`,
+        cityName: place.name,
+        country: place.country,
+        position: place.position,
+        timeZoneId: place.timeZoneId,
+        sharesStatus: true,
+        isViewer: false,
+        weather: place.name in weatherAt ? weatherOf(place.name as City) : null,
+        weatherState: place.name in weatherAt ? 'Available' : 'Unavailable',
+      });
   return northwindPins(pins);
 }
