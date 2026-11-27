@@ -42,6 +42,9 @@ public class MondinoApi : WebApplicationFactory<Program>
 
     public bool UsesPostalCodeSource { get; set; }
 
+    /// <summary>Set before the first request to serve <c>TestApp</c>, a stand-in for the Angular build, as wwwroot.</summary>
+    public bool ServesApp { get; set; }
+
     /// <summary>The changes the test-only session endpoint was asked to make.</summary>
     public TestOnlyChanges Changes { get; } = new();
 
@@ -59,6 +62,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.UseSetting("Database:Provider", "InMemory");
         builder.UseSetting("Database:Name", $"mondino-tests-{Guid.NewGuid():N}");
+
+        if (ServesApp)
+        {
+            builder.UseWebRoot(Path.Combine(AppContext.BaseDirectory, "TestApp"));
+        }
 
         if (EmailKey is not null)
         {

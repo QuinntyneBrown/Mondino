@@ -16,4 +16,8 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- A stand-in for the Angular build the API serves from wwwroot, with its nonce placeholder. -->
+    <None Include="TestApp\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
