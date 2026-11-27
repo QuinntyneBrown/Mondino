@@ -1,0 +1,101 @@
+// The working-hours overlap, on the viewer's own clock (docs/design-system/components/overlap-bar).
+.overlap__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.overlap__title {
+  font: var(--text-label);
+}
+.overlap__when {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.overlap__track {
+  position: relative;
+  height: var(--overlap-bar-height);
+  margin-top: var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-canvas);
+}
+.overlap__theirs,
+.overlap__both,
+.overlap__you,
+.overlap__now {
+  position: absolute;
+  left: var(--from);
+  width: var(--span);
+}
+.overlap__theirs,
+.overlap__both {
+  top: var(--space-1);
+  bottom: var(--space-1);
+  border-radius: var(--radius-sm);
+}
+.overlap__theirs {
+  background: color-mix(in srgb, var(--color-people) 25%, transparent);
+}
+.overlap__both {
+  background: var(--color-people);
+}
+.overlap__you {
+  top: 0;
+  bottom: 0;
+  border: var(--border-width-thick) solid var(--color-fg-default);
+  border-radius: var(--radius-md);
+}
+.overlap__now {
+  top: calc(-1 * var(--space-1));
+  bottom: calc(-1 * var(--space-1));
+  width: var(--border-width-thick);
+  border-radius: var(--radius-full);
+  background: var(--color-fg-default);
+}
+.overlap__scale,
+.overlap__legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.overlap__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1-5);
+  font: var(--text-caption);
+  font-size: var(--font-size-2xs);
+  color: var(--color-fg-muted);
+}
+.overlap__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-2);
+  font: var(--text-caption);
+  color: var(--color-fg-muted);
+}
+.overlap__legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+.overlap__text {
+  margin-top: var(--space-2);
+  font: var(--text-caption);
+  color: var(--color-fg-muted);
+}
+.swatch {
+  width: var(--space-4);
+  height: var(--space-3);
+  border-radius: var(--radius-sm);
+}
+.swatch--you {
+  border: var(--border-width-thick) solid var(--color-fg-default);
+}
+.swatch--theirs {
+  background: color-mix(in srgb, var(--color-people) 25%, transparent);
+}
+.swatch--both {
+  background: var(--color-people);
+}

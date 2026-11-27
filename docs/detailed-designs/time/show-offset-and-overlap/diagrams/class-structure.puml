@@ -50,7 +50,7 @@ class Overlap <<api, time/>> {
   +lengthMinutes: number
 }
 
-class WorkingDay <<domain, time/>> {
+class WorkingDay <<api, time/>> {
   +{static} startMinute: number = 540
   +{static} endMinute: number = 1080
 }

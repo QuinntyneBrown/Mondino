@@ -14,6 +14,5 @@ export * from './lib/time/local-time';
 export * from './lib/time/status';
 export * from './lib/time/clock-format';
 export * from './lib/time/offset';
-export * from './lib/time/working-day';
 export * from './lib/time/overlap';
 export * from './lib/pins/first-name';

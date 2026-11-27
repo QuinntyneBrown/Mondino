@@ -1,6 +1,11 @@
-import type { ClockFormat, DaySpan, Overlap, OverlapText } from '@mondino/api';
+import {
+  WorkingDay,
+  type ClockFormat,
+  type DaySpan,
+  type Overlap,
+  type OverlapText,
+} from '@mondino/api';
 import { zoneOffsetMinutes } from './offset';
-import { WorkingDay } from './working-day';
 
 const day = 1440;
 const ofDay = (minute: number) => ((minute % day) + day) % day;

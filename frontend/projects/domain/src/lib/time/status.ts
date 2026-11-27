@@ -1,6 +1,5 @@
-import type { Pin, Status } from '@mondino/api';
+import { WorkingDay, type Pin, type Status } from '@mondino/api';
 import type { LocalTime } from './local-time';
-import { WorkingDay } from './working-day';
 
 /**
  * The status of a local hour, by the table of L2-015: 07:00 to 08:59 early morning, 09:00 to

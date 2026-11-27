@@ -12,6 +12,7 @@ export * from './lib/time/clock';
 export * from './lib/time/status';
 export * from './lib/time/offset';
 export * from './lib/time/overlap';
+export * from './lib/time/working-day';
 export * from './lib/teams/http-team-creation-api';
 export * from './lib/teams/team-creation';
 export * from './lib/globe/viewport';

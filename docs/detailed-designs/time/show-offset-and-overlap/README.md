@@ -69,9 +69,10 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
   "7h behind", "4h 30m ahead" and "Same time" on a Team row, and on the panel, which adds the
   viewer and follows the day in one line ("Monday 27 Oct · 7h behind you"), "7h behind you",
   "10h ahead of you" and "same time as you".
-- **`WorkingDay`** (`time/`) — the constants of the working day in minutes from midnight:
+- **`WorkingDay`** (`api`, `time/`) — the constants of the working day in minutes from midnight:
   `startMinute` 540 and `endMinute` 1080. `statusAt` and `overlapBetween` read the same
-  constants, so "Working hours" and the overlap cannot disagree.
+  constants, and so does `OverlapBar`, so "Working hours", the overlap and its bar cannot
+  disagree. It is declared in `api` because `components` may read nothing else.
 - **`workingDayOnViewerClock(now, timeZoneId, viewerTimeZoneId): DaySpan`** (`time/`) — pure
   function. It takes the offset between the two zones at `now` and moves the teammate's working
   day onto the viewer's clock by subtracting that offset.

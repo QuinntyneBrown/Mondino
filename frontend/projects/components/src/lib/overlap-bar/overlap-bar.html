@@ -1,0 +1,35 @@
+<section class="overlap" aria-labelledby="mo-overlap-bar-title">
+  <div class="overlap__head">
+    <h3 class="overlap__title" id="mo-overlap-bar-title">Working-hours overlap</h3>
+    <p class="overlap__when tnum">{{ text().figure }}</p>
+  </div>
+  <div class="overlap__track" aria-hidden="true">
+    @for (part of parts().theirs; track $index) {
+      <span
+        class="overlap__theirs"
+        [style.--from.%]="part.from"
+        [style.--span.%]="part.span"
+      ></span>
+    }
+    @if (parts().both; as both) {
+      <span class="overlap__both" [style.--from.%]="both.from" [style.--span.%]="both.span"></span>
+    }
+    <span
+      class="overlap__you"
+      [style.--from.%]="parts().you.from"
+      [style.--span.%]="parts().you.span"
+    ></span>
+    <span class="overlap__now" [style.--from.%]="parts().now"></span>
+  </div>
+  <ul class="overlap__scale tnum" aria-hidden="true">
+    @for (mark of scale(); track $index) {
+      <li>{{ mark }}</li>
+    }
+  </ul>
+  <ul class="overlap__legend" aria-hidden="true">
+    <li><span class="swatch swatch--you"></span>You</li>
+    <li><span class="swatch swatch--theirs"></span>{{ firstName() }}</li>
+    <li><span class="swatch swatch--both"></span>Both</li>
+  </ul>
+  <p class="overlap__text tnum">{{ text().sentence }}</p>
+</section>
