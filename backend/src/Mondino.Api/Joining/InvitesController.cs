@@ -31,7 +31,20 @@ public sealed class InvitesController(ISender sender) : ControllerBase
     public Task<PostalCodeResultDto> LookUpPostalCode(
         string inviteToken, [FromBody] PostalCodeLookupRequest request, CancellationToken cancellationToken) =>
         sender.Send(new LookUpPostalCodeQuery(inviteToken, request.CountryCode, request.PostalCode), cancellationToken);
+
+    /// <summary>
+    /// The cities of a country that start with the text, for "Your city" while the lookup is down
+    /// (L2-004). Answered from Mondino's own cities; the text travels in the body.
+    /// </summary>
+    [HttpPost("{inviteToken}/city-searches")]
+    [EnableRateLimiting(RateLimitPolicies.CitySearch)]
+    public Task<IReadOnlyList<CityResultDto>> SearchCities(
+        string inviteToken, [FromBody] CitySearchRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SearchCitiesQuery(inviteToken, request.CountryCode, request.Text), cancellationToken);
 }
+
+/// <summary>A country and the start of a city's name, as typed.</summary>
+public sealed record CitySearchRequest(string? CountryCode, string? Text);
 
 /// <summary>A country and a postal code, as typed.</summary>
 public sealed record PostalCodeLookupRequest(string? CountryCode, string? PostalCode);
