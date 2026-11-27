@@ -55,9 +55,11 @@ source and Open-Meteo. The browser calls only the Mondino API.
   found city to the globe as the new pin labelled "You · Milan"; until the 3D globe
   (journey 8) that is `GlobeFallback`'s `you` input, a lifted pin at the city's still
   placement that pulses once. The globe turning to the city is journeys 8 and 9's.
-- **`JoinStore`** — route-scoped service. It holds the writable signals `name`, `countryCode`
-  and `postalCode`, and the signals `lookupState`, `found`, `nameProblem` and
-  `postalCodeMissing`.
+- **`JoinStore`** — route-scoped service. It holds the writable signal `name`, the signals
+  `countryCode` and `postalCode` (changed through `setCountry()` and `setPostalCode()`, which
+  call `clearFound()`), `lookup` (a `LookupState`), `submitted`, `nameProblem` and
+  `postalCodeMissing`. `leavePostalCode()` looks an untried postal code up when the field is
+  left. The postal code lives in its signal and the request body and nowhere else.
   - `lookUp()` sets `Locating`, calls `InviteApi.lookUpPostalCode`, and maps the answer or the
     `ApiError` code to a `LookupState`; the code `invite_not_found` sets `inviteState` to
     `NotFound` instead, which replaces the form. One lookup runs at a time: a new lookup aborts the
@@ -72,7 +74,7 @@ source and Open-Meteo. The browser calls only the Mondino API.
     characters or fewer."
   - `postalCodeMissing` reports an empty postal code. A submit with it makes no lookup, marks
     the postal code field `aria-invalid` and shows "Enter a postal code."
-  - A submit with either problem makes `JoinPage` show a summary alert above the fields
+  - A submit with either problem makes `JoinPage` show a summary alert (`Alert`) above the fields
     ("Two things are missing", or "One thing is missing") that links to each field ("Add your
     name", or "Shorten your name" for a name over 60 characters, and "Enter a postal code") and
     takes focus. A link moves focus to its field and leaves the address alone.
@@ -82,9 +84,10 @@ source and Open-Meteo. The browser calls only the Mondino API.
     typing stops and aborts the search before it, `chooseCity()`, and `placeAtCity()`, which sets
     `Found` with the chosen city. Unit tests advance a fake clock. The state stays `Unavailable` for the life of the store, so the lookup is tried
     again when the screen is next opened. What was typed in the postal code field is kept.
-  - While `lookupState` is `RateLimited`, the store holds `retryAt`, worked out from the
-    refusal's `Retry-After` and the injected `CLOCK`, and one timer that counts down to it. The
-    timer is cleared at zero and when the store is destroyed.
+  - While `lookup` is `RateLimited`, it holds `retryAt`, worked out from the refusal's
+    `Retry-After` and the injected `CLOCK` (`@mondino/api`, bound in `app.config.ts`), and the
+    store runs one timer that ticks `secondsToWait` down to it. The timer is cleared at zero and
+    when the store is destroyed; editing the postal code does not stop it.
 - **`LookupState`** — union in `@mondino/api` of `Idle`, `Locating`, `Found` (with its
   `PostalCodeResult`), `NotFound` (with the postal code as typed), `Unavailable` and
   `RateLimited`. Profile & Settings uses the same type.
@@ -112,9 +115,16 @@ source and Open-Meteo. The browser calls only the Mondino API.
 - **The button.** It reads "Place my pin" until a city is found; "Placing your pin…", disabled
   and `aria-busy`, while locating; "Place my pin in Milan" once a city is chosen in
   `CityField`; and "Join Northwind" once the pin is placed.
-- **The rate limit alert.** For `RateLimited`, `JoinPage` shows a warning alert, "Too many
+- **`Alert`** (`mo-alert`) — presentation component in `@mondino/components`, the design
+  system's Alert: a danger or warning tone, a title, a line with a bold start, and the links of
+  a form's error summary, which it emits as `follow` so the screen moves focus to the field and
+  leaves the address alone. Given `focusRequest`, it moves focus to itself once it is drawn, each
+  time the number rises: one for each submit with a problem (ADR 0007).
+- **The rate limit alert.** For `RateLimited`, `JoinPage` shows a warning `Alert`, "Too many
   tries from this device. You can try again in 9:42.", and disables the button until the
-  countdown ends. The alert is announced once, not at each second, and what was typed is kept.
+  countdown ends. The ticking figure is hidden from assistive technology, which reads the wait
+  as it was when the alert appeared, so the alert is announced once, not at each second. What
+  was typed is kept.
   The same alert serves a join refused with `rate_limited` (`join-team`).
 - **`InviteApi.lookUpPostalCode(inviteToken, countryCode, postalCode, signal)`** — sends
   `POST /api/invites/{inviteToken}/postal-code-lookups` with the country and postal code in the
