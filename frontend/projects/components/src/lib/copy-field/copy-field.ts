@@ -26,6 +26,11 @@ export class CopyField {
   readonly value = input.required<string>();
   /** What names the value, where no visible label does. */
   readonly label = input('Invite link');
+  /**
+   * The link's id, where a visible `<label for>` names it, as the invite dialog's "Invite link"
+   * does; then `label` is not used.
+   */
+  readonly inputId = input<string | null>(null);
   /** The link is on the clipboard: the button reads "Copied", with a tick. */
   readonly copied = input(false);
   /** Each new value, past 0, selects the whole link and moves focus to it: a copy was refused. */

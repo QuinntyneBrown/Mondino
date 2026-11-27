@@ -10,6 +10,7 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { CLIPBOARD, HttpTeamApi, TEAM_API } from '@mondino/api';
 import { AppHeader, Avatar, Toast } from '@mondino/components';
 import { initialsOf, NavigatorClipboard } from '@mondino/domain';
+import { InviteDialogOpener } from './invite-dialog-opener';
 import { InviteLinkCopier } from './invite-link-copier';
 import { TeamStore } from './team-store';
 import { Toaster } from './toaster';
@@ -18,7 +19,7 @@ import { Toaster } from './toaster';
  * The teammate screens' shell: the header the mocks draw over Globe, Team, Moments and Profile &
  * Settings, the screen under it, and the team they share, read once and released when the
  * teammate leaves them (view-week-around-the-world). Team, Moments and Profile & Settings join its
- * children with their journeys; "Invite teammate" opens the invite dialog with journey 16.
+ * children with their journeys; "Invite teammate" opens the invite dialog.
  */
 @Component({
   selector: 'mo-team-shell',
@@ -29,6 +30,7 @@ import { Toaster } from './toaster';
     TeamStore,
     Toaster,
     InviteLinkCopier,
+    InviteDialogOpener,
   ],
   templateUrl: './team-shell.html',
   styleUrl: './team-shell.scss',
@@ -38,6 +40,7 @@ export class TeamShell {
   private readonly router = inject(Router);
   protected readonly store = inject(TeamStore);
   protected readonly toaster = inject(Toaster);
+  private readonly inviteDialog = inject(InviteDialogOpener);
 
   /** The screens in the header, in the mocks' order. */
   protected readonly navigation = [
@@ -71,9 +74,12 @@ export class TeamShell {
     void this.router.navigateByUrl('/globe');
   }
 
-  /** "Invite teammate": the invite dialog comes with journey 16 (invite-teammates, L2-054). */
-  protected invite(): void {
-    // Nothing is copied from the header: only the dialog's "Copy link" copies (L2-025).
+  /**
+   * "Invite teammate" opens the invite dialog (invite-teammates, L2-054); nothing is copied until
+   * its "Copy link" is used (L2-025).
+   */
+  protected invite(trigger: HTMLElement): void {
+    void this.inviteDialog.open(trigger);
   }
 }
 

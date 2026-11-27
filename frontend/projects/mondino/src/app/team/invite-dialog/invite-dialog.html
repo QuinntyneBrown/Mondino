@@ -1,0 +1,38 @@
+<div class="backdrop" aria-hidden="true"></div>
+<div class="dialog">
+  <div class="dialog__panel">
+    <div class="dialog__header">
+      <h2 class="dialog__title" [id]="titleId">Invite teammates to {{ teamName() }}</h2>
+      <button
+        mo-button
+        icon
+        class="dialog__close"
+        type="button"
+        aria-label="Close"
+        (click)="close()"
+      >
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="dialog__body">
+      <p [id]="descriptionId">
+        Share this link with anyone on the team. They place their own pin with a postal code — only
+        their city is ever shown.
+      </p>
+      <label class="dialog__label" for="invite-link">Invite link</label>
+      <mo-copy-field
+        class="dialog__link"
+        inputId="invite-link"
+        [value]="link()"
+        [selectRequest]="selectRequest()"
+        (copyLink)="copy()"
+      />
+      <div class="dialog__meta">
+        <span class="tnum">{{ count() }} on the team · link never expires</span>
+      </div>
+    </div>
+  </div>
+</div>

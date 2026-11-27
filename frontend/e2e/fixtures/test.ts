@@ -3,6 +3,7 @@ import { ApiFixture } from './api';
 import { NOW } from './now';
 import { CreateTeamPage } from '../pages/create-team.page';
 import { GlobePage } from '../pages/globe.page';
+import { InviteDialogPage } from '../pages/invite-dialog.page';
 import { InviteNeededPage } from '../pages/invite-needed.page';
 import { JoinPage } from '../pages/join.page';
 import { NotFoundPage } from '../pages/not-found.page';
@@ -26,6 +27,7 @@ interface Fixtures {
   notFoundPage: NotFoundPage;
   joinPage: JoinPage;
   globePage: GlobePage;
+  inviteDialog: InviteDialogPage;
   createTeamPage: CreateTeamPage;
   inviteNeededPage: InviteNeededPage;
   signInPage: SignInPage;
@@ -103,6 +105,10 @@ export const test = base.extend<Options & Fixtures>({
 
   globePage: async ({ page }, use) => {
     await use(new GlobePage(page));
+  },
+
+  inviteDialog: async ({ page }, use) => {
+    await use(new InviteDialogPage(page));
   },
 
   createTeamPage: async ({ page }, use) => {

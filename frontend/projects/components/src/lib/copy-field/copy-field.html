@@ -3,7 +3,8 @@
     class="copy-field__value"
     type="text"
     readonly
-    [attr.aria-label]="label()"
+    [attr.id]="inputId()"
+    [attr.aria-label]="inputId() ? null : label()"
     [value]="value()"
   /><button mo-button variant="primary" size="sm" type="button" (click)="copyLink.emit()">
     @if (copied()) {
@@ -12,8 +13,9 @@
       >Copied
     } @else {
       <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
-        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg
+        <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+        <path d="M15 7h2a5 5 0 1 1 0 10h-2" />
+        <line x1="8" x2="16" y1="12" y2="12" /></svg
       >Copy link
     }
   </button>

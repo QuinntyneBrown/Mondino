@@ -1,4 +1,4 @@
-<mo-app-header homeAddress="/globe" (home)="goHome()" (invite)="invite()">
+<mo-app-header homeAddress="/globe" (home)="goHome()" (invite)="invite($event)">
   @for (item of navigation; track item.path) {
     <a
       nav
