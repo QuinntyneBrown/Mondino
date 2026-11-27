@@ -108,6 +108,14 @@ on one side changes the offset by one hour, and moves the overlap, with no reloa
 - **`WorkingDay`** is read by `statusAt` too: "Working hours" begins at `startMinute` and ends at
   `endMinute`.
 
+- **`compareWithViewer(pin, viewerPin, now, format): Comparison | null`** (`time/`) — pure
+  function, the one rule of which teammate gets what. It gives `null` for the viewer's own pin
+  and while `viewerPin` is absent; for a teammate who does not share their status, the `Offset`
+  and no overlap; otherwise the `Offset` and an `OverlapView`: the `Overlap` or `null`, the
+  teammate's `DaySpan`, the viewer's minute of the day (`nowMinute`), the first name and the
+  `OverlapText`, which are what `OverlapBar` takes. `Comparison` and `OverlapView` are
+  `domain` types; pages read them and bind their parts.
+
 `overlapBetween` uses the offset at the instant `now` for the whole day. On the day of a
 daylight-saving change the overlap shown before the change is the one that held before it, and
 the next tick after the change corrects it.
@@ -118,14 +126,12 @@ since the epoch, as an argument, and the instant comes from `CLOCK`.
 ### Frontend — pages and presentation
 
 - **`GlobePage`** — holds one `computed` over the selected pin, `viewerPin`, `CLOCK`'s `minute`
-  and the viewer's `ClockFormat`. When the selected pin is the viewer's own, or `viewerPin` is
-  absent, it binds no offset and no overlap. Otherwise it calls `offsetBetween` and
-  `formatOffset`, and, when the selected pin's `sharesStatus` is true,
-  `workingDayOnViewerClock`, `overlapBetween` and `formatOverlap`. When `sharesStatus` is false
-  it binds the offset and no overlap, no working day and no overlap text, so the panel shows no
-  "Working-hours overlap" section for that teammate.
-- **`TeamPage`** — derives the offset text of each row in the same way and binds none for the
-  viewer's own row. Under 768 px a row gives the offset after the city ("Dubai · 3h ahead").
+  and the viewer's `ClockFormat`, which calls `compareWithViewer` and `formatOffset`. For the
+  viewer's own pin, or with `viewerPin` absent, it binds no offset and no overlap. For a
+  teammate who does not share their status it binds the offset and no overlap, so the panel
+  shows no "Working-hours overlap" section for that teammate.
+- **`TeamPage`** — derives the offset text of each row through `compareWithViewer` and
+  `formatOffset` and binds none for the viewer's own row. Under 768 px a row gives the offset after the city ("Dubai · 3h ahead").
 - **`TeammatePanel`** — presentation component. It takes the offset text, the `Overlap`, the
   teammate's `DaySpan` and the `OverlapText` in its `content` (`TeammatePanelContent`, designed
   in `team/view-teammate-panel`). It shows no offset when the offset text is `null` and no

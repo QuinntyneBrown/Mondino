@@ -19,6 +19,7 @@ class "time/ functions" as TimeFns <<domain, time/>> {
   +formatOffset(offset: Offset, form: 'row' | 'panel'): string
   +workingDayOnViewerClock(now: number, timeZoneId: string, viewerTimeZoneId: string): DaySpan
   +overlapBetween(now: number, timeZoneId: string, viewerTimeZoneId: string): Overlap | null
+  +compareWithViewer(pin: Pin, viewerPin: Pin | undefined, now: number, format: ClockFormat): Comparison | null
   +formatMinuteOfDay(minute: number, format: ClockFormat): string
   +formatOverlap(overlap: Overlap | null, theirDay: DaySpan, firstName: string, format: ClockFormat): OverlapText
 }
@@ -48,6 +49,19 @@ class Overlap <<api, time/>> {
   +startMinute: number
   +endMinute: number
   +lengthMinutes: number
+}
+
+class Comparison <<domain, time/>> {
+  +offset: Offset
+  +overlap: OverlapView | null
+}
+
+class OverlapView <<domain, time/>> {
+  +overlap: Overlap | null
+  +theirDay: DaySpan
+  +nowMinute: number
+  +firstName: string
+  +text: OverlapText
 }
 
 class WorkingDay <<api, time/>> {
@@ -87,6 +101,9 @@ class TeammatePanel <<components>> {
   +overlapText: OverlapText | null
 }
 
+TimeFns ..> Comparison : returns
+Comparison --> Offset : has
+Comparison --> OverlapView : has
 TimeFns ..> Offset : returns
 TimeFns ..> Overlap : returns
 TimeFns ..> DaySpan : returns

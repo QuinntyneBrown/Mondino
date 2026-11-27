@@ -16,3 +16,4 @@ export * from './lib/time/clock-format';
 export * from './lib/time/offset';
 export * from './lib/time/overlap';
 export * from './lib/pins/first-name';
+export * from './lib/time/compare-with-viewer';
