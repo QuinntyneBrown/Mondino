@@ -213,8 +213,8 @@ Every L2 requirement, L2-001 to L2-057, is realised by exactly one feature.
   every toast on the four screens, the just-joined greeting among them, is shown through it. A `MomentMarker` holds its
   `moments`, an `emblem`, a `count` and `today`.
 - `GlobeScene.setPalette` takes a `GlobePalette` read from the `--color-globe-*` tokens; the
-  globe is drawn by three.js from `globe.glb` and two mask textures built in Blender
-  (ADR 0012), and its outline and shadow are SVG circles around the canvas. `CLOCK`'s
+  globe is drawn by three.js from `globe-low.glb` first, then `globe-high.glb`, and two mask
+  textures built in Blender (ADR 0012, ADR 0030), and its outline and shadow are SVG circles around the canvas. `CLOCK`'s
   `minute` signal ticks once a minute (`BrowserClock`, bound by `TeamShell` for its four screens and
   by Join and Create Team each, ADR 0025), and
   `TeamStore.refreshing` is true while a refresh is pending.

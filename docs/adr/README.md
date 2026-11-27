@@ -19,13 +19,13 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0009](0009-making-a-team.md) | Making a team keeps only a keyed fingerprint of the email, and reuses Join's lookup | Accepted |
 | [0010](0010-protecting-team-data.md) | Every endpoint needs a session unless marked open, and the app is served under a nonce-based CSP | Accepted |
 | [0011](0011-signing-in-with-an-emailed-link.md) | Sign-in links are mailed by Postmark from an outbox, and the link keeps its token in the fragment | Accepted |
-| [0012](0012-drawing-the-globe.md) | The globe is drawn by three.js from a Blender-built glTF model and mask textures | Accepted |
+| [0012](0012-drawing-the-globe.md) | The globe is drawn by three.js from a Blender-built glTF model and mask textures | Accepted; model split in two by 0030 |
 | [0013](0013-turning-the-globe.md) | The globe turns from one frame loop, at numbers of its own, and only the Globe screen's globe turns on its own | Accepted |
 | [0014](0014-drawing-the-pins.md) | The page places the pins over the globe, and the numbers that group, fade and label them | Accepted |
 | [0015](0015-weather-source.md) | The weather comes from Open-Meteo, asked once per city and kept 15 minutes | Accepted |
 | [0016](0016-no-limit-on-making-a-team.md) | Making a team has no rate limit, the one open request without one | Accepted; supersedes part of 0009 |
 | [0017](0017-azure-postgresql.md) | The deployed database is an Azure PostgreSQL Flexible Server, reached without a password and migrated by the deployment | Accepted |
-| [0018](0018-initial-bundle-budget.md) | The initial budget (290 kB warning, 300 kB error) pays for Angular's runtime, which lazy screens put in the main chunk | Accepted; supersedes the budgets of 0005 and 0007 |
+| [0018](0018-initial-bundle-budget.md) | The initial budget (290 kB warning, 300 kB error) pays for Angular's runtime, which lazy screens put in the main chunk | Accepted; supersedes the budgets of 0005 and 0007; budget tightened by 0030 |
 | [0019](0019-moment-calendars.md) | Holidays come from OpenHolidays and Mondino's own calendar; races, events and sport from Mondino's own calendar | Accepted |
 | [0020](0020-chosen-kinds-in-the-browser.md) | The viewer's chosen kinds of moment are read through `SETTINGS_STORE`, kept in the browser until Profile & Settings saves them | Accepted |
 | [0021](0021-a-window-of-moments.md) | A long Moments list keeps a window of 60 rows in the page, moved by the page itself rather than by CDK virtual scrolling | Accepted |
@@ -37,5 +37,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0027](0027-breakpoints-where-the-mocks-break.md) | The layouts change where the mocks do, at breakpoints one Sass module names, and the Globe's globe fills its stage | Accepted |
 | [0028](0028-an-ended-session-on-profile.md) | A store that is refused with 401 forgets the team, and its screen says an invite link is needed; there is no interceptor | Accepted; replaces the design's `sessionExpiredInterceptor` |
 | [0029](0029-accessibility-as-the-mocks-draw-it.md) | The Globe announces a selection in its own live region, motion is read where it moves, and the specs measure what a sweep would | Accepted; replaces the design's `LiveAnnouncer` and `MotionPreference` |
+| [0030](0030-fast-to-load-and-light-all-day.md) | The globe is drawn first from a light model, the API compresses and caches, detail steps down after 3 seconds under 30 frames a second, and a model of the phone's connection proves the load | Accepted; tightens 0018's budget; splits 0012's model |
 
 Not decided yet: nothing a journey has reached.

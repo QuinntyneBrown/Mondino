@@ -1,6 +1,8 @@
 # 0012: The globe is drawn by three.js from a Blender-built glTF model and mask textures
 
-**Status:** Accepted (journey 8, Draw the globe). Builds on
+**Status:** Accepted (journey 8, Draw the globe). The model is two files since
+[ADR 0030](0030-fast-to-load-and-light-all-day.md), drawn first from the low one, and its
+`DetailLevel` is built there. Builds on
 [ADR 0001](0001-frontend-workspace.md) and [ADR 0010](0010-protecting-team-data.md).
 
 ## Context

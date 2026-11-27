@@ -2,7 +2,8 @@
 
 **Status:** Accepted (bundle headroom pass, after journey 15). Supersedes the budgets of
 [0005](0005-fetch-for-the-backend.md) and [0007](0007-join-form-runtime-in-the-initial-bundle.md),
-and 0007's rule that components avoid signal queries.
+and 0007's rule that components avoid signal queries. Its budget is tightened to 285 kB and
+290 kB by [ADR 0030](0030-fast-to-load-and-light-all-day.md).
 
 ## Context
 
