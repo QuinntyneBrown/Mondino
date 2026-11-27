@@ -59,20 +59,43 @@
                   autocomplete="postal-code"
                   [maxlength]="12"
                   tabular
-                  describedBy="lookup"
+                  [describedBy]="lookupDown() ? null : 'lookup'"
+                  [disabled]="lookupDown()"
                   [value]="store.postalCode()"
-                  [invalid]="postalCodeError() !== null"
+                  [invalid]="postalCodeError() !== null || store.lookup().kind === 'NotFound'"
                   [error]="postalCodeError()"
                   (valueChange)="store.setPostalCode($event)"
                   (blurred)="store.leavePostalCode()"
                 />
               </div>
-              <mo-lookup-message
-                messageId="lookup"
-                [state]="store.lookup()"
-                [country]="store.country()"
-                [quiet]="postalCodeError() !== null"
-              />
+              @if (lookupDown()) {
+                <mo-city-field
+                  [text]="store.cityText()"
+                  [results]="store.cityResults()"
+                  [countryName]="store.country()?.name ?? ''"
+                  (textChange)="store.setCityText($event)"
+                  (choose)="store.chooseCity($event)"
+                />
+              }
+              @if (!lookupDown() || store.lookup().kind === 'Found') {
+                <mo-lookup-message
+                  messageId="lookup"
+                  [state]="store.lookup()"
+                  [country]="store.country()"
+                  [quiet]="postalCodeError() !== null"
+                />
+              }
+              @if (store.lookup().kind === 'RateLimited') {
+                <mo-alert
+                  tone="warning"
+                  icon="clock"
+                  strong="Too many tries from this device."
+                  text="You can try again in"
+                  [figure]="countdown()"
+                  [figureSpoken]="countdownSpoken()"
+                  end="."
+                />
+              }
               @switch (store.lookup().kind) {
                 @case ('Locating') {
                   <button
@@ -97,6 +120,20 @@
                 @case ('Found') {
                   <button mo-button variant="primary" size="lg" block type="submit">
                     Join {{ invite.teamName }}
+                  </button>
+                }
+                @case ('RateLimited') {
+                  <button mo-button variant="primary" size="lg" block type="submit" disabled>
+                    Place my pin
+                  </button>
+                }
+                @case ('Unavailable') {
+                  <button mo-button variant="primary" size="lg" block type="submit">
+                    @if (store.chosenCity(); as chosen) {
+                      Place my pin in {{ chosen.city.name }}
+                    } @else {
+                      Place my pin
+                    }
                   </button>
                 }
                 @default {

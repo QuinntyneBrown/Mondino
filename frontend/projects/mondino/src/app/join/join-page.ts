@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
@@ -13,6 +14,7 @@ import {
   Avatar,
   AvatarGroup,
   Button,
+  CityField,
   GlobeFallback,
   GlobePlaceholder,
   LookupMessage,
@@ -39,6 +41,7 @@ import { JoinStore, nameLimit } from './join-store';
     Avatar,
     AvatarGroup,
     Button,
+    CityField,
     GlobeFallback,
     GlobePlaceholder,
     LookupMessage,
@@ -93,6 +96,24 @@ export class JoinPage {
     if (!invite || invite.positions.length === 0) return 'The globe, with no pins';
     const count = invite.positions.length;
     return `The globe, with ${count} ${count === 1 ? 'pin' : 'pins'}: one for each teammate already in ${invite.teamName}`;
+  });
+
+  /** The lookup is down: "Your city" stands in for the postal code (L2-004). */
+  protected readonly lookupDown = computed(() => {
+    const kind = this.store.lookup().kind;
+    return kind === 'Unavailable' || (kind === 'Found' && this.store.chosenCity() !== null);
+  });
+
+  /** The wait after too many tries, as "0:42". */
+  protected readonly countdown = computed(() => {
+    const seconds = this.store.secondsToWait();
+    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  });
+
+  /** The wait as it was when the alert appeared: announced once, not at each tick. */
+  protected readonly countdownSpoken = computed(() => {
+    const lookup = this.store.lookup();
+    return lookup.kind === 'RateLimited' ? untracked(() => this.countdown()) : '';
   });
 
   protected readonly nameError = computed(() => {
