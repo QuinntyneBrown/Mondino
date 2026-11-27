@@ -24,17 +24,18 @@ test.describe('Globe: the team’s pins', () => {
     await globePage.open();
 
     // Then the pins facing the viewer are a list of buttons, from west to east, each named by
-    // its teammate, city, local time and status; Sofia and Luca, both in Milan, are one group pin "2"
+    // its teammate, city, local time, status and weather; Sofia and Luca, both in Milan, are one
+    // group pin "2"
     await expect(globePage.pinButtons).toHaveCount(8);
     expect(await globePage.pinNames()).toEqual([
-      'Chloé Martin, São Paulo, 11:05, Working hours',
-      'Liam O’Connor, Dublin, 14:05, Working hours',
-      'Kwame Mensah, Accra, 14:05, Working hours',
+      'Chloé Martin, São Paulo, 11:05, Working hours, Showers 26°',
+      'Liam O’Connor, Dublin, 14:05, Working hours, Rainy 9°',
+      'Kwame Mensah, Accra, 14:05, Working hours, Clear 30°',
       '2 teammates close together: Sofia Bianchi (you), Luca Ferri',
-      'Lena Fischer, Berlin, 15:05, Working hours',
-      'Mara Lindqvist, Stockholm, 15:05, Working hours',
-      'Ahmed Al-Sayed, Dubai, 18:05, Evening',
-      'Priya Raman, Bengaluru, 19:35, Evening',
+      'Lena Fischer, Berlin, 15:05, Working hours, Cloudy 8°',
+      'Mara Lindqvist, Stockholm, 15:05, Working hours, Cloudy 6°',
+      'Ahmed Al-Sayed, Dubai, 18:05, Evening, Clear 32°',
+      'Priya Raman, Bengaluru, 19:35, Evening, Stormy 27°',
     ]);
     await expect(globePage.pin('2 teammates')).toHaveText('2');
     await expect(globePage.pin('2 teammates')).toHaveClass(/pin--group/);
@@ -87,7 +88,9 @@ test.describe('Globe: the team’s pins', () => {
 
     // Then her pin is named "(you)", and carries the ring of the viewer's own pin, thicker than another's
     const sofia = globePage.pin('Sofia Bianchi (you)');
-    await expect(sofia).toHaveAccessibleName('Sofia Bianchi (you), Milan, 15:05, Working hours');
+    await expect(sofia).toHaveAccessibleName(
+      'Sofia Bianchi (you), Milan, 15:05, Working hours, Foggy 13°',
+    );
     await expect(sofia).toHaveClass(/pin--you/);
     const ring = (name: string) =>
       globePage.pin(name).evaluate((button) => parseFloat(getComputedStyle(button).borderTopWidth));
@@ -119,7 +122,7 @@ test.describe('Globe: the team’s pins', () => {
     await globePage.open();
 
     await expect(globePage.pin(markup)).toHaveAccessibleName(
-      `${markup}, Berlin, 15:05, Working hours`,
+      `${markup}, Berlin, 15:05, Working hours, Cloudy 8°`,
     );
     await expect(globePage.pin(markup)).toHaveText('<S');
     await expect(globePage.images).toHaveCount(0);

@@ -38,7 +38,9 @@ test.describe('Globe: a pin lifts and is selected', () => {
     // Then it is lifted, larger and in front, with its label naming her, her city and local time
     await expect(globePage.pinItem('Lena Fischer')).toHaveClass(/globe__pin--lifted/);
     await expect(globePage.labelOf('Lena Fischer')).toHaveClass(/pin-label--lifted/);
-    await expect(globePage.labelOf('Lena Fischer')).toHaveText('Lena Fischer · Berlin15:05');
+    await expect(globePage.labelOf('Lena Fischer')).toHaveText(
+      'Lena Fischer · Berlin15:058°Cloudy',
+    );
     expect((await lena.boundingBox())!.width).toBeGreaterThan(resting);
     const front = (name: string) =>
       globePage.pinItem(name).evaluate((item) => Number(getComputedStyle(item).zIndex));
@@ -77,7 +79,9 @@ test.describe('Globe: a pin lifts and is selected', () => {
     await page.keyboard.press('Tab');
     await expect(globePage.pin('Chloé Martin')).toBeFocused();
     await expect(globePage.pinItem('Chloé Martin')).toHaveClass(/globe__pin--lifted/);
-    await expect(globePage.labelOf('Chloé Martin')).toHaveText('Chloé Martin · São Paulo11:05');
+    await expect(globePage.labelOf('Chloé Martin')).toHaveText(
+      'Chloé Martin · São Paulo11:0526°Showers',
+    );
 
     // And Enter selects it
     await page.keyboard.press('Enter');
@@ -180,7 +184,7 @@ test.describe('Globe: a pin is selected by touch', () => {
     // When Kwame's pin is tapped, it is selected and lifted, with its label
     await globePage.pin('Kwame Mensah').tap();
     await expect(globePage.pin('Kwame Mensah')).toHaveAttribute('aria-pressed', 'true');
-    await expect(globePage.labelOf('Kwame Mensah')).toHaveText('Kwame Mensah · Accra14:05');
+    await expect(globePage.labelOf('Kwame Mensah')).toHaveText('Kwame Mensah · Accra14:0530°Clear');
     await expect(globePage.liftedLabels).toHaveCount(1);
 
     // When the globe is tapped where there is no pin, the selection is cleared

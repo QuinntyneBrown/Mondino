@@ -1,7 +1,7 @@
 import type { GlobeViewport, Pin, PinPlacement, PinView } from '@mondino/api';
 import { describeGroup } from './pin-views';
 import { groupPins, type PlacePoint } from './group-pins';
-import { placeLabels } from './place-labels';
+import { LabelWidthPx, placeLabels, WeatherLabelWidthPx } from './place-labels';
 
 /** A place turned further than this from the viewer is drawn fainter and unlabelled (ADR 0014). */
 export const FarDepth = 0.5;
@@ -76,6 +76,7 @@ export function placePins(
       y: anchor.y,
       labelled: grouped.length === 1 && anchor.depth >= FarDepth,
       markRadius: grouped.length === 1 ? PinRadiusPx : GroupRadiusMarkPx,
+      widthPx: grouped[0].weather ? WeatherLabelWidthPx : LabelWidthPx,
     })),
     widthPx,
     isCompact(widthPx),

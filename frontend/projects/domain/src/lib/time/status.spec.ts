@@ -30,6 +30,8 @@ describe('statusFor', () => {
     timeZoneId: 'Asia/Dubai',
     sharesStatus,
     isViewer: false,
+    weather: null,
+    weatherState: 'Unavailable',
   });
 
   it('gives the status of the local hour, on a Saturday as on a Monday', () => {

@@ -14,6 +14,8 @@ const pin = (name: string, timeZoneId: string, more: Partial<Pin> = {}): Pin => 
   timeZoneId,
   sharesStatus: true,
   isViewer: false,
+  weather: null,
+  weatherState: 'Unavailable',
   ...more,
 });
 

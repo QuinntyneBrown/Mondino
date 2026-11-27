@@ -20,3 +20,4 @@ export * from './lib/toast/toast';
 export * from './lib/pin-layer/pin-layer';
 export * from './lib/pin-label/pin-label';
 export * from './lib/overlap-bar/overlap-bar';
+export * from './lib/weather-icon/weather-icon';

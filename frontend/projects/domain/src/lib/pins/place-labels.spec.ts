@@ -1,4 +1,4 @@
-import { placeLabels, type LabelledPoint } from './place-labels';
+import { placeLabels, WeatherLabelWidthPx, type LabelledPoint } from './place-labels';
 
 const at = (x: number, y: number, labelled = true): LabelledPoint => ({
   x,
@@ -20,6 +20,13 @@ describe('placeLabels', () => {
     expect(
       placeLabels([at(300, 300), at(340, 300, false), at(260, 300, false)], 600, false)[0],
     ).toBe('below');
+  });
+
+  it('allows a label with weather its own width: it fits on the left where the time alone fits on the right', () => {
+    expect(placeLabels([at(470, 300)], 600, false)).toEqual(['right']);
+    expect(placeLabels([{ ...at(470, 300), widthPx: WeatherLabelWidthPx }], 600, false)).toEqual([
+      'left',
+    ]);
   });
 
   it('keeps it inside the globe: a pin at the right rim is labelled on the left', () => {
