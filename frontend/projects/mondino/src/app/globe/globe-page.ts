@@ -9,7 +9,7 @@ import {
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
-import { GlobeFallback, GlobePlaceholder, Toast } from '@mondino/components';
+import { GlobeFallback, GlobeLegend, GlobePlaceholder, Toast } from '@mondino/components';
 import { GlobeView, type GlobeState } from '@mondino/globe';
 import { BrowserClock, stillPlacements } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
@@ -25,7 +25,7 @@ export const toastLifetime = 4000;
  */
 @Component({
   selector: 'mo-globe-page',
-  imports: [GlobeFallback, GlobePlaceholder, GlobeView, Toast],
+  imports: [GlobeFallback, GlobeLegend, GlobePlaceholder, GlobeView, Toast],
   // One clock for the screen, released with it.
   providers: [{ provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './globe-page.html',

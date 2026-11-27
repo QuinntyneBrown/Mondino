@@ -68,6 +68,13 @@ any other origin.
   "A still picture of the globe, with 13 teammates’ pins." (the team's count). The block itself
   is not focusable and listens for no drag and no arrow key: the still picture does not turn.
 
+- **`GlobeLegend`** (`mo-globe-legend`) — presentation component with one input, `still`. It
+  renders the mocks' `ul.globe-screen__legend` ("Night side", "Moment this week", "Teammates
+  close together" beside a sample group pin, and "Drag to spin", or on the still picture
+  "Still view — 3D isn’t available in this browser") and, on the still picture,
+  `p.globe-screen__still` before it. Its host takes no box, so the legend is laid over the
+  stage from 640 px as the mocks draw it, and the line shows under 640 px only.
+
 **In the `domain` library**
 
 - **`stillPlacements(pins, size, options)`** — pure function in `pins/`. It projects each
@@ -158,7 +165,7 @@ The scene lights the model from that direction, so the shaded half is always the
 away from the sun. The subsolar point moves 0.25° west each minute, which is 15° in an hour.
 The shading is a darkening of the surface, not a change to the pins: pins and labels are drawn
 over the scene by `PinLayer` and keep their own contrast on both sides (L2-041). The legend
-that names "Night side" at 640 px and wider is part of `GlobePage`'s template.
+that names "Night side" at 640 px and wider is `GlobeLegend`, in `GlobePage`'s stage.
 
 The globe's colours are tokens. The design system defines `--color-globe-ocean`,
 `--color-globe-ocean-deep`, `--color-globe-land`, `--color-globe-land-deep`,
