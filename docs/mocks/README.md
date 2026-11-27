@@ -152,6 +152,10 @@ still picture keeps its pins.
 3. **"Reset link".** The invite dialog draws it and Join says what a reset link looks like to
    someone who opens it. What it asks before it acts, and what the dialog shows afterwards, is
    not designed; anyone on the team can press it, since Mondino has no admins.
+   Until it is, the built invite dialog leaves "Reset link" out (journey 16): a control that
+   does nothing when pressed is not built, so its foot keeps the count alone, "13 on the team ·
+   link never expires". An unusable link already has one answer on Join, "This invite link no
+   longer works" (L2-001).
 4. **The palette.** The Mondino App prototype uses the palette the *Palette Variants* canvas
    calls "Current": navy ink and sea on a cool off-white with a warm orange pin. Fjord, Candy
    Pop and Lagoon are on that canvas as options and none has been applied to the app. The mocks
@@ -185,6 +189,9 @@ still picture keeps its pins.
 14. **Leaving.** `left-team` takes the team's name from the screen the teammate left from;
     opened or reloaded without it, its title reads "You’ve left the team". Someone on no team
     who opens a screen sees `invite-needed` in place.
+15. **The sheet's width.** `dialogs/invite` says a dialog is a sheet "under 576 px", as L2-037
+    and the design system's dialog page do; the component CSS made it one under 640 px, with the
+    Globe's stage. Journey 16 brought the CSS to 576 px (36rem), the phone's own breakpoint.
 
 ## Coverage
 

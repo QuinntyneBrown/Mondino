@@ -22,32 +22,35 @@ box "Frontend — Mondino web app" #E0F2FE
   participant "InviteDialog" as dialog
   participant "CopyField" as field
   participant "InviteLinkCopier" as copier
+  participant "Toaster" as toaster
   participant "Toast" as toast
 end box
 actor -> header : Choose "Invite teammate", on any teammate screen
 header -> shell : invite(the button)
 shell -> opener : open(the button)
-opener -> opener : import the dialog's chunk on first use
+opener -> opener : import the dialog's and the CDK Dialog's chunks on first use
 opener -> dialog : Dialog.open, role dialog, modal
 dialog --> actor : "Invite teammates to Northwind", the link, "13 on the team · link never expires";\nfocus on "Copy link" (L2-054)
 actor -> field : Choose "Copy link"
 field -> dialog : copy
 dialog -> copier : copy()
 alt the browser accepts the copy
-  copier --> dialog : Copied
+  copier -> toaster : show(success)
+  copier --> dialog : true
   dialog -> opener : close
   opener --> actor : Focus returns to "Invite teammate"
-  shell -> toast : Show the success toast for 4 s
+  shell -> toast : Show the success toast for 4 s, held while pointed at or focused
   toast --> actor : "Invite link copied. Paste it wherever your team talks." (L2-054)
 else the browser refuses the copy
-  copier --> dialog : Refused
-  dialog -> field : select()
+  copier -> toaster : show(danger)
+  copier --> dialog : false
+  dialog -> field : selectRequest
   field --> actor : The dialog stays; the link is selected and focused
   shell -> toast : Show the danger toast, which stays
   toast --> actor : "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself." (L2-054)
 end
 note over header, toast
-  Escape and Close close the dialog and return focus to the control that opened it.
+  Escape, Close and the backdrop close the dialog and return focus to the control that opened it.
   No request is sent to the Mondino API: the link is built from the invite token TeamStore holds.
 end note
 @enduml

@@ -30,7 +30,9 @@ working at once, and Join then shows "This invite link no longer works" (`open-i
 The new link is shown in the dialog. An invite link never expires on its own.
 
 What "Reset link" asks before it acts is not designed, and the reset is not built before that
-design exists: `<TO SUPPLY>`.
+design exists: `<TO SUPPLY>`. Until then the built dialog leaves "Reset link" out, so nothing in
+it does nothing when pressed; its foot reads the count alone (journey 16,
+`docs/mocks/README.md`).
 
 Mondino sends the link to no one. The teammate pastes it wherever the team talks; "Invite
 teammate" opens the dialog and nothing else.
@@ -38,7 +40,9 @@ teammate" opens the dialog and nothing else.
 ## Description
 
 The feature is a vertical slice from the header to the database. Copying happens in the
-browser alone; only the reset calls the Mondino API. No outside source takes part.
+browser alone; only the reset calls the Mondino API. No outside source takes part. Journey 16
+builds the dialog and its copy; the parts of the reset below are what it must be once it is
+designed, and none of them is built.
 
 **Frontend (`mondino` application, `@mondino/api`, `@mondino/components`, `@mondino/domain`)**
 
@@ -46,49 +50,63 @@ browser alone; only the reset calls the Mondino API. No outside source takes par
   the output `invite` with the button's element. From 768 px the button shows its label
   (`app-header__invite-label`); under 768 px it shows the icon alone and keeps the accessible
   name "Invite teammate" (`adapt-to-every-width`).
-- **`TeamShell`** — provides `InviteDialogOpener` beside `TeamStore` and `InviteLinkCopier`. On
-  the header's `invite` it calls `InviteDialogOpener.open(trigger)`. It renders the `Toast`
-  from `InviteLinkCopier.result`, so the toast outlives the dialog and is the same on all four
-  screens.
+- **`TeamShell`** — provides `InviteDialogOpener` beside `TeamStore`, `Toaster` and
+  `InviteLinkCopier` (`view-week-around-the-world`). On the header's `invite` it calls
+  `InviteDialogOpener.open(trigger)`. It renders the `Toast` from `Toaster.current`, so the
+  toast outlives the dialog and is the same on all four screens.
 - **`TeamPage`** — for a team of one it shows `InvitePrompt`, the card "It’s just you on
   Northwind so far" (`view-team-through-the-day`), whose button "Invite teammates" calls the
   same `InviteDialogOpener.open(trigger)`.
-- **`InviteDialogOpener`** — service of the `mondino` application, provided at `TeamShell`'s
-  route. `open(trigger)` imports `InviteDialog` dynamically, so the dialog's code is loaded
-  when it is first opened and is in no screen's chunk, then opens it through the CDK `Dialog`
-  service with `TeamShell`'s injector. It opens one dialog at a time and returns focus to
-  `trigger` when the dialog closes.
-- **`InviteDialog`** — CDK Dialog with `role="dialog"`, `aria-modal`, the title as its name and
-  the paragraph as its description; its block is `dialog`.
+- **`InviteDialogOpener`** — service of the `mondino` application, provided by `TeamShell`.
+  `open(trigger)` imports `InviteDialog` and the CDK `Dialog` dynamically, so their code is
+  loaded when the dialog is first opened and is in no screen's chunk, then opens it with
+  `TeamShell`'s injector, so the dialog shares the shell's `TeamStore` and `InviteLinkCopier`.
+  It opens one dialog at a time, starts focus on "Copy link" (`autoFocus`), and returns focus
+  to `trigger` when the dialog closes (`restoreFocus`). The dialog it opens is released when it
+  closes, and closed when the shell is destroyed.
+- **`InviteDialog`** — component of the `mondino` application, opened as a CDK Dialog whose
+  container has `role="dialog"`, `aria-modal`, the title as its name and the paragraph as its
+  description; its block is `dialog`, with the design system's `backdrop` under it. The CDK
+  pane fills the window and the component places `dialog__panel` in it, as the design
+  system's `.dialog` does.
   - It reads the team's name, the invite token and the number of pins from `TeamStore`, and
-    builds the link with `inviteLinkFor`. The team's name is rendered as text. The line under
-    the link (`dialog__meta`) reads the count and "link never expires".
-  - Focus starts on "Copy link" and stays inside the dialog. Escape and the "Close" button
-    close it.
-  - "Copy link" calls `InviteLinkCopier.copy()`. On `Copied` the dialog closes. On `Refused`
-    the dialog stays open and calls `CopyField.select()`.
-  - "Reset link" calls `TeamApi.resetInviteLink(teamId)` and, on the answer, calls
-    `TeamStore.replaceInviteToken`, so the dialog and the invite card show the new link without
-    a further read. What the dialog asks before the request, what it shows while the request
-    is pending, what it says once the link has been reset and what it shows when the request
-    fails are `<TO SUPPLY>`.
-  - Under 576 px the dialog is a sheet from the bottom.
+    the link, without its scheme, from `InviteLinkCopier.link()`. The team's name is rendered
+    as text. The line under the link (`dialog__meta`) reads the count and "link never
+    expires".
+  - Focus starts on "Copy link" and stays inside the dialog. Escape, the "Close" button and a
+    click on the backdrop close it.
+  - "Copy link" calls `InviteLinkCopier.copy()`. When it resolves true the dialog closes. When
+    it resolves false the dialog stays open and raises `CopyField`'s `selectRequest`, which
+    selects the link and moves focus to it.
+  - "Reset link" is not built until it is designed. Once it is, it calls
+    `TeamApi.resetInviteLink(teamId)` and, on the answer, `TeamStore.replaceInviteToken`, so
+    the dialog and the invite card show the new link without a further read. What the dialog
+    asks before the request, what it shows while the request is pending, what it says once the
+    link has been reset and what it shows when the request fails are `<TO SUPPLY>`.
+  - Under 576 px the dialog is a sheet from the bottom; from 576 px it is centred. It fades in
+    in `--duration-slow`, with no motion under reduced motion.
 - **`CopyField`** (`mo-copy-field`, block `copy-field`) — presentation component in
   `@mondino/components`: the link in a read-only input (`copy-field__value`) and the button
-  "Copy link". It takes `value`, `label` and `copied`, emits `copy`, and `select()` selects the
-  link and moves focus to it. It injects nothing. Create Team uses the same component
-  (`make-team`).
+  "Copy link" with the mocks' link icon. It takes `value`, `label`, `inputId` (when a visible
+  `<label for>` names the link, as `dialog__label` does) and `copied`, emits `copyLink`, and
+  each new `selectRequest` selects the link and moves focus to it. It injects nothing. Create
+  Team uses the same component (`make-team`).
 - **`InviteLinkCopier`** — service of the `mondino` application
-  (`view-week-around-the-world`). `copy()` copies the link through the CDK `Clipboard`, sets
-  `result` and returns it. The invite card on the Globe of a team of one calls the same method
-  directly, with no dialog, and ends in the same toasts.
+  (`view-week-around-the-world`). `copy()` writes the link through the `CLIPBOARD` token
+  (`NavigatorClipboard`, `navigator.clipboard`, ADR 0009), shows the toast through `Toaster`
+  and resolves whether the link is on the clipboard. The invite card on the Globe of a team of
+  one calls the same method directly, with no dialog, and ends in the same toasts.
+- **`Toaster`** — service of the `mondino` application: the one toast on the teammate screens.
+  A success goes after 4 s; `hold()` stops the time while the toast is pointed at or focused and
+  `release()` lets the rest of it run. `Toast` emits `held` with true and false as the pointer
+  or focus enters and leaves it.
 - **`Toast`** (`mo-toast`, block `toast`) — presentation component in `@mondino/components`,
   rendered by `TeamShell` in the mocks' `toast-region`.
 
-  | `CopyResult` | Toast | Region | Dismissal |
+  | `copy()` | Toast | Region | Dismissal |
   |--------------|-------|--------|-----------|
-  | `Copied` | "Invite link copied. Paste it wherever your team talks." | `role="status"`, polite | After 4 s; the timer pauses while the toast is pointed at or focused. "Dismiss" closes it at once. |
-  | `Refused` | "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself." | `role="alert"`, assertive | Stays until "Dismiss" is chosen |
+  | Copied | "Invite link copied. Paste it wherever your team talks." | `role="status"`, polite | After 4 s; the timer pauses while the toast is pointed at or focused. "Dismiss" closes it at once. |
+  | Refused | "Couldn’t copy the link. It’s selected — press Ctrl+C or ⌘C to copy it yourself." | `role="alert"`, assertive | Stays until "Dismiss" is chosen |
 
   The 4 s dismissal is one timer, cleared when `InviteLinkCopier` is destroyed; unit tests
   advance a fake clock. On the invite card, where there is no dialog, a refused copy selects
@@ -133,7 +151,11 @@ browser alone; only the reset calls the Mondino API. No outside source takes par
 **Open points**
 
 - The confirmation "Reset link" asks for, and the dialog's pending and failed states, are
-  `<TO SUPPLY>`.
+  `<TO SUPPLY>`. Until they are drawn the dialog is built without "Reset link", and no part of
+  the reset, in the browser or the backend, is built (journey 16).
+- "Invite teammates" on the Team screen of a team of one comes with that screen
+  (`view-team-through-the-day`, journey 17), and the header on Moments and Profile & Settings
+  with theirs; `TeamShell`'s header is the one on every screen.
 - A limit on how often a team's link is reset is `<TO SUPPLY>`.
 - Whether teammates are told that the link was reset, and by whom, is `<TO SUPPLY>`. No mock
   draws it.
@@ -177,7 +199,8 @@ the Mondino API, `TeamsController` sends `ResetInviteLinkCommand` past `TeamScop
 ### Class structure
 
 `InviteDialog` depends on `CopyField`, `InviteLinkCopier`, `TeamStore` and the `TeamApi`
-contract. `InviteLinkCopier` holds a `CopyResult`, which `TeamShell` shows as a `Toast`.
+contract (the last for the reset, not yet built). `InviteLinkCopier` writes through the
+`Clipboard` contract and tells `Toaster`, whose toast `TeamShell` shows as a `Toast`.
 `ResetInviteLinkCommand` is an `ITeamScopedRequest`, and its handler replaces the `Team`'s
 invite token.
 
