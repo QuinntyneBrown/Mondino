@@ -1,4 +1,4 @@
-import { getJson, postJson } from './request';
+import { getJson, post, postJson } from './request';
 
 describe('request', () => {
   const fetchMock = vi.fn<typeof fetch>();
@@ -28,6 +28,14 @@ describe('request', () => {
     cookies('theme=dark; __Host-mondino-xsrf=CfDJ8%2Btoken');
     await postJson('/api/teams/t1/me', { name: 'Sofia' }, signal);
     expect(headersSent().get('x-xsrf-token')).toBe('CfDJ8+token');
+  });
+
+  it('posts to an endpoint that answers 202 with no body, and reads nothing back', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 202 }));
+    await expect(post('/api/sign-in-links', { email: 'sofia@northwind.co' }, signal)).resolves.toBe(
+      undefined,
+    );
+    expect(fetchMock.mock.calls[0][1]?.body).toBe('{"email":"sofia@northwind.co"}');
   });
 
   it('sends no token with a read', async () => {

@@ -19,11 +19,29 @@ export function postJson<T>(url: string, body: unknown, signal: AbortSignal): Pr
   });
 }
 
+/** Posts `body` as JSON to an endpoint that answers with no body, as `postJson` does. */
+export async function post(url: string, body: unknown, signal: AbortSignal): Promise<void> {
+  await send<null>(
+    url,
+    {
+      signal,
+      method: 'POST',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+    false,
+  );
+}
+
 /** The cookie the backend gives a session's antiforgery token in, and the header it is returned in (docs/adr/0010). */
 const antiforgeryCookie = '__Host-mondino-xsrf';
 const antiforgeryHeader = 'x-xsrf-token';
 
-async function send<T>(url: string, init: RequestInit & { signal: AbortSignal }): Promise<T> {
+async function send<T>(
+  url: string,
+  init: RequestInit & { signal: AbortSignal },
+  readsBody = true,
+): Promise<T> {
   const { signal } = init;
   let response: Response;
   try {
@@ -42,7 +60,7 @@ async function send<T>(url: string, init: RequestInit & { signal: AbortSignal })
       retryAfterSeconds: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
     });
   }
-  return (await response.json()) as T;
+  return readsBody ? ((await response.json()) as T) : (null as T);
 }
 
 /** The `code` of a ProblemDetails, or `unexpected` when the answer carries none. */

@@ -26,6 +26,9 @@
   font: var(--text-h1-lg);
   letter-spacing: var(--letter-spacing-tight);
 }
+.notice__title:focus {
+  outline: none;
+}
 .notice__text {
   max-width: var(--layout-overlay-max);
   margin-top: var(--space-4);

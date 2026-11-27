@@ -18,7 +18,7 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0008](0008-session-and-cross-site-requests.md) | The session is a year-long sliding cookie, and the open requests refuse other sites | Accepted |
 | [0009](0009-making-a-team.md) | Making a team keeps only a keyed fingerprint of the email, and reuses Join's lookup | Accepted |
 | [0010](0010-protecting-team-data.md) | Every endpoint needs a session unless marked open, and the app is served under a nonce-based CSP | Accepted |
+| [0011](0011-signing-in-with-an-emailed-link.md) | Sign-in links are mailed by Postmark from an outbox, and the link keeps its token in the fragment | Accepted |
 
 Not decided yet, each by the journey that first needs it: the globe's renderer and asset format
-(journey 8), the providers of the calendars (journey 19) and the sender of sign-in emails
-(journey 7).
+(journey 8) and the providers of the calendars (journey 19).

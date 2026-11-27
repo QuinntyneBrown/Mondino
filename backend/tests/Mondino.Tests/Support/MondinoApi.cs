@@ -4,13 +4,16 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Mondino.Application.Joining;
 using Mondino.Application.Persistence;
+using Mondino.Application.SignIn;
 using Mondino.Application.Teammates;
 using Mondino.Domain.Teams;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
+using Mondino.Infrastructure.SignIn;
 
 namespace Mondino.Tests.Support;
 
@@ -54,6 +57,28 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>The key of the email fingerprint (<c>EmailProtection:Key</c>); null leaves it unset.</summary>
     public string? EmailKey { get; set; } = Convert.ToBase64String(new byte[32]);
 
+    /// <summary>The outbox sign-in mails leave through, recording each one instead of sending it.</summary>
+    public FakeSignInMailOutbox SignInMails { get; } = new();
+
+    /// <summary>
+    /// The outside Email source. Set <see cref="UsesEmailSource"/> before the first request to send
+    /// sign-in mails for real, through the outbox and the Postmark sender, to it.
+    /// </summary>
+    public FakeEmailSource EmailSource { get; } = new();
+
+    public bool UsesEmailSource { get; set; }
+
+    /// <summary>The Postmark server token the Email source is called with; null leaves it unset.</summary>
+    public string? EmailServerToken { get; set; } = "postmark-test-token";
+
+    /// <summary>The app's own address, the start of every sign-in link (<c>SignInEmail:AppAddress</c>).</summary>
+    public const string AppAddress = "https://mondino.test";
+
+    /// <summary>Every log line, at every level, once <see cref="CapturesLogs"/> is set before the first request.</summary>
+    public CapturedLogs Logs { get; } = new();
+
+    public bool CapturesLogs { get; set; }
+
     /// <summary>Set before the first request to make every use of the database fail.</summary>
     public bool DatabaseFails { get; set; }
 
@@ -73,9 +98,21 @@ public class MondinoApi : WebApplicationFactory<Program>
             builder.UseSetting("EmailProtection:Key", EmailKey);
         }
 
+        builder.UseSetting("SignInEmail:AppAddress", AppAddress);
+        builder.UseSetting("SignInEmail:From", "Mondino <signin@mondino.test>");
+        if (EmailServerToken is not null)
+        {
+            builder.UseSetting("SignInEmail:ServerToken", EmailServerToken);
+        }
+
         if (UsesPostalCodeSource && PostalCodeSourceUsername is not null)
         {
             builder.UseSetting("PostalCodeSource:Username", PostalCodeSourceUsername);
+        }
+
+        if (CapturesLogs)
+        {
+            builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs).AddFilter<CapturedLogs>(null, LogLevel.Trace));
         }
 
         builder.ConfigureTestServices(services =>
@@ -103,6 +140,17 @@ public class MondinoApi : WebApplicationFactory<Program>
             {
                 services.RemoveAll<IPostalCodeLookup>();
                 services.AddSingleton<IPostalCodeLookup>(PostalCodes);
+            }
+
+            if (UsesEmailSource)
+            {
+                services.AddHttpClient(PostmarkSignInEmailSender.ClientName)
+                    .ConfigurePrimaryHttpMessageHandler(() => EmailSource);
+            }
+            else
+            {
+                services.RemoveAll<ISignInMailOutbox>();
+                services.AddSingleton<ISignInMailOutbox>(SignInMails);
             }
 
             if (DatabaseFails)

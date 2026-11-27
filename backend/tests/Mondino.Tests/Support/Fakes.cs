@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mondino.Application.Persistence;
 using Mondino.Application.Teammates;
+using Mondino.Domain.SignIn;
 using Mondino.Domain.Teams;
 
 namespace Mondino.Tests.Support;
@@ -27,6 +28,8 @@ public sealed class FailingAppDbContext : IAppDbContext
     public DbSet<Teammate> Teammates => throw Down();
 
     public DbSet<City> Cities => throw Down();
+
+    public DbSet<SignInLink> SignInLinks => throw Down();
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken) =>
         throw Down();

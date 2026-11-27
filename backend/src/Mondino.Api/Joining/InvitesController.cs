@@ -63,10 +63,22 @@ public sealed class InvitesController(ISender sender) : ControllerBase
 }
 
 /// <summary>A country and the start of a city's name, as typed.</summary>
-public sealed record CitySearchRequest(string? CountryCode, string? Text);
+public sealed record CitySearchRequest(string? CountryCode, string? Text)
+{
+    /// <summary>Only the type: what a teammate sent is never written to a log (L2-051).</summary>
+    public override string ToString() => nameof(CitySearchRequest);
+}
 
 /// <summary>A country and a postal code, as typed.</summary>
-public sealed record PostalCodeLookupRequest(string? CountryCode, string? PostalCode);
+public sealed record PostalCodeLookupRequest(string? CountryCode, string? PostalCode)
+{
+    /// <summary>Only the type: what a teammate sent is never written to a log (L2-051).</summary>
+    public override string ToString() => nameof(PostalCodeLookupRequest);
+}
 
 /// <summary>A name, a country, and a postal code or a city chosen from "Your city", as given.</summary>
-public sealed record JoinRequest(string? Name, string? CountryCode, string? PostalCode, string? CityId, Guid? JoinRequestId);
+public sealed record JoinRequest(string? Name, string? CountryCode, string? PostalCode, string? CityId, Guid? JoinRequestId)
+{
+    /// <summary>Only the type: what a teammate sent is never written to a log (L2-051).</summary>
+    public override string ToString() => nameof(JoinRequest);
+}

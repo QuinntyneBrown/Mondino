@@ -336,3 +336,74 @@ apply the lessons that fit.
   helper sends the session's cookies by hand for the same reason.
 - *Check the shape of navigation state and storage* (journey 4, lesson 3): `teammateGuard` reads
   only `TeamMembership.current()`, which already checks the stored shape.
+
+## Journey 7: Sign in with an emailed link
+
+**What slowed it**
+
+- The design had the handler send the mail before answering and refuse with 503 when the Email
+  source did not take it. Mail goes only to a teammate's email, so that refusal, and the seconds a
+  call takes, would have told anyone which emails Mondino knows. Mail now leaves from an outbox
+  after the answer (ADR 0011), and the design, the shared contracts and `survive-source-failure`
+  were brought in line before any code.
+- The design kept the email with the link in plain, against ADR 0009. The link keeps the email's
+  fingerprint and the email sealed under a key only the token gives, which is also how "You need an
+  invite link" can name it for a teammate who left after asking.
+- The log test passed against a build whose analyzers had refused the sabotage meant to prove it,
+  and then failed for real once every category logged at Trace: MVC writes an action's arguments to
+  its Trace log, and a record's `ToString` printed the email, the token, and Create Team's name and
+  postal code. Every API request record now prints only its type.
+- `JsonContent.Create` writes camelCase by default; Postmark expects `From`, `To`, `TextBody`. The
+  test at the HTTP boundary caught it.
+- The globe-shape spec parsed the mock after the app was open, so the mock's own `style=` broke the
+  app's CSP and the guard failed the spec. The mock is read before the app is opened, as the
+  existing specs do.
+- ADR 0009 expected an `AuthLayout` component once a second screen used the `auth` block, but its
+  body's title, lead and fields would then be styled across a component boundary. The two pages
+  share one Sass partial instead (ADR 0011).
+
+**Lessons**
+
+1. **An answer that must not depend on a secret must not wait on it either.** When only some
+   inputs trigger a call to an outside source, put the call behind an outbox so neither the status
+   nor the time of the answer says which.
+2. **Prove a log test can fail, and check the sabotage built.** A failed build leaves the old
+   binary, and the test passes against it; read the build's own result first.
+3. **Capture logs with a provider-level filter.** `appsettings.json` keeps `Microsoft.AspNetCore` at
+   Warning, which hides MVC's Trace lines; `AddFilter<TProvider>(null, LogLevel.Trace)` sees
+   everything.
+4. **A record that carries what a person typed overrides `ToString`.** The framework logs action
+   arguments by their `ToString`.
+5. **Read a mock's markup before the app is open.** Parsing it under the app's CSP applies its
+   inline styles to nothing but still reports the violation.
+6. **A token meant for one browser goes in the fragment.** No server, proxy or log sees it; the
+   page sends it in a body and replaces the address before anything else.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0011, the sign-in design and its
+  diagrams, the shared contracts, two neighbouring designs, L2-052 and the deployment settings were
+  one commit before any code; the design was touched again only for what the code found (the
+  request records' `ToString`, "Use another email" as the mock's link).
+- *Read the prompt against the mock too* (journey 3, lesson 1): the mock draws "Use another email"
+  as a link to `/sign-in`; it was built as a button first and changed to the mock's link.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice ran red first, but for
+  four proofs that passed on first run because an earlier slice had built them (the token's storage,
+  "without a server token nothing is sent", the links to Sign In, and Sign In by touch and keyboard);
+  they were kept as the proof.
+- *Write a controller one action at a time* (journey 5, lesson 5): the redemption's rows in the open
+  endpoints test were held back from slice 1's commit and restored, red, in slice 3.
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6): 259.15 kB before,
+  259.24 kB after (the route's entry); Sign In is its own 7 kB chunk. No budget moved.
+- *Check the verify script's own exit code* (journey 2, lesson 6): read as `rc` each slice; it caught
+  a selector in a spec before the commit.
+- *A cookie's lifetime is measured from the fake clock* (journey 4, lesson 1): the redemption tests
+  send the session's cookies by hand.
+- *Check the shape of navigation state and storage* (journey 4, lesson 3): `InviteNeededPage` reads
+  the email only when it is a short string, and takes it out of history once read
+  (journey 4, lesson 2).
+- *Test an outside source at its HTTP boundary* (journey 3, lesson 5): Postmark's message, its
+  timeout under `FakeTimeProvider`, its breaker and the missing token are proven against a fake
+  `HttpMessageHandler`.
+- *Remove `IHttpClientFactory`'s loggers* (journey 3, lesson 4): the Email source's client logs
+  nothing.

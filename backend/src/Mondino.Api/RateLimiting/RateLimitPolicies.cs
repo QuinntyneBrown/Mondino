@@ -28,6 +28,12 @@ internal static class RateLimitPolicies
     /// <summary>Making a team: 5 an hour.</summary>
     public const string CreateTeam = "create-team";
 
+    /// <summary>Asking for a sign-in link: 5 in 15 minutes.</summary>
+    public const string SignInLink = "sign-in-link";
+
+    /// <summary>Opening a sign-in link: 10 a minute, so sign-in links cannot be guessed at speed.</summary>
+    public const string SignInRedemption = "sign-in-redemption";
+
     public static IServiceCollection AddRateLimitPolicies(this IServiceCollection services) =>
         services.AddRateLimiter(options =>
         {
@@ -36,6 +42,8 @@ internal static class RateLimitPolicies
             options.AddPolicy(CitySearch, context => PerClient(context, permits: 30, window: TimeSpan.FromMinutes(1)));
             options.AddPolicy(Join, context => PerClient(context, permits: 5, window: TimeSpan.FromMinutes(1)));
             options.AddPolicy(CreateTeam, context => PerClient(context, permits: 5, window: TimeSpan.FromHours(1)));
+            options.AddPolicy(SignInLink, context => PerClient(context, permits: 5, window: TimeSpan.FromMinutes(15)));
+            options.AddPolicy(SignInRedemption, context => PerClient(context, permits: 10, window: TimeSpan.FromMinutes(1)));
             options.OnRejected = RefuseAsync;
         });
 

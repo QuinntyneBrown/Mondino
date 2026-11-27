@@ -1,6 +1,8 @@
 <mo-notice-page
   title="You need an invite link"
-  lead="Mondino teams are invite-only, and you aren’t on one yet. Ask a teammate to send you their team’s link — it opens straight onto the globe."
+  [lead]="lead"
+  [emphasis]="email ?? ''"
+  [rest]="rest"
 >
   <a slot="actions" mo-button variant="primary" size="lg" routerLink="/new">Start a team</a>
   <a slot="actions" mo-button size="lg" routerLink="/sign-in">Use a different email</a>
