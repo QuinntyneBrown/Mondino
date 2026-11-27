@@ -11,6 +11,7 @@ import {
   CLOCK,
   type ClockFormat,
   HttpProfileApi,
+  type MomentKind,
   PROFILE_API,
   type TemperatureUnit,
 } from '@mondino/api';
@@ -27,6 +28,7 @@ import {
   SelectField,
   type SelectOption,
   Skeleton,
+  Switch,
   TextField,
 } from '@mondino/components';
 import {
@@ -64,6 +66,7 @@ import { ProfileStore } from './profile-store';
     Segmented,
     SelectField,
     Skeleton,
+    Switch,
     TextField,
   ],
   // The screen's state, its client and one clock, released with it.
@@ -94,6 +97,38 @@ export class ProfilePage {
     { value: '24-hour', label: '24-hour' },
     { value: '12-hour', label: '12-hour' },
   ];
+
+  /** The kinds' switches, in their fixed order (L2-022). */
+  protected readonly kindSwitches: readonly { kind: MomentKind; label: string }[] = [
+    { kind: 'holiday', label: 'Public holidays' },
+    { kind: 'formula-1', label: 'Formula 1 race weekends' },
+    { kind: 'local-event', label: 'Local events and festivals' },
+    { kind: 'sport', label: 'Big sporting days' },
+  ];
+
+  /** What each sharing switch's state means for teammates (L2-034). */
+  protected readonly weatherHint = computed(() =>
+    this.store.settings()?.sharesWeather
+      ? 'Shown on your pin and in your panel.'
+      : 'Teammates see your local time and no weather.',
+  );
+  protected readonly statusHint = computed(() =>
+    this.store.settings()?.sharesStatus
+      ? 'Worked out from your local time — 09:00 to 18:00 counts as working.'
+      : 'Teammates see no status for you, at any hour.',
+  );
+
+  /** Both switches off in the draft: teammates will see only the name, city and local time. */
+  protected readonly sharesNothing = computed(() => {
+    const settings = this.store.settings();
+    return !!settings && !settings.sharesWeather && !settings.sharesStatus;
+  });
+
+  /** Either switch off as saved: the viewer still sees what teammates do not. */
+  protected readonly withholds = computed(() => {
+    const settings = this.store.profile()?.settings;
+    return !!settings && (!settings.sharesWeather || !settings.sharesStatus);
+  });
 
   /** The country chosen in the draft, with the form its postal codes take. */
   protected readonly country = computed(

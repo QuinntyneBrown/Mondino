@@ -36,6 +36,13 @@ export class ProfilePage {
   readonly display: Locator;
   readonly temperature: Locator;
   readonly clock: Locator;
+  /** Moments on the globe, a switch per kind, and What teammates see, the two sharing switches. */
+  readonly moments: Locator;
+  readonly privacy: Locator;
+  readonly shareWeather: Locator;
+  readonly shareStatus: Locator;
+  /** The note under the sharing switches when both are off. */
+  readonly sharingNote: Locator;
   readonly saveBar: Locator;
   readonly saveChanges: Locator;
   readonly saveBarButton: Locator;
@@ -75,6 +82,13 @@ export class ProfilePage {
     this.display = this.main.getByRole('region', { name: 'Display' });
     this.temperature = this.display.getByRole('radiogroup', { name: 'Temperature' });
     this.clock = this.display.getByRole('radiogroup', { name: 'Clock' });
+    this.moments = this.main.getByRole('region', { name: 'Moments on the globe' });
+    this.privacy = this.main.getByRole('region', { name: 'What teammates see' });
+    this.shareWeather = this.privacy.getByRole('switch', { name: /^Share my local weather/ });
+    this.shareStatus = this.privacy.getByRole('switch', {
+      name: /^Share whether I’m working or asleep/,
+    });
+    this.sharingNote = this.privacy.locator('.panel__note');
     this.saveBar = page.locator('.save-bar');
     this.saveChanges = this.saveBar.getByRole('button', { name: 'Save changes' });
     this.saveBarButton = this.saveBar.getByRole('button');
@@ -89,6 +103,26 @@ export class ProfilePage {
   /** An option of a Display radio group: "°F" of Temperature. */
   option(group: Locator, name: string): Locator {
     return group.getByRole('radio', { name, exact: true });
+  }
+
+  /** A kind's switch under Moments on the globe: "Big sporting days". */
+  kindSwitch(label: string): Locator {
+    return this.moments.getByRole('switch', { name: label });
+  }
+
+  /** "On" or "Off" beside a switch's track. */
+  stateOf(control: Locator): Locator {
+    return control.locator('.switch__state');
+  }
+
+  /** The line under a switch's label. */
+  hintOf(control: Locator): Locator {
+    return control.locator('.switch-row__hint');
+  }
+
+  /** The emblem leading a kind's switch. */
+  emblemOf(control: Locator): Locator {
+    return control.locator('.emblem');
   }
 
   /** The tick a chosen option carries besides its fill. */

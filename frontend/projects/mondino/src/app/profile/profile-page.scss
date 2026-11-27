@@ -118,6 +118,20 @@
   gap: var(--space-3);
   margin-top: var(--space-4);
 }
+// The note under the sharing switches when both are off.
+.panel__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-canvas);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+.panel__note .icon {
+  margin-top: var(--space-0-5);
+}
 // A setting with its label: the legend floats so the row lays out as the mock's.
 .setting-row {
   display: flex;
