@@ -77,6 +77,11 @@ public static class DependencyInjection
         services.AddSingleton<ISignInTokens, SignInTokens>();
         services.AddSingleton<SignInMailOutbox>();
         services.AddSingleton<ISignInMailOutbox>(provider => provider.GetRequiredService<SignInMailOutbox>());
+        services.Configure<SignInEmailOptions>(configuration.GetSection(SignInEmailOptions.Section));
+        services.AddHttpClient(PostmarkSignInEmailSender.ClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .RemoveAllLoggers();
+        services.AddSingleton<ISignInEmailSender, PostmarkSignInEmailSender>();
+        services.AddHostedService<SignInMailDispatcher>();
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentTeammate, CurrentTeammate>();

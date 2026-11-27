@@ -12,6 +12,7 @@ using Mondino.Application.Teammates;
 using Mondino.Domain.Teams;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
+using Mondino.Infrastructure.SignIn;
 
 namespace Mondino.Tests.Support;
 
@@ -58,6 +59,17 @@ public class MondinoApi : WebApplicationFactory<Program>
     /// <summary>The outbox sign-in mails leave through, recording each one instead of sending it.</summary>
     public FakeSignInMailOutbox SignInMails { get; } = new();
 
+    /// <summary>
+    /// The outside Email source. Set <see cref="UsesEmailSource"/> before the first request to send
+    /// sign-in mails for real, through the outbox and the Postmark sender, to it.
+    /// </summary>
+    public FakeEmailSource EmailSource { get; } = new();
+
+    public bool UsesEmailSource { get; set; }
+
+    /// <summary>The Postmark server token the Email source is called with; null leaves it unset.</summary>
+    public string? EmailServerToken { get; set; } = "postmark-test-token";
+
     /// <summary>The app's own address, the start of every sign-in link (<c>SignInEmail:AppAddress</c>).</summary>
     public const string AppAddress = "https://mondino.test";
 
@@ -81,6 +93,11 @@ public class MondinoApi : WebApplicationFactory<Program>
         }
 
         builder.UseSetting("SignInEmail:AppAddress", AppAddress);
+        builder.UseSetting("SignInEmail:From", "Mondino <signin@mondino.test>");
+        if (EmailServerToken is not null)
+        {
+            builder.UseSetting("SignInEmail:ServerToken", EmailServerToken);
+        }
 
         if (UsesPostalCodeSource && PostalCodeSourceUsername is not null)
         {
@@ -114,8 +131,16 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.AddSingleton<IPostalCodeLookup>(PostalCodes);
             }
 
-            services.RemoveAll<ISignInMailOutbox>();
-            services.AddSingleton<ISignInMailOutbox>(SignInMails);
+            if (UsesEmailSource)
+            {
+                services.AddHttpClient(PostmarkSignInEmailSender.ClientName)
+                    .ConfigurePrimaryHttpMessageHandler(() => EmailSource);
+            }
+            else
+            {
+                services.RemoveAll<ISignInMailOutbox>();
+                services.AddSingleton<ISignInMailOutbox>(SignInMails);
+            }
 
             if (DatabaseFails)
             {
