@@ -7,6 +7,7 @@ import { expect, test } from '../fixtures/test';
 import { NORTHWIND_PINS, northwindPinsOf } from '../fixtures/pins';
 import { mockMarkup } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
+import { pauseNow } from '../support/clock';
 
 /** The text of the first element with `className` in a mock, its tags taken out. */
 function mockText(path: string, className: string): string {
@@ -68,7 +69,7 @@ test.describe('Globe: a team of one', () => {
     await expect(globePage.toast).toHaveText(
       mockText('notifications/invite-link/success.html', 'toast__body'),
     );
-    await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now())));
+    await pauseNow(page);
     expect(await globePage.clipboardText()).toBe('http://127.0.0.1:4310/join/northwind-7Kq2');
     await expect(globePage.statusToast).toHaveCount(1);
     await letTimePass(page, 3_000);

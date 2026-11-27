@@ -7,6 +7,7 @@ import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { NORTHWIND_ME, sofiaProfile } from '../fixtures/profile';
 import { mockText } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
+import { pauseNow } from '../support/clock';
 
 const bar = (state: string): string =>
   mockText(`notifications/settings-bar/${state}.html`, 'save-bar__text')!;
@@ -60,7 +61,7 @@ test.describe('Profile & Settings: the bar for unsaved changes', () => {
     api.answer('PUT', NORTHWIND_ME, sofiaProfile({ clockFormat: '12-hour' }));
     await profilePage.trySavingAgain.click();
     await expect(profilePage.saveBarText).toHaveText(bar('success'));
-    await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now())));
+    await pauseNow(page);
     expect(tries).toBe(1);
     await expect(profilePage.saveBar).toHaveRole('status');
     await expect(profilePage.time).toHaveText('3:05 pm local · Central European Time');

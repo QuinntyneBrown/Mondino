@@ -6,6 +6,7 @@ import { expect, test } from '../fixtures/test';
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { mockMarkup } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
+import { pauseNow } from '../support/clock';
 
 const mock = 'dialogs/invite/default.html';
 const link = 'http://127.0.0.1:4310/join/northwind-7Kq2';
@@ -100,7 +101,7 @@ test.describe('Invite teammates', () => {
     await expect(globePage.statusToast).toHaveText(
       'Invite link copied. Paste it wherever your team talks.',
     );
-    await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now())));
+    await pauseNow(page);
     expect(await inviteDialog.copies()).toEqual([link]);
     expect(await globePage.clipboardText()).toBe(link);
 
