@@ -3,8 +3,9 @@
     class="globe"
     [class.globe--loading]="state() !== 'Ready'"
     [class.globe--interactive]="interactive()"
-    role="img"
-    [attr.aria-label]="label()"
+    [attr.role]="interactive() ? 'group' : 'img'"
+    [attr.tabindex]="interactive() ? 0 : null"
+    [attr.aria-label]="name()"
   >
     <svg class="globe__frame" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
       <circle class="globe__shadow" cx="313.2" cy="318.5" r="264" />

@@ -51,7 +51,9 @@ test.describe('Globe: just joined', () => {
     await expect(globePage.youLabel).toHaveText('Sofia Bianchi (you) · Milan');
     await expect(globePage.youPin).toHaveClass(/pin-dot--new/);
     expect(await globePage.pulse()).not.toBe('none');
-    await expect(globePage.globe).toHaveAccessibleName('The globe, with your new pin in Milan');
+    await expect(globePage.globe).toHaveAccessibleName(
+      'The globe, with your new pin in Milan. Drag to spin, or use the arrow keys.',
+    );
   });
 
   test('the toast can be dismissed', async ({ joinPage, globePage }) => {

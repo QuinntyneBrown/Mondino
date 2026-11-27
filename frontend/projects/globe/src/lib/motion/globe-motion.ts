@@ -4,12 +4,25 @@ export interface GlobeOrientation {
   readonly tilt: number;
 }
 
+/** Which way an arrow key turns the globe's front. */
+export type ArrowDirection = 'Left' | 'Right' | 'Up' | 'Down';
+
+/** A step's turn, as a drag the same way would make it: longitude and tilt, in steps. */
+const stepTurns: Record<ArrowDirection, readonly [number, number]> = {
+  Left: [1, 0],
+  Right: [-1, 0],
+  Up: [0, -1],
+  Down: [0, 1],
+};
+
 export type MotionMode = 'TurningOnItsOwn' | 'Dragged' | 'Waiting' | 'Still';
 
 /** How fast the globe turns on its own: a whole turn a minute (ADR 0013). */
 export const TurnRateDegreesPerSecond = 6;
 /** How long the globe rests after a drag before it turns on its own again (L2-009). */
 export const IdleDelayMs = 5000;
+/** How far one press of an arrow key turns the globe: one time zone (ADR 0013). */
+export const StepDegrees = 15;
 /** How far from the equator the centre of the view may tilt, so a pole never passes it. */
 export const TiltLimitDegrees = 60;
 
@@ -79,6 +92,18 @@ export class GlobeMotion {
   /** Turns the globe with the drag, the tilt within its limit. */
   dragBy(deltaLongitude: number, deltaTilt: number): void {
     this.turnBy(deltaLongitude, deltaTilt);
+  }
+
+  /**
+   * Turns the globe's front one step the way the arrow points, and rests as after a drag. Gives
+   * false, and does nothing, when the globe is tilted as far as it goes that way.
+   */
+  step(direction: ArrowDirection): boolean {
+    const [longitude, tilt] = stepTurns[direction];
+    if (!this.canTurn(longitude, tilt)) return false;
+    this.turnBy(longitude * StepDegrees, tilt * StepDegrees);
+    this.rest();
+    return true;
   }
 
   /** The drag ends: the globe rests, and turns on its own again 5 seconds later. */
