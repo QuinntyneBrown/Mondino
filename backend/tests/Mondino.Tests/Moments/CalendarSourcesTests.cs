@@ -1,6 +1,6 @@
 // Acceptance Test
 // Traces to: L2-020, L2-049, L2-050
-// Description: The seeded team's moments are the cast's, from Mondino's own calendar and the public holiday source; the source is given a country and a year, kept 24 hours, given up after 5 seconds and left alone for 30 seconds after 5 failures
+// Description: The seeded team's moments are the cast's, from Mondino's own calendar and the public holiday source; the source is given a country and a year, kept 24 hours, given up after 5 seconds and left alone for 30 seconds after 5 failures, and while it fails the last holidays it gave are kept beside every other kind
 
 using System.Net;
 using System.Text.Json;
@@ -169,6 +169,52 @@ public sealed class CalendarSourcesTests
         await MomentsAsync(client, sofia);
         Assert.True(api.OpenHolidays.Requests.Count > asked);
     }
+
+    [Theory]
+    [InlineData(SourceBehaviour.Fails)]
+    [InlineData(SourceBehaviour.Hangs)]
+    public async Task While_the_source_fails_the_last_holidays_it_gave_are_kept_and_every_other_kind_is_given(SourceBehaviour behaviour)
+    {
+        // Given the public holiday source gave Italy's Immaculate Conception yesterday
+        await using var api = new MondinoApi { UsesCalendars = true };
+        await api.SeedAsync();
+        api.OpenHolidays.Holds("IT", "2025-12-08", "Immaculate Conception");
+        using var client = api.CreateSecureClient();
+        var sofia = await api.JoinNorthwindAsync(client);
+        Assert.Contains("Immaculate Conception", Titles(await MomentsAsync(client, sofia)));
+
+        // When a day later the source fails (or does not answer in 5 seconds) and the moments are read
+        api.Time.Advance(TimeSpan.FromHours(25));
+        api.OpenHolidays.Behaviour = behaviour;
+        var asked = api.OpenHolidays.Requests.Count;
+        var reading = MomentsAsync(client, sofia);
+        if (behaviour == SourceBehaviour.Hangs)
+        {
+            // Each of the six countries it covers is asked again for its two years
+            await api.OpenHolidays.WaitForRequestsAsync(asked + 12);
+            api.Time.Advance(TimeSpan.FromSeconds(5));
+        }
+
+        var moments = await reading.WaitAsync(TimeSpan.FromSeconds(10));
+
+        // Then the source was asked, and the holiday it gave before is still there
+        Assert.True(api.OpenHolidays.Requests.Count > asked);
+        var titles = Titles(moments);
+        Assert.Contains("Immaculate Conception", titles);
+
+        // And moments of every other kind are given: Formula 1, local events and sport
+        Assert.Contains("Monza tickets on sale", titles);
+        Assert.Contains("Halloween on 6th Street", titles);
+        Assert.Contains("Clásico Nacional", titles);
+
+        // And while its breaker is open the holiday is still given, with no call
+        asked = api.OpenHolidays.Requests.Count;
+        Assert.Contains("Immaculate Conception", Titles(await MomentsAsync(client, sofia)));
+        Assert.Equal(asked, api.OpenHolidays.Requests.Count);
+    }
+
+    private static List<string?> Titles(List<JsonElement> moments) =>
+        [.. moments.Select(m => m.GetProperty("title").GetString())];
 
     private static async Task<List<JsonElement>> MomentsAsync(HttpClient client, Session session)
     {

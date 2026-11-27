@@ -90,4 +90,7 @@ public enum SourceBehaviour
     Hangs,
     Fails,
     RefusesTheAccount,
+
+    /// <summary>No answer until the test releases it, then the answer it would give.</summary>
+    Stalls,
 }

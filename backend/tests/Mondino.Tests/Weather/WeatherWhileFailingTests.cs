@@ -139,12 +139,12 @@ public sealed class WeatherWhileFailingTests
     [Fact]
     public async Task Reads_while_the_source_stalls_share_one_call_per_city_and_none_is_queued()
     {
-        // Given the weather source does not answer
+        // Given the weather source is slow to answer
         await using var api = new MondinoApi { UsesWeatherSource = true };
         await api.SeedAsync();
         using var client = api.CreateSecureClient();
         var sofia = await api.JoinNorthwindAsync(client);
-        api.OpenMeteo.Behaviour = SourceBehaviour.Hangs;
+        api.OpenMeteo.Behaviour = SourceBehaviour.Stalls;
 
         // When three reads of the team come while it stalls
         var reads = Enumerable.Range(0, 3).Select(_ => PinsAsync(client, sofia)).ToList();
@@ -153,10 +153,14 @@ public sealed class WeatherWhileFailingTests
         // Then the source has one call for each of the twelve cities, not one per read
         Assert.Equal(12, api.OpenMeteo.Requests.Count);
 
-        // And when 5 seconds pass every read answers, with no call made after them
-        api.Time.Advance(TimeSpan.FromSeconds(5));
+        // And when it answers every read is given the weather, with no call made after it
+        api.OpenMeteo.Release();
         var answered = await Task.WhenAll(reads).WaitAsync(TimeSpan.FromSeconds(10));
-        Assert.All(answered, pins => Assert.Equal(13, pins.Count));
+        Assert.All(answered, pins =>
+        {
+            Assert.Equal(13, pins.Count);
+            Assert.All(pins, pin => Assert.Equal("Available", pin.GetProperty("weatherState").GetString()));
+        });
         Assert.Equal(12, api.OpenMeteo.Requests.Count);
     }
 
