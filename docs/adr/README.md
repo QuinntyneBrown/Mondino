@@ -36,5 +36,6 @@ Playwright, WCAG) needs a record here that gives its reason.
 | [0026](0026-one-breaker-for-every-outside-source.md) | Every outside source has one kind of breaker, an older answer is given while it fails, and two sources in a row share one 6-second deadline | Accepted; completes 0015 and 0019 |
 | [0027](0027-breakpoints-where-the-mocks-break.md) | The layouts change where the mocks do, at breakpoints one Sass module names, and the Globe's globe fills its stage | Accepted |
 | [0028](0028-an-ended-session-on-profile.md) | A store that is refused with 401 forgets the team, and its screen says an invite link is needed; there is no interceptor | Accepted; replaces the design's `sessionExpiredInterceptor` |
+| [0029](0029-accessibility-as-the-mocks-draw-it.md) | The Globe announces a selection in its own live region, motion is read where it moves, and the specs measure what a sweep would | Accepted; replaces the design's `LiveAnnouncer` and `MotionPreference` |
 
 Not decided yet: nothing a journey has reached.

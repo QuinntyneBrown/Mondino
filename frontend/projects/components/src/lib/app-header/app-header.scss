@@ -61,11 +61,11 @@
 .app-header__invite:hover {
   background: var(--color-bg-surface);
 }
-// A 44 px touch target around the drawn 34 px.
+// A 44 px touch target around the drawn 34 px, measured from inside its border.
 .app-header__invite::after {
   content: '';
   position: absolute;
-  inset: -0.3125rem;
+  inset: calc(-0.3125rem - var(--border-width-hairline));
   border-radius: inherit;
 }
 .app-header__invite-label {
@@ -97,7 +97,7 @@
     padding-inline: var(--space-3);
   }
   .app-header__invite::after {
-    inset: calc(-1 * var(--space-1)) 0;
+    inset: calc(-1 * var(--space-1) - var(--border-width-hairline)) 0;
   }
   .app-header__invite-label {
     display: inline;

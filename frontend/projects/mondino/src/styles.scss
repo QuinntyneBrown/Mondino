@@ -114,9 +114,10 @@ main:focus-visible {
   border: 0;
 }
 
-// Times and temperatures never shift as they change.
+// Times and temperatures never shift as they change. A utility: it holds against a component's
+// own `font` shorthand, which would otherwise reset it.
 .tnum {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums !important;
 }
 .text-muted {
   color: var(--color-fg-muted);

@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-028, L2-015, L2-024, L2-026
+// Traces to: L2-028, L2-015, L2-024, L2-026, L2-041
 // Description: The Team list is filtered by All, Working now or Asleep, one tab list with each filter's count, following the hour with no reload and leaving a teammate who hides their status under All only
 
 import type { Page } from '@playwright/test';

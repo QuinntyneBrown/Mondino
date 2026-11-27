@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-004, L2-006, L2-045, L2-049
+// Traces to: L2-004, L2-006, L2-045, L2-049, L2-040
 // Description: A postal code that cannot be found says the country's form; a lookup that is down offers "Your city"; too many tries wait
 
 import type { Request } from '@playwright/test';
@@ -12,6 +12,7 @@ import {
   NORTHWIND_LOOKUPS,
   northwindInvite,
 } from '../fixtures/invites';
+import { announcements, listenForAnnouncements } from '../support/accessibility';
 
 test.describe('Join: a postal code that cannot be found, and a lookup that is down', () => {
   test.beforeEach(async ({ api, joinPage }) => {
@@ -158,6 +159,7 @@ test.describe('Join: a postal code that cannot be found, and a lookup that is do
       json: { status: 429, code: 'rate_limited' },
     });
     await joinPage.fill({ name: 'Sofia Bianchi', country: 'Italy', postalCode: '20121' });
+    await listenForAnnouncements(joinPage.page);
 
     // When it is looked up
     await joinPage.leavePostalCode();
@@ -173,6 +175,17 @@ test.describe('Join: a postal code that cannot be found, and a lookup that is do
     // And as time passes the countdown follows, and at zero the button comes back
     await joinPage.page.clock.runFor(10_000);
     await expect(joinPage.rateLimitCountdown).toHaveText('0:32');
+    // Announced once, not every second
+    expect(
+      (await announcements(joinPage.page)).filter((said) => said.politeness === 'assertive'),
+    ).toEqual([
+      {
+        politeness: 'assertive',
+        text: expect.stringMatching(
+          /^Too many tries from this device\. You can try again in 0:42\b/,
+        ),
+      },
+    ]);
     await joinPage.page.clock.runFor(32_000);
     await expect(joinPage.rateLimit).toHaveCount(0);
     await expect(joinPage.submit).toBeEnabled();

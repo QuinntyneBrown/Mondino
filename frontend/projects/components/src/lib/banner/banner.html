@@ -1,10 +1,10 @@
-<div class="banner" role="status">
+<div class="banner">
   <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
     <path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057" />
     <path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78" />
     <path d="m2 2 20 20" />
   </svg>
-  <p class="banner__text">
+  <p class="banner__text" role="status">
     {{ text() }} <span class="tnum">{{ time() }}</span>.
   </p>
   <button mo-button size="sm" type="button" [disabled]="busy()" (click)="retry.emit()">

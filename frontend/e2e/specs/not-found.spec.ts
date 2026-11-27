@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-038
+// Traces to: L2-038, L2-039
 // Description: An address that belongs to no screen says so and offers the way back to the globe
 
 import { expect, test } from '../fixtures/test';

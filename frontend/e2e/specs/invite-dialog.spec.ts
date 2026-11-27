@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-025, L2-054
+// Traces to: L2-025, L2-054, L2-040, L2-041
 // Description: "Invite teammate" in the header opens the invite dialog as dialogs/invite draws it, with nothing copied; focus starts on "Copy link", stays inside and returns to the button; "Copy link" copies, closes and says so for 4 seconds held while pointed at or focused; a refused copy keeps the dialog with the link selected and an alert that stays; on a phone the button is an icon and the dialog a sheet
 
 import { expect, test } from '../fixtures/test';
@@ -7,6 +7,11 @@ import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { mockMarkup } from '../support/mocks';
 import { rememberTeam } from '../support/membership';
 import { pauseNow } from '../support/clock';
+import {
+  announcements,
+  listenForAnnouncements,
+  lowContrastInBothThemes,
+} from '../support/accessibility';
 
 const mock = 'dialogs/invite/default.html';
 const link = 'http://127.0.0.1:4310/join/northwind-7Kq2';
@@ -94,6 +99,7 @@ test.describe('Invite teammates', () => {
   }) => {
     await globePage.open();
     await globePage.inviteTeammate.click();
+    await listenForAnnouncements(page);
     await inviteDialog.copyLink.click();
 
     await expect(inviteDialog.dialog).toHaveCount(0);
@@ -113,6 +119,15 @@ test.describe('Invite teammates', () => {
     await page.mouse.move(0, 0);
     await page.clock.runFor(2_900);
     await expect(globePage.toast).toBeVisible();
+    // Its words meet AA in light and in dark
+    expect(await lowContrastInBothThemes(page)).toEqual([]);
+    // Said once, politely, however long it stays
+    expect(await announcements(page)).toEqual([
+      {
+        politeness: 'polite',
+        text: expect.stringMatching(/^Invite link copied\. Paste it wherever your team talks\./),
+      },
+    ]);
 
     // Focused, too
     await globePage.dismiss.focus();
@@ -131,6 +146,7 @@ test.describe('Invite teammates', () => {
     await globePage.refuseCopy();
     await globePage.open();
     await globePage.inviteTeammate.click();
+    await listenForAnnouncements(page);
     await inviteDialog.copyLink.click();
 
     await expect(globePage.alertToast).toHaveText(
@@ -143,6 +159,12 @@ test.describe('Invite teammates', () => {
     await expect(globePage.alert).toHaveText(/Couldn’t copy the link\./);
     await page.clock.runFor(10_000);
     await expect(globePage.alertToast).toBeVisible();
+    // Its words meet AA in light and in dark
+    expect(await lowContrastInBothThemes(page)).toEqual([]);
+    // Said once, as an alert
+    expect(await announcements(page)).toEqual([
+      { politeness: 'assertive', text: expect.stringMatching(/^Couldn’t copy the link\./) },
+    ]);
     await globePage.dismiss.click();
     await expect(globePage.toast).toHaveCount(0);
     await expect(inviteDialog.dialog).toBeVisible();

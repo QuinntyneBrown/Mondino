@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-012, L2-023, L2-013, L2-009, L2-042
+// Traces to: L2-012, L2-023, L2-013, L2-009, L2-042, L2-039
 // Description: A pin lifts when pointed at or focused and settles back; Enter, Space, a click or a tap selects it, the globe turns to it and holds, and a tap off the pins clears it
 
 import { expect, test } from '../fixtures/test';

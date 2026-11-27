@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-053, L2-044
+// Traces to: L2-053, L2-044, L2-041
 // Description: Create Team checks its fields when "Create team" is pressed, says what is wrong under each and moves focus to the first
 
 import { expect, test } from '../fixtures/test';

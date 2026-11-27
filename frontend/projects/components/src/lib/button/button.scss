@@ -83,8 +83,18 @@
   width: 100%;
 }
 :host(.btn--sm) {
+  position: relative;
   min-height: var(--control-height-sm);
   padding: 0 var(--space-3);
+}
+// Drawn 36 px tall, a small button takes a touch over 44 px, measured from inside its border.
+:host(.btn--sm)::after {
+  content: '';
+  position: absolute;
+  inset: calc(
+      (var(--control-height-sm) - var(--target-comfortable)) / 2 - var(--border-width-hairline)
+    )
+    0;
 }
 :host(.btn--icon) {
   width: var(--target-comfortable);

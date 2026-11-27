@@ -110,10 +110,12 @@
 .team-table__row .team-table__moment:has(.team-table__none) {
   display: none;
 }
+// A temperature never shifts as it changes.
 .team-table__weather-in {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1-5);
+  font-variant-numeric: tabular-nums;
 }
 .team-table__none {
   font: var(--text-caption);

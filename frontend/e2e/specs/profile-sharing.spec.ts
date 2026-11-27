@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-034, L2-022, L2-035
+// Traces to: L2-034, L2-022, L2-035, L2-041
 // Description: The viewer turns off what teammates see and the kinds that mark pins, by keyboard and by pointer; each switch says what its state means, both off adds a note, a save sends them and her own pin card says she still sees what teammates do not; every kind off brings the Globe's note and legend
 
 import type { Request } from '@playwright/test';

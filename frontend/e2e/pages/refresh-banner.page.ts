@@ -16,10 +16,14 @@ export class RefreshBannerPage {
     this.tryAgain = this.banner.getByRole('button');
   }
 
-  /** The banner read as a mock's: its role, its words, its button's and the shapes of its two icons. */
+  /**
+   * The banner read as a mock's: the role of its words (the live region is the words alone, so
+   * its button changing to "Trying…" is not announced), its words, its button's and the shapes
+   * of its two icons.
+   */
   parts(): Promise<{ role: string; text: string; button: string; icons: string[][] }> {
     return this.banner.evaluate((banner) => ({
-      role: banner.getAttribute('role') ?? '',
+      role: banner.querySelector('.banner__text')?.getAttribute('role') ?? '',
       text: (banner.querySelector('.banner__text')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
       button: (banner.querySelector('button')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
       icons: [...banner.querySelectorAll('svg')].map((svg) =>

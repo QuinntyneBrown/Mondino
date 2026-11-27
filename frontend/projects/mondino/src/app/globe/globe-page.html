@@ -40,6 +40,7 @@
       } @else if (globeState() === 'Fallback') {
         <div class="globe-screen__globe">
           <mo-globe-fallback
+            pinned
             data-measured
             [label]="globeLabel()"
             (widthChange)="stillWidth.set($event)"

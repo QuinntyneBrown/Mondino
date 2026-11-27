@@ -30,7 +30,7 @@
 .chip::after {
   content: '';
   position: absolute;
-  inset: calc((var(--space-8) - var(--target-comfortable)) / 2) 0;
+  inset: calc((var(--space-8) - var(--target-comfortable)) / 2 - var(--border-width-hairline)) 0;
 }
 .chip:hover {
   border-color: var(--color-fg-default);

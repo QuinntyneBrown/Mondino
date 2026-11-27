@@ -1782,3 +1782,74 @@ proven: a 401 on saving, leaving or reading Profile & Settings shows "You need a
 place, without "Leave without saving?" (ADR 0028); both stay 100. Only a sweep, run when a person
 asks, proves the look of each state at each width in both themes; every criterion's behaviour is
 in the behaviour specs. Total: 89.
+
+## Journey 28: Make accessible
+
+**What slowed it**
+
+- The design drew a CDK `LiveAnnouncer` and a `MOTION_PREFERENCE` token, neither built: the Globe
+  announces through the mock's own polite region and the globe reads `matchMedia` where it moves.
+  ADR 0029 records both, with the design and its diagrams brought in line before any spec.
+- The first contrast and ring measurements were taken mid-fade and mid-transition. Every check now
+  finishes the screen's one-off animations first (`settled`) and settles after each Tab.
+- A touch target read as its drawn size plus the pseudo-element's insets hid real 42 px targets:
+  the insets are laid out inside the border. Reading the `::before`/`::after` box as the browser
+  lays it out found the header's "Invite teammate", the Moments chips, the footer links, the
+  ribbon's markers, the skip link and every small button under 44 px.
+- 200% text could not be set through the CSSOM (rem media queries do not follow) nor a style tag
+  (the CSP blocks it); Chromium's `Page.setFontSizes` sets the browser's own default, as a person
+  does.
+- The still picture was a `role="img"`, which hid its pin buttons from the accessibility tree; the
+  Globe now gives it `pinned`, and it is a group.
+- The refresh banner was one `role="status"` holding its button, so each retry announced it
+  again. Its words alone are now the live region, in the mock, the design system, L2-040 and the
+  code. L2-040 criterion 8 said a failure banner is an alert; the mock draws it polite, and the
+  requirement was corrected to the mock.
+- A labelled pin near the rim faded with its depth under AA. Labelled pins are drawn at full
+  strength; far pins fade unlabelled and draw no initials until they lift.
+
+**Lessons**
+
+1. **Measure a target as the browser lays it out.** Read the pseudo-element's own box, never the
+   drawn size plus its insets; a border sits between them.
+2. **Finish the animations before measuring a colour or a ring.** A fade halfway through reads as
+   a contrast failure that no person sees.
+3. **Listen to live regions the way a screen reader does.** A `MutationObserver` that reads the
+   spoken text, hears an inner region before the outer one and skips `aria-hidden` proved "said
+   once" for every toast, banner, lookup and countdown, and found the banner said twice.
+4. **A live region holds only what it announces.** A button inside one is read again whenever its
+   label changes.
+5. **Set 200% text with `Page.setFontSizes`.** Nothing else moves the `rem` breakpoints.
+6. **An accessibility tree is a spec's best locator for "a group holding a list".** One
+   `ariaSnapshot()` regex proves the globe holds the list of pins and nothing else.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0029, the design and its three
+  diagrams before the first spec.
+- *Search the specs by a criterion's words before writing one* (journey 26, lesson 3): touch on the
+  globe (journeys 9 and 10), words beside colour (journeys 11 to 23), the leave dialog's Escape
+  (journey 24) and the pulse and lift under reduced motion were already proven; those specs now
+  name L2-039 to L2-042.
+- *Probe every screen before writing the specs* (journey 27, lesson 3): one parametrised spec walks
+  ten screens in both themes, and found every defect fixed here.
+- *Never pipe the verify script* (journey 18, lesson 1): every commit followed verify's own exit
+  code, written to a log.
+- *Measure the initial bundle* (journey 2, lesson 1): 274.41 kB before and after; the changes are
+  in lazy components and styles.
+- *A flaky spec is fixed at its root*: every new and changed spec ran three times in a row with no
+  failure.
+
+**Progress:** 23 of 24 criteria proven (90, from 0). L2-039 criteria 1 to 5 (every screen walked
+by Tab in reading order with a 3:1 ring and 44 px targets, "Skip to content" first, the three
+dialogs keeping focus and closing on Escape, touch on the globe). L2-040 criteria 1 to 8 (the
+labelled group and its list of pins, each announced in full; a selection said once; the minute
+silent; the canvas hidden; the lookup's result and error; group pins with their count; the still
+picture; toasts, the banner and Sign In said once). L2-041 criteria 1 to 3 and 5 to 7 (AA text in
+both themes on every screen, dialogs, toasts and the banner, pins' initials and moment markers;
+words beside colour; 200% text at 1280 px; tabular figures; the theme from the device with no
+setting; the deeper dark globe with a light outline). L2-042 criteria 1 to 4. Not proven: L2-041
+criterion 4, the axe scan, which only the sweep proves; it is written for every screen in every
+state in light and dark and runs when a person asks. Journey 6's L2-045 criterion 5 is now proven
+("You can try again in" read in the alert, announced once while the countdown runs): 38 of 40,
+still 90. Total: 93.

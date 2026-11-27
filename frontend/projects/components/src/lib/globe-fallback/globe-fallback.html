@@ -1,5 +1,5 @@
 <div class="globe-stage">
-  <div class="globe" role="img" [attr.aria-label]="label()">
+  <div class="globe" [attr.role]="pinned() ? 'group' : 'img'" [attr.aria-label]="label()">
     <svg class="globe__art" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
       <defs>
         <path

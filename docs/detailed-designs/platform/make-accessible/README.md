@@ -64,10 +64,11 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 
 **The globe's text equivalent (L2-040).**
 
-- **`GlobeView`** (`mo-globe`) — the host element has `role="group"` and an accessible name
-  from its input `label`. The canvas inside it carries `aria-hidden="true"`. `PinLayer`'s
-  list of pins is drawn over the canvas and stands in its place in the accessibility tree.
-- **`PinLayer`** — component in `globe` (`show-pins`). The pins it draws are the list: the
+- **`GlobeView`** (`mo-globe`) — its `.globe` element has `role="group"` and an accessible
+  name from its input `label`. The canvas inside it carries `aria-hidden="true"`. `PinLayer`'s
+  list of pins is drawn over the canvas, in `GlobeView`'s `[pins]` slot, and stands in its
+  place in the accessibility tree.
+- **`PinLayer`** — component in `components` (`show-pins`). The pins it draws are the list: the
   mocks' `ul.globe__pins` with one `li.globe__pin` per pin, each holding a `button.pin`. A
   button's accessible name is the pin's description, and the visible label beside it is
   `aria-hidden`, so a pin is read once. The button carries `aria-pressed`, which is true for
@@ -78,23 +79,28 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 - **The still picture keeps its pins.** Where the still picture stands in for the globe
   (`draw-globe`), `GlobeFallback` draws the same list of pins over it, placed by
   `stillPlacements` and named by the same `descriptions`: each pin is still a button, lifts,
-  and opens its panel through the outputs `select` and `selectGroup`. The group is named "A still picture of the
+  and opens its panel through the outputs `select` and `selectGroup`. Given `pinned`, as
+  the Globe gives it, `GlobeFallback` is a `group` rather than an `img`, so its pins are
+  reached as text; on Join, Create Team and Profile & Settings, whose pins are bare, it stays
+  one picture. The group is named "A still picture of the
   globe, with 13 teammates’ pins." and is not a Tab stop itself, since it does not turn and
   is not dragged. The legend says why it is still, in words: "Still view — 3D isn’t available
   in this browser"; on a phone a line under the globe reads the same and adds "Pins still
   open."
-- **`describePin(pin, now, settings)`** — function in `domain`'s `pins/`. It returns one
-  sentence: the teammate's name, city, local time, status, weather and any moment this week,
+- **`describePin(name, cityName, localTime, status, weather, marker)`** — function in
+  `domain`'s `pins/`, which `pinViews` calls for each pin. It returns one sentence: the teammate's name, city, local time, status, weather and any moment this week,
   as in "Tomás Herrera, Mexico City, 08:05, Early morning, Partly cloudy 22°, 2 moments this
-  week: Día de Muertos, in 5 days; Clásico Nacional, in 6 days". It calls `localTime`, `formatTime` and `statusFor` from `time/`. It leaves the
-  status out when `statusFor` gives none, and the weather out when the pin has none. `globe` depends on `api` only, so `GlobePage` computes
-  the descriptions and passes them to `GlobeView` as the input `descriptions`, keyed by
-  teammate id.
-- **Selection is announced once.** `GlobePage` calls the CDK `LiveAnnouncer` with politeness
-  `polite` when the selected teammate id changes, whether the selection came from a tap, a
-  click or the keyboard. The message is the selected teammate's name and city and the word
-  "selected", as in "Tomás Herrera, Mexico City, selected.".
-  `TeammatePanel` is not itself a live region.
+  week: Día de Muertos, in 5 days; Clásico Nacional, in 6 days". `pinViews` works out the local time and status from `time/`. It leaves the
+  status out when there is none to show, and the weather out when the pin has none. `globe`
+  depends on `api` only, so `GlobePage` builds the pin views and their placements and hands
+  them to `PinLayer` in `GlobeView`'s `[pins]` slot; each placement carries its description.
+- **Selection is announced once.** `GlobePage` holds the mocks' polite live region,
+  `p.visually-hidden[role=status][aria-live=polite]`, in the page before anything is
+  selected. Its text is the selected teammate's name and city and the word "selected", as in
+  "Tomás Herrera, Mexico City, selected.", and changes when the selected teammate id changes,
+  whether the selection came from a tap, a click, the keyboard or the address. A group's is
+  its title ("2 teammates close together."). `TeammatePanel` is not itself a live region
+  (ADR 0029).
 - **A minute tick is silent.** The descriptions and the panel update in place when the clock
   ticks. Neither is inside a live region, and `GlobePage` announces only a change of selection.
 - **A toast is announced once.** `Toast` sits in the mocks' `toast-region`. A toast that
@@ -131,22 +137,25 @@ pin's city, time zone, weather and moments, which the text equivalent reads.
 - Sizes are in `rem` and layouts are fluid (`adapt-to-every-width`, L2-037), so text at 200%
   reflows at 1280 px wide with no sideways scrolling.
 - Times and temperatures use `font-variant-numeric: tabular-nums`, set by a foundation utility.
+- The behaviour specs measure every screen, in light and dark: the focus ring's contrast,
+  every touch target, the contrast of each line of text over its painted background, the
+  figures of each time and temperature, and 200% text as the browser's default font size at 32 px (ADR 0029).
 - An axe sweep with the WCAG 2.2 AA rules covers every screen in every state. Like the visual
   and responsive sweeps, it is kept current and runs only when a person asks.
 
 **Reduced motion (L2-042).**
 
-- **`MotionPreference`** / `MOTION_PREFERENCE` — contract and injection token in `api`, with
-  one member, the signal `reduced`.
-- **`BrowserMotionPreference`** — implementation in `domain`. It reads
-  `matchMedia('(prefers-reduced-motion: reduce)')`, listens for its `change` event, so the app
-  follows the setting without a reload, and removes the listener when destroyed.
-- `GlobeView` reads `reduced`. When it is true the globe does not turn on its own, a selected
-  pin is shown facing the viewer with no animated turn, a lifted pin moves to its lifted place
-  with no animation, and a newly placed pin does not pulse.
-- The panel's fade and every other CSS transition sit inside
-  `@media (prefers-reduced-motion: no-preference)`, so they are absent when reduced motion is
-  requested.
+- **`GlobeView`** reads `matchMedia('(prefers-reduced-motion: reduce)')` and gives it to
+  `GlobeMotion`, and listens for its `change` event, so the globe follows the setting without
+  a reload, until the view is destroyed. When it is true the globe does not turn on its own
+  and a selected pin is shown facing the viewer with no animated turn. There is no
+  `MotionPreference` token: the globe is the only code that moves something with script
+  (ADR 0029).
+- Every other motion is CSS, and CSS follows the setting by itself. The tokens set every
+  `--duration-*` to 0.01 ms under `prefers-reduced-motion: reduce`, so the panel's fade, a
+  dialog's and a toast's entrance and a lifted pin's growth happen at once; each animation
+  that repeats or pulses (a new pin's pulse, the shimmer of a skeleton and of the globe's
+  placeholder) is `animation: none` there, in its own component's stylesheet.
 - No animation repeats faster than three times in a second. The pulse of a newly placed pin
   runs once.
 
@@ -182,16 +191,16 @@ data the text equivalent reads.
 
 `GlobeView` renders `PinLayer`'s list of pin buttons over the canvas, which it hides from the
 accessibility tree. `GlobePage` builds each description with `describePin`, announces a selection
-through `LiveAnnouncer` and shows the teammate in `TeammatePanel`. `GlobeView` reads
-`MotionPreference` before it turns or animates.
+in its own polite live region and shows the teammate in `TeammatePanel`. `GlobeView` reads the
+reduced motion setting before it turns.
 
 ![C4 component view for making Mondino accessible](diagrams/c4-component.png)
 
 ### Class structure
 
-`GlobeView` composes `PinLayer` and depends on `MotionPreference`, which
-`BrowserMotionPreference` implements. `PinLayer` renders one button per pin. `GlobePage`
-depends on `describePin` and on the CDK `LiveAnnouncer`.
+`GlobePage` renders `GlobeView` with `PinLayer` in its `[pins]` slot. `PinLayer` renders one
+button per pin. `GlobeView` reads the reduced motion setting and gives it to `GlobeMotion`.
+`GlobePage` depends on `describePin`, through `pinViews`, and holds its own live region.
 
 ![Class diagram for making Mondino accessible](diagrams/class-structure.png)
 
@@ -200,7 +209,7 @@ depends on `describePin` and on the CDK `LiveAnnouncer`.
 The teammate tabs past the skip link to the pins. Each pin's button is a Tab stop; `PinLayer`
 lifts the focused pin and shows its focus indicator (L2-039), and Enter or Space selects it. `GlobeView` turns to
 the pin, or shows it with no animated turn when reduced motion is requested (L2-042).
-`GlobePage` shows the teammate in `TeammatePanel` and announces the change once through a
+`GlobePage` shows the teammate in `TeammatePanel` and announces the change once in its
 polite live region (L2-040). A minute tick is not announced.
 
 ![Sequence diagram for selecting a pin by keyboard](diagrams/sequence-select-pin-by-keyboard.png)

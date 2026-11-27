@@ -64,7 +64,8 @@ Frontend:
 - **`refreshFailed`**, **`refreshing`** and **`refreshedAt`** — whether the last refresh
   failed, whether one is pending, and the minute the pins held were read. While
   `refreshFailed` is true `TeamShell` renders `Banner` (`mo-banner`, block
-  `banner`, `role="status"`) under `AppHeader`, where it also renders the toast: "Couldn’t
+  `banner`) under `AppHeader`, its words alone a polite live region (`banner__text`,
+  `role="status"`), so the button turning to "Trying…" is not announced (ADR 0029),, where it also renders the toast: "Couldn’t
   refresh. Clocks are live; weather and moments are from 14:50.", the time being `refreshedAt`
   on the viewer's clock in tabular figures, with the button "Try again", which calls
   `refresh()` at once. On the Team screen, which shows no list of moments, the banner names the

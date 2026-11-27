@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-011, L2-012, L2-013, L2-040, L2-043, L2-044
+// Traces to: L2-011, L2-012, L2-013, L2-040, L2-043, L2-044, L2-041
 // Description: The Globe shows the team's pins as a list of buttons: initials in each teammate's colour, the viewer's own marked, two in one city as one group pin, the far side hidden
 
 import { expect, test } from '../fixtures/test';

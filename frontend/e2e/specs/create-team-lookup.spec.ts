@@ -1,10 +1,11 @@
 // Acceptance Test
-// Traces to: L2-053, L2-003, L2-004, L2-006, L2-045
+// Traces to: L2-053, L2-003, L2-004, L2-006, L2-045, L2-040
 // Description: Create Team looks its postal code up as Join does, with Join's messages, and places the new pin at the city
 
 import { expect, test } from '../fixtures/test';
 import { CITIES, lookupAnswer } from '../fixtures/invites';
 import { CREATE_CITY_SEARCHES, CREATE_LOOKUPS } from '../fixtures/teams';
+import { announcements, listenForAnnouncements } from '../support/accessibility';
 
 test.describe('Create Team: the postal code lookup', () => {
   test.beforeEach(async ({ createTeamPage }) => {
@@ -58,6 +59,7 @@ test.describe('Create Team: the postal code lookup', () => {
   }) => {
     api.answer('POST', CREATE_LOOKUPS, (route) => lookupAnswer(route.request().postDataJSON()));
     await createTeamPage.fill({ country: 'Italy', postalCode: '2012' });
+    await listenForAnnouncements(createTeamPage.page);
 
     await createTeamPage.leavePostalCode();
 
@@ -67,6 +69,14 @@ test.describe('Create Team: the postal code lookup', () => {
     await expect(createTeamPage.lookup).toHaveAttribute('role', 'alert');
     await expect(createTeamPage.postalCode).toHaveAttribute('aria-invalid', 'true');
     await expect(createTeamPage.allPins).toHaveCount(0);
+    // Said once, as an alert, after the polite wait
+    expect(await announcements(createTeamPage.page)).toEqual([
+      { politeness: 'polite', text: 'Finding 2012…' },
+      {
+        politeness: 'assertive',
+        text: 'We couldn’t find “2012” in Italy. Italian postal codes have five digits, like 20121.',
+      },
+    ]);
 
     // And the alert goes as soon as the postal code is edited
     await createTeamPage.postalCode.fill('20121');
@@ -109,6 +119,7 @@ test.describe('Create Team: the postal code lookup', () => {
       json: { status: 429, code: 'rate_limited' },
     });
     await createTeamPage.fill({ country: 'Italy', postalCode: '20121' });
+    await listenForAnnouncements(createTeamPage.page);
 
     await createTeamPage.leavePostalCode();
 
@@ -117,8 +128,21 @@ test.describe('Create Team: the postal code lookup', () => {
     await expect(createTeamPage.rateLimitCountdown).toHaveText('9:42');
     await expect(createTeamPage.submit).toBeDisabled();
     await expect(createTeamPage.postalCode).toHaveValue('20121');
+    // The countdown ticks on, and is announced once, not every second
+    await createTeamPage.page.clock.runFor(10_000);
+    await expect(createTeamPage.rateLimitCountdown).toHaveText('9:32');
+    expect(
+      (await announcements(createTeamPage.page)).filter((said) => said.politeness === 'assertive'),
+    ).toEqual([
+      {
+        politeness: 'assertive',
+        text: expect.stringMatching(
+          /^Too many tries from this device\. You can try again in 9:42\b/,
+        ),
+      },
+    ]);
 
-    await createTeamPage.page.clock.runFor(582_000);
+    await createTeamPage.page.clock.runFor(572_000);
     await expect(createTeamPage.rateLimit).toHaveCount(0);
     await expect(createTeamPage.submit).toBeEnabled();
   });

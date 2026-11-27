@@ -1,10 +1,11 @@
 // Acceptance Test
-// Traces to: L2-052, L2-043, L2-044
+// Traces to: L2-052, L2-043, L2-044, L2-040
 // Description: Asking for a link reads "Sending link…" once, then "Check your inbox" with the email as text, whatever the email; a request that fails keeps the email and offers "Try again"
 
 import type { Request } from '@playwright/test';
 import { expect, test } from '../fixtures/test';
 import { LINK_ASKED, SIGN_IN_LINKS } from '../fixtures/sign-in';
+import { announcements, listenForAnnouncements } from '../support/accessibility';
 
 const sentText = (email: string) =>
   `We sent a sign-in link to ${email}. It works once, for the next 15 minutes.`;
@@ -21,6 +22,7 @@ test.describe('Sign In: asking for a link', () => {
       if (request.url().endsWith(SIGN_IN_LINKS)) sent.push(request);
     });
     await signInPage.open();
+    await listenForAnnouncements(signInPage.page);
 
     // When Sofia asks for a link with her work email
     await signInPage.askForLink('sofia@northwind.co');
@@ -45,6 +47,13 @@ test.describe('Sign In: asking for a link', () => {
     await expect(signInPage.noticeTitle).toBeFocused();
     await expect(signInPage.form).toHaveCount(0);
     await expect(signInPage.footer).toBeVisible();
+    // Said once, politely
+    expect(await announcements(signInPage.page)).toEqual([
+      {
+        politeness: 'polite',
+        text: `Check your inbox ${sentText('sofia@northwind.co')} Use another email`,
+      },
+    ]);
   });
 
   test('pressing the button twice sends one request', async ({ api, signInPage }) => {
@@ -121,6 +130,7 @@ test.describe('Sign In: asking for a link', () => {
       // Given a request for a link that fails
       api.answer('POST', SIGN_IN_LINKS, answer);
       await signInPage.open();
+      await listenForAnnouncements(signInPage.page);
 
       // When Sofia asks for a link
       await signInPage.askForLink('sofia@northwind.co');
@@ -133,6 +143,13 @@ test.describe('Sign In: asking for a link', () => {
       await expect(signInPage.submit).toHaveText('Try again');
       await expect(signInPage.submit).toBeEnabled();
       await expect(signInPage.email).toHaveValue('sofia@northwind.co');
+      // Said once, as an alert
+      expect(await announcements(signInPage.page)).toEqual([
+        {
+          politeness: 'assertive',
+          text: 'We couldn’t send the link. Mondino didn’t answer — try again in a moment.',
+        },
+      ]);
 
       // And "Try again" asks again
       api.answer('POST', SIGN_IN_LINKS, LINK_ASKED);

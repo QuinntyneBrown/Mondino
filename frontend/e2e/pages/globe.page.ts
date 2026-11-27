@@ -25,6 +25,14 @@ export class GlobePage {
   /** The list of pins over the globe, a keyboard's and a screen reader's way to the teammates. */
   readonly pinList: Locator;
   readonly pinButtons: Locator;
+  /** The pins drawn with their initials: every pin but a far one resting unlabelled. */
+  readonly nearPinButtons: Locator;
+  /**
+   * The globe as assistive technology finds it: one labelled group, whatever draws it, and the
+   * pin buttons in the list it holds, found by their roles alone.
+   */
+  readonly globeGroup: Locator;
+  readonly groupPinButtons: Locator;
   /** Everything over the globe a person can press or focus. */
   readonly pinControls: Locator;
   /** The pins that are lifted, and the labels shown at rest and lifted. */
@@ -155,6 +163,12 @@ export class GlobePage {
     this.allPins = this.stage.locator('.globe__pin');
     this.pinList = this.stage.locator('ul.globe__pins');
     this.pinButtons = this.pinList.locator('li.globe__pin > button.pin');
+    this.nearPinButtons = this.pinList.locator('li.globe__pin:not(.globe__pin--far) > button.pin');
+    this.globeGroup = this.stage.getByRole('group');
+    this.groupPinButtons = this.globeGroup
+      .getByRole('list')
+      .getByRole('listitem')
+      .getByRole('button');
     this.pinControls = this.pinList.locator('button, a, [tabindex], [role="button"]');
     this.liftedPins = this.pinList.locator('li.globe__pin--lifted');
     this.newPins = this.pinList.locator('.pin--new');
@@ -519,6 +533,20 @@ export class GlobePage {
   async pinNames(): Promise<string[]> {
     return this.pinButtons.evaluateAll((buttons) =>
       buttons.map((button) => button.getAttribute('aria-label') ?? ''),
+    );
+  }
+
+  /** The colour of the globe's outline, as the theme draws it. */
+  outlineColour(): Promise<string> {
+    return this.globe
+      .locator('circle.globe__outline')
+      .evaluate((circle) => getComputedStyle(circle).stroke);
+  }
+
+  /** Whether the panel sits inside a live region, which would read each minute's tick aloud. */
+  panelIsLive(): Promise<boolean> {
+    return this.panel.evaluate(
+      (panel) => !!panel.closest('[aria-live], [role="status"], [role="alert"], [role="log"]'),
     );
   }
 

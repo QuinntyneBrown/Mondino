@@ -134,6 +134,8 @@ kind's icon, darker pin text and control edges, all four kinds of moment on. Wha
 | A team of 500 on Team lists London before Accra, a city's teammates in the order the seed made them, and each teammate of one city with weather of their own. | Accra (−0.19°) before London (−0.13°), a city's teammates by name, and one weather for each city. | West to east is by offset, then longitude, then name (L2-026), and the weather is the city's, one reading for each (L2-018). |
 | The Team search takes text of any length. | At most 60 characters, as "Your city" on Join. | What is typed in a search is limited in length (L2-044). |
 | Tabs, filters and chips drawn about 30 px tall; the phone header 390 px wide at its narrowest. | The same look, each with a 44 px touch target, and a header that fits 320 px. | Every touch target is at least 44 × 44 px, and every screen works from the narrowest phone (L2-037, L2-039). |
+| Every pin fades with its depth, its initials and label with it; "Working now 8" draws its count at 70%. | A labelled pin is drawn at full strength; a far pin fades and draws no initials until it lifts. The count is at full strength, in regular weight. | No text falls under 4.5:1, on the globe or in a tab (L2-041, ADR 0029). |
+| The footers' links, the Team ribbon's markers and "Skip to content" are as tall as their text or their avatar. | The same look, each with a 44 px touch target. | Every touch target is 44 × 44 px (L2-039). |
 
 The prototype now draws most states itself. These are still the mocks' own, written from the L2
 requirements: Join's error summary, Profile & Settings with the lookup down or rate limited,

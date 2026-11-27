@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-005, L2-045
+// Traces to: L2-005, L2-045, L2-040
 // Description: A failed join keeps what was typed and offers to try again; a full team says so in the form's place; too many joins wait
 
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
@@ -13,6 +13,7 @@ import {
   northwindInvite,
   SOFIA_JOINED,
 } from '../fixtures/invites';
+import { announcements, listenForAnnouncements } from '../support/accessibility';
 
 const fullText =
   'The team has all 500 of its places taken. Ask a teammate at Northwind to tell you when a place opens, then open this link again.';
@@ -109,6 +110,7 @@ test.describe('Join: a join that is refused', () => {
     });
 
     // When "Join Northwind" is chosen
+    await listenForAnnouncements(joinPage.page);
     await joinPage.submit.click();
 
     // Then the countdown shows, the button waits, and what was typed is kept
@@ -120,8 +122,22 @@ test.describe('Join: a join that is refused', () => {
     await expect(joinPage.name).toHaveValue('Sofia Bianchi');
     await expect(joinPage.postalCode).toHaveValue('20121');
 
+    // And the countdown ticks on, announced once and not every second
+    await joinPage.page.clock.runFor(10_000);
+    await expect(joinPage.rateLimitCountdown).toHaveText('9:32');
+    expect(
+      (await announcements(joinPage.page)).filter((said) => said.politeness === 'assertive'),
+    ).toEqual([
+      {
+        politeness: 'assertive',
+        text: expect.stringMatching(
+          /^Too many tries from this device\. You can try again in 9:42\b/,
+        ),
+      },
+    ]);
+
     // And at zero the button comes back, and finds the city again
-    await joinPage.page.clock.runFor(582_000);
+    await joinPage.page.clock.runFor(572_000);
     await expect(joinPage.rateLimit).toHaveCount(0);
     await expect(joinPage.submit).toBeEnabled();
     await joinPage.submit.click();

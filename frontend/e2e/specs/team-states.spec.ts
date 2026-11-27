@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-026, L2-027, L2-049, L2-054, L2-034, L2-044, L2-047
+// Traces to: L2-026, L2-027, L2-049, L2-054, L2-034, L2-044, L2-047, L2-042
 // Description: Team while it loads, when it fails, for a team of one, without the weather, for a teammate who shares less, and with names that are markup, long or one word
 
 import { expect, test } from '../fixtures/test';
@@ -10,6 +10,8 @@ import {
   northwindPinsWhere,
 } from '../fixtures/pins';
 import { rememberTeam } from '../support/membership';
+import { fastRepeats, motionUnderReduce } from '../support/accessibility';
+import { changeReducedMotion } from '../support/turning';
 
 const markup = '<img src=x onerror=alert(1)>';
 const longName = 'Maximiliana Alexandra Oyelaran-Fitzgerald';
@@ -34,6 +36,10 @@ test.describe('Team: its states', () => {
     await expect(teamPage.main).toHaveAttribute('aria-busy', 'true');
     await expect(teamPage.loading).toHaveAttribute('aria-label', 'Loading team');
     await expect(teamPage.loadingAnnouncement).toHaveText('Loading team…');
+    // And its shimmer repeats slower than three times a second, and stops under reduced motion
+    expect(await fastRepeats(teamPage.page)).toEqual([]);
+    await changeReducedMotion(teamPage.page, true);
+    expect(await motionUnderReduce(teamPage.page)).toEqual([]);
 
     // When they come back, the list takes its place
     pins.release(northwindPins());

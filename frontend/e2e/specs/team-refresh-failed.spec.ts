@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-048, L2-049
+// Traces to: L2-048, L2-049, L2-040, L2-041
 // Description: When a refresh fails, the screen keeps what it shows and its clocks tick, and a banner under the header says so as notifications/refresh-banner/warning draws it, naming the weather alone on Team; "Try again" reads "Trying…" until a refresh works, and the banner then goes with no message
 
 import type { Answer, ApiFixture } from '../fixtures/api';
@@ -7,6 +7,11 @@ import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { expect, test } from '../fixtures/test';
 import { rememberTeam } from '../support/membership';
 import { mockBanner } from '../support/mocks';
+import {
+  announcements,
+  listenForAnnouncements,
+  lowContrastInBothThemes,
+} from '../support/accessibility';
 
 const unreachable: Answer = { unanswered: true };
 
@@ -42,6 +47,7 @@ test.describe('Keep the team fresh: a refresh that fails', () => {
     await globePage.open();
     await expect(globePage.title).toHaveText('13 teammates');
     await expect(refreshBanner.banner).toHaveCount(0);
+    await listenForAnnouncements(page);
 
     // When Mondino cannot be reached at the next refresh, 15 minutes on
     await page.clock.fastForward('15:00');
@@ -61,6 +67,12 @@ test.describe('Keep the team fresh: a refresh that fails', () => {
     await page.clock.fastForward('01:00');
     await expect.poll(pins.reads).toBe(3);
     await expect(refreshBanner.text).toContainText('from 15:05.');
+    // Its words meet AA in light and in dark
+    expect(await lowContrastInBothThemes(page)).toEqual([]);
+    // Said once, politely, while the clocks tick on and the tries fail: it keeps what is shown
+    expect(
+      (await announcements(page)).filter((said) => said.text.startsWith('Couldn’t refresh')),
+    ).toEqual([{ politeness: 'polite', text: expect.stringMatching(/^Couldn’t refresh\./) }]);
 
     // When "Try again" is used while Mondino answers slowly
     let answer!: (answer: Answer) => void;
