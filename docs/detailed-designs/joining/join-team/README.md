@@ -66,7 +66,16 @@ screen.
     (`open-invite-link`): "Northwind is full", or "This invite link no longer works".
   - A retry sends the same `joinRequestId`, so a join whose response was lost does not make a
     second pin.
-- **`JoinState`** — feature-local union of `Idle`, `Joining`, `RateLimited` and `Failed`.
+- **`JoinState`** — feature-local union of `Idle`, `Joining` and `Failed`. A join refused with
+  429 is the lookup's own `RateLimited` state, and a full team or a reset link an `InviteState`.
+- **`TeamMembership` / `TEAM_MEMBERSHIP`** — contract and token in `@mondino/api`, with the
+  `Membership` type; **`LocalTeamMembership`** in `domain`'s `storage/` keeps it in local
+  storage under `mondino.membership` (ids and the team's name only) and is bound in
+  `app.config.ts`, since every screen of a team reads it.
+- **`GlobePage`** — reads the `JustJoined` from `Router.currentNavigation()`, checks its shape
+  (it is data), and replaces the history entry's state without it, so a reload or a return
+  through history does not greet the teammate again. The toast's timer is cleared when the
+  screen is left.
 - **`InviteApi.join(inviteToken, request)`** — sends
   `POST /api/invites/{inviteToken}/teammates` with a `JoinRequest` body: `name`, `countryCode`,
   `postalCode` or `cityId`, and `joinRequestId`. It returns a `JoinResult`: `teamId` and

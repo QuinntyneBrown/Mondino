@@ -22,18 +22,23 @@ package "mondino application" {
   enum JoinState {
     Idle
     Joining
-    RateLimited
     Failed
   }
   class JoinPage
   class GlobePage
 }
 package "@mondino/domain" {
-  class TeamMembership {
+  class LocalTeamMembership {
+    +current: Signal<Membership | null>
     +remember(membership: Membership): void
+    +forget(): void
   }
 }
 package "@mondino/api" {
+  interface TeamMembership {
+    +current: Signal<Membership | null>
+    +remember(membership: Membership): void
+  }
   interface InviteApi {
     +join(inviteToken: string, request: JoinRequest): Promise<JoinResult>
   }
@@ -110,6 +115,7 @@ package "Mondino.Infrastructure" {
 JoinPage --> JoinStore
 JoinPage ..> GlobePage : navigates to /globe
 JoinPage ..> TeamMembership : remembers the team after joining
+LocalTeamMembership ..|> TeamMembership
 JoinStore --> JoinState
 JoinStore ..> InviteApi : INVITE_API
 InviteApi ..> JoinRequest

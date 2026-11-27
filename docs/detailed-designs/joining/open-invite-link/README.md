@@ -79,7 +79,7 @@ source.
   refusal is an `ApiError` with its `code`, and no answer the code `unreachable`. The Join
   route's lazy routes file binds the token, so the client stays out of the initial bundle.
 - **`Invite`** — `teamName`, `teammateCount`, `positions`, `avatars`, `alreadyJoined`
-  and `countries` (`full` joins with `join-team`). Until the postal code lookup (journey 3) a
+  `full` (set by `join-team`) and `countries`. Until the postal code lookup (journey 3) a
   `Country` is its `code` and `name`. The `countries` list serves the Join form and is described in
   `place-pin-from-postal-code`.
 - **`InviteAvatar`** — `initials` and `colour` of one teammate, drawn by the design system's

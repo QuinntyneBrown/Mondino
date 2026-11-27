@@ -162,3 +162,61 @@ apply the lessons that fit.
   `node tools/verify/verify.mjs; echo $?` before its commit.
 - *The browser logs every refused request* (journey 2, lesson 4): the 422, 503 and 429 answers the
   specs give on purpose passed the guard, and an unanswered city search would still fail it.
+
+## Journey 4: Join the team
+
+**What slowed it**
+
+- The parent branch was rebased onto `main` and force-pushed mid-journey. The branch was moved
+  with `git rebase --onto`, and `docs/adr/README.md` met `main`'s own row 0004 (Azure hosting);
+  both rows were kept.
+- The session cookie's acceptance test failed although the session worked: the cookie expires a
+  year after the mocks' "now" (2025), which `FakeTimeProvider` gives the cookie handler, and the
+  test machine's clock is past that, so the test client's cookie container dropped it as expired.
+  The test sends the cookie by hand and says why.
+- `MondinoApi` replaced `ICurrentTeammate` with a fake, so a real session could not be read in a
+  test. The fake now stands in only while a test has signed a teammate in, and the real one reads
+  the cookie otherwise.
+- After a reload the Router's first navigation carries the history entry's state, so the
+  "You’re on the map." toast came back. `GlobePage` replaces the entry's state once it has read it.
+- The mock draws a join refused with 429 as the lookup's own rate-limited state (the found city
+  gone, "Place my pin"); the design said the found city stayed. The mock won, and the store
+  reuses the lookup's countdown, which also gave the slice for free.
+- Some refusals passed before their slice: the double-click and the full team were built by the
+  handler the design describes in slice 1, and the join's 429 by the store in slice 3. Their
+  specs were still written first and run; they were kept as the proof.
+
+**Lessons**
+
+1. **A cookie's lifetime is measured from the fake clock.** An acceptance test that follows a
+   cookie with a real client fails once the real date passes the fake "now" plus the lifetime;
+   send the cookie by hand, or give the client the same clock.
+2. **Read navigation state once, then take it out of history.** `Router.currentNavigation()`
+   restores the entry's state on a reload; a one-time greeting replaces it after reading.
+3. **Check the shape of navigation state and storage.** Both are data a person can change; a
+   membership or a `JustJoined` that is not the expected shape is treated as none.
+4. **Refuse cross-site pre-session requests by `Sec-Fetch-Site`, then `Origin`** (ADR 0008):
+   there is no session to bind an antiforgery token to, and a JSON-only body with no CORS
+   already stops a plain form.
+5. **Serialise one team's joins in the process as well as by a unique index.** EF Core InMemory
+   enforces no unique index, so the double-click test proves the in-process gate, and the index
+   holds across instances on PostgreSQL.
+
+**Earlier lessons applied**
+
+- *Bring the docs in line first* (journey 1, lesson 6): ADR 0008 and the design's changes were
+  one commit before any code; the design was touched again only to record what the code chose
+  (the membership's contract, the state's union).
+- *Read the prompt against the mock too* (journey 3, lesson 1): the rate-limited join follows the
+  mock, not the design's words; the prompt itself agreed with the mock.
+- *Measure the initial bundle* (journey 2, lesson 1; journey 3, lesson 6): the membership bound
+  at the root cost 0.8 kB and the Globe route 0.4 kB (257.5 to 258.7 kB), inside the budget, so
+  no budget moved.
+- *Run the spec before the page exists* (journey 1, lesson 5): every slice's tests were run first
+  and failed on the missing endpoint, state or screen, but for the three noted above.
+- *Check the verify script's own exit code* (journey 2, lesson 6): each slice ran
+  `node tools/verify/verify.mjs`, read `$?`, and the lint failures it caught (a selector in a
+  spec, an unused fixture) were fixed before the commit.
+- *The browser logs every refused request* (journey 2, lesson 4): the 409, 429 and 500 answers
+  given on purpose passed the guard.
+
