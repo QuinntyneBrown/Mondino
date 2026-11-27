@@ -17,7 +17,7 @@ Container_Boundary(spa, "Mondino web app") {
 }
 Rel(teammate, page, "Opens the Globe screen")
 Rel(page, placeholder, "Shows until the globe is ready")
-Rel(page, view, "Loads with a dynamic import and gives pins to")
+Rel(page, view, "Shows, with the placeholder projected, and gives pins to")
 Rel(view, scene, "Creates, sizes and disposes")
 Rel(view, fallback, "Is replaced by, through stateChange, when the scene is unavailable")
 Rel(page, fallback, "Shows when the globe library fails to load; gives placements to")

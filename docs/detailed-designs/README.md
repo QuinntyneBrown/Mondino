@@ -181,7 +181,7 @@ Every L2 requirement, L2-001 to L2-056, is realised by exactly one feature.
 - `GlobeScene.setPalette` takes a `GlobePalette` read from the `--color-globe-*` tokens; the
   globe is drawn by three.js from `globe.glb` and two mask textures built in Blender
   (ADR 0012), and its outline and shadow are SVG circles around the canvas. `CLOCK`'s
-  `minute` signal ticks once a minute (`BrowserClock`, bound at the root), and
+  `minute` signal ticks once a minute (`BrowserClock`, bound by each screen that reads the time), and
   `TeamStore.refreshing` is true while a refresh is pending.
 
 ## Not decided yet

@@ -8,7 +8,7 @@ import {
   untracked,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CLIPBOARD, TEAM_MEMBERSHIP } from '@mondino/api';
+import { CLIPBOARD, CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
 import {
   Alert,
   Button,
@@ -22,7 +22,7 @@ import {
   Toast,
   Wordmark,
 } from '@mondino/components';
-import { emailLimit, stillPlacements } from '@mondino/domain';
+import { BrowserClock, emailLimit, stillPlacements } from '@mondino/domain';
 import { type CreateTeamField, CreateTeamStore, nameLimit } from './create-team-store';
 
 /** The words under a field that is missing or wrong (L2-053). */
@@ -70,7 +70,8 @@ const fieldIds: Record<CreateTeamField, string> = {
     Toast,
     Wordmark,
   ],
-  providers: [CreateTeamStore],
+  // One clock for the screen, released with it.
+  providers: [CreateTeamStore, { provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './create-team-page.html',
   styleUrl: './create-team-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

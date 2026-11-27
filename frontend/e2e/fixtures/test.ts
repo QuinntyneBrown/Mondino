@@ -8,6 +8,14 @@ import { JoinPage } from '../pages/join.page';
 import { NotFoundPage } from '../pages/not-found.page';
 import { SignInPage } from '../pages/sign-in.page';
 
+interface Options {
+  /**
+   * Whether the browser can draw WebGL. Chromium draws it in software (SwiftShader); a spec of the
+   * still picture turns it off with `test.use({ webgl: false })`.
+   */
+  webgl: boolean;
+}
+
 interface Fixtures {
   /** Problems seen during a spec: any one fails it. */
   problems: string[];
@@ -25,7 +33,9 @@ interface Fixtures {
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
 
-export const test = base.extend<Fixtures>({
+export const test = base.extend<Options & Fixtures>({
+  webgl: [true, { option: true }],
+
   // eslint-disable-next-line no-empty-pattern
   problems: async ({}, use) => {
     await use([]);
@@ -38,8 +48,20 @@ export const test = base.extend<Fixtures>({
   },
 
   guard: [
-    async ({ page, context, problems, api }, use) => {
+    async ({ page, context, problems, api, webgl }, use) => {
       void api;
+      if (!webgl)
+        await page.addInitScript(() => {
+          const getContext = HTMLCanvasElement.prototype.getContext;
+          HTMLCanvasElement.prototype.getContext = function (
+            this: HTMLCanvasElement,
+            kind: string,
+            ...rest: unknown[]
+          ) {
+            if (kind.includes('webgl')) return null;
+            return (getContext as (...args: unknown[]) => unknown).call(this, kind, ...rest);
+          } as typeof getContext;
+        });
       // The time the spec says it is, so every local time, status and moment is the same on
       // every run. A spec moves it with page.clock; it never sleeps.
       await page.clock.install({ time: NOW });

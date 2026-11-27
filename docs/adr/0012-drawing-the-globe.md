@@ -39,9 +39,9 @@ The constraints are the requirements' and the instructions':
   `frontend/`). The script reads Natural Earth's 1:50m land from `world-atlas` (a dev
   dependency), models the globe, saves `globe.blend` beside itself and writes the three assets.
   All three are committed, so a build needs no Blender. The model holds three meshes, with
-  positions and normals only: `Globe.High` (160 × 80 segments) and `Globe.Low` (80 × 40), the
-  sphere with the land raised 1.4% of the radius from the sea and rounded, and `Clouds`, a smooth
-  shell at 1.032 the clouds are drawn on.
+  positions and normals only: `GlobeHigh` (144 × 72 segments) and `GlobeLow` (72 × 36), the
+  sphere with the land raised 1.2% of the radius from the sea and rounded, and `Clouds`, a smooth
+  shell at 1.02 the clouds are drawn on.
 - **The surface is two mask textures, not colours**: `surface.png` (2048 × 1024,
   equirectangular, north at the top: land in red, forest in green, sand in blue, ice in alpha)
   and `clouds.png` (1024 × 512, cloud in red). The shader looks each point up from its direction
@@ -66,19 +66,30 @@ The constraints are the requirements' and the instructions':
   so no `blob:` address is made and the CSP is unchanged. The API serves `.glb` as
   `model/gltf-binary` (ASP.NET Core does not know the extension and would otherwise answer with
   the app shell).
-- **Sizes.** `globe.glb` about 0.7 MB, `surface.png` about 170 kB, `clouds.png` about 30 kB,
-  the scene's chunk with three.js about 520 kB before compression; the `globe` library's own
-  chunk is a few kilobytes. All are cached by their hashed names after the first visit
+- **Sizes.** `globe.glb` 521 kB, `surface.png` 171 kB, `clouds.png` 30 kB, the scene's chunk
+  with three.js 629 kB (130 kB compressed); the `globe` library's own code is about 8 kB in the
+  page's chunk. All are cached by their hashed names after the first visit
   (L2-046).
 - **Two detail steps.** `High`: the canvas at the device's pixel ratio up to 2, and
-  `Globe.High`. `Low`: the canvas at a pixel ratio of 1, and `Globe.Low`. A step changes only
+  `GlobeHigh`. `Low`: the canvas at a pixel ratio of 1, and `GlobeLow`. A step changes only
   resolution and mesh: lighting, colours, the outline and the pins are the same at both
   (L2-008 criterion 4). Stepping down happens after 3 seconds under 30 frames a second; the
   frame timing and `DetailLevel` are journey 29's (L2-046).
+- **The lazy boundary is the renderer, not the component.** `GlobePage` (and `JoinPage`)
+  import `GlobeView` directly, so the `globe` library's own code (the component, the scene's
+  contract and the sun's position, about 8 kB) is in the page's lazy chunk, and the renderer with
+  the scene (`three-globe-scene`, about 630 kB, 130 kB compressed) is the one dynamic import.
+  Measured, an `@defer` block around `GlobeView` puts Angular's defer runtime (about 7 kB) into
+  the initial chunk, and `NgTemplateOutlet` another 2.8 kB, past the budget, while deferring
+  only those 8 kB. A renderer chunk that fails to load is `AssetsFailed`, and the still picture
+  shows, which is what `@error` would have done.
 - **Drawn on demand.** The scene draws a frame only when something has changed (the sun, the
   size, the palette, the detail, later the orientation) and never while stopped; `GlobeView`
-  stops it while the tab is hidden. The minute tick of the shared clock (`BrowserClock` in
-  `domain`, bound at the root) moves the sun once a minute and rests while the tab is hidden.
+  stops it while the tab is hidden. The minute tick of the screen's clock (`BrowserClock` in
+  `domain`) moves the sun once a minute and rests while the tab is hidden. Each screen that reads
+  the time binds `CLOCK` to its own `BrowserClock` in its component's providers, so its timer
+  and listener go with the screen and its code stays out of the initial chunk; Join and Create
+  Team bind it the same way.
 - **Released on destroy.** `GlobeScene.dispose` cancels the pending frame, removes the canvas's
   context-loss listener, disposes of every geometry, material and texture, closes the decoded
   images, and calls `renderer.dispose()` and `renderer.forceContextLoss()`. `GlobeView` aborts
@@ -91,8 +102,8 @@ The constraints are the requirements' and the instructions':
 
 ## Consequences
 
-- The initial bundle is unchanged by the globe; `GlobePage` pays for `@defer` and the legend,
-  and `BrowserClock` joins the root.
+- The initial bundle grows by about 0.4 kB (Angular's runtime for what `GlobeView` uses): from
+  259.24 kB to 259.64 kB, inside the budget.
 - A device without WebGL 2 (about 3% of browsers) sees the still picture with its pins working.
 - Changing the globe's look means changing the script and running Blender again; the three
   assets are its output and are not edited by hand.

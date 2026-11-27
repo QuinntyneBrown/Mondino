@@ -1,0 +1,178 @@
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  DOCUMENT,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+  untracked,
+} from '@angular/core';
+import { CLOCK, type Position } from '@mondino/api';
+import {
+  createGlobeScene,
+  detailSteps,
+  type GlobePalette,
+  type GlobeScene,
+  type ProjectedPoint,
+} from '../scene/globe-scene';
+import { subsolarPoint } from '../sun/sun-position';
+
+/** Loading until the first 3D frame is drawn; Fallback where it cannot be, and the page shows the still picture. */
+export type GlobeState = 'Loading' | 'Ready' | 'Fallback';
+
+/** The teammate's own new pin: where it is and what its label says. */
+export interface NewPin {
+  readonly position: Position;
+  readonly label: string;
+}
+
+const paletteTokens: Record<keyof GlobePalette, string> = {
+  ocean: '--color-globe-ocean',
+  oceanDeep: '--color-globe-ocean-deep',
+  land: '--color-globe-land',
+  landDeep: '--color-globe-land-deep',
+  sand: '--color-globe-sand',
+  ice: '--color-globe-ice',
+  cloud: '--color-globe-cloud',
+  night: '--color-globe-night',
+};
+
+/**
+ * The 3D globe (L2-008), its night side shaded from the clock (L2-010). It draws a placeholder
+ * projected into it (`[loading]`) until the first frame, and tells the page through `stateChange`
+ * when the globe cannot be drawn, so the page shows the still picture in its place. Until pins
+ * are built (`show-pins`), bare pins and the teammate's own new pin are plain markers over it.
+ * Everything it acquires is released when it is destroyed.
+ */
+@Component({
+  selector: 'mo-globe',
+  templateUrl: './globe-view.html',
+  styleUrl: './globe-view.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class GlobeView {
+  /** What the globe shows, for someone who cannot see it. */
+  readonly label = input.required<string>();
+  /** Bare pins, with no name: `null` draws no pin layer at all. */
+  readonly pins = input<readonly Position[] | null>(null);
+  /** The teammate's own new pin, lifted, labelled and pulsing once; or null. */
+  readonly you = input<NewPin | null>(null);
+
+  readonly stateChange = output<GlobeState>();
+
+  protected readonly state = signal<GlobeState>('Loading');
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly document = inject(DOCUMENT);
+  private readonly clock = inject(CLOCK);
+  private readonly releasing = new AbortController();
+  private readonly scene = signal<GlobeScene | null>(null);
+  private resizing: ResizeObserver | undefined;
+
+  /** The markers, where the scene draws their places; none on the far side. */
+  protected readonly markers = computed(() => {
+    const scene = this.scene();
+    const pins = this.pins();
+    if (!scene || this.state() !== 'Ready' || pins === null) return null;
+    const placed = (position: Position) => scene.project(position);
+    const you = this.you();
+    const youAt = you ? placed(you.position) : null;
+    return {
+      pins: pins.map(placed).filter((point): point is ProjectedPoint => point !== null),
+      you: you && youAt ? { ...youAt, label: you.label } : null,
+    };
+  });
+
+  constructor() {
+    afterNextRender(() => void this.begin());
+    inject(DestroyRef).onDestroy(() => this.release());
+    // The night side follows the clock: the sun moves a quarter of a degree west each minute.
+    effect(() => {
+      this.clock.minute();
+      const scene = this.scene();
+      scene?.setSun(subsolarPoint(untracked(() => this.clock.now())));
+    });
+  }
+
+  private async begin(): Promise<void> {
+    const { signal: released } = this.releasing;
+    let scene: GlobeScene;
+    try {
+      // Read from the rendered view rather than through a view query, whose runtime would join
+      // the initial bundle (lessons learned, journey 3).
+      const canvas = this.host.querySelector('canvas');
+      if (!canvas) return;
+      scene = await createGlobeScene(canvas, {
+        detail: detailSteps(window.devicePixelRatio || 1)[0],
+        signal: released,
+        onContextLost: () => this.unavailable(),
+      });
+    } catch {
+      if (!released.aborted) this.unavailable();
+      return;
+    }
+    if (released.aborted) {
+      scene.dispose();
+      return;
+    }
+
+    scene.setPalette(this.palette());
+    scene.setSun(subsolarPoint(this.clock.now()));
+    const box = this.host.querySelector<HTMLElement>('.globe');
+    if (!box) return;
+    scene.resize(box.clientWidth, box.clientHeight);
+    this.resizing = new ResizeObserver(([entry]) =>
+      scene.resize(entry.contentRect.width, entry.contentRect.height),
+    );
+    this.resizing.observe(box);
+    const view = this.document.defaultView;
+    view
+      ?.matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', () => scene.setPalette(this.palette()), { signal: released });
+    // Nothing is drawn while the tab is hidden.
+    this.document.addEventListener(
+      'visibilitychange',
+      () => (this.document.hidden ? scene.stop() : scene.start()),
+      { signal: released },
+    );
+    scene.onFrame(() => {
+      if (this.state() === 'Loading') this.moveTo('Ready');
+    });
+    this.scene.set(scene);
+    if (!this.document.hidden) scene.start();
+  }
+
+  /** The globe's colours, from the tokens on the host, so the theme decides them. */
+  private palette(): GlobePalette {
+    const style = getComputedStyle(this.host);
+    const read = (token: string) => style.getPropertyValue(token).trim();
+    return Object.fromEntries(
+      Object.entries(paletteTokens).map(([part, token]) => [part, read(token)]),
+    ) as unknown as GlobePalette;
+  }
+
+  private unavailable(): void {
+    this.release();
+    this.moveTo('Fallback');
+  }
+
+  private moveTo(state: GlobeState): void {
+    if (this.state() === state) return;
+    this.state.set(state);
+    this.stateChange.emit(state);
+  }
+
+  private release(): void {
+    this.releasing.abort();
+    this.resizing?.disconnect();
+    this.resizing = undefined;
+    this.scene()?.dispose();
+    this.scene.set(null);
+  }
+}

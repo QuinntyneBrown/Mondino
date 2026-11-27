@@ -25,8 +25,8 @@ import {
   TextField,
   Wordmark,
 } from '@mondino/components';
-import { TEAM_MEMBERSHIP } from '@mondino/api';
-import { stillPlacements } from '@mondino/domain';
+import { CLOCK, TEAM_MEMBERSHIP } from '@mondino/api';
+import { BrowserClock, stillPlacements } from '@mondino/domain';
 import type { JustJoined } from '../globe/just-joined';
 import { JoinStore, nameLimit } from './join-store';
 
@@ -54,7 +54,8 @@ import { JoinStore, nameLimit } from './join-store';
     TextField,
     Wordmark,
   ],
-  providers: [JoinStore],
+  // One clock for the screen, released with it.
+  providers: [JoinStore, { provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './join-page.html',
   styleUrl: './join-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
