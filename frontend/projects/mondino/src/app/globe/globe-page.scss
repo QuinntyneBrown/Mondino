@@ -4,7 +4,7 @@
 .globe-screen {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--layout-header-height));
   overflow-x: clip;
 }
 .globe-screen__stage {
@@ -62,7 +62,7 @@
 @media (min-width: 64rem) {
   .globe-screen {
     flex-direction: row;
-    height: 100dvh;
+    height: calc(100dvh - var(--layout-header-height));
   }
   .globe-screen__stage {
     min-width: 0;

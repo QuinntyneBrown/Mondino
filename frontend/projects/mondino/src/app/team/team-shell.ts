@@ -1,0 +1,78 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { CLIPBOARD, HttpTeamApi, TEAM_API } from '@mondino/api';
+import { AppHeader, Avatar } from '@mondino/components';
+import { initialsOf, NavigatorClipboard } from '@mondino/domain';
+import { TeamStore } from './team-store';
+
+/**
+ * The teammate screens' shell: the header the mocks draw over Globe, Team, Moments and Profile &
+ * Settings, the screen under it, and the team they share, read once and released when the
+ * teammate leaves them (view-week-around-the-world). Team, Moments and Profile & Settings join its
+ * children with their journeys; "Invite teammate" opens the invite dialog with journey 16.
+ */
+@Component({
+  selector: 'mo-team-shell',
+  imports: [AppHeader, Avatar, RouterLink, RouterOutlet],
+  providers: [
+    { provide: TEAM_API, useClass: HttpTeamApi },
+    { provide: CLIPBOARD, useClass: NavigatorClipboard },
+    TeamStore,
+  ],
+  templateUrl: './team-shell.html',
+  styleUrl: './team-shell.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TeamShell {
+  private readonly router = inject(Router);
+  protected readonly store = inject(TeamStore);
+
+  /** The screens in the header, in the mocks' order. */
+  protected readonly navigation = [
+    { path: '/globe', label: 'Globe' },
+    { path: '/team', label: 'Team' },
+    { path: '/moments', label: 'Moments' },
+  ];
+
+  /**
+   * The screen shown, by its path, which the header marks `aria-current="page"`. It is read from
+   * the router's navigations rather than with `RouterLinkActive`, which costs the initial bundle
+   * 10 kB.
+   */
+  protected readonly screen = signal(pathOf(this.router.url));
+
+  /** The viewer's own pin, whose initials and colour the link to Profile & Settings shows. */
+  protected readonly viewer = computed(() => {
+    const pin = this.store.team()?.pins.find((each) => each.isViewer);
+    return pin ? { initials: initialsOf(pin.name), colour: pin.colour } : null;
+  });
+
+  constructor() {
+    void this.store.load();
+    const subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) this.screen.set(pathOf(event.urlAfterRedirects));
+    });
+    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+  }
+
+  protected goHome(): void {
+    void this.router.navigateByUrl('/globe');
+  }
+
+  /** "Invite teammate": the invite dialog comes with journey 16 (invite-teammates, L2-054). */
+  protected invite(): void {
+    // Nothing is copied from the header: only the dialog's "Copy link" copies (L2-025).
+  }
+}
+
+/** An address's path, without its query string or fragment: "/globe". */
+function pathOf(url: string): string {
+  return url.split(/[?#]/)[0];
+}

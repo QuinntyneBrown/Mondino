@@ -81,6 +81,15 @@ export class GlobePage {
   readonly workingRows: Locator;
   readonly workingEmpty: Locator;
   readonly moreWorking: Locator;
+  /** The header over the teammate screens: the mark, the navigation, Invite teammate and the viewer. */
+  readonly header: Locator;
+  readonly home: Locator;
+  readonly navigation: Locator;
+  readonly navigationLinks: Locator;
+  readonly currentScreen: Locator;
+  readonly inviteTeammate: Locator;
+  readonly profile: Locator;
+  readonly profileAvatar: Locator;
   /** The heading over the globe: the number of teammates, and the counts under it. */
   readonly title: Locator;
   readonly counts: Locator;
@@ -157,6 +166,14 @@ export class GlobePage {
     this.workingRows = this.working.locator('.row-list a.row');
     this.workingEmpty = this.working.locator('.panel__empty');
     this.moreWorking = this.working.locator('a.panel__more');
+    this.header = page.locator('header.app-header');
+    this.home = this.header.getByRole('link', { name: 'Mondino home' });
+    this.navigation = this.header.getByRole('navigation', { name: 'Primary' });
+    this.navigationLinks = this.navigation.getByRole('link');
+    this.currentScreen = this.navigation.locator('[aria-current="page"]');
+    this.inviteTeammate = this.header.getByRole('button', { name: 'Invite teammate' });
+    this.profile = this.header.getByRole('link', { name: 'Profile & Settings' });
+    this.profileAvatar = this.profile.locator('.avatar');
     this.title = this.stage.locator('.globe-screen__heading h1');
     this.counts = this.stage.locator('.globe-screen__counts');
     this.toastRegion = page.locator('.toast-region');

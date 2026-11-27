@@ -15,8 +15,6 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   CLOCK,
-  HttpTeamApi,
-  TEAM_API,
   TEAM_MEMBERSHIP,
   type GlobeViewport,
   type PinPlacement,
@@ -47,7 +45,7 @@ import {
   workingNow,
 } from '@mondino/domain';
 import type { JustJoined } from './just-joined';
-import { TeamStore } from './team-store';
+import { TeamStore } from '../team/team-store';
 
 /** How long the toast after joining stays before it goes by itself. */
 export const toastLifetime = 4000;
@@ -72,12 +70,8 @@ export const toastLifetime = 4000;
     Toast,
     WeekPanel,
   ],
-  // One clock and one team for the screen, released with it.
-  providers: [
-    { provide: CLOCK, useClass: BrowserClock },
-    { provide: TEAM_API, useClass: HttpTeamApi },
-    TeamStore,
-  ],
+  // One clock for the screen, released with it; the team is the shell's.
+  providers: [{ provide: CLOCK, useClass: BrowserClock }],
   templateUrl: './globe-page.html',
   styleUrl: './globe-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,7 +96,10 @@ export class GlobePage {
 
   /** The teammate who has just joined, from the navigation that opened the screen; null on a reload. */
   protected readonly justJoined = justJoinedIn(
-    inject(Router).currentNavigation()?.extras.state?.['justJoined'],
+    // The screen is drawn in the shell's outlet once the navigation has ended, so its state is the
+    // last successful navigation's.
+    (inject(Router).currentNavigation() ?? inject(Router).lastSuccessfulNavigation())?.extras
+      .state?.['justJoined'],
   );
 
   /** Whether the 3D globe is loading, drawn, or cannot be drawn and the still picture is shown. */
@@ -274,7 +271,6 @@ export class GlobePage {
       this.requestedId.set(params.get('teammate')),
     );
     destroyRef.onDestroy(() => subscription.unsubscribe());
-    void this.store.load();
     // Once the pins are read, the address chooses the selected pin; an id that is no pin of the
     // team is taken out of the address. With no id a held group pin stays held.
     let joinedPending = this.justJoined?.teammateId ?? null;

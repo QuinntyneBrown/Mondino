@@ -1,0 +1,31 @@
+<header class="app-header">
+  <a
+    class="app-header__home"
+    [attr.href]="homeAddress()"
+    aria-label="Mondino home"
+    (click)="goHome($event)"
+  >
+    <mo-wordmark [collapses]="true" />
+  </a>
+  <nav class="segmented" aria-label="Primary">
+    <ng-content select="[nav]" />
+  </nav>
+  <div class="app-header__actions">
+    <button
+      #trigger
+      class="btn app-header__invite"
+      type="button"
+      aria-label="Invite teammate"
+      (click)="invite.emit(trigger)"
+    >
+      <svg class="icon icon--sm" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <line x1="19" x2="19" y1="8" y2="14" />
+        <line x1="22" x2="16" y1="11" y2="11" />
+      </svg>
+      <span class="app-header__invite-label">Invite teammate</span>
+    </button>
+    <ng-content select="[me]" />
+  </div>
+</header>
