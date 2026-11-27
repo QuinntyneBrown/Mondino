@@ -15,6 +15,7 @@ using Mondino.Domain.Teams;
 using Mondino.Infrastructure.Persistence;
 using Mondino.Infrastructure.PostalCodes;
 using Mondino.Infrastructure.SignIn;
+using Mondino.Infrastructure.WeatherSource;
 
 namespace Mondino.Tests.Support;
 
@@ -48,6 +49,14 @@ public class MondinoApi : WebApplicationFactory<Program>
 
     /// <summary>The weather source, answering as the test tells it: nothing, until told.</summary>
     public FakeWeatherSource Weather { get; } = new();
+
+    /// <summary>
+    /// The outside weather service. Set <see cref="UsesWeatherSource"/> before the first request to
+    /// run the real weather source, with its cache and timeout, against it.
+    /// </summary>
+    public FakeOpenMeteo OpenMeteo { get; } = new();
+
+    public bool UsesWeatherSource { get; set; }
 
     /// <summary>Set before the first request to serve <c>TestApp</c>, a stand-in for the Angular build, as wwwroot.</summary>
     public bool ServesApp { get; set; }
@@ -146,8 +155,16 @@ public class MondinoApi : WebApplicationFactory<Program>
                 services.AddSingleton<IPostalCodeLookup>(PostalCodes);
             }
 
-            services.RemoveAll<IWeatherSource>();
-            services.AddSingleton<IWeatherSource>(Weather);
+            if (UsesWeatherSource)
+            {
+                services.AddHttpClient(OpenMeteoWeatherSource.ClientName)
+                    .ConfigurePrimaryHttpMessageHandler(() => OpenMeteo);
+            }
+            else
+            {
+                services.RemoveAll<IWeatherSource>();
+                services.AddSingleton<IWeatherSource>(Weather);
+            }
 
             if (UsesEmailSource)
             {
