@@ -1,11 +1,16 @@
 // Acceptance Test
 // Traces to: L2-040, L2-042, L2-041
-// Description: The globe is one labelled group holding the list of pins, each named in full, with its canvas hidden, and the still picture holds the same list; a selection by keyboard, click or address is announced once, politely, and a minute passing announces nothing; under reduced motion a pin selected by keyboard faces the viewer at once; in dark the globe is the same picture a little deeper with a light outline
+// Description: The globe is one labelled group holding the list of pins, each named in full, with its canvas hidden, and the still picture holds the same list; a selection by keyboard, click or address is announced once, politely, and a minute passing announces nothing; under reduced motion a pin selected by keyboard faces the viewer at once; in dark the globe is the same picture a little deeper with a light outline, and pins, markers and labels keep their contrast in both themes
 
 import { expect, test } from '../fixtures/test';
 import { NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
 import { idOf, NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
-import { announcements, listenForAnnouncements } from '../support/accessibility';
+import {
+  announcements,
+  listenForAnnouncements,
+  lowContrastInBothThemes,
+  ownContrast,
+} from '../support/accessibility';
 import { brightness, coloursAt, placeOnGlobe } from '../support/globe-pixels';
 import { rememberTeam } from '../support/membership';
 import { pauseTheClock } from '../support/turning';
@@ -131,7 +136,7 @@ test.describe('The globe as text', () => {
     expect(offCentre(await globePage.pinPlace('Kwame Mensah'))).toBeLessThan(1);
   });
 
-  test('in dark, the globe is the same picture a little deeper, with a light outline', async ({
+  test('in dark, the globe is the same picture a little deeper, with a light outline, and its pins and markers keep their contrast', async ({
     page,
     globePage,
   }) => {
@@ -154,5 +159,18 @@ test.describe('The globe as text', () => {
       colour.match(/\d+/g)!.slice(0, 3).map(Number) as [number, number, number];
     expect(brightness(rgb(lightOutline))).toBeLessThan(0.3);
     expect(brightness(rgb(await globePage.outlineColour()))).toBeGreaterThan(0.7);
+
+    // And in both themes every pin's initials meet AA on its colour, each moment marker's
+    // emblem or count 3:1 on sun, and the labels and panel meet AA over what is behind them
+    expect(await globePage.nearPinButtons.count()).toBeGreaterThan(0);
+    expect(await globePage.allMarkers.count()).toBeGreaterThan(0);
+    for (const colorScheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+      for (const ratio of await ownContrast(globePage.nearPinButtons))
+        expect(ratio, `${colorScheme} initials`).toBeGreaterThanOrEqual(4.5);
+      for (const ratio of await ownContrast(globePage.allMarkers))
+        expect(ratio, `${colorScheme} marker`).toBeGreaterThanOrEqual(3);
+    }
+    expect(await lowContrastInBothThemes(page)).toEqual([]);
   });
 });

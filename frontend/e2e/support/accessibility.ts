@@ -340,15 +340,14 @@ export function fastRepeats(page: Page): Promise<string[]> {
   });
 }
 
-/** Waits for every animation that ends (a fade, an entrance) to end, so a screen is read as shown. */
+/**
+ * Brings every animation that ends (a fade, an entrance, a ring growing) to its end, so a screen
+ * is read as it is once shown, whatever the page's clock is doing.
+ */
 export function settled(page: Page): Promise<void> {
-  return page.evaluate(async () => {
-    await Promise.all(
-      document
-        .getAnimations()
-        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
-        .map((animation) => animation.finished.catch(() => undefined)),
-    );
+  return page.evaluate(() => {
+    for (const animation of document.getAnimations())
+      if (animation.effect?.getComputedTiming().iterations !== Infinity) animation.finish();
   });
 }
 
@@ -475,4 +474,45 @@ export async function tabWithin(
       });
   }
   return stops;
+}
+
+/** Every line of text on the page that falls under AA, in light and then in dark (L2-041). */
+export async function lowContrastInBothThemes(page: Page): Promise<string[]> {
+  const found: string[] = [];
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme });
+    found.push(...(await lowContrastText(page)).map((line) => `${colorScheme}: ${line}`));
+  }
+  return found;
+}
+
+/**
+ * The contrast of each element's own colour (its text or its icon) with its own surface, as a
+ * pin's initials on its colour or a moment marker's emblem on sun.
+ */
+export function ownContrast(elements: Locator): Promise<number[]> {
+  return elements.evaluateAll((all) => {
+    const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
+    const rgb = (colour: string): number[] => {
+      probe.clearRect(0, 0, 1, 1);
+      probe.fillStyle = '#fff';
+      probe.fillRect(0, 0, 1, 1);
+      probe.fillStyle = colour;
+      probe.fillRect(0, 0, 1, 1);
+      return [...probe.getImageData(0, 0, 1, 1).data].slice(0, 3);
+    };
+    const luminance = (c: number[]): number => {
+      const [r, g, b] = c
+        .map((v) => v / 255)
+        .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    return all.map((element) => {
+      const style = getComputedStyle(element);
+      const [l1, l2] = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort(
+        (x, y) => y - x,
+      );
+      return Math.round(((l1 + 0.05) / (l2 + 0.05)) * 100) / 100;
+    });
+  });
 }

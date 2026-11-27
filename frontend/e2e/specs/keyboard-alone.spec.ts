@@ -15,11 +15,16 @@ import {
 import { NORTHWIND_MOMENTS, northwindMoments } from '../fixtures/moments';
 import { NORTHWIND_PINS, northwindPins } from '../fixtures/pins';
 import { NORTHWIND_ME, sofiaProfile } from '../fixtures/profile';
-import { tabTo, tabWithin } from '../support/accessibility';
+import { lowContrastInBothThemes, tabTo, tabWithin } from '../support/accessibility';
 import { rememberTeam } from '../support/membership';
 
-/** Presses Tab inside a dialog twice round and checks every stop stays in it, ringed and 44 px. */
+/**
+ * Presses Tab inside a dialog twice round and checks every stop stays in it, ringed and 44 px,
+ * and that its text meets AA in light and in dark.
+ */
 async function keepsFocus(dialog: Locator, controls: number): Promise<void> {
+  expect(await lowContrastInBothThemes(dialog.page())).toEqual([]);
+  await dialog.page().emulateMedia({ colorScheme: 'light' });
   const stops = await tabWithin(dialog, controls * 2 + 1);
   for (const stop of stops) {
     expect(stop.inside, `${stop.name} is inside the dialog`).toBe(true);

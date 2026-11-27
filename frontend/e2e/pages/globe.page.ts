@@ -25,6 +25,8 @@ export class GlobePage {
   /** The list of pins over the globe, a keyboard's and a screen reader's way to the teammates. */
   readonly pinList: Locator;
   readonly pinButtons: Locator;
+  /** The pins drawn with their initials: every pin but a far one resting unlabelled. */
+  readonly nearPinButtons: Locator;
   /**
    * The globe as assistive technology finds it: one labelled group, whatever draws it, and the
    * pin buttons in the list it holds, found by their roles alone.
@@ -161,6 +163,7 @@ export class GlobePage {
     this.allPins = this.stage.locator('.globe__pin');
     this.pinList = this.stage.locator('ul.globe__pins');
     this.pinButtons = this.pinList.locator('li.globe__pin > button.pin');
+    this.nearPinButtons = this.pinList.locator('li.globe__pin:not(.globe__pin--far) > button.pin');
     this.globeGroup = this.stage.getByRole('group');
     this.groupPinButtons = this.globeGroup
       .getByRole('list')
