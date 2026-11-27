@@ -263,6 +263,11 @@
               }
             </div>
           </section>
+          <div class="settings__leave">
+            <button mo-button variant="link" type="button" (click)="openLeaveDialog($event)">
+              {{ leaveLabel() }}
+            </button>
+          </div>
         </div>
       </div>
       @if (store.barState() !== 'hidden') {

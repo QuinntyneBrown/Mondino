@@ -5,6 +5,9 @@
   --btn-primary-bg: var(--color-accent);
   --btn-primary-bg-hover: var(--color-accent-hover);
   --btn-primary-fg: var(--color-fg-on-accent);
+  --btn-danger-bg: var(--color-danger-solid);
+  --btn-danger-bg-hover: var(--color-danger-solid-hover);
+  --btn-danger-fg: var(--color-fg-on-danger);
   --btn-radius: var(--radius-full);
 
   display: inline-flex;
@@ -47,6 +50,28 @@
   border-color: var(--color-accent-active);
   background: var(--color-accent-active);
   color: var(--btn-primary-fg);
+}
+:host(.btn--danger) {
+  border-color: var(--btn-danger-bg);
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-fg);
+  font-weight: var(--font-weight-semibold);
+}
+:host(.btn--danger:hover) {
+  border-color: var(--btn-danger-bg-hover);
+  background: var(--btn-danger-bg-hover);
+  color: var(--btn-danger-fg);
+}
+:host(.btn--link) {
+  min-height: var(--target-comfortable);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-fg-link);
+}
+:host(.btn--link:hover) {
+  background: transparent;
+  color: var(--color-fg-link-hover);
 }
 :host(.btn--lg) {
   min-height: var(--control-height-lg);

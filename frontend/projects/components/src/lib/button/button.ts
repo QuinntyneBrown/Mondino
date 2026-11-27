@@ -1,6 +1,6 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-export type ButtonVariant = 'default' | 'primary' | 'on-inverse';
+export type ButtonVariant = 'default' | 'primary' | 'on-inverse' | 'danger' | 'link';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 /**
@@ -17,6 +17,8 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
     class: 'btn',
     '[class.btn--primary]': "variant() === 'primary'",
     '[class.btn--on-inverse]': "variant() === 'on-inverse'",
+    '[class.btn--danger]': "variant() === 'danger'",
+    '[class.btn--link]': "variant() === 'link'",
     '[class.btn--sm]': "size() === 'sm'",
     '[class.btn--lg]': "size() === 'lg'",
     '[class.btn--block]': 'block()',

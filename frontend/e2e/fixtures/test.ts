@@ -8,6 +8,8 @@ import { GlobePage } from '../pages/globe.page';
 import { InviteDialogPage } from '../pages/invite-dialog.page';
 import { InviteNeededPage } from '../pages/invite-needed.page';
 import { JoinPage } from '../pages/join.page';
+import { LeaveTeamDialogPage } from '../pages/leave-team-dialog.page';
+import { LeftTeamPage } from '../pages/left-team.page';
 import { MomentsPage } from '../pages/moments.page';
 import { NotFoundPage } from '../pages/not-found.page';
 import { ProfilePage } from '../pages/profile.page';
@@ -40,6 +42,8 @@ interface Fixtures {
   momentsPage: MomentsPage;
   profilePage: ProfilePage;
   discardDialog: DiscardChangesDialogPage;
+  leaveDialog: LeaveTeamDialogPage;
+  leftTeamPage: LeftTeamPage;
 }
 
 const local = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -148,6 +152,14 @@ export const test = base.extend<Options & Fixtures>({
 
   discardDialog: async ({ page }, use) => {
     await use(new DiscardChangesDialogPage(page));
+  },
+
+  leaveDialog: async ({ page }, use) => {
+    await use(new LeaveTeamDialogPage(page));
+  },
+
+  leftTeamPage: async ({ page }, use) => {
+    await use(new LeftTeamPage(page));
   },
 });
 
